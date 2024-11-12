@@ -5,15 +5,31 @@
     <title>Modals Tests</title>
 
     <script type="module">
-        import { TestShow } from '../js/Tests/ModalsTest.js'
+        import { TestOverlay } from '../js/Tests/ModalsTest.js'
+        import { TestPopupWnd } from '../js/Tests/ModalsTest.js'
+        import { TestModalWnd } from '../js/Tests/ModalsTest.js'
+        
 
         document.getElementById('test1').onclick = function () {
 
-            TestShow();
+            TestOverlay();
         }
+
+        document.getElementById('test2').onclick = function () {
+
+            TestPopupWnd();
+        }
+
+        document.getElementById('test3').onclick = function () {
+
+            TestModalWnd();
+        }
+        
     </script>
 </head>
 <body>
-    <button id="test1">Window 1</button>
+    <button id="test1">Test Overlay</button>
+    <button id="test2">Test Popup Window</button>
+    <button id="test3">Test Modal Window</button>
 </body>
 </html>
