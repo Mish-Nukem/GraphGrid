@@ -20,9 +20,8 @@ export default class Modal {
 
         this.drawHeader = options.drawHeader !== undefined ? options.drawHeader : this.drawHeader;
 
-        this.drawFooter = options.drawFooter !== undefined ? options.drawFooter : this.drawFooter; 
+        this.drawFooter = options.drawFooter !== undefined ? options.drawFooter : this.drawFooter;
     }
-
     show = function () {
         if (!this.opt.isOverlay && (this.opt.isModal || this.opt.closeWhenMiss || this.owner)) {
             this.overlay = new Modal({
@@ -41,21 +40,23 @@ export default class Modal {
             this.overlay.show();
         }
 
-        let x = this.utils.isInt(this.opt.pos.x) ? this.opt.pos.x + 'px' : this.opt.pos.x;
-        let y = this.utils.isInt(this.opt.pos.y) ? this.opt.pos.y + 'px' : this.opt.pos.y;
-        let w = this.utils.isInt(this.opt.pos.w) ? this.opt.pos.w + 'px' : this.opt.pos.w;
-        let h = this.utils.isInt(this.opt.pos.h) ? this.opt.pos.h + 'px' : this.opt.pos.h;
+        let x = !isNaN(this.opt.pos.x) ? this.opt.pos.x + 'px' : this.opt.pos.x;
+        let y = !isNaN(this.opt.pos.y) ? this.opt.pos.y + 'px' : this.opt.pos.y;
+        let w = !isNaN(this.opt.pos.w) ? this.opt.pos.w + 'px' : this.opt.pos.w;
+        let h = !isNaN(this.opt.pos.h) ? this.opt.pos.h + 'px' : this.opt.pos.h;
 
         let opacity = this.opt.isOverlay ? this.opt.isHidden ? 'opacity: 0;' : 'opacity: 0.2;' : this.opt.opacity ? `opacity: ${this.opt.opacity};` : '';
         let backgroundColor = this.opt.isOverlay && !this.opt.isHidden ? 'background:black;' : '';
         let style = this.opt.style || '';
-        let windowClass = this.opt.windowClass || '';
 
         let div = document.createElement('div');
+        div.id = `window_${this.id}_`;
 
-        let s = `<div id="window_${this.id}_"
-            class="${windowClass}"
-            style="top: ${y};
+        if (this.opt.windowClass) {
+            div.className = this.opt.windowClass;
+        }
+
+        div.style = `top: ${y};
                 left: ${x};
                 width: ${w};
                 height: ${h};
@@ -64,9 +65,9 @@ export default class Modal {
                 ${opacity}
                 ${backgroundColor}
                 ${style}
-                "
-            >`;
+                `;
 
+        let s = '';
         if (this.drawHeader) {
             s += this.drawHeader();
         }
@@ -77,41 +78,52 @@ export default class Modal {
             s += this.drawFooter();
         }
 
-        if (!this.opt.isOverlay && this.opt.resizable != false) {
-            s += `<div wnd-rsz="${this.id}-y"
-                style="position: absolute;left: -1px;bottom: -6px;cursor: s-resize;height: 12px;width: ${this.opt.pos.w - 10}px;z-index: ${this.opt.zInd + 5};">
+        if (this.opt.resizable) {
+            s += `<div wnd-rsz-y
+                style="position: absolute;left: -1px;bottom: -6px;cursor: s-resize;height: 12px;width:calc(100% - 10px);z-index: ${this.opt.zInd + 5};">
                 </div>
-            <div wnd-rsz="${this.id}-x"
-                style="position: absolute;right: -6px;top: -1px;cursor: e-resize;height: ${this.opt.pos.h - 10}px;width: 12px;z-index: ${this.opt.zInd + 5};">
+            <div wnd-rsz-x
+                style="position: absolute;right: -6px;top: -1px;cursor: e-resize;height:calc(100% - 10px);width: 12px;z-index: ${this.opt.zInd + 5};">
                 </div>
-            <div wnd-rsz="${this.id}-xy"
+            <div wnd-rsz-xy
                 style="position: absolute;right: -5px;bottom: -5px;cursor: se-resize;height: 16px;width: 16px;z-index: ${this.opt.zInd + 5};">
                 </div>`;
         }
 
-
-        s += `</div>`;
-
         div.innerHTML = s;
 
-        document.body.append(div)
+        document.body.append(div);
+
+        if (this.opt.draggable) {
+            this.setupDrag(div);
+        }
+
+        if (this.opt.resizable) {
+            this.setupResize(div);
+        }
     }
 
     drawHeader = function () {
         let headerClass = this.opt.headerClass || '';
 
-        return `<div class="${headerClass}" style="display: flex;flex-wrap: nowrap;justify-content: space-between;align-items: center;">
+        return `<div wnd-header class="${headerClass}" style="display: flex;flex-wrap: nowrap;justify-content: space-between;align-items: center;">
         <h4>${this.opt.title || ''}</h4>
         <button wnd-btn="close_${this.id}_" type="button" class="close" style="color: black;">×</button>
         </div>`;
     }
 
     drawFooter = function () {
-        return ``;
+        let footerClass = this.opt.footerClass || '';
+
+        return `<div wnd-footer class="${footerClass}" style="display: flex;flex-wrap: nowrap;justify-content: space-between;align-items: center;">
+        <h4>${this.opt.title || ''}</h4>
+        </div>`;
     }
 
     close = function () {
-        delete window._wndDict[this.id];
+        //if (!noRemove) {
+        //    delete window._wndDict[this.id];
+        //}
 
         let elem = document.getElementById(`window_${this.id}_`);
         elem.setAttribute('display', 'none');
@@ -119,6 +131,111 @@ export default class Modal {
         setTimeout(function () {
             elem.remove();
         }, 10);
+    }
+
+    remove = function () {
+        delete window._wndDict[this.id];
+
+        this.close();
+    }
+
+    setupDrag = function (elem) {
+        let pos = this.opt.pos;
+        let mouseDown = function (e) {
+
+            let rect = elem.getBoundingClientRect();
+            let shiftX = e.clientX - rect.left;
+            let shiftY = e.clientY - rect.top;
+
+            moveAt(e.pageX, e.pageY);
+
+            // переносит окно на координаты (pageX, pageY),
+            // дополнительно учитывая изначальный сдвиг относительно указателя мыши
+            function moveAt(pageX, pageY) {
+                pos.x = pageX - shiftX;
+                pos.y = pageY - shiftY;
+
+                elem.style.left = pos.x + 'px';
+                elem.style.top = pos.y + 'px';
+            }
+
+            function onMouseMove(e) {
+                moveAt(e.pageX, e.pageY);
+            }
+
+            // передвигаем окно при событии mousemove
+            document.addEventListener('mousemove', onMouseMove);
+
+            // отпустить окно, удалить ненужные обработчики
+            let rem = document.onmouseup;
+            document.onmouseup = function () {
+                document.removeEventListener('mousemove', onMouseMove);
+                document.onmouseup = rem;
+            };
+
+        };
+
+        let header = elem.querySelector('div[wnd-header]');
+        let footer = elem.querySelector('div[wnd-footer]');
+
+        if (header) {
+            header.onmousedown = mouseDown;
+        }
+        if (footer) {
+            footer.onmousedown = mouseDown;
+        }
+        elem.ondragstart = function () {
+            return false;
+        };
+    }
+
+    setupResize = function (elem) {
+        let pos = this.opt.pos;
+        let mouseDown = function (e) {
+
+            let rect = elem.getBoundingClientRect();
+            let shiftX = e.target.hasAttribute('wnd-rsz-x') || e.target.hasAttribute('wnd-rsz-xy') ? e.clientX : -1;
+            let shiftY = e.target.hasAttribute('wnd-rsz-y') || e.target.hasAttribute('wnd-rsz-xy') ? e.clientY : -1;
+
+            resize(e.pageX, e.pageY);
+
+            function resize(pageX, pageY) {
+                if (shiftX > 0) {
+                    let w = rect.width + pageX - shiftX;
+
+                    pos.w = (!pos.maxW || w <= pos.maxW) && (!pos.minW || w >= pos.minW) ? w : pos.w;
+                    elem.style.width = pos.w + 'px';
+                }
+                if (shiftY > 0) {
+                    let h = rect.height + pageY - shiftY;
+
+                    pos.h = (!pos.maxH || h <= pos.maxH) && (!pos.minH || h >= pos.minH) ? h : pos.h;
+                    elem.style.height = pos.h + 'px';
+                }
+            }
+
+            function onMouseMove(e) {
+                resize(e.pageX, e.pageY);
+            }
+
+            // передвигаем окно при событии mousemove
+            document.addEventListener('mousemove', onMouseMove);
+
+            // отпустить окно, удалить ненужные обработчики
+            let rem = document.onmouseup;
+            document.onmouseup = function () {
+                document.removeEventListener('mousemove', onMouseMove);
+                document.onmouseup = rem;
+            };
+        };
+
+        elem.querySelector('div[wnd-rsz-y]').onmousedown = mouseDown;
+        elem.querySelector('div[wnd-rsz-x]').onmousedown = mouseDown;
+        elem.querySelector('div[wnd-rsz-xy]').onmousedown = mouseDown;
+
+        elem.ondragstart = function () {
+            return false;
+        };
     }
 }
 
@@ -138,7 +255,7 @@ document.addEventListener('click', function (e) {
         case 'window':
             if (wnd.opt.closeWhenClick || wnd.owner && wnd.owner.opt.closeWhenMiss) {
                 if (wnd.overlay) {
-                    wnd.overlay.close();
+                    wnd.overlay.remove();
                 }
 
                 if (wnd.owner) {
@@ -150,7 +267,7 @@ document.addEventListener('click', function (e) {
             break;
         case 'close':
             if (wnd.overlay) {
-                wnd.overlay.close();
+                wnd.overlay.remove();
             }
 
             wnd.close();

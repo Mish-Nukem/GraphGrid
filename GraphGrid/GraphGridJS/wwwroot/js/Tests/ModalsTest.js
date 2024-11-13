@@ -30,21 +30,28 @@ export function TestPopupWnd() {
     wnd.show();
 }
 
+let wndModal;
+
 export function TestModalWnd() {
-    let wnd = new Modal({
+    wndModal = wndModal || new Modal({
         //closeWhenClick: true,
         isModal: true,
         title: 'Test modal title',
+        draggable: true,
+        resizable: true,
         pos: {
             x: 120,
             y: 120,
             w: 200,
-            h: 200
+            h: 200,
+            minH: 50,
+            minW: 100
         },
         style: 'background:white;border:1px solid;',
         drawBody: function () {
             return 'Test modal content';
-        }
+        },
+        drawFooter: false
     });
-    wnd.show();
+    wndModal.show();
 }
