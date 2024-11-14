@@ -1,0 +1,44 @@
+﻿body {
+}
+
+.modal-window-wnd {
+    border-radius: 3px;
+    overflow: hidden;
+}
+
+.modal-window-header {
+    padding: 0 10px;
+}
+
+    .modal-window-header > h4 {
+        white-space: nowrap;
+        overflow: hidden;
+    }
+
+    .modal-window-header > button {
+        border: 0;
+        background: 0 0;
+        font-size: 21px;
+        font-weight: 700;
+        line-height: 1;
+        opacity: 0.2;
+    }
+
+        .modal-window-header > button:hover {
+            opacity: 1;
+        }
+
+.modal-window-body {
+    padding: 0 10px;
+    height: 100%;
+}
+
+.modal-window-footer {
+    padding: 0 10px;
+    justify-content: flex-end !important;
+}
+
+.modal-window-footer-button {
+    padding: 2px 5px;
+    margin: 5px;
+}
