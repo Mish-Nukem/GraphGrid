@@ -6,8 +6,8 @@
     <link rel="stylesheet" href="../css/default.css" crossorigin="anonymous">
     <script type="module">
         import { TestGrid } from '../js/Tests/GridTest.js'
-        //import { TestPopupWnd } from '../js/Tests/ModalsTest.js'
-        //import { TestModalWnd } from '../js/Tests/ModalsTest.js'
+        import { TestPopupWndGrid } from '../js/Tests/GridTest.js'
+        //import { TestModalWnd } from '../js/Tests/GridTest.js'
         
 
         document.getElementById('test1').onclick = function () {
@@ -15,10 +15,10 @@
             TestGrid();
         }
 
-        //document.getElementById('test2').onclick = function () {
+        document.getElementById('test2').onclick = function () {
 
-        //    TestPopupWnd();
-        //}
+            TestPopupWndGrid();
+        }
 
         //document.getElementById('test3').onclick = function () {
 
@@ -29,7 +29,7 @@
 </head>
 <body>
     <button id="test1">Test Grid</button>
-    <!--<button id="test2">Test Popup Window</button>
-    <button id="test3">Test Modal Window</button>-->
+    <button id="test2">Test Grid in Popup Window</button>
+    <!--<button id="test3">Test Modal Window</button>-->
 </body>
 </html>

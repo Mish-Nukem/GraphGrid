@@ -31,6 +31,7 @@
 .modal-window-body {
     padding: 0 10px;
     height: 100%;
+    overflow: auto;
 }
 
 .modal-window-footer {
@@ -42,3 +43,14 @@
     padding: 2px 5px;
     margin: 5px;
 }
+
+.grid-default {
+    border-collapse: collapse;
+}
+
+    .grid-default > tr > td,
+    .grid-default > tbody > tr > td,
+    .grid-default > tbody > tr > th,
+    .grid-default > thead > tr > th {
+        border: solid 1px;
+    }

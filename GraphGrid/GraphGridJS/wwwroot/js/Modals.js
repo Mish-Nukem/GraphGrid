@@ -102,8 +102,8 @@ export default class Modal {
         if (this.drawBody) {
             let bodyClass = this.opt.bodyClass || 'modal-window-body';
 
-            s += `<div class="${bodyClass}">`;
-            s += this.drawBody();
+            s += `<div wnd-body class="${bodyClass}">`;
+            //s += this.drawBody();
             s += '</div>';
         }
         if (this.drawFooter) {
@@ -131,6 +131,15 @@ export default class Modal {
         if (this.opt.resizable) {
             this.setupResize(div);
         }
+
+        let wnd = this;
+        setTimeout(function () {
+            let body = div.querySelector('div[wnd-body]');
+            let s = wnd.drawBody(body);
+            if (s) {
+                body.append(s);
+            }
+        }, 10);
     }
 
     drawHeader = function () {
