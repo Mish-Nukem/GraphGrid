@@ -36,7 +36,6 @@ export function TestGrid() {
     }
 }
 
-
 let wndModal;
 let mGrid;
 
@@ -56,12 +55,12 @@ export function TestPopupWndGrid() {
             minW: 100
         },
         style: 'background:white;border:1px solid;',
-        drawBody: function (body) {
+        drawBody: function (gridElement) {
 
             if (!mGrid) {
                 mGrid = createGrid();
             }
-            mGrid.parent = body;
+            mGrid.parent = gridElement;
             mGrid.draw();
         },
         footerButtons: [

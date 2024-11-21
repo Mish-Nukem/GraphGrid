@@ -116,9 +116,7 @@
 
         gridElement = gridElement || document.getElementById(`grid_${this.id}_`);
 
-        //if (!this.parentIsDocument) {
-            gridElement.style.width = (w + (this.columns.length + 1) * 2) + 'px';
-        //}
+        gridElement.style.width = (w + (this.columns.length + 1) * 2) + 'px';
 
         const thead = gridElement.tHead;
 

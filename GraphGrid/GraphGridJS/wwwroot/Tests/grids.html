@@ -7,8 +7,11 @@
     <script type="module">
         import { TestGrid } from '../js/Tests/GridTest.js'
         import { TestPopupWndGrid } from '../js/Tests/GridTest.js'
-        //import { TestModalWnd } from '../js/Tests/GridTest.js'
         
+        document.getElementById('home').onclick = function () {
+
+            location.href = '../index.html';
+        }
 
         document.getElementById('test1').onclick = function () {
 
@@ -19,17 +22,13 @@
 
             TestPopupWndGrid();
         }
-
-        //document.getElementById('test3').onclick = function () {
-
-        //    TestModalWnd();
-        //}
-        
     </script>
 </head>
 <body>
+    <button id="home">Home</button>
     <button id="test1">Test Grid</button>
     <button id="test2">Test Grid in Popup Window</button>
-    <!--<button id="test3">Test Modal Window</button>-->
+    <br/>
+    <span style="padding-bottom: 15px">&nbsp;</span>
 </body>
 </html>
