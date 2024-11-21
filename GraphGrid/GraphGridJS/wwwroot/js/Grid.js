@@ -39,7 +39,7 @@
     }
 
     draw = function (noRefresh) {
-        let grid = this.getGridElement();;
+        const grid = this.getGridElement();;
 
         if (!noRefresh) {
             this.refresh();
@@ -51,7 +51,7 @@
             this.draw(true);
         }
 
-        let grid = this;
+        const grid = this;
 
         this.getData(function () {
             grid.drawPager(false);
@@ -69,12 +69,12 @@
 
     remove = function () {
 
-        let grid = window._gridDict[this.id];
+        const grid = window._gridDict[this.id];
         if (!grid) return;
 
         delete window._gridDict[this.id];
 
-        let elem = document.getElementById(`grid_${this.id}_`);
+        const elem = document.getElementById(`grid_${this.id}_`);
         elem.setAttribute('display', 'none');
 
         setTimeout(function () {
@@ -90,7 +90,7 @@
         return '';
     }
 
-    drawHeader = function (grid) {
+    drawHeader = function (gridElement) {
         if (!this.columns) return;
 
         let s = '<thead><tr>';
@@ -98,7 +98,7 @@
         let w = 0;
         for (let col of this.columns) {
             w += col.w;
-            let colClass = this.columnClass ? `class="${this.columnClass}"` : '';
+            const colClass = this.columnClass ? `class="${this.columnClass}"` : '';
             s += `<th id="col_${this.id}_${col.id}" ${colClass} style="position: sticky;top: 0;width: ${col.w}px">`;
 
             s += this.drawHeaderCell(col);
@@ -114,27 +114,27 @@
 
         s += '</tr></thead>';
 
-        grid = grid || document.getElementById(`grid_${this.id}_`);
+        gridElement = gridElement || document.getElementById(`grid_${this.id}_`);
 
-        if (!this.parentIsDocument) {
-            grid.style.width = (w + (this.columns.length + 1) * 2) + 'px';
-        }
+        //if (!this.parentIsDocument) {
+            gridElement.style.width = (w + (this.columns.length + 1) * 2) + 'px';
+        //}
 
-        let thead = grid.tHead;
+        const thead = gridElement.tHead;
 
         if (thead) {
             thead.innerHTML = s;
         }
         else {
-            grid.innerHTML = s;
+            gridElement.innerHTML = s;
         }
 
-        let grObj = this;
+        const grid = this;
         setTimeout(function () {
             let i = 0;
-            for (let th of grid.tHead.rows[0].children) {
-                let col = grObj.columns[i++];
-                grObj.setupResize(col, th, grid);
+            for (let th of gridElement.tHead.rows[0].children) {
+                let col = grid.columns[i++];
+                grid.setupColumnResize(col, th, gridElement);
             }
         }, 10);
     }
@@ -143,7 +143,7 @@
         return col.title || col.name;
     }
 
-    drawBody = function (grid) {
+    drawBody = function (gridElement) {
         if (!this.columns || !this.rows) return;
 
         let s = '<tbody>';
@@ -160,19 +160,20 @@
 
         s += '</tbody>';
 
-        grid = grid || document.getElementById(`grid_${this.id}_`);
-        let body = grid.tBodies[0];
+        gridElement = gridElement || document.getElementById(`grid_${this.id}_`);
+        const body = gridElement.tBodies[0];
 
         if (body) {
             body.innerHTML = s;
         }
         else {
-            grid.innerHTML += s;
+            gridElement.innerHTML += s;
         }
     }
 
     drawCell = function (col, row) {
-        return row[col.name];
+        const val = row[col.name];
+        return val !== undefined ? val : '';
     }
 
     getData = function (callback) {
@@ -183,14 +184,14 @@
     }
 
     getColumns = function () {
-        let res = [];
+        const res = [];
         this.colDict = {};
 
         for (let row of this.rows) {
             for (let key in row) {
                 if (this.colDict[key]) continue;
 
-                let col = { name: key };
+                const col = { name: key };
 
                 this.colDict[col.name] = col;
                 res.push(col);
@@ -214,11 +215,18 @@
         }
     }
 
-    setupResize = function (col, header, grid) {
-        let mouseDown = function (e) {
+    setupColumnResize = function (column, th, gridElement) {
+        const mouseDown = function (e) {
 
-            let initW = +header.style.width.replace('px', '');
-            let shiftX = e.target.hasAttribute('grid-rsz-x') ? e.clientX : -1;
+            const initW = +th.style.width.replace('px', '');
+            const shiftX = e.target.hasAttribute('grid-rsz-x') ? e.clientX : -1;
+            const columns = column.grid.columns;
+
+            let otherColsW = 0;
+            for (let col of columns) {
+                if (col == column) continue;
+                otherColsW += col.w;
+            }
 
             resize(e.pageX);
 
@@ -226,13 +234,15 @@
                 if (shiftX > 0) {
                     let w = initW + pageX - shiftX;
 
-                    let prevW = col.w;
-                    col.w = (!col.maxW || w <= col.maxW) && (!col.minW || w >= col.minW) ? w : col.w;
+                    const prevW = column.w;
+                    column.w = (!column.maxW || w <= column.maxW) && (!column.minW || w >= column.minW) ? w : column.w;
 
-                    if (col.w != prevW) {
-                        grid.style.width = '';
+                    if (column.w != prevW) {
+                        gridElement.style.width = '';
 
-                        header.style.width = col.w + 'px';
+                        th.style.width = column.w + 'px';
+
+                        gridElement.style.width = (otherColsW + column.w + (columns.length + 1) * 2) + 'px';
                     }
                 }
             }
@@ -243,23 +253,14 @@
 
             document.addEventListener('mousemove', onMouseMove);
 
-            let rem = document.onmouseup;
-            let columns = col.grid.columns;
+            const rem = document.onmouseup;
             document.onmouseup = function () {
                 document.removeEventListener('mousemove', onMouseMove);
                 document.onmouseup = rem;
-
-                if (!this.parentIsDocument) {
-                    let w = 0;
-                    for (let col of columns) {
-                        w += col.w;
-                    }
-                    grid.style.width = (w + (columns.length + 1) * 2) + 'px';
-                }
             };
         };
 
-        header.querySelector('div[grid-rsz-x]').onmousedown = mouseDown;
+        th.querySelector('div[grid-rsz-x]').addEventListener('mousedown', mouseDown);
 
         //    header.ondragstart = function () {
         //        return false;

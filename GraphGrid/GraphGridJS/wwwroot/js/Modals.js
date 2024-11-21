@@ -48,16 +48,16 @@ export default class Modal {
             this.overlay.show();
         }
 
-        let x = !isNaN(this.opt.pos.x) ? this.opt.pos.x + 'px' : this.opt.pos.x;
-        let y = !isNaN(this.opt.pos.y) ? this.opt.pos.y + 'px' : this.opt.pos.y;
-        let w = !isNaN(this.opt.pos.w) ? this.opt.pos.w + 'px' : this.opt.pos.w;
-        let h = !isNaN(this.opt.pos.h) ? this.opt.pos.h + 'px' : this.opt.pos.h;
+        const x = !isNaN(this.opt.pos.x) ? this.opt.pos.x + 'px' : this.opt.pos.x;
+        const y = !isNaN(this.opt.pos.y) ? this.opt.pos.y + 'px' : this.opt.pos.y;
+        const w = !isNaN(this.opt.pos.w) ? this.opt.pos.w + 'px' : this.opt.pos.w;
+        const h = !isNaN(this.opt.pos.h) ? this.opt.pos.h + 'px' : this.opt.pos.h;
 
-        let opacity = this.opt.isOverlay ? this.opt.isHidden ? 'opacity: 0;' : 'opacity: 0.2;' : this.opt.opacity ? `opacity: ${this.opt.opacity};` : '';
-        let backgroundColor = this.opt.isOverlay && !this.opt.isHidden ? 'background:black;' : '';
-        let style = this.opt.style || '';
+        const opacity = this.opt.isOverlay ? this.opt.isHidden ? 'opacity: 0;' : 'opacity: 0.2;' : this.opt.opacity ? `opacity: ${this.opt.opacity};` : '';
+        const backgroundColor = this.opt.isOverlay && !this.opt.isHidden ? 'background:black;' : '';
+        const style = this.opt.style || '';
 
-        let div = document.createElement('div');
+        const div = document.createElement('div');
         div.id = `window_${this.id}_`;
 
         div.className = this.opt.windowClass || 'modal-window-wnd';
@@ -87,7 +87,7 @@ export default class Modal {
     }
 
     refresh = function () {
-        let div = document.getElementById(`window_${this.id}_`);
+        const div = document.getElementById(`window_${this.id}_`);
 
         this.drawWindow(div);
     }
@@ -100,7 +100,7 @@ export default class Modal {
             s += this.drawHeader();
         }
         if (this.drawBody) {
-            let bodyClass = this.opt.bodyClass || 'modal-window-body';
+            const bodyClass = this.opt.bodyClass || 'modal-window-body';
 
             s += `<div wnd-body class="${bodyClass}">`;
             //s += this.drawBody();
@@ -132,10 +132,10 @@ export default class Modal {
             this.setupResize(div);
         }
 
-        let wnd = this;
+        const wnd = this;
         setTimeout(function () {
-            let body = div.querySelector('div[wnd-body]');
-            let s = wnd.drawBody(body);
+            const body = div.querySelector('div[wnd-body]');
+            const s = wnd.drawBody(body);
             if (s) {
                 body.append(s);
             }
@@ -143,7 +143,7 @@ export default class Modal {
     }
 
     drawHeader = function () {
-        let headerClass = this.opt.headerClass || 'modal-window-header';
+        const headerClass = this.opt.headerClass || 'modal-window-header';
 
         return `<div wnd-header class="${headerClass}" style="display: flex;flex-wrap: nowrap;justify-content: space-between;align-items: center;">
         <h4>${this.opt.title || ''}</h4>
@@ -152,8 +152,8 @@ export default class Modal {
     }
 
     drawFooter = function () {
-        let footerClass = this.opt.footerClass || 'modal-window-footer';
-        let footerButtonClass = this.opt.footerButtonClass || 'modal-window-footer-button';
+        const footerClass = this.opt.footerClass || 'modal-window-footer';
+        const footerButtonClass = this.opt.footerButtonClass || 'modal-window-footer-button';
 
         let s = `<div wnd-footer class="${footerClass}" style="display: flex;flex-wrap: nowrap;justify-content: space-between;align-items: center;">`;
         for (let ind in this.buttonsDict) {
@@ -169,13 +169,13 @@ export default class Modal {
     }
 
     close = function () {
-        let wnd = window._wndDict[this.id];
+        const wnd = window._wndDict[this.id];
         if (!wnd) return;
 
         delete window._wndDict[this.id];
         window._wndDict.topWindow = wnd.prevTopWindow;
 
-        let elem = document.getElementById(`window_${this.id}_`);
+        const elem = document.getElementById(`window_${this.id}_`);
         elem.setAttribute('display', 'none');
 
         if (wnd.overlay) {
@@ -191,12 +191,12 @@ export default class Modal {
         }, 10);
     }
     setupDrag = function (elem) {
-        let pos = this.opt.pos;
-        let mouseDown = function (e) {
+        const pos = this.opt.pos;
+        const mouseDown = function (e) {
 
-            let rect = elem.getBoundingClientRect();
-            let shiftX = e.clientX - rect.left;
-            let shiftY = e.clientY - rect.top;
+            const rect = elem.getBoundingClientRect();
+            const shiftX = e.clientX - rect.left;
+            const shiftY = e.clientY - rect.top;
 
             moveAt(e.pageX, e.pageY);
 
@@ -217,7 +217,7 @@ export default class Modal {
             document.addEventListener('mousemove', onMouseMove);
 
             // отпустить окно, удалить ненужные обработчики
-            let rem = document.onmouseup;
+            const rem = document.onmouseup;
             document.onmouseup = function () {
                 document.removeEventListener('mousemove', onMouseMove);
                 document.onmouseup = rem;
@@ -225,8 +225,8 @@ export default class Modal {
 
         };
 
-        let header = elem.querySelector('div[wnd-header]');
-        let footer = elem.querySelector('div[wnd-footer]');
+        const header = elem.querySelector('div[wnd-header]');
+        const footer = elem.querySelector('div[wnd-footer]');
 
         if (header) {
             header.onmousedown = mouseDown;
@@ -240,24 +240,24 @@ export default class Modal {
     }
 
     setupResize = function (elem) {
-        let pos = this.opt.pos;
-        let mouseDown = function (e) {
+        const pos = this.opt.pos;
+        const mouseDown = function (e) {
 
-            let rect = { width: +elem.style.width.replace('px', ''), height: +elem.style.height.replace('px', '') };
-            let shiftX = e.target.hasAttribute('wnd-rsz-x') || e.target.hasAttribute('wnd-rsz-xy') ? e.clientX : -1;
-            let shiftY = e.target.hasAttribute('wnd-rsz-y') || e.target.hasAttribute('wnd-rsz-xy') ? e.clientY : -1;
+            const rect = { width: +elem.style.width.replace('px', ''), height: +elem.style.height.replace('px', '') };
+            const shiftX = e.target.hasAttribute('wnd-rsz-x') || e.target.hasAttribute('wnd-rsz-xy') ? e.clientX : -1;
+            const shiftY = e.target.hasAttribute('wnd-rsz-y') || e.target.hasAttribute('wnd-rsz-xy') ? e.clientY : -1;
 
             resize(e.pageX, e.pageY);
 
             function resize(pageX, pageY) {
                 if (shiftX > 0) {
-                    let w = rect.width + pageX - shiftX;
+                    const w = rect.width + pageX - shiftX;
 
                     pos.w = (!pos.maxW || w <= pos.maxW) && (!pos.minW || w >= pos.minW) ? w : pos.w;
                     elem.style.width = pos.w + 'px';
                 }
                 if (shiftY > 0) {
-                    let h = rect.height + pageY - shiftY;
+                    const h = rect.height + pageY - shiftY;
 
                     pos.h = (!pos.maxH || h <= pos.maxH) && (!pos.minH || h >= pos.minH) ? h : pos.h;
                     elem.style.height = pos.h + 'px';
@@ -270,16 +270,16 @@ export default class Modal {
 
             document.addEventListener('mousemove', onMouseMove);
 
-            let rem = document.onmouseup;
+            const rem = document.onmouseup;
             document.onmouseup = function () {
                 document.removeEventListener('mousemove', onMouseMove);
                 document.onmouseup = rem;
             };
         };
 
-        elem.querySelector('div[wnd-rsz-y]').onmousedown = mouseDown;
-        elem.querySelector('div[wnd-rsz-x]').onmousedown = mouseDown;
-        elem.querySelector('div[wnd-rsz-xy]').onmousedown = mouseDown;
+        elem.querySelector('div[wnd-rsz-y]').addEventListener('mousedown', mouseDown);
+        elem.querySelector('div[wnd-rsz-x]').addEventListener('mousedown', mouseDown);
+        elem.querySelector('div[wnd-rsz-xy]').addEventListener('mousedown', mouseDown);
 
         elem.ondragstart = function () {
             return false;
@@ -290,13 +290,13 @@ export default class Modal {
 document.addEventListener('click', function (e) {
     if (!e.target || !window._wndDict) return;
 
-    let wndAttr = e.target.getAttribute('wnd-btn') || e.target.id;
+    const wndAttr = e.target.getAttribute('wnd-btn') || e.target.id;
     if (!wndAttr) return;
 
-    let parts = wndAttr.split('_');
+    const parts = wndAttr.split('_');
     if (parts.length < 2) return;
 
-    let wnd = window._wndDict[parts[1]];
+    const wnd = window._wndDict[parts[1]];
     if (!wnd) return;
 
     switch (parts[0]) {
@@ -311,7 +311,7 @@ document.addEventListener('click', function (e) {
             wnd.close();
             break;
         case 'button':
-            let button = wnd.buttonsDict[parts[2]];
+            const button = wnd.buttonsDict[parts[2]];
             if (!button || !button.onclick) return;
 
             e.modal = wnd;
@@ -322,10 +322,10 @@ document.addEventListener('click', function (e) {
 });
 
 document.addEventListener('keydown', function (e) {
-    let wnd = window._wndDict ? window._wndDict.topWindow : null;
+    const wnd = window._wndDict ? window._wndDict.topWindow : null;
     if (!wnd) return;
 
-    let key = e && e.key ? e.key.toLowerCase() : '';
+    const key = e && e.key ? e.key.toLowerCase() : '';
 
     if ((key == 'esc' || key == 'escape') && wnd.opt && wnd.opt.closeWhenEscape == true) {
         wnd.close();
