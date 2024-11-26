@@ -46,11 +46,30 @@
 
 .grid-default {
     border-collapse: collapse;
+    /*border: solid 1px;*/
 }
 
     .grid-default > tr > td,
-    .grid-default > tbody > tr > td,
+    .grid-default > tbody > tr > td
+    /*,.grid-default > tbody > tr > th,
+    .grid-default > thead > tr > th*/ {
+        border: solid;
+        border-width: 0 1px 1px 1px;
+    }
+
+
     .grid-default > tbody > tr > th,
     .grid-default > thead > tr > th {
-        border: solid 1px;
+        background-color: white;
+        /*border: none;*/
+        border: solid;
+        border-width: 0 1px 0 1px;
     }
+
+.grid-header-div {
+    /*border: outset;*/
+    border: solid;
+    background-color: white;
+    margin: -1px -1px -1px -1px;
+    border-width: 1px 0;
+}

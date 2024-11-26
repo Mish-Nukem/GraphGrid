@@ -100,9 +100,9 @@
             w += col.w;
             const colClass = this.columnClass ? `class="${this.columnClass}"` : '';
             s += `<th id="col_${this.id}_${col.id}" ${colClass} style="position: sticky;top: 0;width: ${col.w}px">`;
-
+            s += '<div class="grid-header-div">';
             s += this.drawHeaderCell(col);
-
+            s += '</div>';
             s += `
             <div grid-rsz-x
                 style="position: absolute;right: -6px;top: -1px;cursor: e-resize;height:100%;width: 12px;z-index: ${this.opt.zInd + 1};">
