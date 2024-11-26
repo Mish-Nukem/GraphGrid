@@ -44,6 +44,12 @@
         if (!noRefresh) {
             this.refresh();
         }
+        else {
+            grid.drawPager(false);
+            grid.drawHeader();
+            grid.drawBody();
+            grid.drawPager(false, true);
+        }
     }
 
     refresh = function () {
@@ -99,7 +105,7 @@
         for (let col of this.columns) {
             w += col.w;
             const colClass = this.columnClass ? `class="${this.columnClass}"` : '';
-            s += `<th id="col_${this.id}_${col.id}" ${colClass} style="position: sticky;top: 0;width: ${col.w}px">`;
+            s += `<th grid-header id="col_${this.id}_${col.id}" ${colClass} style="position: sticky;top: 0;width: ${col.w}px">`;
             s += '<div class="grid-header-div">';
             s += this.drawHeaderCell(col);
             s += '</div>';
@@ -133,6 +139,7 @@
             for (let th of gridElement.tHead.rows[0].children) {
                 let col = grid.columns[i++];
                 grid.setupColumnResize(col, th, gridElement);
+                grid.setupColumnDrug(col, th);
             }
         }, 10);
     }
@@ -202,6 +209,7 @@
     prepareColumns = function (columns) {
         this.columns = columns || this.columns || [];
         this.colDict = this.colDict || {};
+        this.columnsDefaultOrder = [];
 
         let id = 0;
         for (let col of this.columns) {
@@ -210,6 +218,7 @@
             col.w = col.w || 100;
             col.grid = this;
             this.colDict[col.id] = this.colDict[col.name] = col;
+            this.columnsDefaultOrder.push(col);
         }
     }
 
@@ -263,6 +272,84 @@
         //    header.ondragstart = function () {
         //        return false;
         //    };
+    }
+
+    setupColumnDrug = function (column, th) {
+        const grid = column.grid;
+        const columns = column.grid.columns;
+        const mouseDown = function (e) {
+            if (e.target.hasAttribute('grid-rsz-x')) return;
+
+            grid._movingColumn = column;
+
+            drawMovingColumn(e.pageX);
+
+            function drawMovingColumn(pageX) {
+            }
+
+            function onMouseMove(e) {
+                drawMovingColumn(e.pageX);
+            }
+
+            document.addEventListener('mousemove', onMouseMove);
+
+            const rem = document.onmouseup;
+            document.onmouseup = function () {
+                document.removeEventListener('mousemove', onMouseMove);
+                document.onmouseup = rem;
+
+                if (grid._movingColumn && grid._targetColumn && grid._movingColumn != grid._targetColumn) {
+
+                    const newColumns = [];
+                    for (let col of columns) {
+                        if (col == grid._movingColumn) {
+                            newColumns.push(grid._targetColumn);
+                        }
+                        else if (col == grid._targetColumn) {
+                            newColumns.push(grid._movingColumn);
+                        }
+                        else {
+                            newColumns.push(col);
+                        }
+                    }
+                    grid.columns = newColumns;
+
+                    grid.draw();
+                }
+
+                delete grid._movingColumn;
+                delete grid._targetColumn;
+            };
+        };
+
+        const mouseOver = function (e) {
+            if (!grid._movingColumn) return;
+
+            const parts = e.target.id.split('_');
+            const destColumn = grid.colDict[parts[1]];
+            if (destColumn == column) return;
+
+            grid._targetColumn = column;
+            e.target.classList.add('grid-header-drug-over');
+        }
+
+        const mouseOut = function (e) {
+            if (!grid._movingColumn) return;
+
+            clearMovingClass(e);
+
+            delete grid._targetColumn;
+        }
+
+        const clearMovingClass = function (e) {
+            if (e.target.classList.contains('grid-header-drug-over')) {
+                e.target.classList.remove('grid-header-drug-over');
+            }
+        }
+
+        th.addEventListener('mousedown', mouseDown);
+        th.addEventListener('mouseover', mouseOver);
+        th.addEventListener('mouseout', mouseOut); 
     }
 
 }

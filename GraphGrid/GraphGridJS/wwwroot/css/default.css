@@ -72,4 +72,9 @@
     background-color: white;
     margin: -1px -1px -1px -1px;
     border-width: 1px 0;
+    user-select: none;
+}
+
+.grid-header-drug-over {
+    background-color: lightgray;
 }
