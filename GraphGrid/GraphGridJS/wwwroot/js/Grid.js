@@ -317,6 +317,8 @@
                     grid.draw();
                 }
 
+                clearMovingClass(e);
+
                 delete grid._movingColumn;
                 delete grid._targetColumn;
             };
@@ -325,11 +327,9 @@
         const mouseOver = function (e) {
             if (!grid._movingColumn) return;
 
-            const parts = e.target.id.split('_');
-            const destColumn = grid.colDict[parts[1]];
-            if (destColumn == column) return;
-
             grid._targetColumn = column;
+
+            if (grid._targetColumn == grid._movingColumn) return;
             e.target.classList.add('grid-header-drug-over');
         }
 
