@@ -46,6 +46,7 @@
 
 .grid-default {
     border-collapse: collapse;
+    table-layout: fixed;
     /*border: solid 1px;*/
 }
 
@@ -55,6 +56,11 @@
     .grid-default > thead > tr > th*/ {
         border: solid;
         border-width: 0 1px 1px 1px;
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: clip;
+        vertical-align: middle;
+        /*white-space-collapse: collapse;*/
     }
 
 
@@ -64,6 +70,9 @@
         /*border: none;*/
         border: solid;
         border-width: 0 1px 0 1px;
+        white-space: nowrap;
+        text-overflow: clip;
+        vertical-align: middle;
     }
 
 .grid-header-div {
@@ -77,4 +86,7 @@
 
 .grid-header-drug-over {
     background-color: lightgray;
+}
+
+.grid-cell {
 }

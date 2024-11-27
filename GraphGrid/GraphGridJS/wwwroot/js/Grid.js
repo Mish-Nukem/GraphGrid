@@ -13,9 +13,9 @@
         this.opt.zInd = this.opt.zInd || 1;
     }
 
-    getGridElement = function () {
+    createGridElement = function () {
         let grid = document.getElementById(`grid_${this.id}_`);
-        if (grid) return grid;
+        if (grid) return false;
 
         this.parent = this.opt.parentId ? document.getElementById(this.opt.parentId) : this.parent || this.opt.parent || document.body;
         this.parentIsDocument = this.parent == document.body;
@@ -35,46 +35,31 @@
 
         window._gridDict[this.id] = this;
 
-        return grid;
+        return true;
     }
 
-    draw = function (noRefresh) {
-        const grid = this.getGridElement();;
-
-        if (!noRefresh) {
-            this.refresh();
+    draw = function () {
+        if (!this.createGridElement()) {
+            this.drawToolbar(false);
+            this.drawPager(false);
+            this.drawPager(false, true);
         }
-        else {
-            grid.drawPager(false);
-            grid.drawHeader();
-            grid.drawBody();
-            grid.drawPager(false, true);
-        }
+        this.drawHeader();
+        this.drawBody();
     }
 
     refresh = function () {
-        if (!window._gridDict[this.id]) {
-            this.draw(true);
-        }
-
         const grid = this;
 
         this.getData(function () {
-            grid.drawPager(false);
-
             if (!grid.columns) {
                 grid.prepareColumns(grid.getColumns());
             }
-
-            grid.drawHeader();
-
-            grid.drawBody();
-            grid.drawPager(false, true);
+            grid.draw();
         });
     }
 
     remove = function () {
-
         const grid = window._gridDict[this.id];
         if (!grid) return;
 
@@ -99,23 +84,20 @@
     drawHeader = function (gridElement) {
         if (!this.columns) return;
 
-        let s = '<thead><tr>';
+        const colClass = this.columnClass ? `class="${this.columnClass}"` : '';
 
         let w = 0;
+        let s = '<thead><tr>';
         for (let col of this.columns) {
+            s += `<th grid-header id="col_${this.id}_${col.id}" ${colClass} style="position: sticky;top: 0;width: ${col.w}px">
+                    <div class="grid-header-div">
+                        ${this.drawHeaderCell(col)}
+                    </div>
+                    <div grid-rsz-x
+                        style="position: absolute;right: -6px;top: -1px;cursor: e-resize;height:100%;width: 12px;z-index: ${this.opt.zInd + 1};">
+                    </div>
+                </th>`;
             w += col.w;
-            const colClass = this.columnClass ? `class="${this.columnClass}"` : '';
-            s += `<th grid-header id="col_${this.id}_${col.id}" ${colClass} style="position: sticky;top: 0;width: ${col.w}px">`;
-            s += '<div class="grid-header-div">';
-            s += this.drawHeaderCell(col);
-            s += '</div>';
-            s += `
-            <div grid-rsz-x
-                style="position: absolute;right: -6px;top: -1px;cursor: e-resize;height:100%;width: 12px;z-index: ${this.opt.zInd + 1};">
-                </div>
-            `;
-
-            s += '</th>';
         }
 
         s += '</tr></thead>';
@@ -156,9 +138,7 @@
         for (let row of this.rows) {
             s += '<tr>';
             for (let col of this.columns) {
-                s += '<td>';
-                s += this.drawCell(col, row);
-                s += '</td>';
+                s += `<td>${this.drawCell(col, row)}</td>`;
             }
             s += '</tr>';
         }
@@ -216,10 +196,17 @@
             col.id = id++;
             col.title = col.title || col.name;
             col.w = col.w || 100;
+            col.minW = col.minW || 30;
             col.grid = this;
             this.colDict[col.id] = this.colDict[col.name] = col;
-            this.columnsDefaultOrder.push(col);
         }
+
+        Object.assign(this.columnsDefaultOrder, this.columns);
+    }
+
+    resetColumnsOrderToDefault = function () {
+        Object.assign(this.columns, this.columnsDefaultOrder);
+        this.draw();
     }
 
     setupColumnResize = function (column, th, gridElement) {
@@ -269,26 +256,58 @@
 
         th.querySelector('div[grid-rsz-x]').addEventListener('mousedown', mouseDown);
 
-        //    header.ondragstart = function () {
-        //        return false;
-        //    };
+        th.ondragstart = function () {
+            return false;
+        };
     }
 
     setupColumnDrug = function (column, th) {
         const grid = column.grid;
         const columns = column.grid.columns;
+
+        const addFakeGrid = function (e) {
+            const rect = th.getBoundingClientRect();
+            const fakeGrid = document.createElement('table');
+
+            fakeGrid.className = grid.opt.gridClass || 'grid-default';
+            fakeGrid.style = grid.opt.style || '';
+            fakeGrid.style.zIndex = 1000;
+            fakeGrid.style.position = 'fixed';
+            fakeGrid.style.top = (e.pageY - e.clientY + rect.top - 10) + 'px';
+            fakeGrid.style.width = rect.width + 'px';
+            fakeGrid.style.height = rect.height + 'px';
+
+            const colClass = grid.columnClass ? `class="${grid.columnClass}"` : '';
+
+            fakeGrid.innerHTML = `<thead><tr>
+                <th ${colClass} style="width: ${column.w}px">
+                    <div class="grid-header-div">
+                        ${grid.drawHeaderCell(column)}
+                    </div>
+                </th>
+            </tr></thead>`;
+
+            document.body.append(fakeGrid);
+            return fakeGrid;
+        }
+
         const mouseDown = function (e) {
             if (e.target.hasAttribute('grid-rsz-x')) return;
 
             grid._movingColumn = column;
 
-            drawMovingColumn(e.pageX);
+            const fakeGrid = addFakeGrid(e);
 
-            function drawMovingColumn(pageX) {
+            drawMovingColumn(e.pageX, e.pageY);
+
+            function drawMovingColumn(pageX, pageY) {
+                const x = pageX + 10;
+
+                fakeGrid.style.left = x + 'px';
             }
 
             function onMouseMove(e) {
-                drawMovingColumn(e.pageX);
+                drawMovingColumn(e.pageX, e.pageY);
             }
 
             document.addEventListener('mousemove', onMouseMove);
@@ -298,26 +317,29 @@
                 document.removeEventListener('mousemove', onMouseMove);
                 document.onmouseup = rem;
 
+                fakeGrid.remove();
+                clearMovingClass(e);
+
                 if (grid._movingColumn && grid._targetColumn && grid._movingColumn != grid._targetColumn) {
 
                     const newColumns = [];
                     for (let col of columns) {
-                        if (col == grid._movingColumn) {
-                            newColumns.push(grid._targetColumn);
-                        }
-                        else if (col == grid._targetColumn) {
-                            newColumns.push(grid._movingColumn);
-                        }
-                        else {
-                            newColumns.push(col);
+                        switch (col) {
+                            case grid._movingColumn:
+                                newColumns.push(grid._targetColumn);
+                                break;
+                            case grid._targetColumn:
+                                newColumns.push(grid._movingColumn);
+                                break;
+                            default:
+                                newColumns.push(col);
+                                break;
                         }
                     }
                     grid.columns = newColumns;
 
                     grid.draw();
                 }
-
-                clearMovingClass(e);
 
                 delete grid._movingColumn;
                 delete grid._targetColumn;
@@ -327,14 +349,23 @@
         const mouseOver = function (e) {
             if (!grid._movingColumn) return;
 
+            if (e.target.hasAttribute('grid-rsz-x')) {
+                e.target.style.cursor = "default";
+            }
+
             grid._targetColumn = column;
 
-            if (grid._targetColumn == grid._movingColumn) return;
-            e.target.classList.add('grid-header-drug-over');
+            const elem = e.target.parentElement.tagName == 'TH' ? e.target.parentElement.firstElementChild : e.target;
+
+            elem.classList.add('grid-header-drug-over');
         }
 
         const mouseOut = function (e) {
             if (!grid._movingColumn) return;
+
+            if (e.target.hasAttribute('grid-rsz-x')) {
+                e.target.style.cursor = "e-resize";
+            }
 
             clearMovingClass(e);
 
@@ -342,14 +373,15 @@
         }
 
         const clearMovingClass = function (e) {
-            if (e.target.classList.contains('grid-header-drug-over')) {
-                e.target.classList.remove('grid-header-drug-over');
+            const elem = e.target.parentElement.tagName == 'TH' ? e.target.parentElement.firstElementChild : e.target;
+
+            if (elem.classList.contains('grid-header-drug-over')) {
+                elem.classList.remove('grid-header-drug-over');
             }
         }
 
         th.addEventListener('mousedown', mouseDown);
         th.addEventListener('mouseover', mouseOver);
-        th.addEventListener('mouseout', mouseOut); 
+        th.addEventListener('mouseout', mouseOut);
     }
-
 }
