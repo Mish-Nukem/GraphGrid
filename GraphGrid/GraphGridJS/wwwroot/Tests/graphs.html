@@ -1,0 +1,34 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>Grids Tests</title>
+    <link rel="stylesheet" href="../css/default.css" crossorigin="anonymous">
+    <script type="module">
+        import { TestGrid } from '../js/Tests/GraphTest.js'
+        import { TestPopupWndGrid } from '../js/Tests/GraphTest.js'
+        
+        document.getElementById('home').onclick = function () {
+
+            location.href = '../index.html';
+        }
+
+        document.getElementById('test1').onclick = function () {
+
+            TestGrid();
+        }
+
+        document.getElementById('test2').onclick = function () {
+
+            TestPopupWndGrid();
+        }
+    </script>
+</head>
+<body>
+    <button id="home">Home</button>
+    <button id="test1">Test Grid</button>
+    <button id="test2">Test Grid in Popup Window</button>
+    <br/>
+    <span style="padding-bottom: 15px">&nbsp;</span>
+</body>
+</html>

@@ -3,10 +3,12 @@ import Modal from '../Modals.js';
 
 
 let grid;
+let modalGrid;
+let wndModal;
 
 function createGrid() {
     let res = new Grid({
-        getData: function (after) {
+        getRows: function (e) {
             this.rows = [
                 { Id: 1, Name: 'Mikle', Date: '26/01/1979', Comment: 'Good boy' },
                 { Id: 2, Name: 'Nataly', Date: '15/01/1999', Comment: 'Good girl' },
@@ -17,7 +19,7 @@ function createGrid() {
                 { Id: 7, Name: 'Ilia', Date: '16/09/1980', Comment: 'Brother 1' },
                 { Id: 8, Name: 'Mitka', Date: '04/07/1989', Comment: 'Brother 2' },
             ];
-            after();
+            e.callback();
         },
     //    getColumns: function () {
     //        return [{ name: 'Id' }, { name: 'Name' }, { name: 'Comment' }];
@@ -33,77 +35,58 @@ export function TestGrid() {
     grid.refresh();
 }
 
-let wndModal;
-let mGrid;
-
 export function TestPopupWndGrid() {
     wndModal = wndModal || new Modal({
         isModal: true,
-        title: 'Test modal title',
+        title: 'Test grid',
         draggable: true,
         resizable: true,
         closeWhenEscape: true,
         pos: {
             x: 120,
             y: 120,
-            w: 300,
+            w: 450,
             h: 200,
             minH: 50,
             minW: 100
         },
         style: 'background:white;border:1px solid;',
-        drawBody: function (gridElement) {
+        drawBody: function (wndBodyElement) {
+            const span = document.createElement('span');
+            span.innerHTML = 'Drag column header to change columns order';
+            span.style.margin = '10px';
+            wndBodyElement.appendChild(span);
 
-            if (!mGrid) {
-                mGrid = createGrid();
+            if (!modalGrid) {
+                modalGrid = createGrid();
             }
-            mGrid.parent = gridElement;
-            mGrid.refresh();
+
+            const div = document.createElement('div');
+            div.style.margin = '10px';
+            wndBodyElement.appendChild(div);
+            
+            modalGrid.parent = div;
+            modalGrid.refresh();
         },
         footerButtons: [
             {
-                title: 'Modal',
-                onclick: function (e) {
-                    let modal2 = new Modal({
-                        isModal: true,
-                        title: 'Second Test modal',
-                        draggable: true,
-                        resizable: true,
-                        closeWhenEscape: true,
-                        pos: {
-                            x: 140,
-                            y: 140,
-                            w: 200,
-                            h: 200,
-                            minH: 50,
-                            minW: 100
-                        },
-                        style: 'background:white;border:1px solid;',
-                        drawBody: function (ev) {
-                            return 'Second Test modal content';
-                        },
-                    });
-                    modal2.show();
-                }
-            },
-            {
                 title: 'Reset columns order',
                 onclick: function (e) {
-                    mGrid.resetColumnsOrderToDefault();
-
-                    e.modal.refresh();
+                    modalGrid.resetColumnsOrderToDefault();
                 }
             },
-            //{
-            //    title: 'Cancel',
-            //    onclick: function (e) {
-            //        e.modal.refresh();
-            //    }
-            //},
             {
                 title: 'Close',
                 onclick: function (e) {
-                    e.modal.result = '';
+                    e.modal.close();
+                }
+            },
+            {
+                title: 'Close and remove grid',
+                onclick: function (e) {
+                    modalGrid.remove();
+                    modalGrid = undefined;
+
                     e.modal.close();
                 }
             },

@@ -5,7 +5,7 @@ export default class Modal {
 
         this.opt = options || {};
 
-        this.opt.zInd = this.opt.zInd || (window._wndDict ? window._wndDict.lastZInd + 1 : 999) || 999;
+        this.opt.zInd = this.opt.zInd || (window._wndDict ? ++window._wndDict.lastZInd : 999) || 999;
 
         window._wndDict = window._wndDict || { seq: 0, lastZInd: this.opt.zInd };
 
@@ -99,13 +99,10 @@ export default class Modal {
         if (this.drawHeader) {
             s += this.drawHeader();
         }
-        if (this.drawBody) {
-            const bodyClass = this.opt.bodyClass || 'modal-window-body';
 
-            s += `<div wnd-body class="${bodyClass}">`;
-            //s += this.drawBody();
-            s += '</div>';
-        }
+        const bodyClass = this.opt.bodyClass || 'modal-window-body';
+        s += `<div wnd-body class="${bodyClass}"></div>`;
+
         if (this.drawFooter) {
             s += this.drawFooter();
         }
@@ -132,14 +129,16 @@ export default class Modal {
             this.setupResize(div);
         }
 
-        const wnd = this;
-        setTimeout(function () {
-            const body = div.querySelector('div[wnd-body]');
-            const s = wnd.drawBody(body);
-            if (s) {
-                body.append(s);
-            }
-        }, 10);
+        if (this.drawBody) {
+            const wnd = this;
+            setTimeout(function () {
+                const body = div.querySelector('div[wnd-body]');
+                const s = wnd.drawBody(body);
+                if (s) {
+                    body.append(s);
+                }
+            }, 10);
+        }
     }
 
     drawHeader = function () {

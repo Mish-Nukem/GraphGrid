@@ -90,3 +90,7 @@
 
 .grid-cell {
 }
+
+.grid-selected-row {
+    background-color: lightgray;
+}

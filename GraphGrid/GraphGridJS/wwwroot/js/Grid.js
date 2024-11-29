@@ -6,34 +6,38 @@
 
         this.id = window._gridDict.seq++;
 
-        this.getData = this.opt.getData || this.getData;
+        this.getRows = this.opt.getRows || this.getRows;
 
         this.getColumns = this.opt.getColumns || this.getColumns;
 
         this.opt.zInd = this.opt.zInd || 1;
+
+        this.selectedRowIndex = 0;
     }
 
     createGridElement = function () {
-        let grid = document.getElementById(`grid_${this.id}_`);
-        if (grid) return false;
+        let gridElement = document.getElementById(`grid_${this.id}_`);
+        if (gridElement) return false;
 
         this.parent = this.opt.parentId ? document.getElementById(this.opt.parentId) : this.parent || this.opt.parent || document.body;
         this.parentIsDocument = this.parent == document.body;
 
-        grid = document.createElement('table');
-        grid.id = `grid_${this.id}_`;
+        gridElement = document.createElement('table');
+        gridElement.id = `grid_${this.id}_`;
 
-        grid.className = this.opt.gridClass || 'grid-default';
-        grid.style = this.opt.style || '';
+        gridElement.className = this.opt.gridClass || 'grid-default';
+        gridElement.style = this.opt.style || '';
 
         this.parent.append(this.drawToolbar(true));
         this.parent.append(this.drawPager(true));
 
-        this.parent.appendChild(grid);
+        this.parent.appendChild(gridElement);
 
         this.parent.append(this.drawPager(true, true));
 
         window._gridDict[this.id] = this;
+
+        gridElement.addEventListener('click', this.onSelectGridRow);
 
         return true;
     }
@@ -51,11 +55,14 @@
     refresh = function () {
         const grid = this;
 
-        this.getData(function () {
-            if (!grid.columns) {
-                grid.prepareColumns(grid.getColumns());
+        this.getRows({
+            callback: function () {
+                if (!grid.columns) {
+                    grid.prepareColumns(grid.getColumns());
+                }
+                grid.draw();
+                //grid.onSelectedRowChanged({ prev: grid.selectedRowIndex, new: grid.selectedRowIndex });
             }
-            grid.draw();
         });
     }
 
@@ -65,11 +72,13 @@
 
         delete window._gridDict[this.id];
 
-        const elem = document.getElementById(`grid_${this.id}_`);
-        elem.setAttribute('display', 'none');
+        const gridElement = document.getElementById(`grid_${this.id}_`);
+        gridElement.setAttribute('display', 'none');
+
+        gridElement.removeEventListener('click', this.onSelectGridRow);
 
         setTimeout(function () {
-            elem.remove();
+            gridElement.remove();
         }, 10);
     }
 
@@ -99,7 +108,6 @@
                 </th>`;
             w += col.w;
         }
-
         s += '</tr></thead>';
 
         gridElement = gridElement || document.getElementById(`grid_${this.id}_`);
@@ -133,16 +141,15 @@
     drawBody = function (gridElement) {
         if (!this.columns || !this.rows) return;
 
+        let i = 0;
         let s = '<tbody>';
-
         for (let row of this.rows) {
-            s += '<tr>';
+            s += `<tr ${(this.selectedRowIndex == i++ ? 'class="grid-selected-row"' : '')}>`;
             for (let col of this.columns) {
                 s += `<td>${this.drawCell(col, row)}</td>`;
             }
             s += '</tr>';
         }
-
         s += '</tbody>';
 
         gridElement = gridElement || document.getElementById(`grid_${this.id}_`);
@@ -161,10 +168,10 @@
         return val !== undefined ? val : '';
     }
 
-    getData = function (callback) {
+    getRows = function (e) {
         this.rows = [];
-        if (callback) {
-            callback(this.rows);
+        if (e.callback) {
+            e.callback(this.rows);
         }
     }
 
@@ -207,6 +214,34 @@
     resetColumnsOrderToDefault = function () {
         Object.assign(this.columns, this.columnsDefaultOrder);
         this.draw();
+    }
+
+    onSelectGridRow = function (e) {
+        if (e.target.tagName != 'TD') return;
+
+        const grid = window._gridDict[this.id.split('_')[1]];
+
+        const prevSelected = grid.selectedRowIndex;
+        grid.selectedRowIndex = 0;
+
+        const rows = this.tBodies[0].rows;
+        for (let i = 0; i < rows.length; i++) {
+            let row = rows[i];
+            if (row == e.target.parentElement) {
+                grid.selectedRowIndex = i;
+                row.classList.add('grid-selected-row')
+
+                grid.onSelectedRowChanged({ prev: prevSelected, new: i });
+            }
+            else {
+                if (row.classList.contains('grid-selected-row')) {
+                    row.classList.remove('grid-selected-row');
+                }
+            }
+        }
+    }
+
+    onSelectedRowChanged = function (e) {
     }
 
     setupColumnResize = function (column, th, gridElement) {
@@ -296,11 +331,13 @@
 
             grid._movingColumn = column;
 
-            const fakeGrid = addFakeGrid(e);
+            let fakeGrid; // = addFakeGrid(e);
 
-            drawMovingColumn(e.pageX, e.pageY);
+            //drawMovingColumn(e.pageX, e.pageY);
 
             function drawMovingColumn(pageX, pageY) {
+                fakeGrid = fakeGrid || addFakeGrid(e);
+
                 const x = pageX + 10;
 
                 fakeGrid.style.left = x + 'px';
@@ -317,7 +354,9 @@
                 document.removeEventListener('mousemove', onMouseMove);
                 document.onmouseup = rem;
 
-                fakeGrid.remove();
+                if (fakeGrid) {
+                    fakeGrid.remove();
+                }
                 clearMovingClass(e);
 
                 if (grid._movingColumn && grid._targetColumn && grid._movingColumn != grid._targetColumn) {
