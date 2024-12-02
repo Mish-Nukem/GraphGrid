@@ -1,4 +1,4 @@
-﻿import GridInGraph from '../GridInGraph.js';
+﻿import GridDB from '../GridDB.js';
 import Modal from '../Modals.js';
 
 let grid;
@@ -35,7 +35,7 @@ function getFamily() {
 }
 
 function createGrid() {
-    let res = new GridInGraph({
+    let res = new GridDB({
         getRows: function (e) {
             this.rows = getFamily();
             e.resolve();
@@ -48,7 +48,7 @@ function createGrid() {
 }
 
 function createChildGrid() {
-    let res = new GridInGraph({
+    let res = new GridDB({
         getRows: function (e) {
             const res = getFamily();
 
@@ -81,7 +81,7 @@ function createChildGrid() {
 }
 
 function createSecondChildGrid() {
-    let res = new GridInGraph({
+    let res = new GridDB({
         getRows: function (e) {
             const res = [
                 { Id: 1, ParentId: [1, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21], Content: 'Voronezh' },

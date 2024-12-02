@@ -19,7 +19,7 @@ function createGrid() {
                 { Id: 7, Name: 'Ilia', Date: '16/09/1980', Comment: 'Brother 1' },
                 { Id: 8, Name: 'Mitka', Date: '04/07/1989', Comment: 'Brother 2' },
             ];
-            e.callback();
+            e.resolve();
         },
     //    getColumns: function () {
     //        return [{ name: 'Id' }, { name: 'Name' }, { name: 'Comment' }];

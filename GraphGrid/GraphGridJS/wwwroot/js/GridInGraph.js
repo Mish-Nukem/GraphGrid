@@ -7,19 +7,14 @@ window.WaveType = {
 window.MoveType = {
     fromParent: 0, fromChild: 1, All: 2
 };
-
-window.NodeStatus = {
-    grid: 0, hidden: 1, filter: 2, lookup: 3, custom: 4
-};
-
-
+// -------------------------------------------------------------------------------------------------------------------------------------------------------------
 export default class GridInGraph extends Grid {
 
     constructor(options) {
         super(options);
     }
 
-    connectToParentGrid = function (parentGrid, content, noDetectCycles) {
+    connectToParentGrid(parentGrid, content, noDetectCycles) {
         if (!parentGrid || parentGrid == this || parentGrid.id == this.id) return;
 
         let graph;
@@ -49,9 +44,9 @@ export default class GridInGraph extends Grid {
             graph.nodeCount = 2;
 
             graph.nodesDict[parentGrid.id] = parentGrid;
-            graph.nodesDict[this.id] = this;
         }
 
+        graph.nodesDict[this.id] = this;
         this.parentLinks = this.parentLinks || {};
         parentGrid.childLinks = parentGrid.childLinks || {};
 
@@ -66,15 +61,15 @@ export default class GridInGraph extends Grid {
         }
     }
 
-    onSelectedRowChanged = function (e) {
-        //super.onSelectedRowChanged(e);
+    onSelectedRowChanged(e) {
+        super.onSelectedRowChanged(e);
 
         if (this.graph) {
-            this.graph.triggerWave({ nodes: [this] });
+            this.graph.triggerWave({ nodes: [this], withStartNodes: false });
         }
     }
 
-    collectFilters = function () {
+    collectFilters() {
         const filters = [];
 
         for (let id in this.parentLinks) {
@@ -92,35 +87,27 @@ export default class GridInGraph extends Grid {
         return filters;
     }
 
-    visitByWave = function (e) {
+    skipOnWaveVisit(e) {
         if (e.waveType == WaveType.refresh) {
-            if (!this.visible || this.status == NodeStatus.hidden) return;
-            if (this.status == NodeStatus.filter && !this._selecting) return;
+            if (!this.visible || this.status == NodeStatus.hidden) return true;
+            if (this.status == NodeStatus.filter && !this._selecting) return true;
         }
+    }
 
-        if (e.waveType == WaveType.value) {
-            if (this.status == NodeStatus.filter && !this._selecting || this.status == NodeStatus.hidden) {
-                this.selectedRowIndex = -1;
-                if (this.status == NodeStatus.filter) {
-                    this.updateNodeControls(true);
-                    this.graph.visitNodesByWave(e);
-                }
-                return;
-            }
-        }
+    visitByWave(e) {
+        if (this.skipOnWaveVisit(e)) return;
 
-        const graph = this.graph;
         const grid = this;
         this.getRows({
             filters: this.collectFilters(),
-            callback: function () {
+            resolve: function () {
                 grid.draw();
-                graph.visitNodesByWave(e);
+                grid.graph.visitNodesByWave(e);
             }
         });
     }
 }
-
+// -------------------------------------------------------------------------------------------------------------------------------------------------------------
 class Graph {
     constructor() {
         this.nodesDict = {};
@@ -135,22 +122,16 @@ class Graph {
 
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     // Возвращает UID волны, используемый при кешировании волн
-    getWaveUid = function (e) {
-        const arr = [e.waveType, e.withStartNodes, e.markVisited, e.allParentsVisited, e.breakOnFail, e.moveType];
+    getWaveUid(e) {
+        const arr = [e.waveType, e.withStartNodes, e.markVisited, e.allParentsVisited, e.moveType];
         for (let node of e.nodes) {
             arr.push(node.id);
         }
         return arr.join('_');
-
-        //    let waveUid = opt.waveType + '_' + opt.withStartNodes + '_' + opt.markVisited + '_' + opt.allParentsVisited + '_' + opt.breakOnFail + '_' + opt.moveType + '_';
-        //    for (let node of opt.nodes) {
-        //        waveUid += node.id + '_';
-        //    }
-        //    return waveUid;
     };
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     // посещает узлы из списка list волной
-    visitNodesByWave = function (e) {
+    visitNodesByWave(e) {
         if (!e || !e.list || e.list.length <= 0) return;
 
         // если запущена новая однотипная волна, то нет смысла продолжать текущую
@@ -166,12 +147,12 @@ class Graph {
     };
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     // возвращает истину, если при формировании списка посещаемых волной узлов нужно не использовать связь по каким-то причинам
-    skipLink = function (link, waveType) {
+    skipLink(link, waveType) {
         return false;
     };
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     // очищает пометки о посещении волной
-    clearWaveVisits = function () {
+    clearWaveVisits() {
         for (let id in this.nodesDict) {
             this.nodesDict[id]._waveNum = -1;
         }
@@ -186,16 +167,14 @@ class Graph {
     // withStartNodes       - вызывать реакцию на волну в стартовых узлах
     // markVisited          - помечать visited = true узлы, посещенные волной
     // allParentsVisited    - помещать в очередь только те узлы, у которых волной посещены все родители
-    // breakOnFail          - прервать проход волны, если реакция какого-то из узлов вернула false
     // moveType             - способ распространения волны по графу: fromParent - от родителя к детям, fromChild - от ребенка к родителям
-    triggerWave = function (e) {
+    triggerWave(e) {
         e = e || {};
 
         if (this._isMakingWave || !e.nodes || e.nodes.length <= 0) return;
 
         if (e.waveType === undefined) e.waveType = WaveType.value;
         if (e.withStartNodes === undefined) e.withStartNodes = true;
-        if (e.breakOnFail === undefined) e.breakOnFail = true;
         if (e.moveType === undefined) e.moveType = MoveType.fromParent;
 
         e.list = [];
@@ -345,59 +324,38 @@ class Graph {
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     // возвращает истину, если среди родительских узлов есть хотя бы один с тем же номером волны
-    hasParentWithSameWave = function (node) {
-        if (!node) return false;
+    hasParentWithSameWave(node) {
+        if (!node) return;
 
         for (let lid in node.parentLinks) {
             if (node.parentLinks[lid].parent._waveNum == node._waveNum) return true;
         }
-
-        return false;
     };
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     // возвращает истину, если среди родительских узлов есть хотя бы один с тем же номером волны
-    hasChildWithSameWave = function (node) {
-        if (!node) return false;
+    hasChildWithSameWave(node) {
+        if (!node) return;
 
         for (let lid in node.childLinks) {
-            if (node.childLinks[j].child._waveNum == node._waveNum) return true;
+            if (node.childLinks[lid].child._waveNum == node._waveNum) return true;
         }
-
-        return false;
     };
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
-
     // помечает все узлы графа, которые входят хотя бы в один цикл
-    markCycles = function () {
+    markCycles() {
         // Если вершина имеет только входные или только выходные дуги, то она явно не входит ни в один цикл. Можно удалить все такие вершины из графа 
         // вместе со связанными с ними дугами. В результате появятся новые вершины, имеющие только входные или выходные дуги. Они также удаляются. 
         // Итерации повторяются до тех пор, пока граф не перестанет изменяться. Отсутствие изменений свидетельствует об отсутствии циклов, 
         // если все вершины были удалены. Все оставшиеся вершины обязательно принадлежат циклам.
-        const matr = {};
-        const nodes = {};
-        Object.assign(matr, this.linksDict);
-        Object.assign(nodes, this.nodesDict);
-
-        matr.hasParents = function (node) {
-            for (let id in this) {
-                let link = this[id];
-                if (link.child == node) return true;
+        const hasParents = function (node) {
+            for (let lid in node.parentLinks) {
+                if (!node.parentLinks[lid].parent.excluded) return true;
             }
         };
 
-        matr.hasChildren = function (node) {
-            for (let id in this) {
-                let link = this[id];
-                if (link.parent == node) return true;
-            }
-        };
-
-        matr.disconnectNodeFromAll = function (node) {
-            for (let id in this) {
-                let link = this[id];
-                if (link.child == node || link.parent == node) {
-                    delete this[id];
-                }
+        const hasChildren = function (node) {
+            for (let lid in node.childLinks) {
+                if (node.childLinks[lid].child.excluded) return true;
             }
         };
 
@@ -407,24 +365,28 @@ class Graph {
         while (changesDone) {
             changesDone = false;
 
-            for (let id in nodes) {
-                let node = nodes[id];
-                if (!node) continue;
+            for (let id in this.nodesDict) {
+                let node = this.nodesDict[id];
+                if (node.excluded) continue;
 
                 // если узел висячий в какую-либо из сторон, или вообще несвязанный
-                if (!matr.hasParents(node) || !matr.hasChildren(node)) {
+                if (!hasParents(node) || !hasChildren(node)) {
                     // исключаем этот узел из списка рассматриваемых
-                    matr.disconnectNodeFromAll(node);
-                    delete nodes[id];
+                    node.excluded = true;
                     changesDone = true;
                 }
             }
         }
 
-        for (let id in nodes) {
-            nodes[id].inCycle = true;
+        for (let id in this.nodesDict) {
+            let node = this.nodesDict[id];
+            if (node.excluded) {
+                delete node.excluded;
+            }
+            else {
+                node.inCycle = true;
+            }
         }
     };
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
-
 }

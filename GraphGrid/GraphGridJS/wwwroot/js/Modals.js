@@ -157,7 +157,7 @@ export default class Modal {
         let s = `<div wnd-footer class="${footerClass}" style="display: flex;flex-wrap: nowrap;justify-content: space-between;align-items: center;">`;
         for (let ind in this.buttonsDict) {
             let btn = this.buttonsDict[ind];
-            s += `<button wnd-btn="button_${this.id}_${btn._ind}_" class="${footerButtonClass} ${btn.className || ''}">`;
+            s += `<button wnd-btn="button_${this.id}_${btn._ind}_" class="${footerButtonClass} ${btn.className || ''}" title="${btn.title}">`;
             if (btn.imageClass) {
                 s += `<i class="${btn.imageClass}"></i>`;
             }

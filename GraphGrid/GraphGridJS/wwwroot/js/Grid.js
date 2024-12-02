@@ -15,7 +15,7 @@
         this.selectedRowIndex = 0;
     }
 
-    createGridElement = function () {
+    createGridElement() {
         let gridElement = document.getElementById(`grid_${this.id}_`);
         if (gridElement) return false;
 
@@ -42,7 +42,7 @@
         return true;
     }
 
-    draw = function () {
+    draw() {
         if (!this.createGridElement()) {
             this.drawToolbar(false);
             this.drawPager(false);
@@ -52,21 +52,30 @@
         this.drawBody();
     }
 
-    refresh = function () {
+    afterRefresh() {
+        if (!this.columns) {
+            this.prepareColumns(this.getColumns());
+        }
+        this.draw();
+        this.onSelectedRowChanged({ prev: this.selectedRowIndex, new: this.selectedRowIndex });
+    }
+
+    refresh() {
         const grid = this;
 
         this.getRows({
-            callback: function () {
-                if (!grid.columns) {
-                    grid.prepareColumns(grid.getColumns());
-                }
-                grid.draw();
-                //grid.onSelectedRowChanged({ prev: grid.selectedRowIndex, new: grid.selectedRowIndex });
+            resolve: function () {
+                grid.afterRefresh();
+            //    if (!grid.columns) {
+            //        grid.prepareColumns(grid.getColumns());
+            //    }
+            //    grid.draw();
+            //    grid.onSelectedRowChanged({ prev: grid.selectedRowIndex, new: grid.selectedRowIndex });
             }
         });
     }
 
-    remove = function () {
+    remove() {
         const grid = window._gridDict[this.id];
         if (!grid) return;
 
@@ -82,15 +91,19 @@
         }, 10);
     }
 
-    drawToolbar = function (full) {
+    drawToolbar(full) {
         return '';
     }
 
-    drawPager = function (full, bottom) {
+    drawPager(full, bottom) {
         return '';
     }
 
-    drawHeader = function (gridElement) {
+    drawHeader(gridElement) {
+        if (!this.columns && (this.getColumns || this.rows)) {
+            this.prepareColumns(this.getColumns());
+        }
+
         if (!this.columns) return;
 
         const colClass = this.columnClass ? `class="${this.columnClass}"` : '';
@@ -98,7 +111,7 @@
         let w = 0;
         let s = '<thead><tr>';
         for (let col of this.columns) {
-            s += `<th grid-header id="col_${this.id}_${col.id}" ${colClass} style="position: sticky;top: 0;width: ${col.w}px">
+            s += `<th grid-header id="col_${this.id}_${col.id}_" ${colClass} style="position: sticky;top: 0;width: ${col.w}px;overflow: hidden;">
                     <div class="grid-header-div">
                         ${this.drawHeaderCell(col)}
                     </div>
@@ -134,11 +147,11 @@
         }, 10);
     }
 
-    drawHeaderCell = function (col) {
+    drawHeaderCell(col) {
         return col.title || col.name;
     }
 
-    drawBody = function (gridElement) {
+    drawBody(gridElement) {
         if (!this.columns || !this.rows) return;
 
         let i = 0;
@@ -163,19 +176,19 @@
         }
     }
 
-    drawCell = function (col, row) {
+    drawCell(col, row) {
         const val = row[col.name];
         return val !== undefined ? val : '';
     }
 
-    getRows = function (e) {
+    getRows(e) {
         this.rows = [];
-        if (e.callback) {
-            e.callback(this.rows);
+        if (e.resolve) {
+            e.resolve(this.rows);
         }
     }
 
-    getColumns = function () {
+    getColumns() {
         const res = [];
         this.colDict = {};
 
@@ -193,7 +206,7 @@
         return res;
     }
 
-    prepareColumns = function (columns) {
+    prepareColumns(columns) {
         this.columns = columns || this.columns || [];
         this.colDict = this.colDict || {};
         this.columnsDefaultOrder = [];
@@ -211,12 +224,12 @@
         Object.assign(this.columnsDefaultOrder, this.columns);
     }
 
-    resetColumnsOrderToDefault = function () {
+    resetColumnsOrderToDefault() {
         Object.assign(this.columns, this.columnsDefaultOrder);
         this.draw();
     }
 
-    onSelectGridRow = function (e) {
+    onSelectGridRow(e) {
         if (e.target.tagName != 'TD') return;
 
         const grid = window._gridDict[this.id.split('_')[1]];
@@ -241,10 +254,10 @@
         }
     }
 
-    onSelectedRowChanged = function (e) {
+    onSelectedRowChanged(e) {
     }
 
-    setupColumnResize = function (column, th, gridElement) {
+    setupColumnResize(column, th, gridElement) {
         const mouseDown = function (e) {
 
             const initW = +th.style.width.replace('px', '');
@@ -296,7 +309,7 @@
         };
     }
 
-    setupColumnDrug = function (column, th) {
+    setupColumnDrug(column, th) {
         const grid = column.grid;
         const columns = column.grid.columns;
 
