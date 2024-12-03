@@ -142,7 +142,7 @@
             for (let th of gridElement.tHead.rows[0].children) {
                 let col = grid.columns[i++];
                 grid.setupColumnResize(col, th, gridElement);
-                grid.setupColumnDrug(col, th);
+                grid.setupColumnDrug(col, th, gridElement);
             }
         }, 10);
     }
@@ -232,7 +232,8 @@
     onSelectGridRow(e) {
         if (e.target.tagName != 'TD') return;
 
-        const grid = window._gridDict[this.id.split('_')[1]];
+        const [gr, id] = this.id.split('_');
+        const grid = window._gridDict[id];
 
         const prevSelected = grid.selectedRowIndex;
         grid.selectedRowIndex = 0;
@@ -260,7 +261,9 @@
     setupColumnResize(column, th, gridElement) {
         const mouseDown = function (e) {
 
-            const initW = +th.style.width.replace('px', '');
+            //const initW = +th.style.width.replace('px', '');
+            const initW = +getComputedStyle(th).width.replace('px', '');
+
             const shiftX = e.target.hasAttribute('grid-rsz-x') ? e.clientX : -1;
             const columns = column.grid.columns;
 
@@ -309,7 +312,7 @@
         };
     }
 
-    setupColumnDrug(column, th) {
+    setupColumnDrug(column, th, gridElement) {
         const grid = column.grid;
         const columns = column.grid.columns;
 
@@ -344,9 +347,7 @@
 
             grid._movingColumn = column;
 
-            let fakeGrid; // = addFakeGrid(e);
-
-            //drawMovingColumn(e.pageX, e.pageY);
+            let fakeGrid;
 
             function drawMovingColumn(pageX, pageY) {
                 fakeGrid = fakeGrid || addFakeGrid(e);
@@ -378,10 +379,16 @@
                     for (let col of columns) {
                         switch (col) {
                             case grid._movingColumn:
-                                newColumns.push(grid._targetColumn);
                                 break;
                             case grid._targetColumn:
-                                newColumns.push(grid._movingColumn);
+                                if (columns.indexOf(grid._movingColumn) > columns.indexOf(grid._targetColumn)) {
+                                    newColumns.push(grid._movingColumn);
+                                    newColumns.push(grid._targetColumn);
+                                }
+                                else {
+                                    newColumns.push(grid._targetColumn);
+                                    newColumns.push(grid._movingColumn);
+                                }
                                 break;
                             default:
                                 newColumns.push(col);
@@ -432,8 +439,38 @@
             }
         }
 
+        const mouseDoubleClick = function (e) {
+            //if (e.target.hasAttribute('grid-rsz-x')) return;
+            const initW = +th.style.width.replace('px', '');
+
+            const fakeDiv = document.createElement('div');
+            fakeDiv.className = "grid-header-div";
+            fakeDiv.style.opacity = 0;
+            fakeDiv.style.position = 'fixed';
+            fakeDiv.innerHTML = grid.drawHeaderCell(column);
+            document.body.append(fakeDiv);
+
+            let contentSize = Math.max(column.w, +getComputedStyle(fakeDiv).width.replace('px', ''));
+
+            fakeDiv.className = '';
+
+            for (let row of grid.rows) {
+                fakeDiv.innerHTML = grid.drawCell(column, row);
+                contentSize = Math.max(contentSize, +getComputedStyle(fakeDiv).width.replace('px', ''));
+            }
+
+            const newW = Math.max(column.w, contentSize);
+
+            if (newW > initW) {
+                column.w = newW;
+                th.style.width = newW + 'px';
+                gridElement.style.width = (+gridElement.style.width.replace('px', '') + newW - initW) + 'px';
+            }
+        }
+
         th.addEventListener('mousedown', mouseDown);
         th.addEventListener('mouseover', mouseOver);
         th.addEventListener('mouseout', mouseOut);
+        th.addEventListener('dblclick', mouseDoubleClick);
     }
 }

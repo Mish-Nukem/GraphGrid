@@ -242,7 +242,10 @@ export default class Modal {
         const pos = this.opt.pos;
         const mouseDown = function (e) {
 
-            const rect = { width: +elem.style.width.replace('px', ''), height: +elem.style.height.replace('px', '') };
+            const cs = getComputedStyle(elem);
+            const [initW, initH] = [+cs.width.replace('px', ''), +cs.height.replace('px', '')];
+
+            //const rect = { width: +elem.style.width.replace('px', ''), height: +elem.style.height.replace('px', '') };
             const shiftX = e.target.hasAttribute('wnd-rsz-x') || e.target.hasAttribute('wnd-rsz-xy') ? e.clientX : -1;
             const shiftY = e.target.hasAttribute('wnd-rsz-y') || e.target.hasAttribute('wnd-rsz-xy') ? e.clientY : -1;
 
@@ -250,13 +253,15 @@ export default class Modal {
 
             function resize(pageX, pageY) {
                 if (shiftX > 0) {
-                    const w = rect.width + pageX - shiftX;
+                    //const w = rect.width + pageX - shiftX;
+                    const w = initW + pageX - shiftX;
 
                     pos.w = (!pos.maxW || w <= pos.maxW) && (!pos.minW || w >= pos.minW) ? w : pos.w;
                     elem.style.width = pos.w + 'px';
                 }
                 if (shiftY > 0) {
-                    const h = rect.height + pageY - shiftY;
+                    //const h = rect.height + pageY - shiftY;
+                    const h = initH + pageY - shiftY;
 
                     pos.h = (!pos.maxH || h <= pos.maxH) && (!pos.minH || h >= pos.minH) ? h : pos.h;
                     elem.style.height = pos.h + 'px';
@@ -292,13 +297,13 @@ document.addEventListener('click', function (e) {
     const wndAttr = e.target.getAttribute('wnd-btn') || e.target.id;
     if (!wndAttr) return;
 
-    const parts = wndAttr.split('_');
-    if (parts.length < 2) return;
+    const [entity, wndId, buttonId] = wndAttr.split('_');
+    if (!wndId) return;
 
-    const wnd = window._wndDict[parts[1]];
+    const wnd = window._wndDict[wndId];
     if (!wnd) return;
 
-    switch (parts[0]) {
+    switch (entity) {
         case 'window':
             if (wnd.opt.closeWhenClick || wnd.owner && wnd.owner.opt.closeWhenMiss) {
 
@@ -310,7 +315,7 @@ document.addEventListener('click', function (e) {
             wnd.close();
             break;
         case 'button':
-            const button = wnd.buttonsDict[parts[2]];
+            const button = wnd.buttonsDict[buttonId];
             if (!button || !button.onclick) return;
 
             e.modal = wnd;

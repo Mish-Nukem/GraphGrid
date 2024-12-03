@@ -71,12 +71,12 @@ export default class GridDB extends Grid {
     onPagerButtonClick(e) {
         if (e.target.tagName != 'BUTTON') return;
 
-        const parts = e.target.getAttribute('grid-pager-button').split('_');
+        const [gridId, buttonId] = e.target.getAttribute('grid-pager-button').split('_');
 
-        const grid = window._gridDict[parts[0]];
+        const grid = window._gridDict[gridId];
 
         let button = grid.pagerButtons.find(function (item, index, array) {
-            return item.id == parts[1];
+            return item.id == buttonId;
         });
 
         if (!button || !button.click) return;
