@@ -1,6 +1,6 @@
-﻿//export default function CreateGraph() {
-//    return new Graph();
-//}
+﻿export function CreateGraph() {
+    return new Graph();
+}
 
 export default class Graph {
     constructor() {
@@ -37,7 +37,9 @@ export default class Graph {
             node.visited = true;
         }
 
-        node.visitByWave(e);
+        if (node.visitByWave) {
+            node.visitByWave(e);
+        }
     };
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     // возвращает истину, если при формировании списка посещаемых волной узлов нужно не использовать связь по каким-то причинам
