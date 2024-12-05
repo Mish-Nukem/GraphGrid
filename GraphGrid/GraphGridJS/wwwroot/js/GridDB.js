@@ -10,7 +10,7 @@ export default class GridDB extends Grid {
         super(options);
 
         this.pageNumber = 1;
-        this.pageSize = 10;
+        this.pageSize = options.pageSize;
 
         this.setupPagerButtons();
     }
@@ -30,13 +30,62 @@ export default class GridDB extends Grid {
         }
     }
 
+    draw() {
+        const gridElemObj = this.createGridElement();
+        if (gridElemObj.isNew) {
+            this.parent.append(this.drawToolbar(true));
+            this.parent.append(this.drawAppliedFilters(true));
+            this.parent.append(this.drawPager(true));
+
+            this.parent.appendChild(gridElemObj.gridElement);
+
+            this.parent.append(this.drawPager(true, true));
+        }
+        else {
+            this.drawToolbar(false);
+            this.drawAppliedFilters(false);
+            this.drawPager(false);
+
+            this.drawPager(false, true);
+        }
+        this.drawHeader(gridElemObj.gridElement);
+        this.drawBody(gridElemObj.gridElement);
+    }
+
+    drawToolbar(full) {
+        return '';
+    }
+
+    drawAppliedFilters(full) {
+        return '';
+    }
+
     drawPagerButton(button) {
-        return button ? button.title ? button.title : button.name : '';
-    //    switch (button.name.toLowerCase()) {
-    //        case 'settings':
-    //            return 'Settings';
-    //            break;
-    //    }
+        //return button ? button.title ? button.title : button.name : '';
+        switch (button.name.toLowerCase()) {
+            case 'settings':
+                return 'Settings';
+                break;
+            case 'first':
+                return button.title;
+                break;
+            case 'prev':
+                return button.title;
+                break;
+            case 'next':
+                return button.title;
+                break;
+            case 'last':
+                return button.title;
+                break;
+            default:
+                return button.title;
+        }
+        return '';
+    }
+
+    drawAppliedFilters(full) {
+        return '';
     }
 
     drawPager(full, bottom) {
@@ -58,7 +107,8 @@ export default class GridDB extends Grid {
         let s = '';
         for (let button of this.pagerButtons)
             s += `
-                <button id="pager_${this.id}_${button.id}" grid-pager-button="${this.id}_${button.id}" class="grid-pager-button" title="${button.title}">
+                <button id="pager_${this.id}_${button.id}" grid-pager-button="${this.id}_${button.id}" class="grid-pager-button" title="${button.title}" 
+                ${button.getDisabled && button.getDisabled() || button.disabled ? 'disabled' : ''}>
                     ${this.drawPagerButton(button)}
                 </button>
         `;
@@ -84,6 +134,41 @@ export default class GridDB extends Grid {
         button.click();
     }
 
+    showGridSettings(e) {
+        const grid = this;
+        alert(`Showing settings for ${grid.id} grid...`);
+    }
+
+    gotoFirstPage() {
+        const grid = this;
+        grid.pageNumber = 1;
+        grid.selectedRowIndex = 0;
+        grid.refresh();
+    }
+
+    gotoPrevPage() {
+        const grid = this;
+        grid.pageNumber = grid.pageNumber > 1 ? grid.pageNumber - 1 : 1;
+        grid.selectedRowIndex = 0;
+        grid.refresh();
+    }
+
+    gotoNextPage() {
+        const grid = this;
+        grid.pagesCount = (grid.totalRows / grid.pageSize | 0) + (grid.totalRows % grid.pageSize > 0 ? 1 : 0);
+        grid.pageNumber = grid.pageNumber < grid.pagesCount ? grid.pageNumber + 1 : grid.pageNumber;
+        grid.selectedRowIndex = 0;
+        grid.refresh();
+    }
+
+    gotoLastPage() {
+        const grid = this;
+        grid.pagesCount = (grid.totalRows / grid.pageSize | 0) + (grid.totalRows % grid.pageSize > 0 ? 1 : 0);
+        grid.pageNumber = grid.pageNumber < grid.pagesCount ? grid.pagesCount : grid.pageNumber;
+        grid.selectedRowIndex = 0;
+        grid.refresh();
+    }
+
     setupPagerButtons() {
         this.pagerButtons = [];
         const grid = this;
@@ -93,7 +178,7 @@ export default class GridDB extends Grid {
             name: 'settings',
             title: 'Grid Settings',
             click: function (e) {
-                alert(`Showing settings for ${grid.id} grid...`);
+                grid.showGridSettings(e);
             }
         }
 
@@ -104,7 +189,10 @@ export default class GridDB extends Grid {
             name: 'first',
             title: 'First',
             click: function (e) {
-                alert(`Moving to first page for ${grid.id} grid...`);
+                grid.gotoFirstPage();
+            },
+            getDisabled: function () {
+                return !grid.rows || grid.rows.length <= 0 || grid.pageNumber == 1;
             }
         }
 
@@ -115,7 +203,10 @@ export default class GridDB extends Grid {
             name: 'prev',
             title: 'Prev',
             click: function (e) {
-                alert(`Moving to prev page for ${grid.id} grid...`);
+                grid.gotoPrevPage();
+            },
+            getDisabled: function () {
+                return !grid.rows || grid.rows.length <= 0 || grid.pageNumber == 1;
             }
         }
 
@@ -126,7 +217,12 @@ export default class GridDB extends Grid {
             name: 'next',
             title: 'Next',
             click: function (e) {
-                alert(`Moving to next page for ${grid.id} grid...`);
+                grid.gotoNextPage();
+            },
+            getDisabled: function () {
+                grid.pagesCount = (grid.totalRows / grid.pageSize | 0) + (grid.totalRows % grid.pageSize > 0 ? 1 : 0);
+
+                return !grid.rows || grid.rows.length <= 0 || grid.pageNumber == grid.pagesCount;
             }
         }
 
@@ -137,7 +233,12 @@ export default class GridDB extends Grid {
             name: 'last',
             title: 'Last',
             click: function (e) {
-                alert(`Moving to last page for ${grid.id} grid...`);
+                grid.gotoLastPage();
+            },
+            getDisabled: function () {
+                grid.pagesCount = (grid.totalRows / grid.pageSize | 0) + (grid.totalRows % grid.pageSize > 0 ? 1 : 0);
+
+                return !grid.rows || grid.rows.length <= 0 || grid.pageNumber == grid.pagesCount;
             }
         }
 

@@ -16,37 +16,35 @@
     }
 
     createGridElement() {
-        let gridElement = document.getElementById(`grid_${this.id}_`);
-        if (gridElement) return false;
+        const res = {};
+
+        res.gridElement = document.getElementById(`grid_${this.id}_`);
+        if (res.gridElement) {
+            res.isNew = false;
+            return res;
+        }
 
         this.parent = this.opt.parentId ? document.getElementById(this.opt.parentId) : this.parent || this.opt.parent || document.body;
         this.parentIsDocument = this.parent == document.body;
 
-        gridElement = document.createElement('table');
-        gridElement.id = `grid_${this.id}_`;
+        res.gridElement = document.createElement('table');
+        res.isNew = true;
+        res.gridElement.id = `grid_${this.id}_`;
 
-        gridElement.className = this.opt.gridClass || 'grid-default';
-        gridElement.style = this.opt.style || '';
-
-        this.parent.append(this.drawToolbar(true));
-        this.parent.append(this.drawPager(true));
-
-        this.parent.appendChild(gridElement);
-
-        this.parent.append(this.drawPager(true, true));
+        res.gridElement.className = this.opt.gridClass || 'grid-default';
+        res.gridElement.style = this.opt.style || '';
 
         window._gridDict[this.id] = this;
 
-        gridElement.addEventListener('click', this.onSelectGridRow);
+        res.gridElement.addEventListener('click', this.onSelectGridRow);
 
-        return true;
+        return res;
     }
 
     draw() {
-        if (!this.createGridElement()) {
-            this.drawToolbar(false);
-            this.drawPager(false);
-            this.drawPager(false, true);
+        const gridElemObj = this.createGridElement();
+        if (gridElemObj.isNew) {
+            this.parent.appendChild(gridElemObj.gridElement);
         }
         this.drawHeader();
         this.drawBody();
@@ -64,13 +62,9 @@
         const grid = this;
 
         this.getRows({
+            filters: grid.collectFilters ? grid.collectFilters() : [],
             resolve: function () {
                 grid.afterRefresh();
-            //    if (!grid.columns) {
-            //        grid.prepareColumns(grid.getColumns());
-            //    }
-            //    grid.draw();
-            //    grid.onSelectedRowChanged({ prev: grid.selectedRowIndex, new: grid.selectedRowIndex });
             }
         });
     }
@@ -89,14 +83,6 @@
         setTimeout(function () {
             gridElement.remove();
         }, 10);
-    }
-
-    drawToolbar(full) {
-        return '';
-    }
-
-    drawPager(full, bottom) {
-        return '';
     }
 
     drawHeader(gridElement) {

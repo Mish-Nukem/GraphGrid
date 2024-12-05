@@ -8,8 +8,8 @@ let modalSecondChildGrid;
 
 let wndModal;
 
-function getFamily() {
-    return [
+function getFamily(e) {
+    const res = [
         { Id: 1, ParentId: [3, 4], Name: 'Mikle', Date: '26/01/1979', Comment: 'Good boy' },
         { Id: 2, ParentId: [0], Name: 'Nataly', Date: '15/01/1999', Comment: 'Good girl' },
         { Id: 3, ParentId: [11], Name: 'Lyuda', Date: '03/07/1953', Comment: 'Mommy' },
@@ -32,17 +32,29 @@ function getFamily() {
         { Id: 20, ParentId: [11], Name: 'Vitia', Date: '??/??/19??', Comment: 'Dadya' },
         { Id: 21, ParentId: [11], Name: 'Tanya', Date: '??/??/19??', Comment: 'Tetya' },
     ];
+
+    //e.totalRows = res.length;
+
+    //const page = e.pageSize > 0 && e.pageNumber > 0 ? res.slice((e.pageNumber - 1) * e.pageSize, e.pageNumber * e.pageSize) : res;
+
+    //return page;
+    return res;
 }
 
 function createGrid() {
     let res = new GridDB({
         getRows: function (e) {
-            this.rows = getFamily();
+            this.rows = getFamily(e);
+            this.totalRows = this.rows.length;
+
+            this.rows = this.pageSize > 0 && this.pageNumber > 0 ? this.rows.slice((this.pageNumber - 1) * this.pageSize, this.pageNumber * this.pageSize) : this.rows;
+
             e.resolve();
         },
         getColumns: function () {
             return [{ name: 'Id' }, { name: 'Name' }, { name: 'Date' }, { name: 'Comment' }];
-        }
+        },
+        pageSize: 5
     });
     return res;
 }
@@ -50,7 +62,7 @@ function createGrid() {
 function createChildGrid() {
     let res = new GridDB({
         getRows: function (e) {
-            const res = getFamily();
+            const res = getFamily(e);
 
             this.rows = [];
 
@@ -62,13 +74,15 @@ function createChildGrid() {
                     }
                 }
             }
+            this.totalRows = this.rows.length;
+            this.rows = this.pageSize > 0 && this.pageNumber > 0 ? this.rows.slice((this.pageNumber - 1) * this.pageSize, this.pageNumber * this.pageSize) : this.rows;
 
             e.resolve();
         },
         getColumns: function () {
             return [{ name: 'Id' }, { name: 'Name', title: 'Child' }, { name: 'Date' }];
-        }
-
+        },
+        pageSize: 5
     });
 
     res.connectToParentGrid(modalGrid, {
@@ -98,7 +112,7 @@ function createSecondChildGrid() {
                 { Id: 12, ParentId: [2], Content: 'Hanty-Mansiysk' },
             ];
 
-            this.rows = [];
+            this.rows =[];
 
             if (e.filters && e.filters.length) {
                 const filter = e.filters[0];
@@ -109,12 +123,17 @@ function createSecondChildGrid() {
                 }
             }
 
+            e.pageNumber = e.pageNumber || 1;
+
+            this.totalRows = this.rows.length;
+            this.rows = this.pageSize > 0 && this.pageNumber > 0 ? this.rows.slice((this.pageNumber - 1) * this.pageSize, this.pageNumber * this.pageSize) : this.rows;
+
             e.resolve();
         },
         getColumns: function () {
             return [{ name: 'Content', title: 'Lived in City' }];
-        }
-
+        },
+        pageSize: 5
     });
 
     res.connectToParentGrid(modalGrid, {
