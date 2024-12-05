@@ -30,6 +30,14 @@ export default class GridDB extends Grid {
         }
     }
 
+    visitByWave(e) {
+        if (this.skipOnWaveVisit(e)) return;
+
+        this.pageNumber = 1;
+
+        super.visitByWave(e);
+    }
+
     draw() {
         const gridElemObj = this.createGridElement();
         if (gridElemObj.isNew) {
@@ -243,6 +251,5 @@ export default class GridDB extends Grid {
         }
 
         this.pagerButtons.push(last);
-
     }
 }

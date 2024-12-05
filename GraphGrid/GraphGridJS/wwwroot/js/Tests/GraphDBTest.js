@@ -164,9 +164,14 @@ export function TestPopupWndGrid() {
         }
         modalGrid.parent = div;
 
+        const divDetails = document.createElement('div');
+        divDetails.style.margin = '10px';
+        wndBodyElement.appendChild(divDetails);
+
         const div2 = document.createElement('div');
         div2.style.margin = '10px';
-        wndBodyElement.appendChild(div2);
+        div2.style.float = 'left';
+        divDetails.appendChild(div2);
 
         if (!modalChildGrid) {
             modalChildGrid = createChildGrid();
@@ -176,7 +181,8 @@ export function TestPopupWndGrid() {
 
         const div3 = document.createElement('div');
         div3.style.margin = '10px';
-        wndBodyElement.appendChild(div3);
+        div3.style.float = 'right';
+        divDetails.appendChild(div3);
 
         if (!modalSecondChildGrid) {
             modalSecondChildGrid = createSecondChildGrid();
@@ -196,7 +202,7 @@ export function TestPopupWndGrid() {
         pos: {
             x: 120,
             y: 120,
-            w: 550,
+            w: 950,
             h: 800,
             minH: 50,
             minW: 100
