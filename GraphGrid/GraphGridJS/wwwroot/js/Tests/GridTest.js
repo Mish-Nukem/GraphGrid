@@ -75,6 +75,13 @@ export function TestPopupWndGrid() {
                     modalGrid.resetColumnsOrderToDefault();
                 }
             },
+
+            {
+                title: 'Reset columns widths',
+                onclick: function (e) {
+                    modalGrid.resetColumnsWidthsToDefault();
+                }
+            },
             {
                 title: 'Close',
                 onclick: function (e) {
