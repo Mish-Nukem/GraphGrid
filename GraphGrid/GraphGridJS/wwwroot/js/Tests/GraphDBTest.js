@@ -54,7 +54,24 @@ function createGrid() {
         getColumns: function () {
             return [{ name: 'Id' }, { name: 'Name' }, { name: 'Date' }, { name: 'Comment' }];
         },
-        pageSize: 5
+        pageSize: 5,
+        toolbarButtons: [
+            {
+                id: 1,
+                name: 'info',
+                title: 'Persone Info',
+                click: function (e) {
+                    const selRow = e.grid.selectedRowIndex >= 0 && e.grid.rows.length > 0 ? e.grid.rows[e.grid.selectedRowIndex] : null;
+                    if (!selRow) return;
+
+                    alert(`Persone Name = ${selRow.Name}, Persone Birth Day = ${selRow.Date}`);
+                },
+                getDisabled: function (e) {
+                    return !e.grid.rows || e.grid.rows.length <= 0;
+                }
+            }
+            
+        ]
     });
     return res;
 }
@@ -181,7 +198,7 @@ export function TestPopupWndGrid() {
 
         const div3 = document.createElement('div');
         div3.style.margin = '10px';
-        div3.style.float = 'right';
+        div3.style.float = 'left';
         divDetails.appendChild(div3);
 
         if (!modalSecondChildGrid) {

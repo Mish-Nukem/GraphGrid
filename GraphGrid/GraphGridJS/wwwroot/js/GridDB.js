@@ -12,6 +12,9 @@ export default class GridDB extends Grid {
         this.pageNumber = 1;
         this.pageSize = options.pageSize;
 
+        this.pageSizes = [5, 10, 15, 20, 30, 40, 50, 100];
+
+        this.toolbarButtons = options.toolbarButtons;
         this.setupPagerButtons();
     }
 
@@ -61,39 +64,50 @@ export default class GridDB extends Grid {
     }
 
     drawToolbar(full) {
-        return '';
-    }
+        if (!this.toolbarButtons || this.toolbarButtons.length <= 0) return '';
 
-    drawAppliedFilters(full) {
-        return '';
-    }
+        const id = `grid_${this.id}_toolbar_`;
+        let elem = full ? null : document.getElementById(id);
+        if (!elem) {
 
-    drawPagerButton(button) {
-        //return button ? button.title ? button.title : button.name : '';
-        switch (button.name.toLowerCase()) {
-            case 'settings':
-                return 'Settings';
-                break;
-            case 'first':
-                return button.title;
-                break;
-            case 'prev':
-                return button.title;
-                break;
-            case 'next':
-                return button.title;
-                break;
-            case 'last':
-                return button.title;
-                break;
-            default:
-                return button.title;
+            elem = document.createElement('div');
+            elem.id = id;
+
+            elem.className = this.opt.gridClass || 'grid-default';
+            elem.style = this.opt.style || '';
+
+            elem.addEventListener('click', this.onToolbarButtonClick);
         }
-        return '';
+
+        let s = '';
+        for (let button of this.toolbarButtons)
+            s += `
+                <button grid-toolbar-button="${this.id}_${button.id}" class="grid-toolbar-button" title="${button.title}" 
+                ${button.getDisabled && button.getDisabled({ grid: this }) || button.disabled ? 'disabled' : ''}>
+                    ${this.drawToolbarButton(button)}
+                </button>
+        `;
+
+        elem.innerHTML = s;
+
+        return elem;
     }
 
     drawAppliedFilters(full) {
         return '';
+    }
+
+    drawToolbarButton(button) {
+        return button ? button.title ? button.title : button.name : '';
+    }
+
+    drawPagerButton(grid, button) {
+        return `
+                <button grid-pager-item="${grid.id}_${button.id}" class="${button.class ? button.class : 'grid-pager-button'}"
+                title="${button.title}" ${button.getDisabled && button.getDisabled() || button.disabled ? 'disabled' : ''}>
+                    ${button ? button.title ? button.title : button.name : ''}
+                </button>
+            `;
     }
 
     drawPager(full, bottom) {
@@ -110,16 +124,13 @@ export default class GridDB extends Grid {
             elem.style = this.opt.style || '';
 
             elem.addEventListener('click', this.onPagerButtonClick);
+            elem.addEventListener('change', this.onPagerItemChange);
         }
 
         let s = '';
-        for (let button of this.pagerButtons)
-            s += `
-                <button id="pager_${this.id}_${button.id}" grid-pager-button="${this.id}_${button.id}" class="grid-pager-button" title="${button.title}" 
-                ${button.getDisabled && button.getDisabled() || button.disabled ? 'disabled' : ''}>
-                    ${this.drawPagerButton(button)}
-                </button>
-        `;
+        for (let button of this.pagerButtons) {
+            s += button.draw ? button.draw(this, button) : button.title;
+        }
 
         elem.innerHTML = s;
 
@@ -129,7 +140,7 @@ export default class GridDB extends Grid {
     onPagerButtonClick(e) {
         if (e.target.tagName != 'BUTTON') return;
 
-        const [gridId, buttonId] = e.target.getAttribute('grid-pager-button').split('_');
+        const [gridId, buttonId] = e.target.getAttribute('grid-pager-item').split('_');
 
         const grid = window._gridDict[gridId];
 
@@ -139,13 +150,52 @@ export default class GridDB extends Grid {
 
         if (!button || !button.click) return;
 
-        button.click();
+        e.grid = grid;
+
+        button.click(e);
     }
 
-    showGridSettings(e) {
-        const grid = this;
-        alert(`Showing settings for ${grid.id} grid...`);
+    onToolbarButtonClick(e) {
+        if (e.target.tagName != 'BUTTON') return;
+
+        const [gridId, buttonId] = e.target.getAttribute('grid-toolbar-button').split('_');
+
+        const grid = window._gridDict[gridId];
+
+        let button = grid.toolbarButtons.find(function (item, index, array) {
+            return item.id == buttonId;
+        });
+
+        if (!button || !button.click) return;
+
+        e.grid = grid;
+
+        button.click(e);
     }
+
+    onPagerItemChange(e) {
+        if (e.target.tagName == 'BUTTON') return;
+
+        const [gridId, itemId] = e.target.getAttribute('grid-pager-item').split('_');
+
+        const grid = window._gridDict[gridId];
+
+        let button = grid.pagerButtons.find(function (item, index, array) {
+            return item.id == itemId;
+        });
+
+        if (!button || !button.change) return;
+
+        e.grid = grid;
+
+        button.change(e);
+
+    }
+
+    //showGridSettings(e) {
+    //    const grid = this;
+    //    alert(`Showing settings for ${grid.id} grid...`);
+    //}
 
     gotoFirstPage() {
         const grid = this;
@@ -178,19 +228,22 @@ export default class GridDB extends Grid {
     }
 
     setupPagerButtons() {
-        this.pagerButtons = [];
         const grid = this;
+        grid.pagerButtons = [];
 
-        const settings = {
-            id: 0,
-            name: 'settings',
-            title: 'Grid Settings',
-            click: function (e) {
-                grid.showGridSettings(e);
+        if (grid.showGridSettings) {
+            const settings = {
+                id: 0,
+                name: 'settings',
+                title: 'Settings',
+                click: function (e) {
+                    grid.showGridSettings(e);
+                },
+                draw: drawPagerButton,
             }
-        }
 
-        this.pagerButtons.push(settings);
+            grid.pagerButtons.push(settings);
+        }
 
         const first = {
             id: 1,
@@ -201,10 +254,11 @@ export default class GridDB extends Grid {
             },
             getDisabled: function () {
                 return !grid.rows || grid.rows.length <= 0 || grid.pageNumber == 1;
-            }
+            },
+            draw: grid.drawPagerButton,
         }
 
-        this.pagerButtons.push(first);
+        grid.pagerButtons.push(first);
 
         const prev = {
             id: 2,
@@ -215,41 +269,103 @@ export default class GridDB extends Grid {
             },
             getDisabled: function () {
                 return !grid.rows || grid.rows.length <= 0 || grid.pageNumber == 1;
+            },
+            draw: grid.drawPagerButton,
+        }
+
+        grid.pagerButtons.push(prev);
+
+        const curr = {
+            id: 3,
+            name: 'curr',
+            title: 'Current Page',
+            click: function (e) {
+            },
+            getDisabled: function () {
+                return !grid.rows || grid.rows.length <= 1;
+            },
+            draw: function (grid, button) {
+                return `<input value="${grid.pageNumber}"  grid-pager-item="${grid.id}_${button.id}" class="grid-pager-current"
+                ></input>`;
+            },
+            change: function (e) {
+                const newPage = +e.target.value;
+
+                if (e.grid.pageNumber != newPage && newPage >= 1 && newPage <= e.grid.pagesCount) {
+                    e.grid.pageNumber = newPage;
+                    e.grid.selectedRowIndex = 0;
+                    e.grid.refresh();
+                }
             }
         }
 
-        this.pagerButtons.push(prev);
+        grid.pagerButtons.push(curr);
+
+        const total = {
+            id: 4,
+            name: 'total',
+            title: 'Total Pages',
+            draw: function (grid, button) {
+                return ` of ${grid.pagesCount >= 0 ? grid.pagesCount : ''}`;
+            }
+        }
+
+        grid.pagerButtons.push(total);
 
         const next = {
-            id: 3,
+            id: 5,
             name: 'next',
             title: 'Next',
             click: function (e) {
                 grid.gotoNextPage();
             },
             getDisabled: function () {
-                grid.pagesCount = (grid.totalRows / grid.pageSize | 0) + (grid.totalRows % grid.pageSize > 0 ? 1 : 0);
-
                 return !grid.rows || grid.rows.length <= 0 || grid.pageNumber == grid.pagesCount;
-            }
+            },
+            draw: grid.drawPagerButton,
         }
 
-        this.pagerButtons.push(next);
+        grid.pagerButtons.push(next);
 
         const last = {
-            id: 4,
+            id: 6,
             name: 'last',
             title: 'Last',
             click: function (e) {
                 grid.gotoLastPage();
             },
             getDisabled: function () {
-                grid.pagesCount = (grid.totalRows / grid.pageSize | 0) + (grid.totalRows % grid.pageSize > 0 ? 1 : 0);
-
                 return !grid.rows || grid.rows.length <= 0 || grid.pageNumber == grid.pagesCount;
+            },
+            draw: grid.drawPagerButton,
+        }
+
+        grid.pagerButtons.push(last);
+
+        const pgsize = {
+            id: 7,
+            name: 'pgsize',
+            title: 'Page Size',
+            draw: function (grid, button) {
+                let s = `<select  grid-pager-item="${grid.id}_${button.id}" class="grid-pager-size">`;
+                for (let itm of grid.pageSizes) {
+                    s += `<option ${itm == grid.pageSize ? 'selected' : ''}>${itm}</option>`;
+                }
+                s += '</select>';
+                return s;
+            },
+            change: function (e) {
+                const newSize = +e.target.value;
+
+                if (e.grid.pageSize != newSize) {
+                    e.grid.pageSize = newSize;
+                    e.grid.pageNumber = 1;
+                    e.grid.selectedRowIndex = 0;
+                    e.grid.refresh();
+                }
             }
         }
 
-        this.pagerButtons.push(last);
+        grid.pagerButtons.push(pgsize);
     }
 }

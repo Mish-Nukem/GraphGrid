@@ -100,3 +100,15 @@
 .grid-pager-button {
     margin: 5px;
 }
+
+.grid-toolbar-button {
+    margin: 5px;
+}
+
+.grid-pager-current {
+    width: 3em;
+}
+
+.grid-pager-size {
+
+}

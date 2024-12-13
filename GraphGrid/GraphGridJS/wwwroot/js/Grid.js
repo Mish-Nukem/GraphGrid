@@ -54,6 +54,7 @@
         if (!this.columns) {
             this.prepareColumns(this.getColumns());
         }
+        this.pagesCount = (this.totalRows / this.pageSize | 0) + (this.totalRows % this.pageSize > 0 ? 1 : 0);
         this.draw();
         this.onSelectedRowChanged({ prev: this.selectedRowIndex, new: this.selectedRowIndex });
     }
@@ -436,7 +437,7 @@
             fakeDiv.innerHTML = grid.drawHeaderCell(column);
             document.body.append(fakeDiv);
 
-            let contentSize = Math.max(column.w, +getComputedStyle(fakeDiv).width.replace('px', ''));
+            let contentSize = Math.max(column.minW, +getComputedStyle(fakeDiv).width.replace('px', ''));
 
             fakeDiv.className = '';
 
@@ -445,9 +446,9 @@
                 contentSize = Math.max(contentSize, +getComputedStyle(fakeDiv).width.replace('px', ''));
             }
 
-            const newW = Math.max(column.w, contentSize);
+            const newW = contentSize;//Math.max(column.w, contentSize);
 
-            if (newW > initW) {
+            if (newW != initW) {
                 column.w = newW;
                 th.style.width = newW + 'px';
                 gridElement.style.width = (+gridElement.style.width.replace('px', '') + newW - initW) + 'px';

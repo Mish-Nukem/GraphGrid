@@ -106,6 +106,8 @@ export default class GridInGraph extends Grid {
         if (this.skipOnWaveVisit(e)) return;
 
         const grid = this;
+
+        grid.selectedRowIndex = 0;
         grid.getRows({
             filters: grid.collectFilters(),
             resolve: function () {
