@@ -22,6 +22,7 @@
         font-weight: 700;
         line-height: 1;
         opacity: 0.2;
+        cursor: pointer;
     }
 
         .modal-window-header > button:hover {
@@ -31,6 +32,7 @@
 .modal-window-body {
     padding: 0 10px;
     height: 100%;
+    overflow: auto;
 }
 
 .modal-window-footer {
@@ -41,4 +43,81 @@
 .modal-window-footer-button {
     padding: 2px 5px;
     margin: 5px;
+    white-space: nowrap;
+    overflow: hidden;
+    cursor: pointer;
+}
+
+.grid-default {
+    border-collapse: collapse;
+    table-layout: fixed;
+    /*border: solid 1px;*/
+}
+
+    .grid-default > tr > td,
+    .grid-default > tbody > tr > td
+    /*,.grid-default > tbody > tr > th,
+    .grid-default > thead > tr > th*/ {
+        border: solid;
+        border-width: 0 1px 1px 1px;
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: clip;
+        vertical-align: middle;
+        /*white-space-collapse: collapse;*/
+    }
+
+
+    .grid-default > tbody > tr > th,
+    .grid-default > thead > tr > th {
+        background-color: white;
+        /*border: none;*/
+        border: solid;
+        border-width: 0 1px 0 1px;
+        white-space: nowrap;
+        text-overflow: clip;
+        vertical-align: middle;
+    }
+
+.grid-header-div {
+    /*border: outset;*/
+    border: solid;
+    background-color: white;
+    margin: -1px -1px -1px -1px;
+    border-width: 1px 0;
+    user-select: none;
+    display: flex;
+    flex-wrap: nowrap;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.grid-header-drug-over {
+    background-color: lightgray;
+}
+
+.grid-header-sort-sign {
+    margin-top: -4px;
+}
+
+.grid-cell {
+}
+
+.grid-selected-row {
+    background-color: lightgray;
+}
+
+.grid-pager-button {
+    margin: 5px;
+}
+
+.grid-toolbar-button {
+    margin: 5px;
+}
+
+.grid-pager-current {
+    width: 3em;
+}
+
+.grid-pager-size {
 }

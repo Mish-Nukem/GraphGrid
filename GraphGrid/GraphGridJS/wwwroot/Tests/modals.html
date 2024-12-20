@@ -10,6 +10,11 @@
         import { TestModalWnd } from '../js/Tests/ModalsTest.js'
         
 
+        document.getElementById('home').onclick = function () {
+
+            location.href = '../index.html';
+        }
+
         document.getElementById('test1').onclick = function () {
 
             TestOverlay();
@@ -28,8 +33,10 @@
     </script>
 </head>
 <body>
+    <button id="home">Home</button>
     <button id="test1">Test Overlay</button>
     <button id="test2">Test Popup Window</button>
     <button id="test3">Test Modal Window</button>
+    <br/>
 </body>
 </html>

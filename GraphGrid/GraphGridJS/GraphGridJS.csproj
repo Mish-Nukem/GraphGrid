@@ -11,4 +11,11 @@
     <None Include="wwwroot\js\Tests\ModalsTest.js" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Content Update="wwwroot\Tests\graphs.html">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+  </ItemGroup>
+
 </Project>
