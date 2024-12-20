@@ -407,5 +407,6 @@ document.addEventListener('click', function (e) {
         delete col.desc;
     }
 
+    grid.selectedRowIndex = 0;
     grid.refresh();
 });

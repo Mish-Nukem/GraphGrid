@@ -9,6 +9,11 @@ let wndModal;
 function createGrid() {
     let res = new Grid({
         getRows: function (e) {
+            //fetch('my.db.com/family/list', function (data) {
+            //    this.rows = data;
+            //})
+
+
             this.rows = [
                 { Id: 1, Name: 'Mikle', Date: '26/01/1979', Comment: 'Good boy' },
                 { Id: 2, Name: 'Nataly', Date: '15/01/1999', Comment: 'Good girl' },
