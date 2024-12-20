@@ -49,12 +49,26 @@ function createGrid() {
             this.rows = getFamily(e);
             this.totalRows = this.rows.length;
 
+            if (this.columns) {
+                let sortCol = null;
+                for (let col of this.columns) {
+                    if (col.asc || col.desc) {
+                        sortCol = col;
+                        break;
+                    }
+                }
+
+                if (sortCol != null) {
+                    this.rows.sort(function (a, b) { return a[sortCol.name] > b[sortCol.name] ? (sortCol.asc ? 1 : -1) : (sortCol.asc ? -1 : 1); });
+                }
+            }
+
             this.rows = this.pageSize > 0 && this.pageNumber > 0 ? this.rows.slice((this.pageNumber - 1) * this.pageSize, this.pageNumber * this.pageSize) : this.rows;
 
             e.resolve();
         },
         getColumns: function () {
-            return [{ name: 'Id' }, { name: 'Name' }, { name: 'Date' }, { name: 'Comment' }];
+            return [{ name: 'Id', sortable: true }, { name: 'Name', sortable: true }, { name: 'Date', sortable: true }, { name: 'Comment', sortable: true }];
         },
         pageSize: 5,
         toolbarButtons: [
@@ -126,7 +140,7 @@ function createSecondChildGrid() {
                 { Id: 7, ParentId: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 14, 15, 16], Content: 'Piter' },
                 { Id: 8, ParentId: [1, 3, 4, 11, 14, 17, 18, 19, 20, 23], Content: 'Novosibirsk' },
                 { Id: 9, ParentId: [5, 15], Content: 'Ustyuzhna' },
-                { Id: 10, ParentId: [1, 7, 8, 9], Content: 'Army' },
+                { Id: 10, ParentId: [1, 7, 8, 9, 20], Content: 'Army' },
                 { Id: 11, ParentId: [2], Content: 'Bali' },
                 { Id: 12, ParentId: [2], Content: 'Hanty-Mansiysk' },
             ];

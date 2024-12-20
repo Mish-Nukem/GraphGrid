@@ -192,6 +192,7 @@ export default class Modal {
     setupDrag = function (elem) {
         const pos = this.opt.pos;
         const mouseDown = function (e) {
+            if (e.target.tagName != 'DIV') return;
 
             const rect = elem.getBoundingClientRect();
             const shiftX = e.clientX - rect.left;
@@ -214,12 +215,11 @@ export default class Modal {
 
             // передвигаем окно при событии mousemove
             document.addEventListener('mousemove', onMouseMove);
-
+            document.addEventListener('mouseup', onMouseUp);
             // отпустить окно, удалить ненужные обработчики
-            const rem = document.onmouseup;
-            document.onmouseup = function () {
+            function onMouseUp(e) {
                 document.removeEventListener('mousemove', onMouseMove);
-                document.onmouseup = rem;
+                document.removeEventListener('mouseup', onMouseUp);
             };
 
         };
@@ -228,10 +228,11 @@ export default class Modal {
         const footer = elem.querySelector('div[wnd-footer]');
 
         if (header) {
-            header.onmousedown = mouseDown;
+            header.addEventListener('mousedown', mouseDown);//  .onmousedown = mouseDown;
         }
         if (footer) {
-            footer.onmousedown = mouseDown;
+            //footer.onmousedown = mouseDown;
+            footer.addEventListener('mousedown', mouseDown);
         }
         elem.ondragstart = function () {
             return false;
@@ -273,11 +274,11 @@ export default class Modal {
             }
 
             document.addEventListener('mousemove', onMouseMove);
+            document.addEventListener('mouseup', onMouseUp);
 
-            const rem = document.onmouseup;
-            document.onmouseup = function () {
+            function onMouseUp(e) {
                 document.removeEventListener('mousemove', onMouseMove);
-                document.onmouseup = rem;
+                document.removeEventListener('mouseup', onMouseUp);
             };
         };
 
@@ -311,7 +312,6 @@ document.addEventListener('click', function (e) {
             }
             break;
         case 'close':
-
             wnd.close();
             break;
         case 'button':

@@ -368,4 +368,44 @@ export default class GridDB extends Grid {
 
         grid.pagerButtons.push(pgsize);
     }
+
+    drawHeaderCell(col) {
+        const title = super.drawHeaderCell(col);
+        const sortDir = col.asc ? '&#11205;' : col.desc ? '&#11206;' : '';
+
+        return `<span></span><span ${col.sortable ? 'style="cursor:pointer"' : ''}>${title}</span><span class="grid-header-sort-sign">${sortDir}</span>`;
+    }
 }
+
+document.addEventListener('click', function (e) {
+    if (e.target.tagName != 'SPAN') return;
+
+    const th = e.target.closest('TH');
+    if (!th || !th.hasAttribute('grid-header')) return;
+
+    const [gridId, columnId] = th.getAttribute('grid-header').split('_');
+    const grid = window._gridDict[gridId];
+    const column = grid.colDict[columnId];
+
+    if (!column.sortable) return;
+
+    if (column.asc) {
+        delete column.asc;
+        column.desc = true;
+    }
+    else if (column.desc) {
+        delete column.desc;
+    }
+    else {
+        column.asc = true;
+    }
+
+    for (let col of grid.columns) {
+        if (col == column) continue;
+
+        delete col.asc;
+        delete col.desc;
+    }
+
+    grid.refresh();
+});

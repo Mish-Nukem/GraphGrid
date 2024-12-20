@@ -452,6 +452,8 @@
         }
 
         const mouseDoubleClick = function (e) {
+            if (!e.target.hasAttribute('grid-rsz-x')) return;
+
             const th = e.target.closest('TH');
             if (!th || !th.hasAttribute('grid-header')) return;
 
@@ -461,7 +463,6 @@
             const grid = window._gridDict[gridId];
             const column = grid.colDict[columnId];
 
-            //if (e.target.hasAttribute('grid-rsz-x')) return;
             const initW = +th.style.width.replace('px', '');
 
             const fakeDiv = document.createElement('div');
