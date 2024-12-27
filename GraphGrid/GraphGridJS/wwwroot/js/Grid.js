@@ -305,9 +305,22 @@
                 resize(e.pageX);
             }
 
+            const remDS = gridElement.ondragstart;
+            gridElement.ondragstart = function () {
+                return false;
+            };
+
+            const remSS = gridElement.onselectstart;
+            gridElement.onselectstart = function () {
+                return false;
+            };
+
             function onMouseUp(e) {
                 document.removeEventListener('mousemove', onMouseMove);
                 document.removeEventListener('mousemove', onMouseUp);
+
+                gridElement.ondragstart = remDS;
+                gridElement.onselectstart = remSS;
             }
 
             document.addEventListener('mousemove', onMouseMove);
