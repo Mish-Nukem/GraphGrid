@@ -53,11 +53,15 @@
         this.drawBody();
     }
 
+    calculatePagesCount() {
+        this.pagesCount = (this.totalRows / this.pageSize | 0) + (this.totalRows % this.pageSize > 0 ? 1 : 0);
+    }
+
     afterRefresh() {
         if (!this.columns) {
             this.prepareColumns(this.getColumns());
         }
-        this.pagesCount = (this.totalRows / this.pageSize | 0) + (this.totalRows % this.pageSize > 0 ? 1 : 0);
+        this.calculatePagesCount();
         this.draw();
         this.onSelectedRowChanged({ prev: this.selectedRowIndex, new: this.selectedRowIndex });
     }
@@ -96,13 +100,13 @@
 
         if (!this.columns) return;
 
-        const colClass = this.columnClass ? `class="${this.columnClass}"` : '';
+        const colClass = this.opt.columnClass ? `class="${this.opt.columnClass}"` : '';
 
         let w = 0;
         let s = '<thead><tr>';
         for (let col of this.columns) {
             s += `<th grid-header="${this.id}_${col.id}_" ${colClass} style="position: sticky;top: 0;width: ${col.w}px;overflow: hidden;">
-                    <div class="grid-header-div">
+                    <div class="grid-header-div-default ${this.opt.headerDivClass || 'grid-header-div'}">
                         ${this.drawHeaderCell(col)}
                     </div>
                     <div grid-rsz-x="${this.id}_${col.id}"
@@ -115,7 +119,7 @@
 
         gridElement = gridElement || document.getElementById(`grid_${this.id}_`);
 
-        gridElement.style.width = (w + (this.columns.length + 1) * 2) + 'px';
+        gridElement.style.width = (w /*+ (this.columns.length + 1) * 2*/) + 'px';
 
         const thead = gridElement.tHead;
 
@@ -137,7 +141,7 @@
         let i = 0;
         let s = '<tbody>';
         for (let row of this.rows) {
-            s += `<tr ${(this.selectedRowIndex == i++ ? 'class="grid-selected-row"' : '')}>`;
+            s += `<tr ${(this.selectedRowIndex == i++ ? `class="grid-selected-row ${this.opt.selectedRowClass || ''}"` : '')}>`;
             for (let col of this.columns) {
                 s += `<td>${this.drawCell(col, row)}</td>`;
             }
@@ -231,13 +235,19 @@
             let row = rows[i];
             if (row == e.target.parentElement) {
                 grid.selectedRowIndex = i;
-                row.classList.add('grid-selected-row')
+                row.classList.add(`grid-selected-row`);
+                if (grid.opt.selectedRowClass) {
+                    row.classList.add(grid.opt.selectedRowClass);
+                }
 
                 grid.onSelectedRowChanged({ prev: prevSelected, new: i });
             }
             else {
                 if (row.classList.contains('grid-selected-row')) {
                     row.classList.remove('grid-selected-row');
+                }
+                if (grid.opt.selectedRowClass && row.classList.contains(grid.opt.selectedRowClass)) {
+                    row.classList.remove(grid.opt.selectedRowClass);
                 }
             }
         }
@@ -272,7 +282,7 @@
                 otherColsW += col.w;
             }
 
-            resize(e.pageX);
+            //resize(e.pageX);
 
             function resize(pageX) {
                 if (shiftX > 0) {
@@ -286,7 +296,7 @@
 
                         th.style.width = column.w + 'px';
 
-                        gridElement.style.width = (otherColsW + column.w + (columns.length + 1) * 2) + 'px';
+                        gridElement.style.width = (otherColsW + column.w /*+ (columns.length + 1) * 2*/) + 'px';
                     }
                 }
             }
@@ -320,11 +330,11 @@
             fakeGrid.style.width = rect.width + 'px';
             fakeGrid.style.height = rect.height + 'px';
 
-            const colClass = grid.columnClass ? `class="${grid.columnClass}"` : '';
+            const colClass = grid.opt.columnClass ? `class="${grid.opt.columnClass}"` : '';
 
             fakeGrid.innerHTML = `<thead><tr>
                 <th ${colClass} style="width: ${column.w}px">
-                    <div class="grid-header-div">
+                    <div class="grid-header-div-default ${grid.opt.headerDivClass || 'grid-header-div'}">
                         ${grid.drawHeaderCell(column)}
                     </div>
                 </th>
@@ -466,7 +476,7 @@
             const initW = +th.style.width.replace('px', '');
 
             const fakeDiv = document.createElement('div');
-            fakeDiv.className = "grid-header-div";
+            fakeDiv.className =  'grid-header-div-default ' + (grid.opt.headerDivClass || "grid-header-div");
             fakeDiv.style.opacity = 0;
             fakeDiv.style.position = 'fixed';
             fakeDiv.innerHTML = grid.drawHeaderCell(column);

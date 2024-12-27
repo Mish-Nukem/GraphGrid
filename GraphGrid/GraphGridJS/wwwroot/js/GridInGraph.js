@@ -111,6 +111,7 @@ export default class GridInGraph extends Grid {
         grid.getRows({
             filters: grid.collectFilters(),
             resolve: function () {
+                grid.calculatePagesCount();
                 grid.draw();
                 grid.graph.visitNodesByWave(e);
             }

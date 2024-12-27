@@ -73,7 +73,7 @@ export default class GridDB extends Grid {
             elem = document.createElement('div');
             elem.id = id;
 
-            elem.className = this.opt.gridClass || 'grid-default';
+            elem.className = this.opt.toolbarClass || 'toolbar-default';
             elem.style = this.opt.style || '';
 
             elem.addEventListener('click', this.onToolbarButtonClick);
@@ -82,9 +82,9 @@ export default class GridDB extends Grid {
         let s = '';
         for (let button of this.toolbarButtons)
             s += `
-                <button grid-toolbar-button="${this.id}_${button.id}" class="grid-toolbar-button" title="${button.title}" 
+                <button grid-toolbar-button="${this.id}_${button.id}" class="grid-toolbar-button ${button.class || this.toolbarButtonsClass || ''}" title="${button.title}" 
                 ${button.getDisabled && button.getDisabled({ grid: this }) || button.disabled ? 'disabled' : ''}>
-                    ${this.drawToolbarButton(button)}
+                    ${this.drawToolbarButtonTitle(button)}
                 </button>
         `;
 
@@ -97,7 +97,7 @@ export default class GridDB extends Grid {
         return '';
     }
 
-    drawToolbarButton(button) {
+    drawToolbarButtonTitle(button) {
         return button ? button.title ? button.title : button.name : '';
     }
 
@@ -120,7 +120,7 @@ export default class GridDB extends Grid {
             elem = document.createElement('div');
             elem.id = id;
 
-            elem.className = this.opt.gridClass || 'grid-default';
+            elem.className = this.opt.pagerClass || 'pager-default';
             elem.style = this.opt.style || '';
 
             elem.addEventListener('click', this.onPagerButtonClick);
@@ -213,7 +213,7 @@ export default class GridDB extends Grid {
 
     gotoNextPage() {
         const grid = this;
-        grid.pagesCount = (grid.totalRows / grid.pageSize | 0) + (grid.totalRows % grid.pageSize > 0 ? 1 : 0);
+        grid.calculatePagesCount();
         grid.pageNumber = grid.pageNumber < grid.pagesCount ? grid.pageNumber + 1 : grid.pageNumber;
         grid.selectedRowIndex = 0;
         grid.refresh();
@@ -221,7 +221,7 @@ export default class GridDB extends Grid {
 
     gotoLastPage() {
         const grid = this;
-        grid.pagesCount = (grid.totalRows / grid.pageSize | 0) + (grid.totalRows % grid.pageSize > 0 ? 1 : 0);
+        grid.calculatePagesCount();
         grid.pageNumber = grid.pageNumber < grid.pagesCount ? grid.pagesCount : grid.pageNumber;
         grid.selectedRowIndex = 0;
         grid.refresh();
@@ -285,8 +285,8 @@ export default class GridDB extends Grid {
                 return !grid.rows || grid.rows.length <= 1;
             },
             draw: function (grid, button) {
-                return `<input value="${grid.pageNumber}"  grid-pager-item="${grid.id}_${button.id}" class="grid-pager-current"
-                ></input>`;
+                return `<input value="${grid.pageNumber}" grid-pager-item="${grid.id}_${button.id}" class="grid-pager-current ${button.class ? button.class : ''}"
+                    style="width: 3em;display: inline-block;"></input>`;
             },
             change: function (e) {
                 const newPage = +e.target.value;
@@ -306,7 +306,7 @@ export default class GridDB extends Grid {
             name: 'total',
             title: 'Total Pages',
             draw: function (grid, button) {
-                return ` of ${grid.pagesCount >= 0 ? grid.pagesCount : ''}`;
+                return `<span style="padding: 0 3px"> of ${grid.pagesCount >= 0 ? grid.pagesCount : ''}</span>`;
             }
         }
 
@@ -347,7 +347,7 @@ export default class GridDB extends Grid {
             name: 'pgsize',
             title: 'Page Size',
             draw: function (grid, button) {
-                let s = `<select  grid-pager-item="${grid.id}_${button.id}" class="grid-pager-size">`;
+                let s = `<select  grid-pager-item="${grid.id}_${button.id}" class="grid-pager-size ${button.class ? button.class : ''}" style="width: 4.5em;display: inline-block;">`;
                 for (let itm of grid.pageSizes) {
                     s += `<option ${itm == grid.pageSize ? 'selected' : ''}>${itm}</option>`;
                 }
@@ -373,7 +373,7 @@ export default class GridDB extends Grid {
         const title = super.drawHeaderCell(col);
         const sortDir = col.asc ? '&#11205;' : col.desc ? '&#11206;' : '';
 
-        return `<span></span><span ${col.sortable ? 'style="cursor:pointer"' : ''}>${title}</span><span class="grid-header-sort-sign">${sortDir}</span>`;
+        return `<span></span><span style="white-space: nowrap;overflow: hidden;${col.sortable ? 'cursor:pointer' : ''}">${title}</span><span class="grid-header-sort-sign">${sortDir}</span>`;
     }
 }
 

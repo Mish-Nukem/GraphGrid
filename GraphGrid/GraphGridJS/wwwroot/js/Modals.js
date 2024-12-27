@@ -145,7 +145,7 @@ export default class Modal {
         const headerClass = this.opt.headerClass || 'modal-window-header';
 
         return `<div wnd-header class="${headerClass}" style="display: flex;flex-wrap: nowrap;justify-content: space-between;align-items: center;">
-        <h4>${this.opt.title || ''}</h4>
+        <h4 class="${this.opt.titleClass || ''}">${this.opt.title || ''}</h4>
         <button wnd-btn="close_${this.id}_" type="button" class="close" style="color: black;">×</button>
         </div>`;
     }
@@ -157,7 +157,7 @@ export default class Modal {
         let s = `<div wnd-footer class="${footerClass}" style="display: flex;flex-wrap: nowrap;justify-content: space-between;align-items: center;">`;
         for (let ind in this.buttonsDict) {
             let btn = this.buttonsDict[ind];
-            s += `<button wnd-btn="button_${this.id}_${btn._ind}_" class="${footerButtonClass} ${btn.className || ''}" title="${btn.title}">`;
+            s += `<button wnd-btn="button_${this.id}_${btn._ind}_" class="${footerButtonClass} ${btn.class || ''}" title="${btn.title}">`;
             if (btn.imageClass) {
                 s += `<i class="${btn.imageClass}"></i>`;
             }
