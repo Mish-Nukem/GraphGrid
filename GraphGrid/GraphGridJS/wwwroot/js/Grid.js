@@ -15,6 +15,10 @@
         this.selectedRowIndex = 0;
     }
 
+    translate(text, context) {
+        return text;
+    }
+
     createGridElement() {
         const res = {};
 
@@ -132,7 +136,7 @@
     }
 
     drawHeaderCell(col) {
-        return col.title || col.name;
+        return this.translate(col.title || col.name);
     }
 
     drawBody(gridElement) {
@@ -511,6 +515,8 @@
                 th.style.width = newW + 'px';
                 gridElement.style.width = (+gridElement.style.width.replace('px', '') + newW - initW) + 'px';
             }
+
+            fakeDiv.remove();
         }
 
         gridElement.addEventListener('mousedown', mouseDown);

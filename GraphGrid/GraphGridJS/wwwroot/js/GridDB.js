@@ -1,4 +1,5 @@
 ﻿import Grid from './GridInGraph.js';
+import Modal from './Modals.js';
 
 window.NodeStatus = {
     grid: 0, hidden: 1, filter: 2, lookup: 3, custom: 4
@@ -82,9 +83,10 @@ export default class GridDB extends Grid {
         let s = '';
         for (let button of this.toolbarButtons)
             s += `
-                <button grid-toolbar-button="${this.id}_${button.id}" class="grid-toolbar-button ${button.class || this.toolbarButtonsClass || ''}" title="${button.title}" 
+                <button grid-toolbar-button="${this.id}_${button.id}" class="grid-toolbar-button ${button.class || this.toolbarButtonsClass || ''}" title="${this.translate(button.title)}" 
                 ${button.getDisabled && button.getDisabled({ grid: this }) || button.disabled ? 'disabled' : ''}>
-                    ${this.drawToolbarButtonTitle(button)}
+                    ${button.img ? button.img : ''} 
+                    ${button.label ? this.translate(button.label, 'toolbar-button') : ''}
                 </button>
         `;
 
@@ -97,15 +99,12 @@ export default class GridDB extends Grid {
         return '';
     }
 
-    drawToolbarButtonTitle(button) {
-        return button ? button.title ? button.title : button.name : '';
-    }
-
     drawPagerButton(grid, button) {
         return `
-                <button grid-pager-item="${grid.id}_${button.id}" class="${button.class ? button.class : 'grid-pager-button'}"
-                title="${button.title}" ${button.getDisabled && button.getDisabled() || button.disabled ? 'disabled' : ''}>
-                    ${button ? button.title ? button.title : button.name : ''}
+                <button grid-pager-item="${grid.id}_${button.id}_" class="${button.class ? button.class : 'grid-pager-button'}"
+                title="${button.title ? grid.translate(button.title, 'pager-button') : ''}" ${button.getDisabled && button.getDisabled() || button.disabled ? 'disabled' : ''} type="button">
+                    ${button.img ? button.img : ''} 
+                    ${button.label ? grid.translate(button.label, 'pager-button') : ''}
                 </button>
             `;
     }
@@ -129,7 +128,7 @@ export default class GridDB extends Grid {
 
         let s = '';
         for (let button of this.pagerButtons) {
-            s += button.draw ? button.draw(this, button) : button.title;
+            s += button.draw ? button.draw(this, button) : this.translate(button.title, 'pager-button');
         }
 
         elem.innerHTML = s;
@@ -138,15 +137,19 @@ export default class GridDB extends Grid {
     }
 
     onPagerButtonClick(e) {
-        if (e.target.tagName != 'BUTTON') return;
+        const elem = e.target.closest('BUTTON') || e.target;
 
-        const [gridId, buttonId] = e.target.getAttribute('grid-pager-item').split('_');
+        if (elem.tagName != 'BUTTON') return;
+
+        const [gridId, buttonId] = elem.getAttribute('grid-pager-item').split('_');
 
         const grid = window._gridDict[gridId];
 
-        let button = grid.pagerButtons.find(function (item, index, array) {
-            return item.id == buttonId;
-        });
+        //let button = grid.pagerButtons.find(function (item, index, array) {
+        //    return item.id == buttonId;
+        //});
+
+        const button = grid.pagerButtonsDict[buttonId];
 
         if (!button || !button.click) return;
 
@@ -156,9 +159,11 @@ export default class GridDB extends Grid {
     }
 
     onToolbarButtonClick(e) {
-        if (e.target.tagName != 'BUTTON') return;
+        const elem = e.target.closest('BUTTON') || e.target;
 
-        const [gridId, buttonId] = e.target.getAttribute('grid-toolbar-button').split('_');
+        if (elem.tagName != 'BUTTON') return;
+
+        const [gridId, buttonId] = elem.getAttribute('grid-toolbar-button').split('_');
 
         const grid = window._gridDict[gridId];
 
@@ -189,7 +194,6 @@ export default class GridDB extends Grid {
         e.grid = grid;
 
         button.change(e);
-
     }
 
     //showGridSettings(e) {
@@ -230,25 +234,29 @@ export default class GridDB extends Grid {
     setupPagerButtons() {
         const grid = this;
         grid.pagerButtons = [];
+        grid.pagerButtonsDict = {};
 
         if (grid.showGridSettings) {
             const settings = {
                 id: 0,
                 name: 'settings',
                 title: 'Settings',
+                label: 'Settings',
                 click: function (e) {
                     grid.showGridSettings(e);
                 },
-                draw: drawPagerButton,
+                draw: grid.drawPagerButton,
             }
 
             grid.pagerButtons.push(settings);
+            grid.pagerButtonsDict[settings.id] = grid.pagerButtonsDict[settings.name] = settings;
         }
 
         const first = {
             id: 1,
             name: 'first',
             title: 'First',
+            label: 'First',
             click: function (e) {
                 grid.gotoFirstPage();
             },
@@ -259,11 +267,13 @@ export default class GridDB extends Grid {
         }
 
         grid.pagerButtons.push(first);
+        grid.pagerButtonsDict[first.id] = grid.pagerButtonsDict[first.name] = first;
 
         const prev = {
             id: 2,
             name: 'prev',
             title: 'Prev',
+            label: 'Prev',
             click: function (e) {
                 grid.gotoPrevPage();
             },
@@ -274,18 +284,20 @@ export default class GridDB extends Grid {
         }
 
         grid.pagerButtons.push(prev);
+        grid.pagerButtonsDict[prev.id] = grid.pagerButtonsDict[prev.name] = prev;
 
         const curr = {
             id: 3,
             name: 'curr',
             title: 'Current Page',
+            label: 'Current Page',
             click: function (e) {
             },
             getDisabled: function () {
                 return !grid.rows || grid.rows.length <= 1;
             },
             draw: function (grid, button) {
-                return `<input value="${grid.pageNumber}" grid-pager-item="${grid.id}_${button.id}" class="grid-pager-current ${button.class ? button.class : ''}"
+                return `<input value="${grid.pageNumber}" grid-pager-item="${grid.id}_${button.id}_" class="grid-pager-current ${button.class ? button.class : ''}"
                     style="width: 3em;display: inline-block;"></input>`;
             },
             change: function (e) {
@@ -300,22 +312,26 @@ export default class GridDB extends Grid {
         }
 
         grid.pagerButtons.push(curr);
+        grid.pagerButtonsDict[curr.id] = grid.pagerButtonsDict[curr.name] = curr;
 
         const total = {
             id: 4,
             name: 'total',
             title: 'Total Pages',
+            label: 'Total Pages',
             draw: function (grid, button) {
-                return `<span style="padding: 0 3px"> of ${grid.pagesCount >= 0 ? grid.pagesCount : ''}</span>`;
+                return `<span style="padding: 0 3px"> ${grid.translate('of', 'pager-button')} ${grid.pagesCount >= 0 ? grid.pagesCount : ''}</span>`;
             }
         }
 
         grid.pagerButtons.push(total);
+        grid.pagerButtonsDict[total.id] = grid.pagerButtonsDict[total.name] = total;
 
         const next = {
             id: 5,
             name: 'next',
             title: 'Next',
+            label: 'Next',
             click: function (e) {
                 grid.gotoNextPage();
             },
@@ -326,11 +342,13 @@ export default class GridDB extends Grid {
         }
 
         grid.pagerButtons.push(next);
+        grid.pagerButtonsDict[next.id] = grid.pagerButtonsDict[next.name] = next;
 
         const last = {
             id: 6,
             name: 'last',
             title: 'Last',
+            label: 'Last',
             click: function (e) {
                 grid.gotoLastPage();
             },
@@ -341,13 +359,15 @@ export default class GridDB extends Grid {
         }
 
         grid.pagerButtons.push(last);
+        grid.pagerButtonsDict[last.id] = grid.pagerButtonsDict[last.name] = last;
 
         const pgsize = {
             id: 7,
             name: 'pgsize',
             title: 'Page Size',
+            label: 'Page Size',
             draw: function (grid, button) {
-                let s = `<select  grid-pager-item="${grid.id}_${button.id}" class="grid-pager-size ${button.class ? button.class : ''}" style="width: 4.5em;display: inline-block;">`;
+                let s = `<select  grid-pager-item="${grid.id}_${button.id}_" class="grid-pager-size ${button.class ? button.class : ''}" style="width: 4.5em;display: inline-block;">`;
                 for (let itm of grid.pageSizes) {
                     s += `<option ${itm == grid.pageSize ? 'selected' : ''}>${itm}</option>`;
                 }
@@ -367,6 +387,7 @@ export default class GridDB extends Grid {
         }
 
         grid.pagerButtons.push(pgsize);
+        grid.pagerButtonsDict[pgsize.id] = grid.pagerButtonsDict[pgsize.name] = pgsize;
     }
 
     drawHeaderCell(col) {
@@ -375,38 +396,119 @@ export default class GridDB extends Grid {
 
         return `<span></span><span style="white-space: nowrap;overflow: hidden;${col.sortable ? 'cursor:pointer' : ''}">${title}</span><span class="grid-header-sort-sign">${sortDir}</span>`;
     }
+
+    drawGridSettings() {
+        const grid = this;
+
+        return `<ul class="grid-settings-ul">
+            <li grid-settings-item="${grid.id}_0_">
+                ${grid.translate('Reset columns order', 'settings-item')}
+            </li>
+            <li grid-settings-item="${grid.id}_1_">
+                ${grid.translate('Reset columns widths', 'settings-item')}
+            </li>
+         </ul>`;
+    }
+
+    showGridSettings(e) {
+        const grid = this;
+
+        const fakeDiv = document.createElement('div');
+        fakeDiv.style.opacity = 0;
+        fakeDiv.style.position = 'fixed';
+        fakeDiv.innerHTML = grid.drawGridSettings();
+        document.body.append(fakeDiv);
+        const rect = getComputedStyle(fakeDiv);
+        fakeDiv.remove();
+
+        const wnd = new Modal({
+            closeWhenClick: true,
+            closeWhenMiss: true,
+            closeWhenEscape: true,
+            resizable: false,
+            drawHeader: false,
+            drawFooter: false,
+            pos: {
+                x: e.clientX,
+                y: e.clientY,
+                w: rect.width,
+                h: rect.height
+            },
+            style: 'background:white;border:1px solid;',
+            drawBody: function (body) {
+                return grid.drawGridSettings();
+            }
+        });
+        wnd.show();
+    }
+
+    onSettingsItemClick(itemId) {
+        const grid = this;
+
+        switch (itemId) {
+            case '0':
+                grid.resetColumnsOrderToDefault();
+                break;
+            case '1':
+                grid.resetColumnsWidthsToDefault();
+                break;
+        }
+
+        if (window._wndDict.topWindow) {
+            window._wndDict.topWindow.close();
+        }
+    }
+
+    changeColumnSortOrder(column) {
+        const grid = this;
+
+        if (!column.sortable) return;
+
+        if (column.asc) {
+            delete column.asc;
+            column.desc = true;
+        }
+        else if (column.desc) {
+            delete column.desc;
+        }
+        else {
+            column.asc = true;
+        }
+
+        for (let col of grid.columns) {
+            if (col == column) continue;
+
+            delete col.asc;
+            delete col.desc;
+        }
+
+        grid.selectedRowIndex = 0;
+        grid.refresh();
+    }
 }
 
 document.addEventListener('click', function (e) {
-    if (e.target.tagName != 'SPAN') return;
+    let gridId, itemId, grid;
 
-    const th = e.target.closest('TH');
-    if (!th || !th.hasAttribute('grid-header')) return;
+    switch (e.target.tagName) {
+        case 'SPAN':
+            const th = e.target.closest('TH');
+            if (!th || !th.hasAttribute('grid-header')) return;
 
-    const [gridId, columnId] = th.getAttribute('grid-header').split('_');
-    const grid = window._gridDict[gridId];
-    const column = grid.colDict[columnId];
+            [gridId, itemId] = th.getAttribute('grid-header').split('_');
+            grid = window._gridDict[gridId];
+            const column = grid.colDict[itemId];
 
-    if (!column.sortable) return;
+            grid.changeColumnSortOrder(column);
+            break;
+        case 'LI':
+            if (!e.target.hasAttribute('grid-settings-item')) return;
+            
+            [gridId, itemId] = e.target.getAttribute('grid-settings-item').split('_');
+            grid = window._gridDict[gridId];
 
-    if (column.asc) {
-        delete column.asc;
-        column.desc = true;
-    }
-    else if (column.desc) {
-        delete column.desc;
-    }
-    else {
-        column.asc = true;
-    }
-
-    for (let col of grid.columns) {
-        if (col == column) continue;
-
-        delete col.asc;
-        delete col.desc;
+            grid.onSettingsItemClick(itemId);
+            break;
     }
 
-    grid.selectedRowIndex = 0;
-    grid.refresh();
 });

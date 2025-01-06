@@ -111,7 +111,7 @@
 }
 
 .grid-pager-button {
-    margin: 5px;
+    margin: 5px 1px;
 }
 
 .grid-toolbar-button {
@@ -124,3 +124,13 @@
 
 .grid-pager-size {
 }
+
+.grid-settings-ul {
+    padding: 0;
+    margin: 5px 0;
+}
+
+    .grid-settings-ul > li {
+        list-style-type: none;
+        cursor: pointer;
+    }

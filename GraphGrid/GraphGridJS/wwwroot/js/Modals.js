@@ -135,7 +135,7 @@ export default class Modal {
                 const body = div.querySelector('div[wnd-body]');
                 const s = wnd.drawBody(body);
                 if (s) {
-                    body.append(s);
+                    body.innerHTML = s;
                 }
             }, 10);
         }
@@ -172,17 +172,18 @@ export default class Modal {
         if (!wnd) return;
 
         delete window._wndDict[this.id];
-        window._wndDict.topWindow = wnd.prevTopWindow;
 
         const elem = document.getElementById(`window_${this.id}_`);
         elem.setAttribute('display', 'none');
 
         if (wnd.overlay) {
+            window._wndDict.topWindow = wnd.prevTopWindow;
             wnd.overlay.close();
         }
 
         if (wnd.owner) {
             wnd.owner.close();
+            window._wndDict.topWindow = wnd.prevTopWindow;
         }
 
         setTimeout(function () {

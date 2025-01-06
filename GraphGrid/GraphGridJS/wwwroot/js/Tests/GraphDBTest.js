@@ -76,6 +76,7 @@ function createGrid() {
                 id: 1,
                 name: 'info',
                 title: 'Persone Info',
+                label: 'Persone Info',
                 click: function (e) {
                     const selRow = e.grid.selectedRowIndex >= 0 && e.grid.rows.length > 0 ? e.grid.rows[e.grid.selectedRowIndex] : null;
                     if (!selRow) return;
