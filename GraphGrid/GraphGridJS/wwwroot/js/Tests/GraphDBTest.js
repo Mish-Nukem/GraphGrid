@@ -247,20 +247,6 @@ export function TestPopupWndGrid() {
         },
         footerButtons: [
             {
-                title: 'Reset columns state 1',
-                onclick: function (e) {
-                    modalGrid.resetColumnsOrderToDefault();
-                    modalGrid.resetColumnsWidthsToDefault();
-                }
-            },
-            {
-                title: 'Reset columns state 2',
-                onclick: function (e) {
-                    modalChildGrid.resetColumnsOrderToDefault();
-                    modalChildGrid.resetColumnsWidthsToDefault();
-                }
-            },
-            {
                 title: 'Close',
                 onclick: function (e) {
                     e.modal.close();
