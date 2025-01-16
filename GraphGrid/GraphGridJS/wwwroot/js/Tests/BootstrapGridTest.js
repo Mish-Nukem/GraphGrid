@@ -33,6 +33,15 @@ function getFamily(e) {
         { Id: 21, ParentId: [11, 23], Name: 'Tanya', Date: '??/??/19??', Comment: 'Tetya' },
         { Id: 22, ParentId: [0], Name: 'Misha', Date: '??/??/19??', Comment: 'Ded' },
         { Id: 23, ParentId: [0], Name: 'Zambo', Date: '??/??/19??', Comment: 'Ded 2' },
+
+        { Id: 24, ParentId: [18], Name: 'Alina', Date: '??/??/????', Comment: 'Dv. Sister' },
+        { Id: 25, ParentId: [19], Name: 'Igor', Date: '??/??/????', Comment: 'Dv. Brother' },
+        { Id: 26, ParentId: [19], Name: 'Dima', Date: '??/??/????', Comment: 'Dv. Brother' },
+        { Id: 27, ParentId: [20], Name: 'Olga', Date: '??/??/????', Comment: 'Dv. Sister' },
+        { Id: 28, ParentId: [20], Name: 'Venia', Date: '??/??/????', Comment: 'Dv. Brother' },
+        { Id: 29, ParentId: [20], Name: 'Oleg', Date: '??/??/????', Comment: 'Dv. Brother' },
+
+        { Id: 30, ParentId: [0], Name: 'Yura', Date: '??/??/????', Comment: 'Dv. Ded' },
     ];
 
     //e.totalRows = res.length;
@@ -133,18 +142,20 @@ function createSecondChildGrid() {
     let res = new GridDB({
         getRows: function (e) {
             const res = [
-                { Id: 1, ParentId: [1, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23], Content: 'Voronezh' },
-                { Id: 2, ParentId: [1, 3, 4, 5, 6, 7, 9, 10, 11, 15, 16, 17, 18, 19, 20, 21, 22, 23], Content: 'Grafskaya' },
-                { Id: 3, ParentId: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 23], Content: 'Moskow' },
-                { Id: 4, ParentId: [1, 3, 4, 5, 6, 7, 8, 9, 10, 11, 14, 15, 16], Content: 'Pskov' },
-                { Id: 5, ParentId: [1, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 17, 18, 19, 20, 21, 23], Content: 'Elista' },
-                { Id: 6, ParentId: [1, 3, 4, 6, 12, 13, 14], Content: 'Pyatigorsk' },
-                { Id: 7, ParentId: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 14, 15, 16], Content: 'Piter' },
-                { Id: 8, ParentId: [1, 3, 4, 11, 14, 17, 18, 19, 20, 23], Content: 'Novosibirsk' },
-                { Id: 9, ParentId: [5, 15], Content: 'Ustyuzhna' },
-                { Id: 10, ParentId: [1, 7, 8, 9, 20], Content: 'Army' },
-                { Id: 11, ParentId: [2], Content: 'Bali' },
-                { Id: 12, ParentId: [2], Content: 'Hanty-Mansiysk' },
+                { Id: 1, ParentId: [1, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23], City: 'Voronezh' },
+                { Id: 2, ParentId: [1, 3, 4, 5, 6, 7, 9, 10, 11, 15, 16, 17, 18, 19, 20, 21, 22, 23], City: 'Grafskaya' },
+                { Id: 3, ParentId: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 23, 28, 29], City: 'Moskow' },
+                { Id: 4, ParentId: [1, 3, 4, 5, 6, 7, 8, 9, 10, 11, 14, 15, 16, 30], City: 'Pskov' },
+                { Id: 5, ParentId: [1, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 17, 18, 19, 20, 21, 23, 24, 25, 26, 27, 28, 29], City: 'Elista' },
+                { Id: 6, ParentId: [1, 3, 4, 6, 12, 13, 14], City: 'Pyatigorsk' },
+                { Id: 7, ParentId: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 14, 15, 16], City: 'Piter' },
+                { Id: 8, ParentId: [1, 3, 4, 11, 14, 17, 18, 19, 20, 23], City: 'Novosibirsk' },
+                { Id: 9, ParentId: [5, 15, 30], City: 'Ustyuzhna' },
+                { Id: 10, ParentId: [1, 7, 8, 9, 20], City: 'Army' },
+                { Id: 11, ParentId: [2], City: 'Bali' },
+                { Id: 12, ParentId: [2], City: 'Hanty-Mansiysk' },
+                { Id: 13, ParentId: [21], City: 'Paris' },
+                { Id: 14, ParentId: [19, 25, 26], City: 'Energodar' },
             ];
 
             this.rows = [];
@@ -166,7 +177,7 @@ function createSecondChildGrid() {
             e.resolve();
         },
         getColumns: function () {
-            return [{ name: 'Content', title: 'Lived in City' }];
+            return [{ name: 'City', title: 'Lived in City' }];
         },
         pageSize: 5
     });
@@ -199,31 +210,81 @@ export function TestPopupWndGrid() {
         }
         modalGrid.parent = div;
 
+        const ul = document.createElement('ul');
+        ul.className = 'nav nav-tabs';
+        ul.setAttribute('role', 'tablist');
+
+        let tab = document.createElement('li');
+        tab.className = 'nav-item';
+        tab.setAttribute('role', 'presentation');
+        ul.appendChild(tab);
+
+        let btn = document.createElement('button');
+        btn.id = 'children-tab';
+        btn.className = 'nav-link active';
+        btn.setAttribute('role', 'tab');
+        btn.setAttribute('data-bs-toggle', 'tab');
+        btn.setAttribute('data-bs-target', '#children');
+        btn.setAttribute('aria-controls', 'children');
+        btn.setAttribute('aria-selected', 'true');
+        btn.setAttribute('type', 'button');
+        btn.textContent = 'Children';
+        tab.appendChild(btn);
+
+        tab = document.createElement('li');
+        tab.className = 'nav-item';
+        tab.setAttribute('role', 'presentation');
+        ul.appendChild(tab);
+
+        btn = document.createElement('button');
+        btn.id = 'cities-tab';
+        btn.className = 'nav-link';
+        btn.setAttribute('role', 'tab');
+        btn.setAttribute('data-bs-toggle', 'tab');
+        btn.setAttribute('data-bs-target', '#cities');
+        btn.setAttribute('aria-controls', 'cities');
+        btn.setAttribute('aria-selected', 'false');
+        btn.setAttribute('type', 'button');
+        btn.textContent = 'Cities';
+        tab.appendChild(btn);
+
+        wndBodyElement.appendChild(ul);
+
         const divDetails = document.createElement('div');
+        divDetails.className = 'tab-content';
         divDetails.style.margin = '10px';
+
         wndBodyElement.appendChild(divDetails);
 
         const div2 = document.createElement('div');
         div2.style.margin = '10px';
         div2.style.float = 'left';
+        div2.className = 'tab-pane active';
+        div2.id = 'children';
+        div2.setAttribute('role', 'tabpanel');
+        div2.setAttribute('aria-labelledby', 'children-tab');
+        div2.setAttribute('tabindex', '0');
         divDetails.appendChild(div2);
 
         if (!modalChildGrid) {
             modalChildGrid = createChildGrid();
         }
         modalChildGrid.parent = div2;
-        //modalChildGrid.refresh();
 
         const div3 = document.createElement('div');
         div3.style.margin = '10px';
         div3.style.float = 'left';
+        div3.className = 'tab-pane';
+        div3.id = 'cities';
+        div3.setAttribute('role', 'tabpanel');
+        div3.setAttribute('aria-labelledby', 'cities-tab');
+        div3.setAttribute('tabindex', '0');
         divDetails.appendChild(div3);
 
         if (!modalSecondChildGrid) {
             modalSecondChildGrid = createSecondChildGrid();
         }
         modalSecondChildGrid.parent = div3;
-        //modalSecondChildGrid.refresh();
 
         modalGrid.refresh();
     }

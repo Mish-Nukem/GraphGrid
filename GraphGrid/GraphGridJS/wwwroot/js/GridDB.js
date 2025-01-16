@@ -236,9 +236,26 @@ export default class GridDB extends Grid {
         grid.pagerButtons = [];
         grid.pagerButtonsDict = {};
 
+        const refresh = {
+            id: 0,
+            name: 'refresh',
+            title: 'Refresh',
+            label: 'Refresh',
+            click: function (e) {
+                grid.refresh();
+            },
+            //getDisabled: function () {
+            //    return !grid.rows || grid.rows.length <= 0 || grid.pageNumber == 1;
+            //},
+            draw: grid.drawPagerButton,
+        }
+        
+        grid.pagerButtons.push(refresh);
+        grid.pagerButtonsDict[refresh.id] = grid.pagerButtonsDict[refresh.name] = refresh;
+
         if (grid.showGridSettings) {
             const settings = {
-                id: 0,
+                id: 1,
                 name: 'settings',
                 title: 'Settings',
                 label: 'Settings',
@@ -253,7 +270,7 @@ export default class GridDB extends Grid {
         }
 
         const first = {
-            id: 1,
+            id: 2,
             name: 'first',
             title: 'First',
             label: 'First',
@@ -270,7 +287,7 @@ export default class GridDB extends Grid {
         grid.pagerButtonsDict[first.id] = grid.pagerButtonsDict[first.name] = first;
 
         const prev = {
-            id: 2,
+            id: 3,
             name: 'prev',
             title: 'Prev',
             label: 'Prev',
@@ -287,7 +304,7 @@ export default class GridDB extends Grid {
         grid.pagerButtonsDict[prev.id] = grid.pagerButtonsDict[prev.name] = prev;
 
         const curr = {
-            id: 3,
+            id: 4,
             name: 'curr',
             title: 'Current Page',
             label: 'Current Page',
@@ -314,9 +331,9 @@ export default class GridDB extends Grid {
         grid.pagerButtons.push(curr);
         grid.pagerButtonsDict[curr.id] = grid.pagerButtonsDict[curr.name] = curr;
 
-        const total = {
-            id: 4,
-            name: 'total',
+        const pages = {
+            id: 5,
+            name: 'pages',
             title: 'Total Pages',
             label: 'Total Pages',
             draw: function (grid, button) {
@@ -324,11 +341,11 @@ export default class GridDB extends Grid {
             }
         }
 
-        grid.pagerButtons.push(total);
-        grid.pagerButtonsDict[total.id] = grid.pagerButtonsDict[total.name] = total;
+        grid.pagerButtons.push(pages);
+        grid.pagerButtonsDict[pages.id] = grid.pagerButtonsDict[pages.name] = pages;
 
         const next = {
-            id: 5,
+            id: 6,
             name: 'next',
             title: 'Next',
             label: 'Next',
@@ -345,7 +362,7 @@ export default class GridDB extends Grid {
         grid.pagerButtonsDict[next.id] = grid.pagerButtonsDict[next.name] = next;
 
         const last = {
-            id: 6,
+            id: 7,
             name: 'last',
             title: 'Last',
             label: 'Last',
@@ -362,7 +379,7 @@ export default class GridDB extends Grid {
         grid.pagerButtonsDict[last.id] = grid.pagerButtonsDict[last.name] = last;
 
         const pgsize = {
-            id: 7,
+            id: 8,
             name: 'pgsize',
             title: 'Page Size',
             label: 'Page Size',
@@ -388,6 +405,20 @@ export default class GridDB extends Grid {
 
         grid.pagerButtons.push(pgsize);
         grid.pagerButtonsDict[pgsize.id] = grid.pagerButtonsDict[pgsize.name] = pgsize;
+
+        const rows = {
+            id: 9,
+            name: 'rows',
+            title: 'Total Rows',
+            label: 'Total Rows',
+            draw: function (grid, button) {
+                return `<span style="padding: 0 3px"> ${grid.translate('total rows', 'pager-button')} ${grid.totalRows >= 0 ? grid.totalRows : ''}</span>`;
+            }
+        }
+
+        grid.pagerButtons.push(rows);
+        grid.pagerButtonsDict[rows.id] = grid.pagerButtonsDict[rows.name] = rows;
+
     }
 
     drawHeaderCell(col) {
