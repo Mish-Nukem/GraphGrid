@@ -1,4 +1,5 @@
-﻿import Grid from './GridDB.js';
+﻿//import Grid from './GridDB.js';
+import Grid from './GridFL.js';
 
 export default class BootstrapGrid extends Grid {
 
@@ -10,8 +11,10 @@ export default class BootstrapGrid extends Grid {
         this.opt.pagerClass = 'mb-1';
 
         this.opt.gridClass = 'table table-sm table-bordered';
-        this.opt.headerDivClass = 'grid-header-div-default';
+        //this.opt.headerDivClass = 'grid-header-div-default';
+        this.opt.headerDivClass = ' ';
         this.opt.selectedRowClass = 'table-active';
+        this.opt.filterInputClass = 'form-control form-control-sm';
     }
 
     setupPagerButtons() {

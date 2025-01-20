@@ -43,7 +43,7 @@
         res.gridElement.addEventListener('click', this.onSelectGridRow);
 
         this.setupColumnResize(res.gridElement);
-        this.setupColumnDrug(res.gridElement);
+        this.setupColumnDrag(res.gridElement);
 
         return res;
     }
@@ -73,7 +73,7 @@
     refresh() {
         const grid = this;
 
-        this.getRows({
+        grid.getRows({
             filters: grid.collectFilters ? grid.collectFilters() : [],
             resolve: function () {
                 grid.afterRefresh();
@@ -109,7 +109,7 @@
         let w = 0;
         let s = '<thead><tr>';
         for (let col of this.columns) {
-            s += `<th grid-header="${this.id}_${col.id}_" ${colClass} style="position: sticky;top: 0;width: ${col.w}px;overflow: hidden;">
+            s += `<th grid-header="${this.id}_${col.id}_" ${colClass} class="grid-header-th" style="position: sticky;top: 0;width: ${col.w}px;overflow: hidden;vertical-align: top;">
                     <div class="grid-header-div-default ${this.opt.headerDivClass || 'grid-header-div'}">
                         ${this.drawHeaderCell(col)}
                     </div>
@@ -136,7 +136,7 @@
     }
 
     drawHeaderCell(col) {
-        return this.translate(col.title || col.name);
+        return `<div class="grid-header-content">${this.translate(col.title || col.name)}</div>`;
     }
 
     drawBody(gridElement) {
@@ -203,11 +203,10 @@
         for (let col of this.columns) {
             col.id = id++;
             col.title = col.title || col.name;
-            col.w = col.w || 100;
+            col.w = col.initW = col.w || 100;
             col.minW = col.minW || 30;
             col.grid = this;
             this.colDict[col.id] = this.colDict[col.name] = col;
-            col.initW = col.w;
         }
 
         Object.assign(this.columnsDefaultOrder, this.columns);
@@ -286,8 +285,6 @@
                 otherColsW += col.w;
             }
 
-            //resize(e.pageX);
-
             function resize(pageX) {
                 if (shiftX > 0) {
                     let w = initW + pageX - shiftX;
@@ -334,7 +331,7 @@
         gridElement.addEventListener('mousedown', mouseDown);
     }
 
-    setupColumnDrug(gridElement) {
+    setupColumnDrag(gridElement) {
         const addFakeGrid = function (e, grid, column, th) {
             const rect = th.getBoundingClientRect();
             const fakeGrid = document.createElement('table');
@@ -447,9 +444,7 @@
 
             grid._targetColumn = column;
 
-            const elem = e.target.parentElement.tagName == 'TH' ? e.target.parentElement.firstElementChild : e.target;
-
-            elem.classList.add('grid-header-drug-over');
+            th.classList.add('grid-header-drag-over');
         }
 
         const mouseOut = function (e) {
@@ -465,16 +460,18 @@
                 e.target.style.cursor = "e-resize";
             }
 
-            clearMovingClass(e);
+            clearMovingClass(e, th);
 
             delete grid._targetColumn;
         }
 
-        const clearMovingClass = function (e) {
-            const elem = e.target.parentElement.tagName == 'TH' ? e.target.parentElement.firstElementChild : e.target;
+        const clearMovingClass = function (e, th) {
+            th = th || e.target.closest('TH');
 
-            if (elem.classList.contains('grid-header-drug-over')) {
-                elem.classList.remove('grid-header-drug-over');
+            if (!th) return;
+
+            if (th.classList.contains('grid-header-drag-over')) {
+                th.classList.remove('grid-header-drag-over');
             }
         }
 

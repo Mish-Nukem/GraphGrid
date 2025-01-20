@@ -1,4 +1,5 @@
-﻿import Grid from './GridInGraph.js';
+﻿//import Grid from './Grid.js';
+import Grid from './GridInGraph.js';
 import Modal from './Modals.js';
 
 window.NodeStatus = {
@@ -422,10 +423,12 @@ export default class GridDB extends Grid {
     }
 
     drawHeaderCell(col) {
-        const title = super.drawHeaderCell(col);
+        const title = this.translate(col.title || col.name);//super.drawHeaderCell(col);
         const sortDir = col.asc ? '&#11205;' : col.desc ? '&#11206;' : '';
 
-        return `<span></span><span style="white-space: nowrap;overflow: hidden;${col.sortable ? 'cursor:pointer' : ''}">${title}</span><span class="grid-header-sort-sign">${sortDir}</span>`;
+        return `<div class="grid-header-content">
+                <span></span><span style="white-space: nowrap;overflow: hidden;${col.sortable ? 'cursor:pointer' : ''}">${title}</span><span class="grid-header-sort-sign">${sortDir}</span>
+            </div>`;
     }
 
     drawGridSettings() {

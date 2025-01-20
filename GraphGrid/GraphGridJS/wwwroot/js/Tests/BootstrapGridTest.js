@@ -77,7 +77,7 @@ function createGrid() {
             e.resolve();
         },
         getColumns: function () {
-            return [{ name: 'Id', sortable: true }, { name: 'Name', sortable: true }, { name: 'Date', sortable: true }, { name: 'Comment', sortable: true }];
+            return [{ name: 'Id', sortable: true }, { name: 'Name', sortable: true, filtrable: true }, { name: 'Date', sortable: true }, { name: 'Comment', sortable: true }];
         },
         pageSize: 5,
         toolbarButtons: [
@@ -128,6 +128,8 @@ function createChildGrid() {
         },
         pageSize: 5
     });
+
+    res.connectToParentGrid = res.connectToParentGrid || function () { };
 
     res.connectToParentGrid(modalGrid, {
         applyLink: function (parentGrid) {
@@ -181,6 +183,8 @@ function createSecondChildGrid() {
         },
         pageSize: 5
     });
+
+    res.connectToParentGrid = res.connectToParentGrid || function () { };
 
     res.connectToParentGrid(modalGrid, {
         applyLink: function (parentGrid) {

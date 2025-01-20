@@ -82,21 +82,27 @@
 .grid-header-div {
     /*border: outset;*/
     border: solid;
-    background-color: white;
     margin: -1px -1px -1px -1px;
     border-width: 1px 0;
 }
 
+.grid-header-th {
+    background-color: white;
+}
+
 .grid-header-div-default {
     user-select: none;
+}
+
+.grid-header-content {
     display: flex;
     flex-wrap: nowrap;
     justify-content: space-between;
     align-items: center;
 }
 
-.grid-header-drug-over {
-    background-color: lightgray;
+.grid-header-drag-over {
+    background-color: lightgray !important;
 }
 
 .grid-header-sort-sign {
