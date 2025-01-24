@@ -245,9 +245,8 @@ export default class Modal {
         const mouseDown = function (e) {
 
             const cs = getComputedStyle(elem);
-            const [initW, initH] = [+cs.width.replace('px', ''), +cs.height.replace('px', '')];
+            const [initW, initH] = [parseInt(cs.width), parseInt(cs.height)];
 
-            //const rect = { width: +elem.style.width.replace('px', ''), height: +elem.style.height.replace('px', '') };
             const shiftX = e.target.hasAttribute('wnd-rsz-x') || e.target.hasAttribute('wnd-rsz-xy') ? e.clientX : -1;
             const shiftY = e.target.hasAttribute('wnd-rsz-y') || e.target.hasAttribute('wnd-rsz-xy') ? e.clientY : -1;
 

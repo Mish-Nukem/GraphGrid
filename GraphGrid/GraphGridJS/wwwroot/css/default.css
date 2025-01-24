@@ -140,3 +140,13 @@
         list-style-type: none;
         cursor: pointer;
     }
+
+.dropdown-ul {
+    padding: 0;
+    margin: 5px 0;
+}
+
+    .dropdown-ul > li {
+        list-style-type: none;
+        cursor: pointer;
+    }

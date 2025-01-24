@@ -1,6 +1,7 @@
 ﻿//import Grid from './Grid.js';
 import Grid from './GridInGraph.js';
-import Modal from './Modals.js';
+//import Modal from './Modals.js';
+import Dropdown from './Dropdown.js';
 
 window.NodeStatus = {
     grid: 0, hidden: 1, filter: 2, lookup: 3, custom: 4
@@ -250,7 +251,7 @@ export default class GridDB extends Grid {
             //},
             draw: grid.drawPagerButton,
         }
-        
+
         grid.pagerButtons.push(refresh);
         grid.pagerButtonsDict[refresh.id] = grid.pagerButtonsDict[refresh.name] = refresh;
 
@@ -431,54 +432,27 @@ export default class GridDB extends Grid {
             </div>`;
     }
 
-    drawGridSettings() {
-        const grid = this;
-
-        return `<ul class="grid-settings-ul">
-            <li grid-settings-item="${grid.id}_0_">
-                ${grid.translate('Reset columns order', 'settings-item')}
-            </li>
-            <li grid-settings-item="${grid.id}_1_">
-                ${grid.translate('Reset columns widths', 'settings-item')}
-            </li>
-         </ul>`;
+    getGridSettings(grid) {
+        return [{ id: 0, text: 'Reset columns order' }, { id: 1, text: 'Reset columns widths' }];
     }
 
     showGridSettings(e) {
         const grid = this;
 
-        const fakeDiv = document.createElement('div');
-        fakeDiv.style.opacity = 0;
-        fakeDiv.style.position = 'fixed';
-        fakeDiv.innerHTML = grid.drawGridSettings();
-        document.body.append(fakeDiv);
-        const rect = getComputedStyle(fakeDiv);
-        fakeDiv.remove();
-
-        const wnd = new Modal({
-            closeWhenClick: true,
-            closeWhenMiss: true,
-            closeWhenEscape: true,
-            resizable: false,
-            drawHeader: false,
-            drawFooter: false,
-            pos: {
-                x: e.clientX,
-                y: e.clientY,
-                w: rect.width,
-                h: rect.height
-            },
-            style: 'background:white;border:1px solid;',
-            drawBody: function (body) {
-                return grid.drawGridSettings();
-            }
+        const dropdown = new Dropdown({
+            owner: grid,
+            parentElem: document.querySelector(`button[grid-pager-item="${grid.id}_1_"]`),
+            translate: grid.translate,
+            getItems: grid.getGridSettings,
+            onItemClick: grid.onSettingsItemClick,
+            //    allowUpload: true,
+            //    pageSize: 2
         });
-        wnd.show();
+
+        dropdown.show();
     }
 
-    onSettingsItemClick(itemId) {
-        const grid = this;
-
+    onSettingsItemClick(grid, itemId) {
         switch (itemId) {
             case '0':
                 grid.resetColumnsOrderToDefault();
@@ -486,10 +460,6 @@ export default class GridDB extends Grid {
             case '1':
                 grid.resetColumnsWidthsToDefault();
                 break;
-        }
-
-        if (window._wndDict.topWindow) {
-            window._wndDict.topWindow.close();
         }
     }
 
@@ -534,14 +504,6 @@ document.addEventListener('click', function (e) {
             const column = grid.colDict[itemId];
 
             grid.changeColumnSortOrder(column);
-            break;
-        case 'LI':
-            if (!e.target.hasAttribute('grid-settings-item')) return;
-            
-            [gridId, itemId] = e.target.getAttribute('grid-settings-item').split('_');
-            grid = window._gridDict[gridId];
-
-            grid.onSettingsItemClick(itemId);
             break;
     }
 

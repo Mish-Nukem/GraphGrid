@@ -273,8 +273,7 @@
             const grid = window._gridDict[gridId];
             const column = grid.colDict[columnId];
 
-            //const initW = +th.style.width.replace('px', '');
-            const initW = +getComputedStyle(th).width.replace('px', '');
+            const initW = parseInt(getComputedStyle(th).width);
 
             const shiftX = e.target.hasAttribute('grid-rsz-x') ? e.clientX : -1;
             const columns = column.grid.columns;
@@ -487,7 +486,7 @@
             const grid = window._gridDict[gridId];
             const column = grid.colDict[columnId];
 
-            const initW = +th.style.width.replace('px', '');
+            const initW = parseInt(th.style.width);
 
             const fakeDiv = document.createElement('div');
             fakeDiv.className =  'grid-header-div-default ' + (grid.opt.headerDivClass || "grid-header-div");
@@ -496,21 +495,21 @@
             fakeDiv.innerHTML = grid.drawHeaderCell(column);
             document.body.append(fakeDiv);
 
-            let contentSize = Math.max(column.minW, +getComputedStyle(fakeDiv).width.replace('px', ''));
+            let contentSize = Math.max(column.minW, parseInt(getComputedStyle(fakeDiv).width));
 
             fakeDiv.className = '';
 
             for (let row of grid.rows) {
                 fakeDiv.innerHTML = grid.drawCell(column, row);
-                contentSize = Math.max(contentSize, +getComputedStyle(fakeDiv).width.replace('px', ''));
+                contentSize = Math.max(contentSize, parseInt(getComputedStyle(fakeDiv).width));
             }
 
-            const newW = contentSize + 5;//Math.max(column.w, contentSize);
+            const newW = contentSize + 10;//Math.max(column.w, contentSize);
 
             if (newW != initW) {
                 column.w = newW;
                 th.style.width = newW + 'px';
-                gridElement.style.width = (+gridElement.style.width.replace('px', '') + newW - initW) + 'px';
+                gridElement.style.width = (parseInt(gridElement.style.width) + newW - initW) + 'px';
             }
 
             fakeDiv.remove();
