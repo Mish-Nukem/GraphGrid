@@ -52,32 +52,90 @@ function getFamily(e) {
     return res;
 }
 
+function passRow(grid, row, autocompleteColumn) {
+    if (!grid.columns) return true;
+
+    for (let col of grid.columns) {
+        if (!col.filtrable || col.filter === undefined || col.filter == '') continue;
+
+        const cellValue = String(row[col.name]).toLowerCase();
+        if (cellValue == '') return false;
+
+        const filter = col.filter.toLowerCase();
+        if (autocompleteColumn) {
+            if (cellValue.indexOf(filter) != 0) return false;
+
+            if (grid._autocomplDict[cellValue]) return false;
+        }
+        else {
+            if (cellValue != filter) return false;
+        }
+    }
+
+    return true;
+}
+
 function createGrid() {
     let res = new GridDB({
         getRows: function (e) {
-            this.rows = getFamily(e);
-            this.totalRows = this.rows.length;
+            const allRows = getFamily(e);
 
-            if (this.columns) {
-                let sortCol = null;
-                for (let col of this.columns) {
-                    if (col.asc || col.desc) {
-                        sortCol = col;
-                        break;
-                    }
+            if (e.autocompleteColumn) {
+                this._autocomplDict = {};
+                this._autocomplCount = 0;
+            }
+
+            let rows = [];
+            for (let row of allRows) {
+                if (!passRow(this, row, e.autocompleteColumn)) continue;
+
+                if (e.autocompleteColumn) {
+                    this._autocomplCount++;
+                    if (this._autocomplCount >= 10) break;
+
+                    let cellValue = row[e.autocompleteColumn.name];
+                    this._autocomplDict[String(cellValue).toLowerCase()] = 1;
+
+                    rows.push(cellValue);
                 }
-
-                if (sortCol != null) {
-                    this.rows.sort(function (a, b) { return a[sortCol.name] > b[sortCol.name] ? (sortCol.asc ? 1 : -1) : (sortCol.asc ? -1 : 1); });
+                else {
+                    rows.push(row);
                 }
             }
 
-            this.rows = this.pageSize > 0 && this.pageNumber > 0 ? this.rows.slice((this.pageNumber - 1) * this.pageSize, this.pageNumber * this.pageSize) : this.rows;
+            if (!e.autocompleteColumn) {
+                this.totalRows = rows.length;
 
-            e.resolve();
+                if (this.columns) {
+                    let sortCol = null;
+                    for (let col of this.columns) {
+                        if (col.asc || col.desc) {
+                            sortCol = col;
+                            break;
+                        }
+                    }
+
+                    if (sortCol != null) {
+                        rows.sort(function (a, b) { return a[sortCol.name] > b[sortCol.name] ? (sortCol.asc ? 1 : -1) : (sortCol.asc ? -1 : 1); });
+                    }
+                }
+            }
+
+            if (e.autocompleteColumn) {
+                rows.sort(function (a, b) { return a > b ? 1 : -1; });
+
+                return rows;
+            }
+            else {
+                rows = this.pageSize > 0 && this.pageNumber > 0 ? rows.slice((this.pageNumber - 1) * this.pageSize, this.pageNumber * this.pageSize) : rows;
+
+                this.rows = rows;
+
+                e.resolve();
+            }
         },
         getColumns: function () {
-            return [{ name: 'Id', sortable: true }, { name: 'Name', sortable: true, filtrable: true }, { name: 'Date', sortable: true }, { name: 'Comment', sortable: true }];
+            return [{ name: 'Id', sortable: true, filtrable: true }, { name: 'Name', sortable: true, filtrable: true }, { name: 'Date', sortable: true }, { name: 'Comment', sortable: true, filtrable: true }];
         },
         pageSize: 5,
         toolbarButtons: [
@@ -133,7 +191,7 @@ function createChildGrid() {
 
     res.connectToParentGrid(modalGrid, {
         applyLink: function (parentGrid) {
-            return parentGrid.selectedRowIndex >= 0 ? parentGrid.rows[parentGrid.selectedRowIndex]['Id'] : '';
+            return parentGrid.rows.length > 0 && parentGrid.selectedRowIndex >= 0 ? parentGrid.rows[parentGrid.selectedRowIndex]['Id'] : '';
         }
     });
 
@@ -188,7 +246,7 @@ function createSecondChildGrid() {
 
     res.connectToParentGrid(modalGrid, {
         applyLink: function (parentGrid) {
-            return parentGrid.selectedRowIndex >= 0 ? parentGrid.rows[parentGrid.selectedRowIndex]['Id'] : '';
+            return parentGrid.rows.length > 0 && parentGrid.selectedRowIndex >= 0 ? parentGrid.rows[parentGrid.selectedRowIndex]['Id'] : '';
         }
     });
 

@@ -261,6 +261,8 @@
 
     setupColumnResize(gridElement) {
         const mouseDown = function (e) {
+            if (e.target.tagName == 'INPUT') return;
+
             if (!e.target.hasAttribute('grid-rsz-x')) return;
 
             const th = e.target.closest('TH');

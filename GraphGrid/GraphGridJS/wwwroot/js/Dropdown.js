@@ -85,6 +85,8 @@ export default class Dropdown {
         const rect = getComputedStyle(fakeDiv);
         fakeDiv.remove();
 
+        if (dd.items.length <= 0 && !dd.opt.allowUserFilter) return;
+
         const parentRect = dd.opt.parentElem ? dd.opt.parentElem.getBoundingClientRect() : { x: e.clientX, y: e.clientY, width: e.width, height: e.height };
 
         const wnd = new Modal({
@@ -113,12 +115,19 @@ export default class Dropdown {
 
     close() {
         const dd = this;
+
+        if (dd.opt.onClose) {
+            dd.opt.onClose();
+        }
+
         dd.items = [];
 
         delete dd.lastPageNumber;
 
-        dd.modal.close();
-        delete dd.modal;
+        if (dd.modal) {
+            dd.modal.close();
+            delete dd.modal;
+        }
     }
 }
 
