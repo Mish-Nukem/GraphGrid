@@ -27,6 +27,9 @@ export default class GridFL extends Grid {
             owner: grid,
             parentElem: parentElem,
             translate: grid.translate,
+            menuItemClass: grid.opt.menuItemClass,
+            menuClass: grid.opt.menuClass,
+            dropdownWndClass: grid.opt.dropdownWndClass,
             getItems: function (e) {
                 e.autocompleteColumn = column;
 
@@ -131,7 +134,7 @@ export default class GridFL extends Grid {
                 grid.clearAllColumnFilters();
             },
             getDisabled: function () {
-                return !grid.rows || grid.rows.length <= 0 || !grid.isFiltered();
+                return /*!grid.rows || grid.rows.length <= 0 ||*/ !grid.isFiltered();
             },
             draw: grid.drawPagerButton,
         }

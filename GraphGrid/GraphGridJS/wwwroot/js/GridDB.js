@@ -85,7 +85,7 @@ export default class GridDB extends Grid {
         let s = '';
         for (let button of this.toolbarButtons)
             s += `
-                <button grid-toolbar-button="${this.id}_${button.id}" class="grid-toolbar-button ${button.class || this.toolbarButtonsClass || ''}" title="${this.translate(button.title)}" 
+                <button grid-toolbar-button="${this.id}_${button.id}" class="grid-toolbar-button ${button.class || this.opt.toolbarButtonsClass || ''}" title="${this.translate(button.title)}" 
                 ${button.getDisabled && button.getDisabled({ grid: this }) || button.disabled ? 'disabled' : ''}>
                     ${button.img ? button.img : ''} 
                     ${button.label ? this.translate(button.label, 'toolbar-button') : ''}
@@ -445,6 +445,9 @@ export default class GridDB extends Grid {
             translate: grid.translate,
             getItems: grid.getGridSettings,
             onItemClick: grid.onSettingsItemClick,
+            menuItemClass: grid.opt.menuItemClass,
+            menuClass: grid.opt.menuClass,
+            dropdownWndClass: grid.opt.dropdownWndClass,
             //    allowUpload: true,
             //    pageSize: 2
         });

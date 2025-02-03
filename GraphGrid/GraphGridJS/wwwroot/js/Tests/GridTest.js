@@ -1,5 +1,6 @@
 ﻿import Grid from '../Grid.js';
 import Modal from '../Modals.js';
+import TestData from 'TestData.js';
 
 
 let grid;
@@ -12,18 +13,10 @@ function createGrid() {
             //fetch('my.db.com/family/list', function (data) {
             //    this.rows = data;
             //})
+            const data = new TestData();
+            this.rows = data.getFamily(e);
 
 
-            this.rows = [
-                { Id: 1, Name: 'Mikle', Date: '26/01/1979', Comment: 'Good boy' },
-                { Id: 2, Name: 'Nataly', Date: '15/01/1999', Comment: 'Good girl' },
-                { Id: 3, Name: 'Mother', Date: '03/07/1953', Comment: 'Mommy' },
-                { Id: 4, Name: 'Father', Date: '14/06/1953', Comment: 'Papa' },
-                { Id: 5, Name: 'Grandmother', Date: '17/06/1917', Comment: 'Babushka', BlaBla: 'Bla Bla Bla Bla Bla Bla Bla Bla Bla Bla Bla Bla ' },
-                { Id: 6, Name: 'Evgenia', Date: '31/10/1974', Comment: 'Sister' },
-                { Id: 7, Name: 'Ilia', Date: '16/09/1980', Comment: 'Brother 1' },
-                { Id: 8, Name: 'Mitka', Date: '04/07/1989', Comment: 'Brother 2' },
-            ];
             e.resolve();
         },
     //    getColumns: function () {

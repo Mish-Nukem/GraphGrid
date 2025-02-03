@@ -141,12 +141,20 @@
         cursor: pointer;
     }
 
+.dropdown-wnd {
+    background: white;
+    border: 1px solid;
+    /*padding: 0 5px;*/
+}
+
 .dropdown-ul {
     padding: 0;
-    margin: 5px 0;
+    /*margin: 5px 0;*/
+    margin: 0;
 }
 
     .dropdown-ul > li {
         list-style-type: none;
         cursor: pointer;
+        white-space: nowrap;
     }

@@ -7,7 +7,7 @@ export default class BootstrapGrid extends Grid {
         super(options);
 
         //this.toolbarButtonsClass = 'btn btn-sm btn-success';
-        this.toolbarButtonsClass = 'btn btn-primary';
+        this.opt.toolbarButtonsClass = 'btn btn-primary';
         this.opt.pagerClass = 'mb-1';
 
         this.opt.gridClass = 'table table-sm table-bordered';
@@ -15,6 +15,10 @@ export default class BootstrapGrid extends Grid {
         this.opt.headerDivClass = ' ';
         this.opt.selectedRowClass = 'table-active';
         this.opt.filterInputClass = 'form-control form-control-sm';
+
+        this.opt.menuClass = 'list-group';
+        this.opt.menuItemClass = 'list-group-item list-group-item-action list-group-item-light';
+        this.opt.dropdownWndClass = 'none';
     }
 
     setupPagerButtons() {

@@ -81,15 +81,17 @@ export default class Modal {
 
         document.body.append(div);
 
+        this.element = div;
+
         this.prevTopWindow = window._wndDict.topWindow;
         window._wndDict.topWindow = this;
         window._wndDict[this.id] = this;
     }
 
     refresh = function () {
-        const div = document.getElementById(`window_${this.id}_`);
+        //const div = document.getElementById(`window_${this.id}_`);
 
-        this.drawWindow(div);
+        this.drawWindow(this.element);
     }
 
     drawWindow = function (div) {
@@ -171,9 +173,11 @@ export default class Modal {
         const wnd = window._wndDict[this.id];
         if (!wnd) return;
 
+        const elem = wnd.element;
+
         delete window._wndDict[this.id];
 
-        const elem = document.getElementById(`window_${this.id}_`);
+        //const elem = document.getElementById(`window_${this.id}_`);
         elem.setAttribute('display', 'none');
 
         if (wnd.overlay) {
