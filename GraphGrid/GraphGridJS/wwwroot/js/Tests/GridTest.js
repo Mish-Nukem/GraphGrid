@@ -1,6 +1,6 @@
 ﻿import Grid from '../Grid.js';
 import Modal from '../Modals.js';
-import TestData from 'TestData.js';
+import TestData from '../Tests/TestData.js';
 
 
 let grid;

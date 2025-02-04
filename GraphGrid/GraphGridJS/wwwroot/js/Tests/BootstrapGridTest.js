@@ -6,6 +6,7 @@ let grid;
 let modalGrid;
 let modalChildGrid;
 let modalSecondChildGrid;
+let modalThirdChildGrid;
 
 let wndModal;
 
@@ -13,20 +14,24 @@ function passRow(grid, row, autocompleteColumn) {
     if (!grid.columns) return true;
 
     for (let col of grid.columns) {
-        if (!col.filtrable || col.filter === undefined || col.filter == '') continue;
+        if (!col.filtrable || (col.filter === undefined || col.filter == '') && !autocompleteColumn) continue;
 
         const cellValue = String(row[col.name]).toLowerCase();
         if (cellValue == '') return false;
 
-        const filter = col.filter.toLowerCase();
-        if (autocompleteColumn) {
-            if (cellValue.indexOf(filter) != 0) return false;
+        const filter = col.filter === undefined || col.filter == '' ? '' : col.filter.toLowerCase();
 
-            if (grid._autocomplDict[cellValue]) return false;
+        if (filter != '') {
+            if (autocompleteColumn) {
+                if (autocompleteColumn == col && cellValue.indexOf(filter) != 0 || autocompleteColumn != col && cellValue != filter) return false;
+
+            }
+            else {
+                if (cellValue != filter) return false;
+            }
         }
-        else {
-            if (cellValue != filter) return false;
-        }
+
+        if (autocompleteColumn && grid._autocomplDict[cellValue]) return false;
     }
 
     return true;
@@ -83,18 +88,20 @@ function createGrid() {
             if (e.autocompleteColumn) {
                 rows.sort(function (a, b) { return a > b ? 1 : -1; });
 
-                return rows;
+                //return rows;
             }
             else {
                 rows = this.pageSize > 0 && this.pageNumber > 0 ? rows.slice((this.pageNumber - 1) * this.pageSize, this.pageNumber * this.pageSize) : rows;
 
                 this.rows = rows;
+            }
 
-                e.resolve();
+            if (e.resolve) {
+                e.resolve(rows);
             }
         },
         getColumns: function () {
-            return [{ name: 'Id', sortable: true, filtrable: true }, { name: 'Name', sortable: true, filtrable: true }, { name: 'Date', sortable: true }, { name: 'Comment', sortable: true, filtrable: true }];
+            return [{ name: 'Id', sortable: true, filtrable: true }, { name: 'Name', sortable: true, filtrable: true }, { name: 'SecondName', sortable: true, filtrable: true }, { name: 'Date', sortable: true }, { name: 'Comment', sortable: true, filtrable: true }];
         },
         pageSize: 5,
         toolbarButtons: [
@@ -140,10 +147,12 @@ function createChildGrid() {
             this.totalRows = this.rows.length;
             this.rows = this.pageSize > 0 && this.pageNumber > 0 ? this.rows.slice((this.pageNumber - 1) * this.pageSize, this.pageNumber * this.pageSize) : this.rows;
 
-            e.resolve();
+            if (e.resolve) {
+                e.resolve();
+            }
         },
         getColumns: function () {
-            return [{ name: 'Id' }, { name: 'Name', title: 'Child' }, { name: 'Date' }];
+            return [{ name: 'Id' }, { name: 'Name', title: 'Child' }, { name: 'SecondName' }, { name: 'Date' }];
         },
         pageSize: 5
     });
@@ -182,7 +191,9 @@ function createSecondChildGrid() {
             this.totalRows = this.rows.length;
             this.rows = this.pageSize > 0 && this.pageNumber > 0 ? this.rows.slice((this.pageNumber - 1) * this.pageSize, this.pageNumber * this.pageSize) : this.rows;
 
-            e.resolve();
+            if (e.resolve) {
+                e.resolve();
+            }
         },
         getColumns: function () {
             return [{ name: 'City', title: 'Lived in City' }];
@@ -195,6 +206,47 @@ function createSecondChildGrid() {
     res.connectToParentGrid(modalGrid, {
         applyLink: function (parentGrid) {
             return parentGrid.rows.length > 0 && parentGrid.selectedRowIndex >= 0 ? parentGrid.rows[parentGrid.selectedRowIndex]['Id'] : '';
+        }
+    });
+
+    return res;
+}
+
+function createThirdChildGrid() {
+    let res = new GridDB({
+        getRows: function (e) {
+            const data = new TestData();
+
+            const res = data.getFamily(e);
+
+            this.rows = [];
+
+            if (e.filters && e.filters.length) {
+                const filter = ',' + (e.filters[0] + '') + ',';//.replace('[', ',').replace(']', ',');
+                for (let row of res) {
+                    if (filter.indexOf(',' + row['Id'] + ',') >= 0) {
+                        this.rows.push(row);
+                    }
+                }
+            }
+            this.totalRows = this.rows.length;
+            this.rows = this.pageSize > 0 && this.pageNumber > 0 ? this.rows.slice((this.pageNumber - 1) * this.pageSize, this.pageNumber * this.pageSize) : this.rows;
+
+            if (e.resolve) {
+                e.resolve();
+            }
+        },
+        getColumns: function () {
+            return [{ name: 'Id' }, { name: 'Name', title: 'Child' }, { name: 'SecondName' }, { name: 'Date' }];
+        },
+        pageSize: 5
+    });
+
+    res.connectToParentGrid = res.connectToParentGrid || function () { };
+
+    res.connectToParentGrid(modalGrid, {
+        applyLink: function (parentGrid) {
+            return parentGrid.rows.length > 0 && parentGrid.selectedRowIndex >= 0 ? parentGrid.rows[parentGrid.selectedRowIndex]['ParentId'] : '';
         }
     });
 
@@ -258,6 +310,23 @@ export function TestPopupWndGrid() {
         btn.textContent = 'Cities';
         tab.appendChild(btn);
 
+        tab = document.createElement('li');
+        tab.className = 'nav-item';
+        tab.setAttribute('role', 'presentation');
+        ul.appendChild(tab);
+
+        btn = document.createElement('button');
+        btn.id = 'parents-tab';
+        btn.className = 'nav-link';
+        btn.setAttribute('role', 'tab');
+        btn.setAttribute('data-bs-toggle', 'tab');
+        btn.setAttribute('data-bs-target', '#parents');
+        btn.setAttribute('aria-controls', 'parents');
+        btn.setAttribute('aria-selected', 'false');
+        btn.setAttribute('type', 'button');
+        btn.textContent = 'Parents';
+        tab.appendChild(btn);
+
         wndBodyElement.appendChild(ul);
 
         const divDetails = document.createElement('div');
@@ -295,6 +364,21 @@ export function TestPopupWndGrid() {
             modalSecondChildGrid = createSecondChildGrid();
         }
         modalSecondChildGrid.parent = div3;
+
+        const div4 = document.createElement('div');
+        div4.style.margin = '10px';
+        div4.style.float = 'left';
+        div4.className = 'tab-pane';
+        div4.id = 'parents';
+        div4.setAttribute('role', 'tabpanel');
+        div4.setAttribute('aria-labelledby', 'parents-tab');
+        div4.setAttribute('tabindex', '0');
+        divDetails.appendChild(div4);
+
+        if (!modalThirdChildGrid) {
+            modalThirdChildGrid = createThirdChildGrid();
+        }
+        modalThirdChildGrid.parent = div4;
 
         modalGrid.refresh();
     }
@@ -340,6 +424,9 @@ export function TestPopupWndGrid() {
 
                     modalSecondChildGrid.remove();
                     modalSecondChildGrid = undefined;
+
+                    modalThirdChildGrid.remove();
+                    modalThirdChildGrid = undefined;
 
                     e.modal.close();
                 }

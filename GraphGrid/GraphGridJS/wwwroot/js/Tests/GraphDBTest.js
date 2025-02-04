@@ -1,6 +1,6 @@
 ﻿import GridDB from '../GridDB.js';
 import Modal from '../Modals.js';
-import TestData from 'TestData.js';
+import TestData from '../Tests/TestData.js';
 
 let grid;
 let modalGrid;
@@ -121,7 +121,7 @@ function createSecondChildGrid() {
             e.resolve();
         },
         getColumns: function () {
-            return [{ name: 'Content', title: 'Lived in City' }];
+            return [{ name: 'City', title: 'Lived in City' }];
         },
         pageSize: 5
     });

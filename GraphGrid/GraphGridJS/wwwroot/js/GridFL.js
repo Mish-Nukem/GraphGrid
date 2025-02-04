@@ -10,6 +10,7 @@ export default class GridFL extends Grid {
         if (col.filtrable) {
             res += `<div class="grid-header-filter">
                 <input value="${col.filter !== undefined ? col.filter : ''}" grid-col-filter="${grid.id}_${col.id}_" class="grid-col-filter ${grid.opt.filterInputClass || ''}">
+                ${col.filter !== undefined && col.filter !== '' ? `<button grid-filter-clear="${grid.id}_${col.id}_" type="button" class="grid-filter-clear" style="color: black;">×</button>` : ''}
             </div>`;
         }
 
@@ -33,13 +34,33 @@ export default class GridFL extends Grid {
             getItems: function (e) {
                 e.autocompleteColumn = column;
 
-                const res = [];
-                let i = 0;
-                for (let row of grid.getRows(e)) {
-                    res.push({ id: i++, text: String(row) });
-                };
+                grid.getRows({
+                    autocompleteColumn: column, resolve: function (rows) {
+                        rows = rows || [];
 
-                return res;
+                        const res = [];
+                        let i = 0;
+                        for (let row of rows) {
+                            res.push({ id: i++, text: String(row) });
+                        };
+
+                        if (e.resolve) {
+                            e.resolve(res);
+                        }
+                    }
+                })
+
+            //    const res = [];
+            //    let i = 0;
+            //    for (let row of grid.getRows(e)) {
+            //        res.push({ id: i++, text: String(row) });
+            //    };
+
+            //    if (e.resolve) {
+            //        e.resolve(res);
+            //    }
+
+            //    return res;
             },
             onItemClick: function (owner, itemId) {
                 const item = grid._autocompleteDropdown.items.find(function (item, index, array) {
@@ -236,6 +257,24 @@ document.addEventListener('input', function (e) {
 
                 grid.showAutocomplete(parentElem, column);
             }, 100);
+            break;
+    }
+});
+
+document.addEventListener('click', function (e) {
+
+    switch (e.target.tagName) {
+        case 'BUTTON':
+            const attr = e.target.getAttribute('grid-filter-clear');
+            if (!attr) return;
+
+            const [gridId, itemId] = attr.split('_');
+
+            const grid = window._gridDict[gridId];
+            const column = grid.colDict[itemId];
+
+            column.filter = '';
+            grid.columnFilterChange(column, '');
             break;
     }
 });

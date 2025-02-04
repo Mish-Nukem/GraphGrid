@@ -174,6 +174,7 @@
         if (e.resolve) {
             e.resolve(this.rows);
         }
+        return this.rows;
     }
 
     getColumns() {
@@ -360,7 +361,7 @@
         }
 
         const mouseDown = function (e) {
-            if (e.target.hasAttribute('grid-rsz-x')) return;
+            if (e.target.tagName == 'INPUT' || e.target.hasAttribute('grid-rsz-x')) return;
 
             const th = e.target.closest('TH');
             if (!th || !th.hasAttribute('grid-header')) return;

@@ -109,6 +109,20 @@
     margin-top: -4px;
 }
 
+.grid-header-filter {
+    /*white-space: nowrap;*/
+    display: flex;
+}
+
+.grid-filter-clear {
+    border: 0;
+    opacity: 0.2;
+}
+
+    .grid-filter-clear:hover {
+        opacity: 1;
+    }
+
 .grid-cell {
 }
 

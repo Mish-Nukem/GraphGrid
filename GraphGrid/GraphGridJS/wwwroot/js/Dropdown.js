@@ -36,14 +36,6 @@ export default class Dropdown {
     draw() {
         const dd = this;
 
-        if (!dd.lastPageNumber || dd.lastPageNumber != dd.pageNumber) {
-            const newItems = dd.getItems({ filter: dd.filter, pageSize: dd.pageSize, pageNumber: dd.pageNumber });
-
-            dd.items.push(...newItems);
-
-            dd.lastPageNumber = dd.pageNumber;
-        }
-
         let res = ``;
 
         if (dd.opt.allowUserFilter) {
@@ -75,47 +67,63 @@ export default class Dropdown {
     show(e) {
         const dd = this;
 
-        //e.parentElem = document.querySelector(`button[grid-pager-item="${grid.id}_1_"]`);
+        function afterGetItems() {
+            const fakeDiv = document.createElement('div');
+            fakeDiv.style.opacity = 0;
+            fakeDiv.style.position = 'fixed';
+            fakeDiv.style.height = 'auto';
+            fakeDiv.innerHTML = dd.draw();
+            document.body.append(fakeDiv);
+            const rect = getComputedStyle(fakeDiv);
+            const w = parseInt(rect.width) + 1;
+            const h = parseInt(rect.height) + 1;
+            fakeDiv.remove();
 
-        const fakeDiv = document.createElement('div');
-        fakeDiv.style.opacity = 0;
-        //fakeDiv.className = 'modal-window-body';
-        fakeDiv.style.position = 'fixed';
-        fakeDiv.style.height = 'auto';
-        fakeDiv.innerHTML = dd.draw();
-        document.body.append(fakeDiv);
-        const rect = getComputedStyle(fakeDiv);
-        const w = parseInt(rect.width) + 1;
-        const h = parseInt(rect.height) + 1;
-        fakeDiv.remove();
+            if (dd.items.length <= 0 && !dd.opt.allowUserFilter) return;
 
-        if (dd.items.length <= 0 && !dd.opt.allowUserFilter) return;
+            const parentRect = dd.opt.parentElem ? dd.opt.parentElem.getBoundingClientRect() : { x: e.clientX, y: e.clientY, width: e.width, height: e.height };
 
-        const parentRect = dd.opt.parentElem ? dd.opt.parentElem.getBoundingClientRect() : { x: e.clientX, y: e.clientY, width: e.width, height: e.height };
+            const wnd = new Modal({
+                closeWhenClick: true,
+                closeWhenMiss: true,
+                closeWhenEscape: true,
+                resizable: false,
+                drawHeader: false,
+                drawFooter: false,
+                bodyClass: dd.opt.dropdownWndClass || 'dropdown-wnd',
+                pos: {
+                    x: parentRect.x,
+                    y: parentRect.y + parentRect.height,
+                    w: Math.max(w, parentRect.width),
+                    h: h
+                },
+                drawBody: function (body) {
+                    return dd.draw();
+                }
+            });
+            wnd.show();
 
-        const wnd = new Modal({
-            closeWhenClick: true,
-            closeWhenMiss: true,
-            closeWhenEscape: true,
-            resizable: false,
-            drawHeader: false,
-            drawFooter: false,
-            bodyClass: dd.opt.dropdownWndClass || 'dropdown-wnd',
-            pos: {
-                x: parentRect.x,
-                y: parentRect.y + parentRect.height,
-                w: Math.max(w, parentRect.width),
-                h: h
-            },
-            //style: 'background:white;', //border:1px solid;
-            drawBody: function (body) {
-                return dd.draw();
-            }
-        });
-        wnd.show();
+            dd.modal = wnd;
+            window._dropdown = dd;
+        }
 
-        dd.modal = wnd;
-        window._dropdown = dd;
+        if (!dd.lastPageNumber || dd.lastPageNumber != dd.pageNumber) {
+            dd.getItems({
+                filter: dd.filter, pageSize: dd.pageSize, pageNumber: dd.pageNumber, resolve: function (newItems) {
+                    if (newItems && newItems.length > 0) {
+                        dd.items.push(...newItems);
+                    }
+
+                    dd.lastPageNumber = dd.pageNumber;
+
+                    afterGetItems();
+                }
+            });
+
+        }
+        else {
+            afterGetItems();
+        }
     }
 
     close() {
@@ -178,16 +186,7 @@ document.addEventListener('keydown', function (e) {
             dd.close();
             break;
         case 'down', 'arrowdown':
-            //activeItemElem = dd.modal.element.querySelector('li[class="active"]');
             if (dd.activeItem) {
-                //[dropdownId, itemId] = activeItem.getAttribute('dropdown-item').split('_');
-
-                //activeItem = dd.items.find(function (item, index, array) {
-                //    item.id = itemId;
-                //});
-
-                //ind = dd.items.indexOf(activeItem);
-
                 ind = dd.items.indexOf(dd.activeItem);
 
                 if (ind < 0 || ind == dd.items.length - 1) return;
@@ -205,35 +204,9 @@ document.addEventListener('keydown', function (e) {
                 nextItemElem = dd.modal.element.querySelector(`li[dropdown-item="${dd.id}_${dd.activeItem.id}_"]`);
                 nextItemElem.classList.add('active');
             }
-            //if (activeItem)
-            //nextItem = activeItem.newItems('li') || dd.modal.element.querySelector('li');
-
-            //dd.items.find(function (item, index, array) {
-            //    dd.activeItem = item;
-            //    if (index < dd.items.length) {
-            //        nextItem = dd.items[index + 1];
-            //        nextItemElem = dd.modal.element.querySelector(`li[dropdown-item="${dd.id}_${nextItem.id}_"]`);
-            //        nextItemElem.addClass('active');
-            //    }
-            //    //return item.id == itemId;
-            //});
-
-            //activeItemElem
-            
-
             break;
         case 'up', 'arrowup':
-            //activeItem = dd.modal.element.querySelector('li[class="active"]');
-
             if (dd.activeItem) {
-                //[dropdownId, itemId] = activeItem.getAttribute('dropdown-item').split('_');
-
-                //activeItem = dd.items.find(function (item, index, array) {
-                //    item.id = itemId;
-                //});
-
-                //ind = dd.items.indexOf(activeItem);
-
                 ind = dd.items.indexOf(dd.activeItem);
 
                 if (ind <= 0) return;
