@@ -67,7 +67,13 @@ export default class Dropdown {
     show(e) {
         const dd = this;
 
-        function afterGetItems() {
+        function afterGetItems(newItems) {
+            if (newItems && newItems.length > 0) {
+                dd.items.push(...newItems);
+            }
+
+            dd.lastPageNumber = dd.pageNumber;
+
             const fakeDiv = document.createElement('div');
             fakeDiv.style.opacity = 0;
             fakeDiv.style.position = 'fixed';
@@ -108,18 +114,23 @@ export default class Dropdown {
         }
 
         if (!dd.lastPageNumber || dd.lastPageNumber != dd.pageNumber) {
-            dd.getItems({
-                filter: dd.filter, pageSize: dd.pageSize, pageNumber: dd.pageNumber, resolve: function (newItems) {
-                    if (newItems && newItems.length > 0) {
-                        dd.items.push(...newItems);
-                    }
+            let newItems;
+            newItems = dd.getItems({
+                filter: dd.filter, pageSize: dd.pageSize, pageNumber: dd.pageNumber, resolve: function (items) {
+                    //if (items && items.length > 0) {
+                    //    dd.items.push(...items);
+                    //}
 
-                    dd.lastPageNumber = dd.pageNumber;
+                    //dd.lastPageNumber = dd.pageNumber;
+                    if (newItems) return;
 
-                    afterGetItems();
+                    afterGetItems(items);
                 }
             });
 
+            if (newItems) {
+                afterGetItems(newItems);
+            }
         }
         else {
             afterGetItems();

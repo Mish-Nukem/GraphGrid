@@ -3,13 +3,13 @@ import Dropdown from './Dropdown.js';
 
 export default class GridFL extends Grid {
 
-    drawHeaderCell(col) {
+    drawHeaderCell(col, context) {
         const grid = this;
 
         let res = super.drawHeaderCell(col);
-        if (col.filtrable) {
+        if (col.filtrable && context != 'fake') {
             res += `<div class="grid-header-filter">
-                <input value="${col.filter !== undefined ? col.filter : ''}" grid-col-filter="${grid.id}_${col.id}_" class="grid-col-filter ${grid.opt.filterInputClass || ''}">
+                <input value="${col.filter !== undefined ? col.filter : ''}"  title="${col.filter !== undefined ? col.filter : ''}" grid-col-filter="${grid.id}_${col.id}_" class="grid-col-filter ${grid.opt.filterInputClass || ''}">
                 ${col.filter !== undefined && col.filter !== '' ? `<button grid-filter-clear="${grid.id}_${col.id}_" type="button" class="grid-filter-clear" style="color: black;">×</button>` : ''}
             </div>`;
         }
@@ -227,6 +227,9 @@ document.addEventListener('change', function (e) {
 
             [gridId, itemId] = e.target.getAttribute('grid-col-filter').split('_');
             grid = window._gridDict[gridId];
+
+            if (grid._skipChange) return;
+
             const column = grid.colDict[itemId];
             const filter = e.target.value;
 

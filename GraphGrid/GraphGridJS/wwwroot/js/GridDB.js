@@ -432,7 +432,7 @@ export default class GridDB extends Grid {
             </div>`;
     }
 
-    getGridSettings(grid) {
+    getGridSettings(e) {
         return [{ id: 0, text: 'Reset columns order' }, { id: 1, text: 'Reset columns widths' }];
     }
 

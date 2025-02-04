@@ -55,7 +55,7 @@ function createGrid() {
 
                 if (e.autocompleteColumn) {
                     this._autocomplCount++;
-                    if (this._autocomplCount >= 10) break;
+                    if (this._autocomplCount > 10) break;
 
                     let cellValue = row[e.autocompleteColumn.name];
                     this._autocomplDict[String(cellValue).toLowerCase()] = 1;

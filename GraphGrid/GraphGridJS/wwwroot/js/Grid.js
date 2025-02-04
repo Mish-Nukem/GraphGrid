@@ -107,6 +107,7 @@
         const colClass = this.opt.columnClass ? `class="${this.opt.columnClass}"` : '';
 
         let w = 0;
+        //let s = gridElement.tHead && false ? '' : '<thead>';
         let s = '<thead><tr>';
         for (let col of this.columns) {
             s += `<th grid-header="${this.id}_${col.id}_" ${colClass} class="grid-header-th" style="position: sticky;top: 0;width: ${col.w}px;overflow: hidden;vertical-align: top;">
@@ -120,19 +121,31 @@
             w += col.w;
         }
         s += '</tr></thead>';
+        //s += gridElement.tHead ? '' : '</thead>';
 
         gridElement = gridElement || document.getElementById(`grid_${this.id}_`);
 
         gridElement.style.width = (w /*+ (this.columns.length + 1) * 2*/) + 'px';
 
-        const thead = gridElement.tHead;
+        //gridElement.innerHTML = s;
+        //    return;
 
-        if (thead) {
-            thead.innerHTML = s;
-        }
-        else {
-            gridElement.innerHTML = s;
-        }
+        //const thead = gridElement.tHead;
+
+        //gridElement.replaceChildren();
+        this._skipChange = true;
+
+        gridElement.innerHTML = s;
+
+        this._skipChange = false;
+    //    return;
+
+    //    if (gridElement.tHead) {
+    //        gridElement.tHead.innerHTML = s;
+    //    }
+    //    else {
+    //        gridElement.innerHTML = s;
+    //    }
     }
 
     drawHeaderCell(col) {
@@ -492,10 +505,10 @@
             const initW = parseInt(th.style.width);
 
             const fakeDiv = document.createElement('div');
-            fakeDiv.className =  'grid-header-div-default ' + (grid.opt.headerDivClass || "grid-header-div");
+            fakeDiv.className = 'grid-header-div-default ' + (grid.opt.headerDivClass || "grid-header-div");
             fakeDiv.style.opacity = 0;
             fakeDiv.style.position = 'fixed';
-            fakeDiv.innerHTML = grid.drawHeaderCell(column);
+            fakeDiv.innerHTML = grid.drawHeaderCell(column, 'fake');
             document.body.append(fakeDiv);
 
             let contentSize = Math.max(column.minW, parseInt(getComputedStyle(fakeDiv).width));
@@ -507,7 +520,7 @@
                 contentSize = Math.max(contentSize, parseInt(getComputedStyle(fakeDiv).width));
             }
 
-            const newW = contentSize + 10;//Math.max(column.w, contentSize);
+            const newW = contentSize + 12;//Math.max(column.w, contentSize);
 
             if (newW != initW) {
                 column.w = newW;
