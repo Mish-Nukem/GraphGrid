@@ -107,7 +107,6 @@
         const colClass = this.opt.columnClass ? `class="${this.opt.columnClass}"` : '';
 
         let w = 0;
-        //let s = gridElement.tHead && false ? '' : '<thead>';
         let s = '<thead><tr>';
         for (let col of this.columns) {
             s += `<th grid-header="${this.id}_${col.id}_" ${colClass} class="grid-header-th" style="position: sticky;top: 0;width: ${col.w}px;overflow: hidden;vertical-align: top;">
@@ -121,35 +120,20 @@
             w += col.w;
         }
         s += '</tr></thead>';
-        //s += gridElement.tHead ? '' : '</thead>';
 
         gridElement = gridElement || document.getElementById(`grid_${this.id}_`);
 
-        gridElement.style.width = (w /*+ (this.columns.length + 1) * 2*/) + 'px';
+        gridElement.style.width = w + 'px';
 
-        //gridElement.innerHTML = s;
-        //    return;
-
-        //const thead = gridElement.tHead;
-
-        //gridElement.replaceChildren();
         this._skipChange = true;
 
         gridElement.innerHTML = s;
 
         this._skipChange = false;
-    //    return;
-
-    //    if (gridElement.tHead) {
-    //        gridElement.tHead.innerHTML = s;
-    //    }
-    //    else {
-    //        gridElement.innerHTML = s;
-    //    }
     }
 
-    drawHeaderCell(col) {
-        return `<div class="grid-header-content">${this.translate(col.title || col.name)}</div>`;
+    drawHeaderCell(col, context) {
+        return this.translate(col.title || col.name);//`<div class="grid-header-content">${this.translate(col.title || col.name)}</div>`;
     }
 
     drawBody(gridElement) {
@@ -312,7 +296,7 @@
 
                         th.style.width = column.w + 'px';
 
-                        gridElement.style.width = (otherColsW + column.w /*+ (columns.length + 1) * 2*/) + 'px';
+                        gridElement.style.width = (otherColsW + column.w) + 'px';
                     }
                 }
             }
@@ -382,6 +366,8 @@
             const [gridId, columnId] = th.getAttribute('grid-header').split('_');
             const grid = window._gridDict[gridId];
             const column = grid.colDict[columnId];
+
+            if (grid.columns.length < 2) return;
 
             grid._movingColumn = column;
 

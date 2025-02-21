@@ -92,6 +92,10 @@
 
 .grid-header-div-default {
     user-select: none;
+    display: grid;
+    grid-template-columns: auto 12px;
+    grid-template-rows: auto auto;
+    grid-auto-flow: row;
 }
 
 .grid-header-content {
@@ -106,17 +110,25 @@
 }
 
 .grid-header-sort-sign {
-    margin-top: -4px;
+    /*margin-top: -4px;*/
+    font-size: 12px;
+    display: flex;
+    align-items: flex-end;
+    justify-content: flex-end;
+    cursor: pointer;
 }
 
 .grid-header-filter {
     /*white-space: nowrap;*/
     display: flex;
+    grid-column: span 2;
 }
 
 .grid-filter-clear {
     border: 0;
     opacity: 0.2;
+    display: flex;
+    justify-content: center;
 }
 
     .grid-filter-clear:hover {
@@ -171,4 +183,25 @@
         list-style-type: none;
         cursor: pointer;
         white-space: nowrap;
+        padding: 2px;
     }
+
+        .dropdown-ul > li:hover {
+            background-color: lightgray;
+        }
+
+.grid-header-content-grid {
+    display: grid;
+    grid-template-columns: auto 12px;
+    grid-template-rows: auto auto;
+    grid-auto-flow: row;
+}
+
+.grid-header-title {
+    white-space: nowrap;
+    overflow: hidden;
+}
+
+/*.grid-col-filter {
+    grid-column: span 2;
+}*/

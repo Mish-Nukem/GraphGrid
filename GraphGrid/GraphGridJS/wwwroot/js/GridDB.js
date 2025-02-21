@@ -198,11 +198,6 @@ export default class GridDB extends Grid {
         button.change(e);
     }
 
-    //showGridSettings(e) {
-    //    const grid = this;
-    //    alert(`Showing settings for ${grid.id} grid...`);
-    //}
-
     gotoFirstPage() {
         const grid = this;
         grid.pageNumber = 1;
@@ -424,12 +419,17 @@ export default class GridDB extends Grid {
     }
 
     drawHeaderCell(col) {
-        const title = this.translate(col.title || col.name);//super.drawHeaderCell(col);
-        const sortDir = col.asc ? '&#11205;' : col.desc ? '&#11206;' : '';
+        const title = this.translate(col.title || col.name);
+        const sortDir = !col.sortable ? '' : col.asc ? '&#11205;' : col.desc ? '&#11206;' : '';
 
-        return `<div class="grid-header-content">
-                <span></span><span style="white-space: nowrap;overflow: hidden;${col.sortable ? 'cursor:pointer' : ''}">${title}</span><span class="grid-header-sort-sign">${sortDir}</span>
-            </div>`;
+        //return `<div class="grid-header-content">
+        //        <span></span><span style="white-space: nowrap;overflow: hidden;${col.sortable ? 'cursor:pointer' : ''}">${title}</span><span class="grid-header-sort-sign">${sortDir}</span>
+        //    </div>`;
+        //`<div class="grid-header-content-grid">`
+        let res = `<span class="grid-header-title" style="${col.sortable ? 'cursor:pointer' : ''}">${title}</span>`;
+        res += sortDir ? `<span class="grid-header-sort-sign">${sortDir}</span>` : '';
+        //`</div>`;
+        return res;
     }
 
     getGridSettings(e) {
@@ -448,8 +448,6 @@ export default class GridDB extends Grid {
             menuItemClass: grid.opt.menuItemClass,
             menuClass: grid.opt.menuClass,
             dropdownWndClass: grid.opt.dropdownWndClass,
-            //    allowUpload: true,
-            //    pageSize: 2
         });
 
         dropdown.show();
@@ -509,5 +507,4 @@ document.addEventListener('click', function (e) {
             grid.changeColumnSortOrder(column);
             break;
     }
-
 });

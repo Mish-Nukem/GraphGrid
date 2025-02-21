@@ -6,13 +6,34 @@ export default class GridFL extends Grid {
     drawHeaderCell(col, context) {
         const grid = this;
 
-        let res = super.drawHeaderCell(col);
-        if (col.filtrable && context != 'fake') {
-            res += `<div class="grid-header-filter">
-                <input value="${col.filter !== undefined ? col.filter : ''}"  title="${col.filter !== undefined ? col.filter : ''}" grid-col-filter="${grid.id}_${col.id}_" class="grid-col-filter ${grid.opt.filterInputClass || ''}">
-                ${col.filter !== undefined && col.filter !== '' ? `<button grid-filter-clear="${grid.id}_${col.id}_" type="button" class="grid-filter-clear" style="color: black;">×</button>` : ''}
-            </div>`;
+        //let res = super.drawHeaderCell(col);
+        //if (col.filtrable && context != 'fake') {
+        //    res += `<div class="grid-header-filter">
+        //        <input value="${col.filter !== undefined ? col.filter : ''}"  title="${col.filter !== undefined ? col.filter : ''}" grid-col-filter="${grid.id}_${col.id}_" class="grid-col-filter ${grid.opt.filterInputClass || ''}">
+        //        ${col.filter !== undefined && col.filter !== '' ? `<button grid-filter-clear="${grid.id}_${col.id}_" type="button" class="grid-filter-clear" style="color: black;">×</button>` : ''}
+        //    </div>`;
+        //}
+
+
+        const title = this.translate(col.title || col.name);
+        const sortDir = !col.sortable ? '' : col.asc ? '&#11205;' : col.desc || context == 'fake' ? '&#11206;' : '';
+        let res = //`<div class="grid-header-content-grid">`
+                `<span class="grid-header-title" style="${col.sortable ? 'cursor:pointer;' : ''} ${!sortDir ? 'grid-column: span 2;' : ''}">${title}</span>`;
+        if (sortDir) {
+            res += `<span class="grid-header-sort-sign">${sortDir}</span>`;
         }
+        if (col.filtrable && context != 'fake') {
+            const hasFilter = col.filter !== undefined && col.filter !== '';
+            //<div class="grid-header-filter">
+            res += `
+                    <input value="${col.filter !== undefined ? col.filter : ''}"  title="${col.filter !== undefined ? col.filter : ''}" grid-col-filter="${grid.id}_${col.id}_" 
+                        class="grid-col-filter ${grid.opt.filterInputClass || ''}" style="${!hasFilter ? 'grid-column: span 2;' : ''}">
+                    
+                `;//</div>
+
+            res += hasFilter ? `<button grid-filter-clear="${grid.id}_${col.id}_" type="button" class="grid-filter-clear" style="color: black;">×</button>` : '';
+        }
+        //res += `</div>`;
 
         return res;
     }
@@ -49,18 +70,6 @@ export default class GridFL extends Grid {
                         }
                     }
                 })
-
-            //    const res = [];
-            //    let i = 0;
-            //    for (let row of grid.getRows(e)) {
-            //        res.push({ id: i++, text: String(row) });
-            //    };
-
-            //    if (e.resolve) {
-            //        e.resolve(res);
-            //    }
-
-            //    return res;
             },
             onItemClick: function (owner, itemId) {
                 const item = grid._autocompleteDropdown.items.find(function (item, index, array) {
@@ -155,7 +164,7 @@ export default class GridFL extends Grid {
                 grid.clearAllColumnFilters();
             },
             getDisabled: function () {
-                return /*!grid.rows || grid.rows.length <= 0 ||*/ !grid.isFiltered();
+                return !grid.isFiltered();
             },
             draw: grid.drawPagerButton,
         }

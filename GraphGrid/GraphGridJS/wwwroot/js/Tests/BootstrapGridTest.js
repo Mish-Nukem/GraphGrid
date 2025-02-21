@@ -147,12 +147,24 @@ function createChildGrid() {
             this.totalRows = this.rows.length;
             this.rows = this.pageSize > 0 && this.pageNumber > 0 ? this.rows.slice((this.pageNumber - 1) * this.pageSize, this.pageNumber * this.pageSize) : this.rows;
 
+            let sortCol = null;
+            for (let col of this.columns) {
+                if (col.asc || col.desc) {
+                    sortCol = col;
+                    break;
+                }
+            }
+
+            if (sortCol != null) {
+                this.rows.sort(function (a, b) { return a[sortCol.name] > b[sortCol.name] ? (sortCol.asc ? 1 : -1) : (sortCol.asc ? -1 : 1); });
+            }
+
             if (e.resolve) {
                 e.resolve();
             }
         },
         getColumns: function () {
-            return [{ name: 'Id' }, { name: 'Name', title: 'Child' }, { name: 'SecondName' }, { name: 'Date' }];
+            return [{ name: 'Id', sortable: true }, { name: 'Name', title: 'Child', sortable: true }, { name: 'SecondName', sortable: true }, { name: 'Date', sortable: true }];
         },
         pageSize: 5
     });
@@ -191,12 +203,24 @@ function createSecondChildGrid() {
             this.totalRows = this.rows.length;
             this.rows = this.pageSize > 0 && this.pageNumber > 0 ? this.rows.slice((this.pageNumber - 1) * this.pageSize, this.pageNumber * this.pageSize) : this.rows;
 
+            let sortCol = null;
+            for (let col of this.columns) {
+                if (col.asc || col.desc) {
+                    sortCol = col;
+                    break;
+                }
+            }
+
+            if (sortCol != null) {
+                this.rows.sort(function (a, b) { return a[sortCol.name] > b[sortCol.name] ? (sortCol.asc ? 1 : -1) : (sortCol.asc ? -1 : 1); });
+            }
+
             if (e.resolve) {
                 e.resolve();
             }
         },
         getColumns: function () {
-            return [{ name: 'City', title: 'Lived in City' }];
+            return [{ name: 'City', title: 'Lived in City', sortable: true }];
         },
         pageSize: 5
     });
@@ -232,12 +256,24 @@ function createThirdChildGrid() {
             this.totalRows = this.rows.length;
             this.rows = this.pageSize > 0 && this.pageNumber > 0 ? this.rows.slice((this.pageNumber - 1) * this.pageSize, this.pageNumber * this.pageSize) : this.rows;
 
+            let sortCol = null;
+            for (let col of this.columns) {
+                if (col.asc || col.desc) {
+                    sortCol = col;
+                    break;
+                }
+            }
+
+            if (sortCol != null) {
+                this.rows.sort(function (a, b) { return a[sortCol.name] > b[sortCol.name] ? (sortCol.asc ? 1 : -1) : (sortCol.asc ? -1 : 1); });
+            }
+
             if (e.resolve) {
                 e.resolve();
             }
         },
         getColumns: function () {
-            return [{ name: 'Id' }, { name: 'Name', title: 'Child' }, { name: 'SecondName' }, { name: 'Date' }];
+            return [{ name: 'Id', sortable: true }, { name: 'Name', title: 'Child', sortable: true }, { name: 'SecondName', sortable: true }, { name: 'Date', sortable: true }];
         },
         pageSize: 5
     });
@@ -299,23 +335,6 @@ export function TestPopupWndGrid() {
         ul.appendChild(tab);
 
         btn = document.createElement('button');
-        btn.id = 'cities-tab';
-        btn.className = 'nav-link';
-        btn.setAttribute('role', 'tab');
-        btn.setAttribute('data-bs-toggle', 'tab');
-        btn.setAttribute('data-bs-target', '#cities');
-        btn.setAttribute('aria-controls', 'cities');
-        btn.setAttribute('aria-selected', 'false');
-        btn.setAttribute('type', 'button');
-        btn.textContent = 'Cities';
-        tab.appendChild(btn);
-
-        tab = document.createElement('li');
-        tab.className = 'nav-item';
-        tab.setAttribute('role', 'presentation');
-        ul.appendChild(tab);
-
-        btn = document.createElement('button');
         btn.id = 'parents-tab';
         btn.className = 'nav-link';
         btn.setAttribute('role', 'tab');
@@ -325,6 +344,23 @@ export function TestPopupWndGrid() {
         btn.setAttribute('aria-selected', 'false');
         btn.setAttribute('type', 'button');
         btn.textContent = 'Parents';
+        tab.appendChild(btn);
+
+        tab = document.createElement('li');
+        tab.className = 'nav-item';
+        tab.setAttribute('role', 'presentation');
+        ul.appendChild(tab);
+
+        btn = document.createElement('button');
+        btn.id = 'cities-tab';
+        btn.className = 'nav-link';
+        btn.setAttribute('role', 'tab');
+        btn.setAttribute('data-bs-toggle', 'tab');
+        btn.setAttribute('data-bs-target', '#cities');
+        btn.setAttribute('aria-controls', 'cities');
+        btn.setAttribute('aria-selected', 'false');
+        btn.setAttribute('type', 'button');
+        btn.textContent = 'Cities';
         tab.appendChild(btn);
 
         wndBodyElement.appendChild(ul);
@@ -350,21 +386,6 @@ export function TestPopupWndGrid() {
         }
         modalChildGrid.parent = div2;
 
-        const div3 = document.createElement('div');
-        div3.style.margin = '10px';
-        div3.style.float = 'left';
-        div3.className = 'tab-pane';
-        div3.id = 'cities';
-        div3.setAttribute('role', 'tabpanel');
-        div3.setAttribute('aria-labelledby', 'cities-tab');
-        div3.setAttribute('tabindex', '0');
-        divDetails.appendChild(div3);
-
-        if (!modalSecondChildGrid) {
-            modalSecondChildGrid = createSecondChildGrid();
-        }
-        modalSecondChildGrid.parent = div3;
-
         const div4 = document.createElement('div');
         div4.style.margin = '10px';
         div4.style.float = 'left';
@@ -379,6 +400,21 @@ export function TestPopupWndGrid() {
             modalThirdChildGrid = createThirdChildGrid();
         }
         modalThirdChildGrid.parent = div4;
+
+        const div3 = document.createElement('div');
+        div3.style.margin = '10px';
+        div3.style.float = 'left';
+        div3.className = 'tab-pane';
+        div3.id = 'cities';
+        div3.setAttribute('role', 'tabpanel');
+        div3.setAttribute('aria-labelledby', 'cities-tab');
+        div3.setAttribute('tabindex', '0');
+        divDetails.appendChild(div3);
+
+        if (!modalSecondChildGrid) {
+            modalSecondChildGrid = createSecondChildGrid();
+        }
+        modalSecondChildGrid.parent = div3;
 
         modalGrid.refresh();
     }
