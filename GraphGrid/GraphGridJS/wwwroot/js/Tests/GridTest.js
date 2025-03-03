@@ -44,7 +44,7 @@ export function TestPopupWndGrid() {
             x: 120,
             y: 120,
             w: 450,
-            h: 200,
+            h: 300,
             minH: 50,
             minW: 100
         },

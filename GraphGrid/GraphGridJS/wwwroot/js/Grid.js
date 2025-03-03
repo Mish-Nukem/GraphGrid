@@ -14,11 +14,11 @@
 
         this.selectedRowIndex = 0;
     }
-
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     translate(text, context) {
         return text;
     }
-
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     createGridElement() {
         const res = {};
 
@@ -47,7 +47,7 @@
 
         return res;
     }
-
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     draw() {
         const gridElemObj = this.createGridElement();
         if (gridElemObj.isNew) {
@@ -56,11 +56,11 @@
         this.drawHeader();
         this.drawBody();
     }
-
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     calculatePagesCount() {
         this.pagesCount = (this.totalRows / this.pageSize | 0) + (this.totalRows % this.pageSize > 0 ? 1 : 0);
     }
-
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     afterRefresh() {
         if (!this.columns) {
             this.prepareColumns(this.getColumns());
@@ -69,7 +69,7 @@
         this.draw();
         this.onSelectedRowChanged({ prev: this.selectedRowIndex, new: this.selectedRowIndex });
     }
-
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     refresh() {
         const grid = this;
 
@@ -80,7 +80,7 @@
             }
         });
     }
-
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     remove() {
         const grid = window._gridDict[this.id];
         if (!grid) return;
@@ -96,7 +96,7 @@
             gridElement.remove();
         }, 10);
     }
-
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     drawHeader(gridElement) {
         if (!this.columns && (this.getColumns || this.rows)) {
             this.prepareColumns(this.getColumns());
@@ -104,12 +104,14 @@
 
         if (!this.columns) return;
 
-        const colClass = this.opt.columnClass ? `class="${this.opt.columnClass}"` : '';
+        const colClass = ``;
 
         let w = 0;
         let s = '<thead><tr>';
         for (let col of this.columns) {
-            s += `<th grid-header="${this.id}_${col.id}_" ${colClass} class="grid-header-th" style="position: sticky;top: 0;width: ${col.w}px;overflow: hidden;vertical-align: top;">
+            w += col.w;
+            s += `<th grid-header="${this.id}_${col.id}_" class="${this.opt.columnClass ? this.opt.columnClass : ''} grid-header-th" 
+                    style="position: sticky;top: 0;width: ${col.w}px;overflow: hidden;vertical-align: top;">
                     <div class="grid-header-div-default ${this.opt.headerDivClass || 'grid-header-div'}">
                         ${this.drawHeaderCell(col)}
                     </div>
@@ -117,7 +119,6 @@
                         style="position: absolute;right: -6px;top: -1px;cursor: e-resize;height:100%;width: 12px;z-index: ${this.opt.zInd + 1};">
                     </div>
                 </th>`;
-            w += col.w;
         }
         s += '</tr></thead>';
 
@@ -131,18 +132,20 @@
 
         this._skipChange = false;
     }
-
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     drawHeaderCell(col, context) {
-        return this.translate(col.title || col.name);//`<div class="grid-header-content">${this.translate(col.title || col.name)}</div>`;
+        return this.translate(col.title || col.name);
     }
-
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     drawBody(gridElement) {
         if (!this.columns || !this.rows) return;
+
+        const selectedClass = `class="grid-selected-row ${this.opt.selectedRowClass || ''}"`;
 
         let i = 0;
         let s = '<tbody>';
         for (let row of this.rows) {
-            s += `<tr ${(this.selectedRowIndex == i++ ? `class="grid-selected-row ${this.opt.selectedRowClass || ''}"` : '')}>`;
+            s += `<tr ${(this.selectedRowIndex == i++ ? selectedClass : '')}>`;
             for (let col of this.columns) {
                 s += `<td>${this.drawCell(col, row)}</td>`;
             }
@@ -160,12 +163,12 @@
             gridElement.innerHTML += s;
         }
     }
-
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     drawCell(col, row) {
         const val = row[col.name];
         return val !== undefined ? val : '';
     }
-
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     getRows(e) {
         this.rows = [];
         if (e.resolve) {
@@ -173,7 +176,7 @@
         }
         return this.rows;
     }
-
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     getColumns() {
         const res = [];
         this.colDict = {};
@@ -191,7 +194,7 @@
 
         return res;
     }
-
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     prepareColumns(columns) {
         this.columns = columns || this.columns || [];
         this.colDict = this.colDict || {};
@@ -209,54 +212,50 @@
 
         Object.assign(this.columnsDefaultOrder, this.columns);
     }
-
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     resetColumnsOrderToDefault() {
         Object.assign(this.columns, this.columnsDefaultOrder);
         this.draw();
     }
-
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     resetColumnsWidthsToDefault() {
         for (let col of this.columns) {
             col.w = col.initW;
         }
         this.draw();
     }
-
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     onSelectGridRow(e) {
         if (e.target.tagName != 'TD') return;
 
         const [gr, id] = this.id.split('_');
         const grid = window._gridDict[id];
 
-        const prevSelected = grid.selectedRowIndex;
-        grid.selectedRowIndex = 0;
+        const prevSelectedIndex = grid.selectedRowIndex;
+
+        if (e.target.parentElement.rowIndex - 1 == prevSelectedIndex) return;
 
         const rows = this.tBodies[0].rows;
-        for (let i = 0; i < rows.length; i++) {
-            let row = rows[i];
-            if (row == e.target.parentElement) {
-                grid.selectedRowIndex = i;
-                row.classList.add(`grid-selected-row`);
-                if (grid.opt.selectedRowClass) {
-                    row.classList.add(grid.opt.selectedRowClass);
-                }
 
-                grid.onSelectedRowChanged({ prev: prevSelected, new: i });
-            }
-            else {
-                if (row.classList.contains('grid-selected-row')) {
-                    row.classList.remove('grid-selected-row');
-                }
-                if (grid.opt.selectedRowClass && row.classList.contains(grid.opt.selectedRowClass)) {
-                    row.classList.remove(grid.opt.selectedRowClass);
-                }
-            }
+        const prevSelRow = rows[grid.selectedRowIndex];
+        prevSelRow.classList.remove('grid-selected-row');
+        if (grid.opt.selectedRowClass) {
+            prevSelRow.classList.remove(grid.opt.selectedRowClass);
         }
-    }
 
+        grid.selectedRowIndex = e.target.parentElement.rowIndex - 1;
+        const newSelRow = rows[grid.selectedRowIndex];
+        newSelRow.classList.add(`grid-selected-row`);
+        if (grid.opt.selectedRowClass) {
+            newSelRow.classList.add(grid.opt.selectedRowClass);
+        }
+
+        grid.onSelectedRowChanged({ prev: prevSelectedIndex, new: grid.selectedRowIndex });
+    }
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     onSelectedRowChanged(e) {
     }
-
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     setupColumnResize(gridElement) {
         const mouseDown = function (e) {
             if (e.target.tagName == 'INPUT') return;
@@ -329,7 +328,7 @@
 
         gridElement.addEventListener('mousedown', mouseDown);
     }
-
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     setupColumnDrag(gridElement) {
         const addFakeGrid = function (e, grid, column, th) {
             const rect = th.getBoundingClientRect();
@@ -356,7 +355,7 @@
             document.body.append(fakeGrid);
             return fakeGrid;
         }
-
+        // -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  
         const mouseDown = function (e) {
             if (e.target.tagName == 'INPUT' || e.target.hasAttribute('grid-rsz-x')) return;
 
@@ -428,7 +427,7 @@
                 delete grid._targetColumn;
             };
         };
-
+        // -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  
         const mouseOver = function (e) {
             const th = e.target.closest('TH');
             if (!th || !th.hasAttribute('grid-header')) return;
@@ -447,7 +446,7 @@
 
             th.classList.add('grid-header-drag-over');
         }
-
+        // -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  
         const mouseOut = function (e) {
             const th = e.target.closest('TH');
             if (!th || !th.hasAttribute('grid-header')) return;
@@ -465,7 +464,7 @@
 
             delete grid._targetColumn;
         }
-
+        // -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  
         const clearMovingClass = function (e, th) {
             th = th || e.target.closest('TH');
 
@@ -475,7 +474,7 @@
                 th.classList.remove('grid-header-drag-over');
             }
         }
-
+        // -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  
         const mouseDoubleClick = function (e) {
             if (!e.target.hasAttribute('grid-rsz-x')) return;
 
@@ -516,10 +515,11 @@
 
             fakeDiv.remove();
         }
-
+        // -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  
         gridElement.addEventListener('mousedown', mouseDown);
         gridElement.addEventListener('mouseover', mouseOver);
         gridElement.addEventListener('mouseout', mouseOut);
         gridElement.addEventListener('dblclick', mouseDoubleClick);
     }
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
 }
