@@ -1,12 +1,10 @@
-﻿//import Grid from './Grid.js';
-import Grid from './GridInGraph.js';
-//import Modal from './Modals.js';
+﻿import Grid from './GridInGraph.js';
 import Dropdown from './Dropdown.js';
 
 window.NodeStatus = {
     grid: 0, hidden: 1, filter: 2, lookup: 3, custom: 4
 };
-
+// ==================================================================================================================================================================
 export default class GridDB extends Grid {
 
     constructor(options) {
@@ -20,7 +18,7 @@ export default class GridDB extends Grid {
         this.toolbarButtons = options.toolbarButtons;
         this.setupPagerButtons();
     }
-
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     skipOnWaveVisit(e) {
         if (super.skipOnWaveVisit(e)) return true;
 
@@ -35,7 +33,7 @@ export default class GridDB extends Grid {
             }
         }
     }
-
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     visitByWave(e) {
         if (this.skipOnWaveVisit(e)) return;
 
@@ -43,7 +41,7 @@ export default class GridDB extends Grid {
 
         super.visitByWave(e);
     }
-
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     draw() {
         const gridElemObj = this.createGridElement();
         if (gridElemObj.isNew) {
@@ -65,7 +63,7 @@ export default class GridDB extends Grid {
         this.drawHeader(gridElemObj.gridElement);
         this.drawBody(gridElemObj.gridElement);
     }
-
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     drawToolbar(full) {
         if (!this.toolbarButtons || this.toolbarButtons.length <= 0) return '';
 
@@ -96,11 +94,11 @@ export default class GridDB extends Grid {
 
         return elem;
     }
-
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     drawAppliedFilters(full) {
         return '';
     }
-
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     drawPagerButton(grid, button) {
         return `
                 <button grid-pager-item="${grid.id}_${button.id}_" class="${button.class ? button.class : 'grid-pager-button'}"
@@ -110,7 +108,7 @@ export default class GridDB extends Grid {
                 </button>
             `;
     }
-
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     drawPager(full, bottom) {
         if (bottom && !this.allowBottomPager) return '';
 
@@ -137,7 +135,7 @@ export default class GridDB extends Grid {
 
         return elem;
     }
-
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     onPagerButtonClick(e) {
         const elem = e.target.closest('BUTTON') || e.target;
 
@@ -159,7 +157,7 @@ export default class GridDB extends Grid {
 
         button.click(e);
     }
-
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     onToolbarButtonClick(e) {
         const elem = e.target.closest('BUTTON') || e.target;
 
@@ -179,7 +177,7 @@ export default class GridDB extends Grid {
 
         button.click(e);
     }
-
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     onPagerItemChange(e) {
         if (e.target.tagName == 'BUTTON') return;
 
@@ -197,21 +195,21 @@ export default class GridDB extends Grid {
 
         button.change(e);
     }
-
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     gotoFirstPage() {
         const grid = this;
         grid.pageNumber = 1;
         grid.selectedRowIndex = 0;
         grid.refresh();
     }
-
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     gotoPrevPage() {
         const grid = this;
         grid.pageNumber = grid.pageNumber > 1 ? grid.pageNumber - 1 : 1;
         grid.selectedRowIndex = 0;
         grid.refresh();
     }
-
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     gotoNextPage() {
         const grid = this;
         grid.calculatePagesCount();
@@ -219,7 +217,7 @@ export default class GridDB extends Grid {
         grid.selectedRowIndex = 0;
         grid.refresh();
     }
-
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     gotoLastPage() {
         const grid = this;
         grid.calculatePagesCount();
@@ -227,7 +225,7 @@ export default class GridDB extends Grid {
         grid.selectedRowIndex = 0;
         grid.refresh();
     }
-
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     setupPagerButtons() {
         const grid = this;
         grid.pagerButtons = [];
@@ -417,25 +415,20 @@ export default class GridDB extends Grid {
         grid.pagerButtonsDict[rows.id] = grid.pagerButtonsDict[rows.name] = rows;
 
     }
-
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     drawHeaderCell(col) {
         const title = this.translate(col.title || col.name);
         const sortDir = !col.sortable ? '' : col.asc ? '&#11205;' : col.desc ? '&#11206;' : '';
 
-        //return `<div class="grid-header-content">
-        //        <span></span><span style="white-space: nowrap;overflow: hidden;${col.sortable ? 'cursor:pointer' : ''}">${title}</span><span class="grid-header-sort-sign">${sortDir}</span>
-        //    </div>`;
-        //`<div class="grid-header-content-grid">`
         let res = `<span class="grid-header-title" style="${col.sortable ? 'cursor:pointer' : ''}">${title}</span>`;
         res += sortDir ? `<span class="grid-header-sort-sign">${sortDir}</span>` : '';
-        //`</div>`;
         return res;
     }
-
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     getGridSettings(e) {
         return [{ id: 0, text: 'Reset columns order' }, { id: 1, text: 'Reset columns widths' }];
     }
-
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     showGridSettings(e) {
         const grid = this;
 
@@ -452,7 +445,7 @@ export default class GridDB extends Grid {
 
         dropdown.show();
     }
-
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     onSettingsItemClick(grid, itemId) {
         switch (itemId) {
             case '0':
@@ -463,7 +456,7 @@ export default class GridDB extends Grid {
                 break;
         }
     }
-
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     changeColumnSortOrder(column) {
         const grid = this;
 
@@ -490,8 +483,9 @@ export default class GridDB extends Grid {
         grid.selectedRowIndex = 0;
         grid.refresh();
     }
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
 }
-
+// ==================================================================================================================================================================
 document.addEventListener('click', function (e) {
     let gridId, itemId, grid;
 
@@ -508,3 +502,4 @@ document.addEventListener('click', function (e) {
             break;
     }
 });
+// -------------------------------------------------------------------------------------------------------------------------------------------------------------

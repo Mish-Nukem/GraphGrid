@@ -9,20 +9,15 @@ window.MoveType = {
     fromParent: 0, fromChild: 1, All: 2
 };
 
-//let Graph;
-// -------------------------------------------------------------------------------------------------------------------------------------------------------------
+// ==================================================================================================================================================================
 export default class GridInGraph extends Grid {
 
     constructor(options) {
         super(options);
     }
-
-    /*async*/ connectToParentGrid(parentGrid, content, noDetectCycles) {
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
+    connectToParentGrid(parentGrid, content, noDetectCycles) {
         const grid = this;
-
-        //if (!Graph) {
-        //    await import('./Graph.js').then(function (obj) { Graph = obj; });
-        //}
 
         if (!parentGrid || parentGrid == grid || parentGrid.id == grid.id) return;
 
@@ -49,7 +44,7 @@ export default class GridInGraph extends Grid {
             grid.graph.nodesDict[grid.id] = grid;
         }
         else {
-            grid.graph = parentGrid.graph = new Graph(); //Graph.CreateGraph();
+            grid.graph = parentGrid.graph = new Graph();
             grid.graph.nodeCount = 2;
             grid.graph.nodesDict[parentGrid.id] = parentGrid;
             grid.graph.nodesDict[grid.id] = grid;
@@ -68,7 +63,7 @@ export default class GridInGraph extends Grid {
             grid.graph.markCycles();
         }
     }
-
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     onSelectedRowChanged(e) {
         super.onSelectedRowChanged(e);
 
@@ -76,7 +71,7 @@ export default class GridInGraph extends Grid {
             this.graph.triggerWave({ nodes: [this], withStartNodes: false });
         }
     }
-
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     collectFilters() {
         const filters = [];
 
@@ -94,14 +89,14 @@ export default class GridInGraph extends Grid {
 
         return filters;
     }
-
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     skipOnWaveVisit(e) {
         if (e.waveType == WaveType.refresh) {
             if (!this.visible || this.status == NodeStatus.hidden) return true;
             if (this.status == NodeStatus.filter && !this._selecting) return true;
         }
     }
-
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     visitByWave(e) {
         if (this.skipOnWaveVisit(e)) return;
 
@@ -117,4 +112,5 @@ export default class GridInGraph extends Grid {
             }
         });
     }
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
 }

@@ -1,7 +1,4 @@
-﻿export function CreateGraph() {
-    return new Graph();
-}
-
+﻿// ==================================================================================================================================================================
 export default class Graph {
     constructor() {
         this.nodesDict = {};

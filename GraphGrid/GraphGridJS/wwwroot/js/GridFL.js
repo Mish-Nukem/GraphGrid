@@ -1,43 +1,30 @@
 ﻿import Grid from './GridDB.js';
 import Dropdown from './Dropdown.js';
-
+// ==================================================================================================================================================================
 export default class GridFL extends Grid {
 
     drawHeaderCell(col, context) {
         const grid = this;
 
-        //let res = super.drawHeaderCell(col);
-        //if (col.filtrable && context != 'fake') {
-        //    res += `<div class="grid-header-filter">
-        //        <input value="${col.filter !== undefined ? col.filter : ''}"  title="${col.filter !== undefined ? col.filter : ''}" grid-col-filter="${grid.id}_${col.id}_" class="grid-col-filter ${grid.opt.filterInputClass || ''}">
-        //        ${col.filter !== undefined && col.filter !== '' ? `<button grid-filter-clear="${grid.id}_${col.id}_" type="button" class="grid-filter-clear" style="color: black;">×</button>` : ''}
-        //    </div>`;
-        //}
-
-
         const title = this.translate(col.title || col.name);
         const sortDir = !col.sortable ? '' : col.asc ? '&#11205;' : col.desc || context == 'fake' ? '&#11206;' : '';
-        let res = //`<div class="grid-header-content-grid">`
-                `<span class="grid-header-title" style="${col.sortable ? 'cursor:pointer;' : ''} ${!sortDir ? 'grid-column: span 2;' : ''}">${title}</span>`;
+        let res = `<span class="grid-header-title" style="${col.sortable ? 'cursor:pointer;' : ''} ${!sortDir ? 'grid-column: span 2;' : ''}">${title}</span>`;
         if (sortDir) {
             res += `<span class="grid-header-sort-sign">${sortDir}</span>`;
         }
         if (col.filtrable && context != 'fake') {
             const hasFilter = col.filter !== undefined && col.filter !== '';
-            //<div class="grid-header-filter">
             res += `
                     <input value="${col.filter !== undefined ? col.filter : ''}"  title="${col.filter !== undefined ? col.filter : ''}" grid-col-filter="${grid.id}_${col.id}_" 
                         class="grid-col-filter ${grid.opt.filterInputClass || ''}" style="${!hasFilter ? 'grid-column: span 2;' : ''}">
-                    
-                `;//</div>
+                `;
 
             res += hasFilter ? `<button grid-filter-clear="${grid.id}_${col.id}_" type="button" class="grid-filter-clear" style="color: black;">×</button>` : '';
         }
-        //res += `</div>`;
 
         return res;
     }
-
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     showAutocomplete(parentElem, column) {
         const grid = this;
 
@@ -85,7 +72,7 @@ export default class GridFL extends Grid {
 
         grid._autocompleteDropdown.show();
     }
-
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     columnFilterChange(column, filter) {
         const grid = this;
 
@@ -95,7 +82,7 @@ export default class GridFL extends Grid {
         grid.selectedRowIndex = 0;
         grid.refresh();
     }
-
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     clearAllColumnFilters() {
         const grid = this;
 
@@ -107,7 +94,7 @@ export default class GridFL extends Grid {
         grid.selectedRowIndex = 0;
         grid.refresh();
     }
-
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     isFiltered() {
         const grid = this;
 
@@ -117,7 +104,7 @@ export default class GridFL extends Grid {
 
         return false;
     }
-
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     getGridSettings(grid) {
         const res = super.getGridSettings(grid);
 
@@ -125,7 +112,7 @@ export default class GridFL extends Grid {
 
         return res;
     }
-
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     onSettingsItemClick(grid, itemId) {
         super.onSettingsItemClick(grid, itemId);
 
@@ -135,7 +122,7 @@ export default class GridFL extends Grid {
                 break;
         }
     }
-
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     setupPagerButtons() {
         const grid = this;
 
@@ -172,8 +159,9 @@ export default class GridFL extends Grid {
         grid.pagerButtons.unshift(clear);
         grid.pagerButtonsDict[clear.id] = grid.pagerButtonsDict[clear.name] = clear;
     }
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
 }
-
+// ==================================================================================================================================================================
 document.addEventListener('click', function (e) {
     let gridId, itemId, grid;
 
@@ -199,7 +187,7 @@ document.addEventListener('click', function (e) {
             break;
     }
 });
-
+// -------------------------------------------------------------------------------------------------------------------------------------------------------------
 //document.addEventListener('dblclick', function (e) {
 //    let gridId, itemId, grid, column;
 
@@ -226,7 +214,7 @@ document.addEventListener('click', function (e) {
 //            break;
 //    }
 //});
-
+// -------------------------------------------------------------------------------------------------------------------------------------------------------------
 document.addEventListener('change', function (e) {
     let gridId, itemId, grid;
 
@@ -246,7 +234,7 @@ document.addEventListener('change', function (e) {
             break;
     }
 });
-
+// -------------------------------------------------------------------------------------------------------------------------------------------------------------
 document.addEventListener('input', function (e) {
     let gridId, itemId, grid;
 
@@ -272,7 +260,7 @@ document.addEventListener('input', function (e) {
             break;
     }
 });
-
+// -------------------------------------------------------------------------------------------------------------------------------------------------------------
 document.addEventListener('click', function (e) {
 
     switch (e.target.tagName) {
@@ -290,3 +278,4 @@ document.addEventListener('click', function (e) {
             break;
     }
 });
+// -------------------------------------------------------------------------------------------------------------------------------------------------------------

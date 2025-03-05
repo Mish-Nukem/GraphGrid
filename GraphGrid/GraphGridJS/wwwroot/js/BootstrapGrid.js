@@ -1,6 +1,5 @@
-﻿//import Grid from './GridDB.js';
-import Grid from './GridFL.js';
-
+﻿import Grid from './GridFL.js';
+// ==================================================================================================================================================================
 export default class BootstrapGrid extends Grid {
 
     constructor(options) {
@@ -20,7 +19,7 @@ export default class BootstrapGrid extends Grid {
         this.opt.menuItemClass = 'list-group-item list-group-item-action list-group-item-light';
         this.opt.dropdownWndClass = 'none';
     }
-
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     setupPagerButtons() {
         const grid = this;
 
@@ -90,33 +89,25 @@ export default class BootstrapGrid extends Grid {
             </svg>`;
         }
     }
-
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     translate(text, context) {
-        switch (text.toUpperCase()) {
-            case 'CLEAR ALL FILTERS':
-                return 'Очистить все фильтры';
-            case 'FIRST':
-                return 'К началу';
-            case 'LAST':
-                return 'В конец';
-            case 'NEXT':
-                return 'Следующая';
-            case 'OF':
-                return 'из';
-            case 'PREV':
-                return 'Предыдущая';
-            case 'REFRESH':
-                return 'Обновить'
-            case 'RESET COLUMNS ORDER':
-                return 'Сбросить порядок колонок';
-            case 'RESET COLUMNS WIDTHS':
-                return 'Сбросить ширину колонок';
-            case 'SETTINGS':
-                return 'Настройки';
-            case 'TOTAL ROWS':
-                return 'Всего строк'
-        }
 
-        return text;
+        const dict = {
+            'CLEAR ALL FILTERS': 'Очистить все фильтры',
+            'FIRST': 'К началу',
+            'LAST': 'В конец',
+            'NEXT': 'Следующая',
+            'OF': 'из',
+            'PREV': 'Предыдущая',
+            'REFRESH': 'Обновить',
+            'RESET COLUMNS ORDER': 'Сбросить порядок колонок',
+            'RESET COLUMNS WIDTHS': 'Сбросить ширину колонок',
+            'SETTINGS': 'Настройки',
+            'TOTAL ROWS': 'Всего строк',
+            'MORE...': 'еще...',
+            'LOAD MORE RECORDS': 'Загрузить еще строк'
+        };
+        return dict[text.toUpperCase()] || text;
     }
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
 }
