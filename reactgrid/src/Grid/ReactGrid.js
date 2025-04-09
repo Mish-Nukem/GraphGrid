@@ -5,7 +5,7 @@ import { useState } from 'react';
 export default function ReactGrid(props) {
     window._gridDict = window._gridDict || { seq: 0 };
 
-    //window._logEnabled = true;
+    window._logEnabled = true;
 
     let grid = window._gridDict['guid_' + props.uid];
 
@@ -48,7 +48,7 @@ export default function ReactGrid(props) {
         });
     }
 
-    return (grid.render(grid));
+    return (grid.render());
 }
 // -------------------------------------------------------------------------------------------------------------------------------------------------------------
 function log(message) {
@@ -498,6 +498,8 @@ export class ReactGridClass {
                 column.w = newW;
                 th.style.width = newW + 'px';
                 gridElement.style.width = (parseInt(gridElement.style.width) + newW - initW) + 'px';
+
+                grid.setState({ rows: grid.rows, columns: grid.columns, ind: grid.stateind++ });
             }
 
             fakeDiv.remove();
