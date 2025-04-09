@@ -121,8 +121,12 @@ function createGrid() {
                     return !e.grid.rows || e.grid.rows.length <= 0;
                 }
             }
-
-        ]
+        ],
+    //    drawCell: function (column, row) {
+    //        let val = row[column.name];
+    //        val = val !== undefined ? val : '';
+    //        return (<span>${val}</span>)
+    //    }
     });
     return res;
 }

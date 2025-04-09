@@ -1,0 +1,210 @@
+﻿body {
+}
+
+.modal-window-wnd {
+    border-radius: 3px;
+    overflow: hidden;
+}
+
+.modal-window-header {
+    padding: 5px 10px 0;
+}
+
+    .modal-window-header > h4 {
+        white-space: nowrap;
+        overflow: hidden;
+    }
+
+    .modal-window-header > button {
+        border: 0;
+        background: 0 0;
+        font-size: 21px;
+        font-weight: 700;
+        line-height: 1;
+        opacity: 0.2;
+        cursor: pointer;
+    }
+
+        .modal-window-header > button:hover {
+            opacity: 1;
+        }
+
+.modal-window-body {
+    padding: 0 10px;
+    height: 100%;
+    overflow: auto;
+}
+
+.modal-window-footer {
+    padding: 10px;
+    justify-content: flex-end !important;
+}
+
+.modal-window-footer-button {
+    padding: 2px 5px;
+    margin: 5px;
+    white-space: nowrap;
+    overflow: hidden;
+    cursor: pointer;
+}
+
+.grid-default {
+    border-collapse: collapse;
+    table-layout: fixed;
+    /*border: solid 1px;*/
+}
+
+    .grid-default > tr > td,
+    .grid-default > tbody > tr > td
+    /*,.grid-default > tbody > tr > th,
+    .grid-default > thead > tr > th*/ {
+        border: solid;
+        border-width: 0 1px 1px 1px;
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: clip;
+        vertical-align: middle;
+        /*white-space-collapse: collapse;*/
+    }
+
+
+    .grid-default > tbody > tr > th,
+    .grid-default > thead > tr > th {
+        background-color: white;
+        /*border: none;*/
+        border: solid;
+        border-width: 0 1px 0 1px;
+        white-space: nowrap;
+        text-overflow: clip;
+        vertical-align: middle;
+    }
+
+.grid-header-div {
+    /*border: outset;*/
+    border: solid;
+    margin: -1px -1px -1px -1px;
+    border-width: 1px 0;
+}
+
+.grid-header-th {
+    background-color: white;
+}
+
+.grid-header-div-default {
+    user-select: none;
+    display: grid;
+    grid-template-columns: auto 12px;
+    grid-template-rows: auto auto;
+    grid-auto-flow: row;
+}
+
+.grid-header-content {
+    display: flex;
+    flex-wrap: nowrap;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.grid-header-drag-over {
+    background-color: lightgray !important;
+}
+
+.grid-header-sort-sign {
+    /*margin-top: -4px;*/
+    font-size: 12px;
+    display: flex;
+    align-items: flex-end;
+    justify-content: flex-end;
+    cursor: pointer;
+}
+
+.grid-header-filter {
+    /*white-space: nowrap;*/
+    display: flex;
+    grid-column: span 2;
+}
+
+.grid-filter-clear {
+    border: 0;
+    opacity: 0.2;
+    display: flex;
+    justify-content: center;
+}
+
+    .grid-filter-clear:hover {
+        opacity: 1;
+    }
+
+.grid-cell {
+}
+
+.grid-selected-row {
+    background-color: lightgray;
+}
+
+.grid-pager-button {
+    margin: 5px 1px;
+}
+
+.grid-toolbar-button {
+    margin: 5px;
+}
+
+.grid-pager-current {
+    width: 3em;
+}
+
+.grid-pager-size {
+}
+
+.grid-settings-ul {
+    padding: 0;
+    margin: 5px 0;
+}
+
+    .grid-settings-ul > li {
+        list-style-type: none;
+        cursor: pointer;
+    }
+
+.dropdown-wnd {
+    background: white;
+    border: 1px solid;
+    /*padding: 0 5px;*/
+}
+
+.dropdown-ul {
+    padding: 0;
+    /*margin: 5px 0;*/
+    margin: 0;
+}
+
+    .dropdown-ul > li {
+        list-style-type: none;
+        cursor: pointer;
+        white-space: nowrap;
+        padding: 2px;
+    }
+
+        .dropdown-ul > li:hover {
+            background-color: lightgray;
+        }
+
+.grid-header-content-grid {
+    display: grid;
+    grid-template-columns: auto 12px;
+    grid-template-rows: auto auto;
+    grid-auto-flow: row;
+}
+
+.grid-header-title {
+    white-space: nowrap;
+    overflow: hidden;
+}
+
+.div-on-menu {
+    margin: 10px;
+}
+/*.grid-col-filter {
+    grid-column: span 2;
+}*/

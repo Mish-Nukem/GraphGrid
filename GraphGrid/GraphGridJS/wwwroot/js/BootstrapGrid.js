@@ -18,6 +18,8 @@ export default class BootstrapGrid extends Grid {
         this.opt.menuClass = 'list-group';
         this.opt.menuItemClass = 'list-group-item list-group-item-action list-group-item-light';
         this.opt.dropdownWndClass = 'none';
+
+        this.drawCell = this.opt.drawCell || this.drawCell;
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     setupPagerButtons() {
