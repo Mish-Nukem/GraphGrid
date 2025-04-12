@@ -1,51 +1,29 @@
 ﻿import React from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 // ==================================================================================================================================================================
 export default function ReactGrid(props) {
-    window._gridDict = window._gridDict || { seq: 0 };
+    window._gridSeq = window._gridSeq || 0;
 
     window._logEnabled = true;
 
-    let grid = window._gridDict['guid_' + props.uid];
+    let grid = null;
 
-    if (!grid) {
-        grid = new ReactGridClass(props);
+    const [gridState, setState] = useState({ grid: grid, ind: 0 });
 
-        log(' 0.0 create grid object: ' + grid.uid + ' ' + grid.id);
+    grid = gridState.grid || new ReactGridClass(props);
 
-        grid.stateind = 0;
-        grid.state = { rows: grid.rows, columns: grid.columns, ind: grid.stateind++ };
-
-        grid.setupGridEvents();
+    if (props.init) {
+        props.init(grid);
     }
 
-    log(' 0.1 Constructor. rows = ' + grid.rows.length + '. state = ' + grid.state.ind);
+    log(' 0.1 Reinit. rows = ' + grid.rows.length + '. state = ' + grid.stateind);
 
-    [grid.state, grid.setState] = useState({ rows: grid.rows, columns: grid.columns, ind: grid.stateind });
-
-    if (grid.rows.length <= 0 || grid.columns.length <= 0) {
-        grid.getRows({
-            resolve: function ({ rows }) {
-                grid.rows = rows;
-
-                log(' 1.0 getRows(). rows = ' + rows.length);
-
-                if (grid.columns.length <= 0) {
-                    grid.columns = grid.getColumns();
-                    grid.prepareColumns(grid.columns);
-
-                    log(' 1.1 prepareColumns()');
-                }
-                grid.calculatePagesCount();
-
-                log(' 2.0 columns = ' + grid.columns.length);
-
-                grid.onSelectedRowChanged({ grid: grid, prev: grid.selectedRowIndex, new: grid.selectedRowIndex });
-
-                grid.state = { rows: grid.rows, columns: grid.columns, ind: 0 }
-            }
-        });
+    if (!grid.refreshState) {
+        grid.refreshState = function () {
+            log('refreshState ' + grid.stateind);
+            setState({ grid: grid, ind: grid.stateind++ });
+        }
     }
 
     return (grid.render());
@@ -59,14 +37,16 @@ function log(message) {
 // -------------------------------------------------------------------------------------------------------------------------------------------------------------
 export class ReactGridClass {
     constructor(props) {
+        log(' 0.0 Grid Constructor ');
+
+        const grid = this;
+
         this.opt = { zInd: 1 };
 
-        window._gridDict = window._gridDict || { seq: 0 };
+        this.id = window._gridSeq++;
 
-        this.id = window._gridDict.seq++;
-        this.uid = props.uid || 'gr_' + this.id;
-
-        this.getRows = props.getRows || this.getRows;
+        //resolve([{ id: 0, text: 'obj_1' }, { id: 1, text: 'obj_2' }, { id: 2, text: 'obj_3' }])
+        this.getRows = props.getRows || function ({ filters }) { return new Promise(function (resolve, reject) { resolve([]) }); }; 
 
         this.getColumns = props.getColumns || this.getColumns;
 
@@ -74,19 +54,45 @@ export class ReactGridClass {
 
         this.selectedRowIndex = 0;
 
-        window._gridDict['guid_' + this.uid] = window._gridDict[this.id] = this;
-
         this.rows = [];
         this.columns = [];
+
+        this.stateind = 0;
+
+        this.setupGridEvents();
+
+        if (!props.noAutoRefresh && (grid.rows.length <= 0 || grid.columns.length <= 0)) {
+
+            grid.getRows({ filters: grid.collectFilters ? grid.collectFilters() : [] }).then(
+                rows => {
+                    grid.rows = rows;
+
+                    log(' 1.0 getRows(). rows = ' + rows.length);
+
+                    if (grid.columns.length <= 0) {
+                        grid.columns = grid.getColumns();
+                        grid.prepareColumns(grid.columns);
+
+                        log(' 1.1 prepareColumns()');
+                    }
+                    grid.calculatePagesCount();
+
+                    log(' 2.0 columns = ' + grid.columns.length);
+
+                    grid.onSelectedRowChanged({ grid: grid, prev: grid.selectedRowIndex, new: grid.selectedRowIndex });
+
+                    grid.refreshState();
+                }
+            );
+        }
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     setupGridEvents() {
-        log('setupGridEvents');
+        log(' 0.1 setupGridEvents');
 
         const grid = this;
-        const gridElement = document.getElementById(`grid_${grid.id}_`);
 
-        grid.setupColumnDrag(gridElement);
+        grid.setupColumnDrag();
 
         document.addEventListener('click', function (e) {
             grid.onSelectGridRow(e);
@@ -109,33 +115,28 @@ export class ReactGridClass {
     refresh() {
         const grid = this;
         grid.ready = false;
-        grid.getRows({
-            filters: grid.collectFilters ? grid.collectFilters() : [],
-            resolve: function ({ rows, grid }) {
-                let columns = grid.columns;
-                if (!columns) {
-                    columns = grid.getColumns();
-                    grid.prepareColumns(grid, columns);
-                    grid.columns = columns;
-                    grid.setColumns(!grid.columnsChanged);
-                }
-                grid.calculatePagesCount(grid);
 
-                grid.setRows(!rows);
+        grid.getRows({ filters: grid.collectFilters ? grid.collectFilters() : [] }).then(
+            rows => {
+                grid.rows = rows;
+
+                if (grid.columns.length <= 0) {
+                    grid.columns = grid.getColumns();
+                    grid.prepareColumns(grid.columns);
+                }
+                grid.calculatePagesCount();
 
                 grid.onSelectedRowChanged({ grid: grid, prev: grid.selectedRowIndex, new: grid.selectedRowIndex });
+
+                grid.refreshState();
             }
-        });
+        );
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     remove() {
-        const grid = window._gridDict[this.id];
-        if (!grid) return;
+        const grid = this;
 
-        delete window._gridDict[grid.id];
-        delete window._gridDict['guid_' + grid.uid];
-
-        const gridElement = document.getElementById(`grid_${grid.id}_`);
+        const gridElement = document.getElementById(`grid_${grid.id}_${grid.stateind}_`);
         gridElement.setAttribute('display', 'none');
 
         document.removeEventListener('click', grid.onSelectGridRow);
@@ -160,7 +161,7 @@ export class ReactGridClass {
 
         return (
             <table
-                id={`grid_${grid.id}_` + grid.state.ind}
+                id={`grid_${grid.id}_${grid.stateind}_`}
                 className={grid.opt.gridClass || 'grid-default'}
                 style={{ width: w + "px" }}
             >
@@ -183,7 +184,7 @@ export class ReactGridClass {
                         return (
                             <th
                                 key={col.id + '_' + col.w + '_'}
-                                grid-header={`${grid.id}_${col.id}_` + grid.state.ind + '_' + col.w}
+                                grid-header={`${grid.id}_${col.id}_` + grid.stateind + '_' + col.w}
                                 className={`${grid.opt.columnClass ? grid.opt.columnClass : ''} grid-header-th`}
                                 style={{ position: "sticky", top: 0, width: col.w + "px", overflow: "hidden", verticalAlign: "top" }}
                             >
@@ -252,14 +253,6 @@ export class ReactGridClass {
         return val !== undefined ? val : '';
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
-    getRows(e) {
-        const rows = [];
-        if (e.resolve) {
-            e.resolve({ rows });
-        }
-        return rows;
-    }
-    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     getColumns() {
         const grid = this;
         const res = [];
@@ -303,7 +296,7 @@ export class ReactGridClass {
         let columns = [];
         Object.assign(columns, grid.columnsDefaultOrder);
 
-        grid.setState({ rows: grid.rows, columns: columns, ind: grid.stateind++ });
+        grid.refreshState();
         grid.columns = columns;
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -314,15 +307,15 @@ export class ReactGridClass {
 
             col.w = col.initW;
         }
-
-        grid.setState({ rows: grid.rows, columns: grid.columns, ind: grid.stateind++ });
+        grid.refreshState();
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     onSelectedRowChanged(e) {
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     setupColumnDrag() {
-        const addFakeGrid = function (e, grid, column, th) {
+        const grid = this;
+        const addFakeGrid = function (e, column, th) {
             const rect = th.getBoundingClientRect();
             const fakeGrid = document.createElement('table');
 
@@ -346,10 +339,8 @@ export class ReactGridClass {
             const th = e.target.closest('TH');
             if (!th || !th.hasAttribute('grid-header')) return;
 
-            const [gridId, columnId] = th.getAttribute('grid-header').split('_');
-            const grid = window._gridDict[gridId];
-            if (!grid || !grid.colDict) return;
-
+            const [, columnId] = th.getAttribute('grid-header').split('_');
+            if (!grid.colDict) return;
             const column = grid.colDict[columnId];
 
             if (grid.columns.length < 2) return;
@@ -357,22 +348,19 @@ export class ReactGridClass {
             grid._movingColumn = column;
 
             let fakeGrid;
-
             function drawMovingColumn(pageX, pageY) {
-                fakeGrid = fakeGrid || addFakeGrid(e, grid, column, th);
+                fakeGrid = fakeGrid || addFakeGrid(e, column, th);
 
                 const x = pageX + 10;
 
                 fakeGrid.style.left = x + 'px';
             }
-
             function onMouseMove(e) {
                 drawMovingColumn(e.pageX, e.pageY);
             }
 
             document.addEventListener('mousemove', onMouseMove);
             document.addEventListener('mouseup', onMouseUp);
-
             function onMouseUp(e) {
                 document.removeEventListener('mousemove', onMouseMove);
                 document.removeEventListener('mouseup', onMouseUp);
@@ -406,7 +394,7 @@ export class ReactGridClass {
                     }
                     grid.columns = newColumns;
 
-                    grid.setState({ rows: grid.rows, columns: newColumns, ind: grid.stateind++ })
+                    grid.refreshState();
                 }
 
                 delete grid._movingColumn;
@@ -418,9 +406,8 @@ export class ReactGridClass {
             const th = e.target.closest('TH');
             if (!th || !th.hasAttribute('grid-header')) return;
 
-            const [gridId, columnId] = th.getAttribute('grid-header').split('_');
-            const grid = window._gridDict[gridId];
-            if (!grid || !grid._movingColumn || !grid.colDict) return;
+            const [, columnId] = th.getAttribute('grid-header').split('_');
+            if (!grid._movingColumn || !grid.colDict) return;
 
             const column = grid.colDict[columnId];
 
@@ -437,9 +424,7 @@ export class ReactGridClass {
             const th = e.target.closest('TH');
             if (!th || !th.hasAttribute('grid-header')) return;
 
-            const [gridId] = th.getAttribute('grid-header').split('_');
-            const grid = window._gridDict[gridId];
-            if (!grid || !grid._movingColumn) return;
+            if (!grid._movingColumn) return;
 
             if (e.target.hasAttribute('grid-rsz-x')) {
                 e.target.style.cursor = "e-resize";
@@ -468,9 +453,7 @@ export class ReactGridClass {
 
             const gridElement = th.closest('TABLE');
 
-            const [gridId, columnId] = th.getAttribute('grid-header').split('_');
-            const grid = window._gridDict[gridId];
-            if (!grid) return;
+            const [, columnId] = th.getAttribute('grid-header').split('_');
 
             const column = grid.colDict[columnId];
 
@@ -499,7 +482,7 @@ export class ReactGridClass {
                 th.style.width = newW + 'px';
                 gridElement.style.width = (parseInt(gridElement.style.width) + newW - initW) + 'px';
 
-                grid.setState({ rows: grid.rows, columns: grid.columns, ind: grid.stateind++ });
+                grid.refreshState();
             }
 
             fakeDiv.remove();
@@ -519,12 +502,10 @@ export class ReactGridClass {
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     onSelectGridRow(e) {
+        const grid = this;
         if (e.target.tagName !== 'TD') return;
 
         const gridElement = e.target.closest('TABLE');
-
-        const [, id] = gridElement.id.split('_');
-        const grid = window._gridDict[id];
 
         const prevSelectedIndex = grid.selectedRowIndex;
 
@@ -558,9 +539,9 @@ export class ReactGridClass {
 
         const gridElement = th.closest('TABLE');
 
-        const [gridId, columnId] = e.target.getAttribute('grid-rsz-x').split('_');
+        const grid = this;
+        const [, columnId] = e.target.getAttribute('grid-rsz-x').split('_');
 
-        const grid = window._gridDict[gridId];
         if (!grid) return;
 
         const column = grid.colDict[columnId];
@@ -593,7 +574,6 @@ export class ReactGridClass {
                 }
             }
         }
-
         function onMouseMove(e) {
             resizing = true;
             resize(e.pageX);
@@ -608,7 +588,6 @@ export class ReactGridClass {
         gridElement.onselectstart = function () {
             return false;
         };
-
         function onMouseUp(e) {
             document.removeEventListener('mousemove', onMouseMove);
             document.removeEventListener('mouseup', onMouseUp);
@@ -618,7 +597,7 @@ export class ReactGridClass {
 
             if (resizing) {
                 if (initW !== column.w) {
-                    grid.setState({ rows: grid.rows, columns: grid.columns, ind: grid.stateind++ });
+                    grid.refreshState();
                 }
                 resizing = false;
             }
