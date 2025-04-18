@@ -339,7 +339,7 @@ export default class Grid {
             fakeGrid.style = grid.opt.style || '';
             fakeGrid.style.zIndex = 1000;
             fakeGrid.style.position = 'fixed';
-            fakeGrid.style.top = (e.pageY - e.clientY + rect.top - 10) + 'px';
+            fakeGrid.style.top = (e.offsetY + rect.top) + 'px';
             fakeGrid.style.width = rect.width + 'px';
             fakeGrid.style.height = rect.height + 'px';
 

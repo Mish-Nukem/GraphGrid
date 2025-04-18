@@ -5,7 +5,7 @@ import { useState, useEffect } from 'react';
 export default function ReactGrid(props) {
     window._gridSeq = window._gridSeq || 0;
 
-    window._logEnabled = true;
+    //window._logEnabled = true;
 
     let grid = null;
 
@@ -323,7 +323,7 @@ export class ReactGridClass {
             fakeGrid.style = grid.opt.style || '';
             fakeGrid.style.zIndex = 1000;
             fakeGrid.style.position = 'fixed';
-            fakeGrid.style.top = (e.pageY - e.clientY + rect.top - 10) + 'px';
+            fakeGrid.style.top = (e.offsetY + rect.top) + 'px';
             fakeGrid.style.width = rect.width + 'px';
             fakeGrid.style.height = rect.height + 'px';
 
