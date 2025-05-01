@@ -1,16 +1,22 @@
-﻿import React from 'react';
-import { renderToStaticMarkup } from 'react-dom/server';
-import { useState, useEffect } from 'react';
+﻿import { useState, useEffect } from 'react';
+import { BaseComponent, log } from './Base';
 // ==================================================================================================================================================================
 export default function Overlay(props) {
-    window._wndSeq = window._wndSeq || 0;
-    window._wndZInd = window._wndZInd || 999;
-
     let ovl = null;
 
     const [ovlState, setState] = useState({ ovl: ovl, ind: 0 });
 
-    ovl = ovlState.ovl || new OverlayClass(props);
+    if (ovlState.ovl && ovlState.ovl.closing) {
+        ovl = ovlState.ovl;
+        ovl.closing = false;
+    }
+    else {
+        ovl = new OverlayClass(props);
+    }
+    //ovl = ovlState.ovl && ovlState.ovl.closing ? ovlState.ovl :  /*ovlState.ovl ||*/ new OverlayClass(props);
+
+    //ovl.visible = props.visible;
+    ovl.onClose = props.onClose;
 
     if (props.init) {
         props.init(ovl);
@@ -23,24 +29,30 @@ export default function Overlay(props) {
         }
     }
 
+    useEffect(() => {
+        ovl.setupEvents(); 
+
+        return () => {
+            log(' 0.11 Clear Overlay Events');
+
+            ovl.clearEvents();
+        }
+    }, [ovl])
+
+
     return (ovl.render());
 }
 // -------------------------------------------------------------------------------------------------------------------------------------------------------------
-function log(message) {
-    if (!window._logEnabled) return;
-
-    console.log(message);
-}
-// -------------------------------------------------------------------------------------------------------------------------------------------------------------
-
-export class OverlayClass {
+export class OverlayClass extends BaseComponent {
     constructor(props) {
+        super(props);
 
         this.opt = {};
 
         this.id = window._wndSeq++;
+        this.uid = props.uid;
 
-        this.opt.zInd = props.zInd || (window._wndZInd ? ++window._wndZInd : 999) || 999;
+        this.opt.zInd = props.zInd || ++window._wndZInd; 
 
         this.opt.pos = props.pos || { x: 0, y: 0, w: '100%', h: '100%' };
 
@@ -57,12 +69,12 @@ export class OverlayClass {
 
         this.visible = props.visible !== undefined ? props.visible : true;
 
-        this.setupOverlayEvents();
+        this.stateind = 0;
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     render = function () {
         const ovl = this;
-        if (!ovl.visible) return;
+        if (!ovl.visible) return <></>;
 
         return (
             <>
@@ -73,7 +85,7 @@ export class OverlayClass {
                         width: ovl.opt.pos.w,
                         height: ovl.opt.pos.h,
                         top: ovl.opt.pos.y,
-                        bottom: ovl.opt.pos.x,
+                        left: ovl.opt.pos.x,
                         opacity: ovl.opt.opacity ? ovl.opt.opacity : ovl.opt.isHidden ? 0 : 0.2,
                         zIndex: ovl.opt.zInd,
                         backgroundColor: !ovl.opt.isHidden ? 'black' : ''
@@ -87,29 +99,48 @@ export class OverlayClass {
         );
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
-    setupOverlayEvents = function () {
+    close = function () {
         const ovl = this;
-        document.addEventListener('click', function (e) {
+        ovl.visible = false;
+        if (ovl.onClose) {
+            ovl.onClose();
+        }
+        ovl.closing = true;
+
+        ovl.refreshState();
+    }
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
+    setupEvents = function () {
+        const ovl = this;
+        function onClick(e) {
             if (!e.target) return;
 
+            if (e.target.tagName !== 'DIV') return;
+
             const [entity, ovlId] = e.target.id.split('_');
-            if (!ovlId) return;
+            if (ovl.id !== +ovlId) return;
 
             if (entity !== 'overlay') return;
 
-            if (ovl.opt.closeWhenClick) {
-                ovl.visible = false;
-                ovl.refreshState();
+            if (ovl.opt && ovl.opt.closeWhenClick) {
+                ovl.close();
             }
-        });
-        document.addEventListener('keydown', function (e) {
+        }
+        function onKeyDown(e) {
             const key = e && e.key ? e.key.toLowerCase() : '';
 
-            if ((key === 'esc' || key === 'escape') && ovl.opt.closeWhenEscape) {
-                ovl.visible = false;
-                ovl.refreshState();
+            if ((key === 'esc' || key === 'escape') && ovl.opt && ovl.opt.closeWhenEscape) {
+                ovl.close();
             }
-        });
+        }
+
+        document.addEventListener('click', onClick);
+        document.addEventListener('keydown', onKeyDown);
+
+        ovl.clearEvents = function () {
+            document.removeEventListener('click', onClick);
+            document.removeEventListener('keydown', onKeyDown);
+        }
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
 }

@@ -1,47 +1,58 @@
-﻿import React from 'react';
+﻿import { useState, useEffect } from 'react';
+import { BaseComponent, log } from './Base';
 import Overlay from './Overlay';
-import { renderToStaticMarkup } from 'react-dom/server';
-import { useState, useEffect } from 'react';
 // ==================================================================================================================================================================
 export default function Modal(props) {
-    window._wndSeq = window._wndSeq || 0;
-    window._wndZInd = window._wndZInd || 999;
-
     let wnd = null;
 
     const [wndState, setState] = useState({ wnd: wnd, ind: 0 });
+    //const [wndState, setState] = useState(wnd);
 
-    wnd = wndState.wnd || new ModalClass(props);
+    const oldWnd = wndState.wnd;
+    //const hide = oldWnd && oldWnd.recreate;
+
+    //wnd = oldWnd && !hide ? oldWnd : new ModalClass(props);
+    //wnd = wndState && wndState.uid === props.uid ? wndState : new ModalClass(props);
+    wnd = oldWnd && oldWnd.uid === props.uid ? oldWnd : new ModalClass(props);
+
 
     if (props.init) {
         props.init(wnd);
     }
 
     if (!wnd.refreshState) {
-        wnd.refreshState = function () {
+        wnd.refreshState = function (clear) {
             log('refreshState ' + wnd.stateind);
+            //if (clear) wnd.recreate = true;
             setState({ wnd: wnd, ind: wnd.stateind++ });
+            //setState(wnd);
         }
     }
+
+    useEffect(() => {
+        wnd.setupEvents();
+
+        return () => {
+            log(' 0.11 Clear ModalEvents');
+
+            wnd.clearEvents();
+        }
+    }, [wnd])
 
     return (wnd.render());
 }
 // -------------------------------------------------------------------------------------------------------------------------------------------------------------
-function log(message) {
-    if (!window._logEnabled) return;
-
-    console.log(message);
-}
-// -------------------------------------------------------------------------------------------------------------------------------------------------------------
-
-export class ModalClass {
+export class ModalClass extends BaseComponent {
     constructor(props) {
+        super(props);
+
+        this.uid = props.uid;
 
         this.opt = {};
 
         this.id = window._wndSeq++;
 
-        this.opt.zInd = props.zInd || (window._wndZInd ? ++window._wndZInd : 999) || 999;
+        this.opt.zInd = props.zInd || ++window._wndZInd;
 
         this.opt.pos = props.pos || { x: 0, y: 0, w: '100%', h: '100%' };
 
@@ -50,8 +61,10 @@ export class ModalClass {
         this.opt.isModal = props.isModal !== undefined ? props.isModal : true;
         this.opt.closeWhenMiss = props.closeWhenMiss;
         this.opt.resizable = props.resizable !== undefined ? props.resizable : true;
+        this.opt.draggable = props.draggable !== undefined ? props.draggable : true;
 
-        //this.opt.isModal = false;
+        this.opt.noHeader = props.noHeader;
+        this.opt.noFooter = props.noFooter;
 
         this.opt.bodyClass = props.bodyClass || 'modal-window-body';
         this.opt.headerClass = props.headerClass || 'modal-window-header';
@@ -79,7 +92,29 @@ export class ModalClass {
 
         this.visible = props.visible !== undefined ? props.visible : true;
 
-        this.setupWindowEvents();
+        this.stateind = 0;
+    }
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
+    render = function () {
+        const wnd = this;
+        if (!wnd.visible) {
+            return <></>;
+        }
+
+        if (wnd.opt.isModal || wnd.opt.closeWhenMiss) {
+            return (
+                <>
+                    <Overlay
+                        renderChild={(zInd) => { return wnd.renderSelf(zInd++) }} closeWhenClick={wnd.opt.closeWhenMiss}
+                        init={(ovl) => ovl.visible = wnd.visible}
+                        onClose={() => wnd.visible = false}
+                    >
+                    </Overlay>
+                </>
+            )
+        }
+
+        return wnd.renderSelf();
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     renderSelf = function (zInd) {
@@ -88,6 +123,7 @@ export class ModalClass {
             <>
                 <div
                     id={`window_${wnd.id}_`}
+                    key={`window_${wnd.id}_`}
                     style={
                         {
                             width: wnd.opt.pos.w,
@@ -103,12 +139,12 @@ export class ModalClass {
                     }
                     className="modal-window-wnd"
                 >
-                    {wnd.renderHeader()}
-                    <div wnd-body className={this.opt.bodyClass}>
+                    {wnd.opt.noHeader ? <></> : wnd.renderHeader()}
+                    <div wnd-body={1} className={wnd.opt.bodyClass}>
                         {wnd.renderContent()}
                     </div>
-                    {wnd.renderFooter()}
-                    {wnd.renderResizables()}
+                    {wnd.opt.noFooter ? <></> : wnd.renderFooter()}
+                    {!wnd.opt.resizable ? <></> : wnd.renderResizables()}
                 </div>
             </>
         );
@@ -117,12 +153,12 @@ export class ModalClass {
     renderHeader = function () {
         const wnd = this;
         return (
-            <div wnd-header className={wnd.opt.headerClass}
+            <div wnd-header={1} className={wnd.opt.headerClass}
             >
                 <h4 className={wnd.opt.titleClass}>
                     {wnd.opt.title || ''}
                 </h4>
-                <button wnd-btn={`"close_${wnd.id}_"`} type="button" className="close" style={{ color: "black" }} >×</button>
+                <button wnd-btn={`close_${wnd.id}_`} type="button" className="close" style={{ color: "black" }} >×</button>
             </div>
         )
     }
@@ -130,7 +166,7 @@ export class ModalClass {
     renderFooter = function () {
         const wnd = this;
         return (
-            <div wnd-footer className={wnd.opt.footerClass}
+            <div wnd-footer={1} className={wnd.opt.footerClass}
                 style={
                     {
                         display: "flex",
@@ -157,7 +193,7 @@ export class ModalClass {
 
         return (
             <>
-                <div wnd-rsz-y
+                <div wnd-rsz-y={wnd.id}
                     style={
                         {
                             position: "absolute",
@@ -171,7 +207,7 @@ export class ModalClass {
                     }
                 >
                 </div>
-                <div wnd-rsz-x
+                <div wnd-rsz-x={wnd.id}
                     style={
                         {
                             position: "absolute",
@@ -184,7 +220,7 @@ export class ModalClass {
                         }
                     } >
                 </div>
-                <div wnd-rsz-xy
+                <div wnd-rsz-xy={wnd.id}
                     style={
                         {
                             position: "absolute",
@@ -201,47 +237,37 @@ export class ModalClass {
         )
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
-    render = function () {
+    close = function () {
         const wnd = this;
-        if (!wnd.visible) return;
+        wnd.visible = false;
 
-        if (wnd.opt.isModal || wnd.opt.closeWhenMiss) {
-            return (
-                <>
-                    <Overlay renderChild={(zInd) => { return wnd.renderSelf(zInd++) }} closeWhenClick={wnd.opt.closeWhenMiss}>
-                    </Overlay>
-                </>
-            )
-        }
+        wnd.clearDrag();
 
-        return wnd.renderSelf();
+        wnd.refreshState(true);
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
-    setupWindowEvents = function () {
+    setupEvents = function () {
         const wnd = this;
 
-        wnd.setupDrag();
-        wnd.setupResize();
-
-        document.addEventListener('click', function (e) {
+        //wnd.setupDrag();
+        //wnd.setupResize();
+        function onClick(e) {
             if (!e.target) return;
 
             const wndAttr = e.target.getAttribute('wnd-btn') || e.target.id;
             if (!wndAttr) return;
 
             const [entity, wndId, buttonId] = wndAttr.split('_');
-            if (!wndId) return;
+            if (wnd.id !== +wndId) return;
 
             switch (entity) {
                 case 'window':
                     if (wnd.opt.closeWhenClick) {
-                        wnd.visible = false;
-                        wnd.refreshState();
+                        wnd.close();
                     }
                     break;
                 case 'close':
-                    wnd.visible = false;
-                    wnd.refreshState();
+                    wnd.close();
                     break;
                 case 'button':
                     const button = wnd.buttonsDict[buttonId];
@@ -253,23 +279,56 @@ export class ModalClass {
                     break;
                 default:
             }
-        });
+        }
 
-        document.addEventListener('keydown', function (e) {
+        function onKeyDown(e) {
             const key = e && e.key ? e.key.toLowerCase() : '';
 
             if ((key === 'esc' || key === 'escape') && wnd.opt.closeWhenEscape === true) {
-                wnd.visible = false;
-                wnd.refreshState();
+                wnd.close();
             }
-        })
+        }
+
+        document.addEventListener('click', onClick);
+        document.addEventListener('keydown', onKeyDown);
+
+        if (wnd.opt.draggable) {
+            wnd.setupDrag();
+        }
+
+        if (wnd.opt.resizable) {
+            wnd.setupResize();
+        }
+
+        wnd.clearEvents = function () {
+            if (wnd.opt.resizable) {
+                wnd.clearResize();
+            }
+            if (wnd.opt.draggable) {
+                wnd.clearDrag();
+            }
+
+            document.removeEventListener('click', onClick);
+            document.removeEventListener('keydown', onKeyDown);
+        }
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
-    setupDrag = function (elem) {
-        return;
-        const pos = this.opt.pos;
+    setupDrag = function () {
+        const wnd = this;
+        const pos = wnd.opt.pos;
+
         const mouseDown = function (e) {
-            if (e.target.tagName != 'DIV') return;
+            if (!wnd.visible) return;
+
+            if (e.target.tagName !== 'DIV') return;
+
+            if (!e.target.getAttribute('wnd-header') && !e.target.getAttribute('wnd-footer')) return;
+
+            const elem = document.getElementById(`window_${wnd.id}_`);
+            if (!elem) {
+                log(`Elem window_${wnd.id}_  not found!`);
+                return;
+            }
 
             const rect = elem.getBoundingClientRect();
             const shiftX = e.clientX - rect.left;
@@ -297,29 +356,36 @@ export class ModalClass {
             function onMouseUp(e) {
                 document.removeEventListener('mousemove', onMouseMove);
                 document.removeEventListener('mouseup', onMouseUp);
+                elem.ondragstart = null;
             };
 
+            elem.ondragstart = function () {
+                return false;
+            };
         };
 
-        const header = elem.querySelector('div[wnd-header]');
-        const footer = elem.querySelector('div[wnd-footer]');
+        document.addEventListener('mousedown', mouseDown);
 
-        if (header) {
-            header.addEventListener('mousedown', mouseDown);
+        wnd.clearDrag = function () {
+            document.removeEventListener('mousedown', mouseDown);
         }
-        if (footer) {
-            //footer.onmousedown = mouseDown;
-            footer.addEventListener('mousedown', mouseDown);
-        }
-        elem.ondragstart = function () {
-            return false;
-        };
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
-    setupResize = function (elem) {
-        return;
+    setupResize = function () {
+        const wnd = this;
         const pos = this.opt.pos;
+
         const mouseDown = function (e) {
+            if (!wnd.visible) return;
+
+            if (e.target.tagName !== 'DIV') return;
+
+            const wndAttr = e.target.getAttribute('wnd-rsz-x') || e.target.getAttribute('wnd-rsz-y') || e.target.getAttribute('wnd-rsz-xy');
+            if (wnd.id !== +wndAttr) return;
+
+            //if (!e.target.hasAttribute('wnd-rsz-x') && !e.target.hasAttribute('wnd-rsz-y') && !e.target.hasAttribute('wnd-rsz-xy')) return;
+
+            const elem = document.getElementById(`window_${wnd.id}_`);
 
             const cs = getComputedStyle(elem);
             const [initW, initH] = [parseInt(cs.width), parseInt(cs.height)];
@@ -350,23 +416,23 @@ export class ModalClass {
 
             document.addEventListener('mousemove', onMouseMove);
             document.addEventListener('mouseup', onMouseUp);
+            elem.ondragstart = function () {
+                return false;
+            };
 
             function onMouseUp(e) {
                 document.removeEventListener('mousemove', onMouseMove);
                 document.removeEventListener('mouseup', onMouseUp);
+                elem.ondragstart = null;
             };
         };
 
-        elem.querySelector('div[wnd-rsz-y]').addEventListener('mousedown', mouseDown);
-        elem.querySelector('div[wnd-rsz-x]').addEventListener('mousedown', mouseDown);
-        elem.querySelector('div[wnd-rsz-xy]').addEventListener('mousedown', mouseDown);
+        document.addEventListener('mousedown', mouseDown);
 
-        elem.ondragstart = function () {
-            return false;
-        };
+        wnd.clearResize = function () {
+            document.removeEventListener('mousedown', mouseDown);
+        }
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
 }
 // ==================================================================================================================================================================
-// -------------------------------------------------------------------------------------------------------------------------------------------------------------
-// -------------------------------------------------------------------------------------------------------------------------------------------------------------

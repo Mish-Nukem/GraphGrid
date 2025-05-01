@@ -202,6 +202,11 @@
             background-color: lightgray;
         }
 
+
+        .dropdown-ul > li.active {
+            background-color: lightgray;
+        }
+
 .grid-header-content-grid {
     display: grid;
     grid-template-columns: auto 12px;

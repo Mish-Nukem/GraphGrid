@@ -1,71 +1,146 @@
-﻿import Modal from './Modals.js';
+﻿import { useState, useEffect } from 'react';
+import { BaseComponent, log } from './Base';
+import { renderToStaticMarkup } from 'react-dom/server';
+import Modal from './Modal';
 // ==================================================================================================================================================================
-export default class Dropdown {
-    constructor(options) {
-        this.opt = options || {};
+export default function Dropdown(props) {
+    let dd = null;
 
-        this.getItems = this.opt.getItems || this.getItems;
+    const [ddState, setState] = useState({ dd: dd, ind: 0 });
+
+    if (ddState.dd && ddState.dd.frozen) {
+        dd = ddState.dd;
+        dd.frozen = false;
+    }
+    else {
+        dd = new DropdownClass(props);
+    }
+
+    //dd = ddState.dd || new DropdownClass(props);
+
+    if (props.init) {
+        props.init(dd);
+    }
+
+    if (!dd.refreshState) {
+        dd.refreshState = function () {
+            log('refreshState ' + dd.stateind);
+            setState({ dd: dd, ind: dd.stateind++ });
+        }
+    }
+
+    useEffect(() => {
+        dd.setupEvents();
+
+        return () => {
+            log(' 0.11 Clear DropdownEvents');
+
+            dd.clearEvents();
+        }
+    }, [dd])
+
+    return (dd.render());
+}
+// -------------------------------------------------------------------------------------------------------------------------------------------------------------
+export class DropdownClass extends BaseComponent {
+    constructor(props) {
+        super(props);
+
+        this.opt = {};
+
+        this.getItems = props.getItems || function ({ filter }) { return new Promise(function (resolve, reject) { resolve([]) }); };
 
         window._dropdownSeq = window._dropdownSeq || 0;
 
         this.id = window._dropdownSeq++;
 
         this.pageNumber = 1;
-        this.pageSize = this.opt.pageSize || 20;
+        this.pageSize = props.pageSize || 20;
         this.items = [];
 
-        this.translate = this.opt.translate || function (text) { return text; };
-    }
-    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
-    getItems(e) {
-        return [];
-    }
-    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
-    appendRows() {
-        const dd = this;
+        this.menuItemClass = '';
+        this.menuClass = '';
 
-        dd.modal.close();
-        delete dd.modal;
+        this.stateind = 0;
+
+        this.opt.onItemClick = props.onItemClick;
+
+        this.visible = false;
+    }
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
+    appendItems() {
+        const dd = this;
 
         dd.pageNumber++;
 
-        setTimeout(function () {
-            dd.show();
-        }, 15);
+        dd.getItems({ filter: dd.filter }).then(
+            items => {
+                dd.items = items;
+
+                dd.refreshState();
+            }
+        );
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
-    draw() {
+    renderPopup() {
         const dd = this;
 
-        let res = ``;
-
-        if (dd.opt.allowUserFilter) {
-            res += ``;
-        }
-
-        res += `<ul class="dropdown-ul ${dd.opt.menuClass || ''}">`;
-
-        for (let item of dd.items) {
-            res += `
-                <li dropdown-item="${dd.id}_${item.id}_" title="${dd.translate(item.title || item.text)}" class="${dd.opt.menuItemClass || ''} ${dd.activeItem == item ? 'active' : ''}">
-                    ${dd.translate(item.text)}
-                </li>`;
-        }
-
-        res += `</ul>`;
-
-        if (dd.opt.allowUpload && dd.opt.pageSize > 0 && dd.items.length == dd.opt.pageSize * dd.pageNumber) {
-            res += `<ul class="dropdown-ul">
-                <li dropdown-item="${dd.id}_append_" title="${dd.translate('load more records')}" class="dropdown-item">
-                    ${dd.translate('more...')}
-                </li>
-            </ul>`;
-        }
-
-        return res;
+        return (
+            <>
+                {
+                    dd.allowUserFilter ? <></> : <></>
+                }
+                <ul className={`dropdown-ul ${dd.menuClass || ''}`}>
+                    {
+                        dd.items.map((item, ind) => {
+                            return (
+                                <li
+                                    dropdown-item={`${dd.id}_${item.id}_`}
+                                    key={`${dd.id}_${item.id}_`}
+                                    title={dd.translate(item.title || item.text)}
+                                    className={dd.menuItemClass + (dd.activeItem === item ? ' active' : '')}
+                                >
+                                    {dd.translate(item.text)}
+                                </li>
+                            );
+                        })
+                    }
+                    {
+                        dd.allowUpload && dd.pageSize > 0 && dd.items.length === dd.pageSize * dd.pageNumber ?
+                            <ul className={`dropdown-ul ${dd.menuClass || ''}`}>
+                                <li dropdown-item={`${dd.id}_append_`}
+                                    key={`${dd.id}_append_`}
+                                    title={dd.translate('load more records')}
+                                    className={dd.menuItemClass}>
+                                    ${dd.translate('more...')}
+                                </li>
+                            </ul>
+                            : <></>
+                    }
+                </ul>
+            </>
+        );
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
-    show(e) {
+    render(noModal) {
+        const dd = this;
+
+        return (
+            dd.visible ? <Modal
+                isModal={!noModal}
+                renderContent={() => { return dd.renderPopup() }}
+                closeWhenEscape={true}
+                pos={dd.pos}
+                closeWhenMiss={true}
+                noHeader={true}
+                noFooter={true}
+                resizable={false}
+            >
+            </Modal> : <></>
+        );
+    }
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
+    popup(e) {
         const dd = this;
 
         function afterGetItems(newItems) {
@@ -75,11 +150,22 @@ export default class Dropdown {
 
             dd.lastPageNumber = dd.pageNumber;
 
+            dd.visible = true;
+            dd.frozen = true;
+
+            const renderFake = function () {
+                return (
+                    <div>
+                        {dd.renderPopup(true)} 
+                    </div>
+                )
+            }
+
             const fakeDiv = document.createElement('div');
             fakeDiv.style.opacity = 0;
             fakeDiv.style.position = 'fixed';
             fakeDiv.style.height = 'auto';
-            fakeDiv.innerHTML = dd.draw();
+            fakeDiv.innerHTML = renderToStaticMarkup(renderFake());
             document.body.append(fakeDiv);
             const rect = getComputedStyle(fakeDiv);
             const w = parseInt(rect.width) + 1;
@@ -88,50 +174,24 @@ export default class Dropdown {
 
             if (dd.items.length <= 0 && !dd.opt.allowUserFilter) return;
 
-            const parentRect = dd.opt.parentElem ? dd.opt.parentElem.getBoundingClientRect() : { x: e.clientX, y: e.clientY, width: e.width, height: e.height };
+            const parentRect = dd.opt.parentElem ? dd.opt.parentElem.getBoundingClientRect() : { x: e.clientX, y: e.clientY, width: e.width || 0, height: e.height || 0 };
 
-            const wnd = new Modal({
-                closeWhenClick: true,
-                closeWhenMiss: true,
-                closeWhenEscape: true,
-                resizable: false,
-                drawHeader: false,
-                drawFooter: false,
-                bodyClass: dd.opt.dropdownWndClass || 'dropdown-wnd',
-                pos: {
-                    x: parentRect.x,
-                    y: parentRect.y + parentRect.height,
-                    w: Math.max(w, parentRect.width),
-                    h: h
-                },
-                drawBody: function (body) {
-                    return dd.draw();
-                }
-            });
-            wnd.show();
+            dd.pos = {
+                x: parentRect.x,
+                y: parentRect.y + parseInt(parentRect.height),
+                w: Math.max(w, parentRect.width),
+                h: h
+            };
 
-            dd.modal = wnd;
-            window._dropdown = dd;
+            dd.refreshState();
         }
 
-        if (!dd.lastPageNumber || dd.lastPageNumber != dd.pageNumber) {
-            let newItems;
-            newItems = dd.getItems({
-                filter: dd.filter, pageSize: dd.pageSize, pageNumber: dd.pageNumber, resolve: function (items) {
-                    //if (items && items.length > 0) {
-                    //    dd.items.push(...items);
-                    //}
-
-                    //dd.lastPageNumber = dd.pageNumber;
-                    if (newItems) return;
-
+        if (!dd.lastPageNumber || dd.lastPageNumber !== dd.pageNumber || dd.items.length <= 0) {
+            dd.getItems({ filter: dd.filter, pageSize: dd.pageSize, pageNumber: dd.pageNumber }).then(
+                items => {
                     afterGetItems(items);
                 }
-            });
-
-            if (newItems) {
-                afterGetItems(newItems);
-            }
+            );
         }
         else {
             afterGetItems();
@@ -140,103 +200,105 @@ export default class Dropdown {
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     close() {
         const dd = this;
-
+        dd.visible = false;
         if (dd.opt.onClose) {
             dd.opt.onClose();
         }
+        dd.frozen = true;
 
         dd.items = [];
         delete dd.activeItem;
-
         delete dd.lastPageNumber;
 
-        if (dd.modal) {
-            dd.modal.close();
-            delete dd.modal;
+        dd.refreshState();
+    }
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
+    setupEvents() {
+        const dd = this;
+
+        function onClick(e) {
+            let dropdownId, itemId;
+
+            switch (e.target.tagName) {
+                case 'LI':
+                    if (!e.target.hasAttribute('dropdown-item')) return;
+
+                    [dropdownId, itemId] = e.target.getAttribute('dropdown-item').split('_');
+                    if (+dropdownId !== dd.id) return;
+
+                    if (itemId === 'append') {
+                        dd.appendItems();
+                    }
+                    else {
+                        if (dd.opt.onItemClick) {
+                            dd.opt.onItemClick({ owner: dd.opt.owner, itemId: itemId });
+                        }
+                        dd.close();
+                    }
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        function onKeyDown(e) {
+            const key = e && e.key ? e.key.toLowerCase() : '';
+
+            let ind;
+
+            switch (key) {
+                case 'esc', 'escape':
+                    dd.close();;
+                    break;
+                case 'enter':
+                    if (!dd.activeItem) return;
+
+                    dd.opt.onItemClick({ owner: dd.opt.owner, itemId: dd.activeItem.id });
+                    dd.close();
+                    break;
+                case 'down', 'arrowdown':
+                    if (dd.activeItem) {
+                        ind = dd.items.indexOf(dd.activeItem);
+
+                        if (ind < 0 || ind === dd.items.length - 1) return;
+
+                        dd.activeItem = dd.items[ind + 1];
+                    }
+                    else if (dd.items.length > 0) {
+                        dd.activeItem = dd.items[0];
+                    }
+
+                    dd.frozen = true;
+                    dd.refreshState();
+                    break;
+                case 'up', 'arrowup':
+                    if (dd.activeItem) {
+                        ind = dd.items.indexOf(dd.activeItem);
+
+                        if (ind <= 0) return;
+
+                        dd.activeItem = dd.items[ind - 1];
+                    }
+                    else if (dd.items.length > 0) {
+                        dd.activeItem = dd.items[0];
+                    }
+
+                    dd.frozen = true;
+                    dd.refreshState();
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        document.addEventListener('click', onClick);
+        document.addEventListener('keydown', onKeyDown);
+
+
+        dd.clearEvents = function () {
+            document.removeEventListener('click', onClick);
+            document.removeEventListener('keydown', onKeyDown);
         }
     }
 }
 // ==================================================================================================================================================================
-document.addEventListener('click', function (e) {
-    let dropdownId, itemId;
-
-    switch (e.target.tagName) {
-        case 'LI':
-            if (!window._dropdown || !e.target.hasAttribute('dropdown-item')) return;
-
-            [dropdownId, itemId] = e.target.getAttribute('dropdown-item').split('_');
-            if (dropdownId != window._dropdown.id) return;
-
-            if (itemId == 'append') {
-                window._dropdown.appendRows();
-            }
-            else {
-                window._dropdown.opt.onItemClick(window._dropdown.opt.owner, itemId);
-                window._dropdown.close();
-            }
-            break;
-    }
-});
-// -------------------------------------------------------------------------------------------------------------------------------------------------------------
-document.addEventListener('keydown', function (e) {
-    const dd = window._dropdown;
-
-    if (!dd) return;
-
-    const key = e && e.key ? e.key.toLowerCase() : '';
-
-    let activeItemElem, nextItemElem, itemElem, activeItem, nextItem, dropdownId, itemId, ind;
-
-    switch (key) {
-        case 'esc', 'escape':
-            dd.close();;
-            break;
-        case 'enter':
-            if (!dd.activeItem) return;
-
-            dd.opt.onItemClick(dd.opt.owner, dd.activeItem.id);
-            dd.close();
-            break;
-        case 'down', 'arrowdown':
-            if (dd.activeItem) {
-                ind = dd.items.indexOf(dd.activeItem);
-
-                if (ind < 0 || ind == dd.items.length - 1) return;
-
-                activeItemElem = dd.modal.element.querySelector(`li[dropdown-item="${dd.id}_${dd.activeItem.id}_"]`);
-                activeItemElem.classList.remove('active');
-
-                dd.activeItem = dd.items[ind + 1];
-            }
-            else if (dd.items.length > 0) {
-                dd.activeItem = dd.items[0];
-            }
-
-            if (dd.activeItem) {
-                nextItemElem = dd.modal.element.querySelector(`li[dropdown-item="${dd.id}_${dd.activeItem.id}_"]`);
-                nextItemElem.classList.add('active');
-            }
-            break;
-        case 'up', 'arrowup':
-            if (dd.activeItem) {
-                ind = dd.items.indexOf(dd.activeItem);
-
-                if (ind <= 0) return;
-
-                activeItemElem = dd.modal.element.querySelector(`li[dropdown-item="${dd.id}_${dd.activeItem.id}_"]`);
-                activeItemElem.classList.remove('active');
-
-                dd.activeItem = dd.items[ind - 1];
-            }
-            else if (dd.items.length > 0) {
-                dd.activeItem = dd.items[0];
-            }
-
-            if (dd.activeItem) {
-                nextItemElem = dd.modal.element.querySelector(`li[dropdown-item="${dd.id}_${dd.activeItem.id}_"]`);
-                nextItemElem.classList.add('active');
-            }
-            break;
-    }
-})
-// -------------------------------------------------------------------------------------------------------------------------------------------------------------

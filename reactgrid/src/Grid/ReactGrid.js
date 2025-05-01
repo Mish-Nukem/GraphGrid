@@ -1,12 +1,8 @@
-﻿import React from 'react';
+﻿import { useState, useEffect } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
-import { useState, useEffect } from 'react';
+import { BaseComponent, log } from './Base';
 // ==================================================================================================================================================================
 export default function ReactGrid(props) {
-    window._gridSeq = window._gridSeq || 0;
-
-    //window._logEnabled = true;
-
     let grid = null;
 
     const [gridState, setState] = useState({ grid: grid, ind: 0 });
@@ -26,18 +22,29 @@ export default function ReactGrid(props) {
         }
     }
 
+    useEffect(() => {
+        grid.setupGridEvents();
+
+        return () => {
+            log(' 0.11 Clear GridEvents');
+
+            document.removeEventListener('click', grid.onSelectGridRow);
+            document.removeEventListener('mousedown', grid.setupColumnResize);
+
+            grid.removeColumnDrag();
+        }
+    }, [grid])
+
     return (grid.render());
 }
 // -------------------------------------------------------------------------------------------------------------------------------------------------------------
-function log(message) {
-    if (!window._logEnabled) return;
-
-    console.log(message);
-}
-// -------------------------------------------------------------------------------------------------------------------------------------------------------------
-export class ReactGridClass {
+export class ReactGridClass extends BaseComponent {
     constructor(props) {
         log(' 0.0 Grid Constructor ');
+
+        super(props);
+
+        window._gridSeq = window._gridSeq || 0;
 
         const grid = this;
 
@@ -59,7 +66,8 @@ export class ReactGridClass {
 
         this.stateind = 0;
 
-        this.setupGridEvents();
+        //this.setupGridEvents();
+        //grid.setupGridEvents();
 
         if (!props.noAutoRefresh && (grid.rows.length <= 0 || grid.columns.length <= 0)) {
 
@@ -321,7 +329,7 @@ export class ReactGridClass {
 
             fakeGrid.className = grid.opt.gridClass || 'grid-default';
             fakeGrid.style = grid.opt.style || '';
-            fakeGrid.style.zIndex = 1000;
+            fakeGrid.style.zIndex = ++window._wndZInd || 1000;
             fakeGrid.style.position = 'fixed';
             fakeGrid.style.top = (e.offsetY + rect.top) + 'px';
             fakeGrid.style.width = rect.width + 'px';
@@ -339,7 +347,9 @@ export class ReactGridClass {
             const th = e.target.closest('TH');
             if (!th || !th.hasAttribute('grid-header')) return;
 
-            const [, columnId] = th.getAttribute('grid-header').split('_');
+            const [gridId, columnId] = th.getAttribute('grid-header').split('_');
+            if (grid.id !== +gridId) return;
+
             if (!grid.colDict) return;
             const column = grid.colDict[columnId];
 
@@ -393,7 +403,6 @@ export class ReactGridClass {
                         }
                     }
                     grid.columns = newColumns;
-
                     grid.refreshState();
                 }
 
@@ -406,7 +415,9 @@ export class ReactGridClass {
             const th = e.target.closest('TH');
             if (!th || !th.hasAttribute('grid-header')) return;
 
-            const [, columnId] = th.getAttribute('grid-header').split('_');
+            const [gridId, columnId] = th.getAttribute('grid-header').split('_');
+            if (grid.id !== +gridId) return;
+
             if (!grid._movingColumn || !grid.colDict) return;
 
             const column = grid.colDict[columnId];
@@ -451,9 +462,10 @@ export class ReactGridClass {
             const th = e.target.closest('TH');
             if (!th || !th.hasAttribute('grid-header')) return;
 
-            const gridElement = th.closest('TABLE');
+            //const gridElement = th.closest('TABLE');
 
-            const [, columnId] = th.getAttribute('grid-header').split('_');
+            const [gridId, columnId] = th.getAttribute('grid-header').split('_');
+            if (grid.id !== +gridId) return;
 
             const column = grid.colDict[columnId];
 
@@ -479,8 +491,8 @@ export class ReactGridClass {
 
             if (newW !== initW) {
                 column.w = newW;
-                th.style.width = newW + 'px';
-                gridElement.style.width = (parseInt(gridElement.style.width) + newW - initW) + 'px';
+                //th.style.width = newW + 'px';
+                //gridElement.style.width = (parseInt(gridElement.style.width) + newW - initW) + 'px';
 
                 grid.refreshState();
             }
@@ -506,6 +518,9 @@ export class ReactGridClass {
         if (e.target.tagName !== 'TD') return;
 
         const gridElement = e.target.closest('TABLE');
+
+        const [, gridId] = gridElement.id.split('_');
+        if (grid.id !== +gridId) return;
 
         const prevSelectedIndex = grid.selectedRowIndex;
 
@@ -540,7 +555,8 @@ export class ReactGridClass {
         const gridElement = th.closest('TABLE');
 
         const grid = this;
-        const [, columnId] = e.target.getAttribute('grid-rsz-x').split('_');
+        const [gridId, columnId] = e.target.getAttribute('grid-rsz-x').split('_');
+        if (grid.id !== +gridId) return;
 
         if (!grid) return;
 
@@ -596,10 +612,10 @@ export class ReactGridClass {
             gridElement.onselectstart = remSS;
 
             if (resizing) {
+                resizing = false;
                 if (initW !== column.w) {
                     grid.refreshState();
                 }
-                resizing = false;
             }
         }
 
