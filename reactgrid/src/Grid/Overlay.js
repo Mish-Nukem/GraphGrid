@@ -1,7 +1,7 @@
 ﻿import { useState, useEffect } from 'react';
 import { BaseComponent, log } from './Base';
 // ==================================================================================================================================================================
-export default function Overlay(props) {
+export function Overlay(props) {
     let ovl = null;
 
     const [ovlState, setState] = useState({ ovl: ovl, ind: 0 });
@@ -13,9 +13,7 @@ export default function Overlay(props) {
     else {
         ovl = new OverlayClass(props);
     }
-    //ovl = ovlState.ovl && ovlState.ovl.closing ? ovlState.ovl :  /*ovlState.ovl ||*/ new OverlayClass(props);
 
-    //ovl.visible = props.visible;
     ovl.onClose = props.onClose;
 
     if (props.init) {

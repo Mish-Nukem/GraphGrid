@@ -2,36 +2,49 @@
 import { renderToStaticMarkup } from 'react-dom/server';
 import { BaseComponent, log } from './Base';
 // ==================================================================================================================================================================
-export default function ReactGrid(props) {
+export function ReactGrid(props) {
     let grid = null;
 
     const [gridState, setState] = useState({ grid: grid, ind: 0 });
 
-    grid = gridState.grid || new ReactGridClass(props);
+    grid = gridState.grid;
+    let isNew = false;
+    if (!grid) {
+        grid = new ReactGridClass(props);
+        isNew = true;
+    }
 
     if (props.init) {
         props.init(grid);
     }
 
-    log(' 0.1 Reinit. rows = ' + grid.rows.length + '. state = ' + grid.stateind);
+    log('grid ' + grid.id + ': ' + ' 0.1 Reinit. rows = ' + grid.rows.length + '. state = ' + grid.stateind);
 
     if (!grid.refreshState) {
         grid.refreshState = function () {
-            log('refreshState ' + grid.stateind);
+            log('grid ' + grid.id + ': ' + 'refreshState ' + grid.stateind);
             setState({ grid: grid, ind: grid.stateind++ });
         }
     }
 
     useEffect(() => {
-        grid.setupGridEvents();
+        grid.setupEvents();
+
+        if (isNew && !props.noAutoRefresh && (grid.rows.length <= 0 || grid.columns.length <= 0)) {
+
+            grid.getRows({ filters: grid.collectFilters() }).then(
+                rows => {
+                    grid.rows = rows;
+                    grid.afterGetRows();
+                    grid.refreshState();
+                }
+            );
+        }
 
         return () => {
-            log(' 0.11 Clear GridEvents');
+            log('grid ' + grid.id + ': ' + ' 0.11 Clear GridEvents');
 
-            document.removeEventListener('click', grid.onSelectGridRow);
-            document.removeEventListener('mousedown', grid.setupColumnResize);
-
-            grid.removeColumnDrag();
+            grid.removeEvents();
         }
     }, [grid])
 
@@ -40,75 +53,88 @@ export default function ReactGrid(props) {
 // -------------------------------------------------------------------------------------------------------------------------------------------------------------
 export class ReactGridClass extends BaseComponent {
     constructor(props) {
-        log(' 0.0 Grid Constructor ');
-
         super(props);
 
         window._gridSeq = window._gridSeq || 0;
 
         const grid = this;
 
-        this.opt = { zInd: 1 };
+        grid.log = log;
 
-        this.id = window._gridSeq++;
+        grid.opt = { zInd: 1 };
 
-        //resolve([{ id: 0, text: 'obj_1' }, { id: 1, text: 'obj_2' }, { id: 2, text: 'obj_3' }])
-        this.getRows = props.getRows || function ({ filters }) { return new Promise(function (resolve, reject) { resolve([]) }); }; 
+        grid.id = window._gridSeq++;
 
-        this.getColumns = props.getColumns || this.getColumns;
+        log('grid ' + grid.id + ': ' + ' 0.0 Grid Constructor ');
 
-        this.opt.zInd = props.zInd || 1;
+        grid.getRows = props.getRows || function ({ filters }) { return new Promise(function (resolve, reject) { resolve([]) }); }; 
 
-        this.selectedRowIndex = 0;
+        grid.getColumns = props.getColumns || grid.getColumns;
 
-        this.rows = [];
-        this.columns = [];
+        grid.opt.zInd = props.zInd || 1;
 
-        this.stateind = 0;
+        grid.selectedRowIndex = 0;
 
-        //this.setupGridEvents();
-        //grid.setupGridEvents();
+        grid.rows = [];
+        grid.columns = [];
 
-        if (!props.noAutoRefresh && (grid.rows.length <= 0 || grid.columns.length <= 0)) {
+        grid.stateind = 0;
 
-            grid.getRows({ filters: grid.collectFilters ? grid.collectFilters() : [] }).then(
-                rows => {
-                    grid.rows = rows;
 
-                    log(' 1.0 getRows(). rows = ' + rows.length);
 
-                    if (grid.columns.length <= 0) {
-                        grid.columns = grid.getColumns();
-                        grid.prepareColumns(grid.columns);
+    //    if (!props.noAutoRefresh && (grid.rows.length <= 0 || grid.columns.length <= 0)) {
 
-                        log(' 1.1 prepareColumns()');
-                    }
-                    grid.calculatePagesCount();
-
-                    log(' 2.0 columns = ' + grid.columns.length);
-
-                    grid.onSelectedRowChanged({ grid: grid, prev: grid.selectedRowIndex, new: grid.selectedRowIndex });
-
-                    grid.refreshState();
-                }
-            );
-        }
+    //        grid.getRows({ filters: grid.collectFilters() }).then(
+    //            rows => {
+    //                grid.rows = rows;
+    //                grid.afterGetRows();
+    //                grid.refreshState();
+    //            }
+    //        );
+    //    }
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
-    setupGridEvents() {
-        log(' 0.1 setupGridEvents');
-
+    afterGetRows() {
         const grid = this;
+        log('grid ' + grid.id + ': ' + ' 1.0 getRows(). rows = ' + grid.rows.length);
+
+        if (grid.columns.length <= 0) {
+            grid.columns = grid.getColumns();
+            grid.prepareColumns(grid.columns);
+
+            log('grid ' + grid.id + ': ' + ' 1.1 prepareColumns()');
+        }
+        grid.calculatePagesCount();
+
+        log('grid ' + grid.id + ': ' + ' 2.0 columns = ' + grid.columns.length);
+
+        grid.onSelectedRowChanged({ grid: grid, prev: grid.selectedRowIndex, new: grid.selectedRowIndex });
+    }
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
+    setupEvents() {
+        const grid = this;
+
+        log('grid ' + grid.id + ': ' + ' 0.1 setupGridEvents');
 
         grid.setupColumnDrag();
 
-        document.addEventListener('click', function (e) {
+        const mouseClick = function (e) {
             grid.onSelectGridRow(e);
-        });
+        }
 
-        document.addEventListener('mousedown', function (e) {
+        const mouseDown = function (e) {
             grid.setupColumnResize(e);
-        });
+        }
+
+        document.addEventListener('click', mouseClick);
+        document.addEventListener('mousedown', mouseDown);
+
+        grid.removeEvents = function () {
+            document.removeEventListener('click', mouseClick);
+            document.removeEventListener('mousedown', mouseDown);
+
+            grid.removeColumnDrag();
+        }
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     translate(text, context) {
@@ -124,21 +150,17 @@ export class ReactGridClass extends BaseComponent {
         const grid = this;
         grid.ready = false;
 
-        grid.getRows({ filters: grid.collectFilters ? grid.collectFilters() : [] }).then(
+        grid.getRows({ filters: grid.collectFilters() }).then(
             rows => {
                 grid.rows = rows;
-
-                if (grid.columns.length <= 0) {
-                    grid.columns = grid.getColumns();
-                    grid.prepareColumns(grid.columns);
-                }
-                grid.calculatePagesCount();
-
-                grid.onSelectedRowChanged({ grid: grid, prev: grid.selectedRowIndex, new: grid.selectedRowIndex });
-
+                grid.afterGetRows();
                 grid.refreshState();
             }
         );
+    }
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
+    collectFilters() {
+        return [];
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     remove() {
@@ -147,10 +169,7 @@ export class ReactGridClass extends BaseComponent {
         const gridElement = document.getElementById(`grid_${grid.id}_${grid.stateind}_`);
         gridElement.setAttribute('display', 'none');
 
-        document.removeEventListener('click', grid.onSelectGridRow);
-        document.removeEventListener('mousedown', grid.setupColumnResize);
-
-        grid.removeColumnDrag();
+        grid.removeEvents();
 
         setTimeout(function () {
             gridElement.remove();
@@ -165,7 +184,7 @@ export class ReactGridClass extends BaseComponent {
             w += col.w;
         }
 
-        log(' 3.1 RENDER(). columns = ' + grid.columns.length + '. w = ' + w);
+        log('grid ' + grid.id + ': ' + ' 3.1 RENDER(). columns = ' + grid.columns.length + '. w = ' + w);
 
         return (
             <table
@@ -220,8 +239,8 @@ export class ReactGridClass extends BaseComponent {
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     renderBody() {
         const grid = this;
-        log(' 5.1 RenderBody(). rows = ' + grid.rows.length);
-        log(' 5.3 ------------------------------ ');
+        log('grid ' + grid.id + ': ' + ' 5.1 RenderBody(). rows = ' + grid.rows.length);
+        log('grid ' + grid.id + ': ' + ' 5.3 ------------------------------ ');
 
         if (!grid.columns || !grid.rows) return;
 
@@ -462,8 +481,6 @@ export class ReactGridClass extends BaseComponent {
             const th = e.target.closest('TH');
             if (!th || !th.hasAttribute('grid-header')) return;
 
-            //const gridElement = th.closest('TABLE');
-
             const [gridId, columnId] = th.getAttribute('grid-header').split('_');
             if (grid.id !== +gridId) return;
 
@@ -491,9 +508,6 @@ export class ReactGridClass extends BaseComponent {
 
             if (newW !== initW) {
                 column.w = newW;
-                //th.style.width = newW + 'px';
-                //gridElement.style.width = (parseInt(gridElement.style.width) + newW - initW) + 'px';
-
                 grid.refreshState();
             }
 
@@ -574,6 +588,7 @@ export class ReactGridClass extends BaseComponent {
         }
 
         let resizing;
+        // -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  
         function resize(pageX) {
             if (shiftX > 0) {
                 let w = initW + pageX - shiftX;
@@ -590,6 +605,7 @@ export class ReactGridClass extends BaseComponent {
                 }
             }
         }
+        // -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  
         function onMouseMove(e) {
             resizing = true;
             resize(e.pageX);
@@ -604,6 +620,7 @@ export class ReactGridClass extends BaseComponent {
         gridElement.onselectstart = function () {
             return false;
         };
+        // -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  
         function onMouseUp(e) {
             document.removeEventListener('mousemove', onMouseMove);
             document.removeEventListener('mouseup', onMouseUp);
@@ -618,7 +635,7 @@ export class ReactGridClass extends BaseComponent {
                 }
             }
         }
-
+        // -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  
         document.addEventListener('mousemove', onMouseMove);
         document.addEventListener('mouseup', onMouseUp);
     }

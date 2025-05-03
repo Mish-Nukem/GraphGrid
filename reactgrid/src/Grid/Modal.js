@@ -1,8 +1,8 @@
 ﻿import { useState, useEffect } from 'react';
 import { BaseComponent, log } from './Base';
-import Overlay from './Overlay';
+import { Overlay } from './Overlay';
 // ==================================================================================================================================================================
-export default function Modal(props) {
+export function Modal(props) {
     let wnd = null;
 
     const [wndState, setState] = useState({ wnd: wnd, ind: 0 });
@@ -248,9 +248,7 @@ export class ModalClass extends BaseComponent {
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     setupEvents = function () {
         const wnd = this;
-
-        //wnd.setupDrag();
-        //wnd.setupResize();
+        // -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  
         function onClick(e) {
             if (!e.target) return;
 
@@ -280,7 +278,7 @@ export class ModalClass extends BaseComponent {
                 default:
             }
         }
-
+        // -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  
         function onKeyDown(e) {
             const key = e && e.key ? e.key.toLowerCase() : '';
 
@@ -288,7 +286,7 @@ export class ModalClass extends BaseComponent {
                 wnd.close();
             }
         }
-
+        // -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  
         document.addEventListener('click', onClick);
         document.addEventListener('keydown', onKeyDown);
 
@@ -299,7 +297,7 @@ export class ModalClass extends BaseComponent {
         if (wnd.opt.resizable) {
             wnd.setupResize();
         }
-
+        // -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  
         wnd.clearEvents = function () {
             if (wnd.opt.resizable) {
                 wnd.clearResize();
@@ -316,7 +314,7 @@ export class ModalClass extends BaseComponent {
     setupDrag = function () {
         const wnd = this;
         const pos = wnd.opt.pos;
-
+        // -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  
         const mouseDown = function (e) {
             if (!wnd.visible) return;
 
@@ -363,7 +361,7 @@ export class ModalClass extends BaseComponent {
                 return false;
             };
         };
-
+        // -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  
         document.addEventListener('mousedown', mouseDown);
 
         wnd.clearDrag = function () {
@@ -374,7 +372,7 @@ export class ModalClass extends BaseComponent {
     setupResize = function () {
         const wnd = this;
         const pos = this.opt.pos;
-
+        // -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  
         const mouseDown = function (e) {
             if (!wnd.visible) return;
 
@@ -394,7 +392,7 @@ export class ModalClass extends BaseComponent {
             const shiftY = e.target.hasAttribute('wnd-rsz-y') || e.target.hasAttribute('wnd-rsz-xy') ? e.clientY : -1;
 
             resize(e.pageX, e.pageY);
-
+            // -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  
             function resize(pageX, pageY) {
                 if (shiftX > 0) {
                     const w = initW + pageX - shiftX;
@@ -409,24 +407,25 @@ export class ModalClass extends BaseComponent {
                     elem.style.height = pos.h + 'px';
                 }
             }
-
+            // -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  
             function onMouseMove(e) {
                 resize(e.pageX, e.pageY);
             }
-
+            // -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  
             document.addEventListener('mousemove', onMouseMove);
             document.addEventListener('mouseup', onMouseUp);
+            // -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  
             elem.ondragstart = function () {
                 return false;
             };
-
+            // -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  
             function onMouseUp(e) {
                 document.removeEventListener('mousemove', onMouseMove);
                 document.removeEventListener('mouseup', onMouseUp);
                 elem.ondragstart = null;
             };
         };
-
+        // -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  
         document.addEventListener('mousedown', mouseDown);
 
         wnd.clearResize = function () {

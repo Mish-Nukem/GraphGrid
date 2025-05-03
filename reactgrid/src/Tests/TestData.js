@@ -1,10 +1,10 @@
 ﻿export default class TestData {
 
-    constructor() {
-    }
+    //constructor() {
+    //}
 
     getFamily(e) {
-        const res = [
+        const family = [
             { Id: 1, ParentId: [3, 4], Name: 'Mikle', SecondName: 'Razumtsev', Date: '26/01/1979', Comment: 'Good boy' },
             { Id: 2, ParentId: [0], Name: 'Nataly', SecondName: 'Sch...', Date: '15/01/1999', Comment: 'Good girl' },
             { Id: 3, ParentId: [11, 23], Name: 'Lyuda', SecondName: 'Razumtseva', Date: '03/07/1953', Comment: 'Mommy' },
@@ -49,12 +49,25 @@
 
         //const page = e.pageSize > 0 && e.pageNumber > 0 ? res.slice((e.pageNumber - 1) * e.pageSize, e.pageNumber * e.pageSize) : res;
 
+        let res = [];
+        if (e.filters && e.filters.length) {
+            const filter = e.filters[0];
+            for (let row of family) {
+                if (row['ParentId'] && row['ParentId'].indexOf(+filter) >= 0) {
+                    res.push(row);
+                }
+            }
+        }
+        else {
+            res = family;
+        }
+
         //return page;
         return res;
     }
 
     getCity(e) {
-        const res = [
+        const cities = [
             { Id: 1, ParentId: [1, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23], City: 'Voronezh' },
             { Id: 2, ParentId: [1, 3, 4, 5, 6, 7, 9, 10, 11, 15, 16, 17, 18, 19, 20, 21, 22, 23], City: 'Grafskaya' },
             { Id: 3, ParentId: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 23, 28, 29], City: 'Moskow' },
@@ -70,6 +83,19 @@
             { Id: 13, ParentId: [21], City: 'Paris' },
             { Id: 14, ParentId: [19, 25, 26], City: 'Energodar' },
         ];
+
+        let res = [];
+        if (e.filters && e.filters.length) {
+            const filter = e.filters[0];
+            for (let row of cities) {
+                if (row['ParentId'] && row['ParentId'].indexOf(+filter) >= 0) {
+                    res.push(row);
+                }
+            }
+        }
+        else {
+            res = cities;
+        }
 
         return res;
     }

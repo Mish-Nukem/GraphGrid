@@ -1,9 +1,9 @@
 ﻿import { useState, useEffect } from 'react';
 import { BaseComponent, log } from './Base';
 import { renderToStaticMarkup } from 'react-dom/server';
-import Modal from './Modal';
+import { Modal } from './Modal';
 // ==================================================================================================================================================================
-export default function Dropdown(props) {
+export function Dropdown(props) {
     let dd = null;
 
     const [ddState, setState] = useState({ dd: dd, ind: 0 });

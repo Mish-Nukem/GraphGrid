@@ -1,10 +1,11 @@
 import './css/default.css';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import TestData from './Tests/TestData';
-import ReactGrid from './Grid/ReactGrid';
-import Overlay from './Grid/Overlay';
-import Modal from './Grid/Modal';
-import Dropdown from './Grid/Dropdown';
+import { ReactGrid } from './Grid/ReactGrid';
+import { Overlay } from './Grid/Overlay';
+import { Modal } from './Grid/Modal';
+import { Dropdown } from './Grid/Dropdown';
+import { GridInGraph } from './Grid/GridInGraph';
 
 function App() {
     const [state, setState] = useState(0);
@@ -14,7 +15,7 @@ function App() {
     const GetRows = function (e) {
         return new Promise(function (resolve, reject) {
 
-            const rows = new TestData().getFamily();
+            const rows = new TestData().getFamily(e);
 
             if (rows != null) {
                 resolve(rows);
@@ -27,7 +28,7 @@ function App() {
     const GetCities = function (e) {
         return new Promise(function (resolve, reject) {
 
-            const rows = new TestData().getCity();
+            const rows = new TestData().getCity(e);
 
             if (rows != null) {
                 resolve(rows);
@@ -67,15 +68,23 @@ function App() {
 
     const drawGridInModal = function () {
         return (
-            <ReactGrid getRows={GetRows} init={(grid) => { window.gridComponent = grid }}></ReactGrid>
+            <>
+                <div className="div-on-menu">
+                    <button onClick={() => { console.clear() }} className="modal-window-footer-button">Clear console</button>
+                </div>
+                <ReactGrid getRows={GetRows} init={(grid) => { window.gridComponent = grid }}></ReactGrid>
+            </>
         )
     }
 
     const drawDropdownInModal = function () {
         return (
             <>
-                <button onClick={(e) => { window.ddComponent.popup(e); }} className="modal-window-footer-button">Show Dropdown</button>
-                <Dropdown init={(dd) => { window.ddComponent = dd; }} getItems={GetPopupItems} onItemClick={(e) => console.log('Item clicked: ' +  e.itemId) }></Dropdown >
+                <div className="div-on-menu">
+                    <button onClick={() => { console.clear() }} className="modal-window-footer-button">Clear console</button>
+                    <button onClick={(e) => { window.ddComponent.popup(e); }} className="modal-window-footer-button">Show Dropdown</button>
+                </div>
+                <Dropdown init={(dd) => { window.ddComponent = dd; }} getItems={GetPopupItems} onItemClick={(e) => console.log('Item clicked: ' + e.itemId)}></Dropdown >
             </>
         )
     }
@@ -111,20 +120,12 @@ function App() {
             case 2:
                 return (
                     <>
-                        <div className="div-on-menu">
-                            <button onClick={() => { console.clear() }} className="modal-window-footer-button">Clear console</button>
-                        </div>
-
                         <Modal uid="m01" isModal={true} renderContent={() => { return drawGridInModal() }} closeWhenEscape={true} pos={{ x: 100, y: 100, w: 300, h: 250 }}></Modal>
                     </>
                 )
             case 3:
                 return (
                     <>
-                        <div className="div-on-menu">
-                            <button onClick={() => { console.clear() }} className="modal-window-footer-button">Clear console</button>
-                        </div>
-
                         <Modal uid="m02" isModal={true} renderContent={() => { return drawDropdownInModal() }} closeWhenEscape={true} pos={{ x: 100, y: 100, w: 300, h: 250 }}></Modal>
                     </>
                 )
@@ -134,9 +135,12 @@ function App() {
                         <div className="div-on-menu">
                             <button onClick={() => { console.clear() }} className="modal-window-footer-button">Clear console</button>
                         </div>
-
-                        <ReactGrid getRows={GetRows}></ReactGrid>
-                        <ReactGrid getRows={GetCities}></ReactGrid>
+                        <div style={{ padding: "5px" }}>
+                            <GridInGraph getRows={GetRows} uid="people"></GridInGraph>
+                        </div>
+                        <div style={{ padding: "5px" }}>
+                            <GridInGraph getRows={GetCities} parentGrids="people"></GridInGraph>
+                        </div>
                     </>
                 );
             default:
@@ -147,7 +151,7 @@ function App() {
     return (
         <div >
             <select onChange={(e) => {
-                console.log('this == ' + e);
+                //console.log('this == ' + e);
                 setState(e.target.selectedIndex);
             }}>
                 <option>1. Test ReactGrid</option>
