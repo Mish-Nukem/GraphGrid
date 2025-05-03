@@ -8,10 +8,10 @@ export function ReactGrid(props) {
     const [gridState, setState] = useState({ grid: grid, ind: 0 });
 
     grid = gridState.grid;
-    let isNew = false;
+    let needGetRows = false;
     if (!grid) {
         grid = new ReactGridClass(props);
-        isNew = true;
+        needGetRows = !props.noAutoRefresh;
     }
 
     if (props.init) {
@@ -22,7 +22,7 @@ export function ReactGrid(props) {
 
     if (!grid.refreshState) {
         grid.refreshState = function () {
-            log('grid ' + grid.id + ': ' + 'refreshState ' + grid.stateind);
+            log('grid ' + grid.id + ': ' + ' -------------- refreshState ' + grid.stateind + ' --------------- ');
             setState({ grid: grid, ind: grid.stateind++ });
         }
     }
@@ -30,7 +30,7 @@ export function ReactGrid(props) {
     useEffect(() => {
         grid.setupEvents();
 
-        if (isNew && !props.noAutoRefresh && (grid.rows.length <= 0 || grid.columns.length <= 0)) {
+        if (needGetRows && (grid.rows.length <= 0 || grid.columns.length <= 0)) {
 
             grid.getRows({ filters: grid.collectFilters() }).then(
                 rows => {
@@ -46,7 +46,7 @@ export function ReactGrid(props) {
 
             grid.removeEvents();
         }
-    }, [grid])
+    }, [grid, needGetRows])
 
     return (grid.render());
 }

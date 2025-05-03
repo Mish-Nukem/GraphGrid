@@ -11,10 +11,10 @@ export function GridInGraph(props) {
     //grid = gridState.grid || new GridInGraphClass(props);
 
     grid = gridState.grid;
-    let isNew = false;
+    let needGetRows = false;
     if (!grid) {
         grid = new GridInGraphClass(props);
-        isNew = true;
+        needGetRows = !props.noAutoRefresh && !props.parentGrids;
     }
 
     if (props.init) {
@@ -23,7 +23,7 @@ export function GridInGraph(props) {
 
     if (!grid.refreshState) {
         grid.refreshState = function () {
-            grid.log('grid ' + grid.id + ': ' + 'refreshState ' + grid.stateind);
+            grid.log('grid ' + grid.id + ': ' + ' -------------- refreshState ' + grid.stateind + ' --------------- ');
             setState({ grid: grid, ind: grid.stateind++ });
         }
     }
@@ -31,7 +31,7 @@ export function GridInGraph(props) {
     useEffect(() => {
         grid.setupEvents();
 
-        if (isNew && !props.noAutoRefresh && !props.parentGrids && (grid.rows.length <= 0 || grid.columns.length <= 0)) {
+        if (needGetRows && (grid.rows.length <= 0 || grid.columns.length <= 0)) {
 
             grid.getRows({ filters: grid.collectFilters() }).then(
                 rows => {
@@ -42,9 +42,13 @@ export function GridInGraph(props) {
             );
         }
 
-        if (props.parentGrids) {
-            grid.connectToParents();
+        if (grid.columns.length <= 0 && grid.getColumns) {
+            grid.getColumns();
         }
+
+        //if (props.parentGrids) {
+        //    grid.connectToParents();
+        //}
 
         return () => {
             grid.log('grid ' + grid.id + ': ' + ' 0.11 Clear GridEvents');
@@ -53,7 +57,7 @@ export function GridInGraph(props) {
 
             delete window._graphDict[grid.graphUid];
         }
-    }, [grid])
+    }, [grid, needGetRows])
 
     return (grid.render());
 }
