@@ -18,11 +18,11 @@ export function ReactGrid(props) {
         props.init(grid);
     }
 
-    log('grid ' + grid.id + ': ' + ' 0.1 Reinit. rows = ' + grid.rows.length + '. state = ' + grid.stateind);
+    grid.log(' 0.1 Reinit. rows = ' + grid.rows.length + '. state = ' + grid.stateind);
 
     if (!grid.refreshState) {
         grid.refreshState = function () {
-            log('grid ' + grid.id + ': ' + ' -------------- refreshState ' + grid.stateind + ' --------------- ');
+            grid.log(' -------------- refreshState ' + grid.stateind + ' --------------- ');
             setState({ grid: grid, ind: grid.stateind++ });
         }
     }
@@ -32,7 +32,7 @@ export function ReactGrid(props) {
 
         if (needGetRows && (grid.rows.length <= 0 || grid.columns.length <= 0)) {
 
-            grid.getRows({ filters: grid.collectFilters() }).then(
+            grid.getRows({ filters: grid.collectFilters(), grid: grid }).then(
                 rows => {
                     grid.rows = rows;
                     grid.afterGetRows();
@@ -41,9 +41,11 @@ export function ReactGrid(props) {
             );
         }
 
-        return () => {
-            log('grid ' + grid.id + ': ' + ' 0.11 Clear GridEvents');
+        if (grid.columns.length <= 0 && grid.getColumns) {
+            grid.getColumns();
+        }
 
+        return () => {
             grid.removeEvents();
         }
     }, [grid, needGetRows])
@@ -59,13 +61,11 @@ export class ReactGridClass extends BaseComponent {
 
         const grid = this;
 
-        grid.log = log;
-
         grid.opt = { zInd: 1 };
 
         grid.id = window._gridSeq++;
 
-        log('grid ' + grid.id + ': ' + ' 0.0 Grid Constructor ');
+        grid.log(' 0.0 Grid Constructor ');
 
         grid.getRows = props.getRows || function ({ filters }) { return new Promise(function (resolve, reject) { resolve([]) }); }; 
 
@@ -94,19 +94,24 @@ export class ReactGridClass extends BaseComponent {
     //    }
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
+    log(message, pref) {
+        const grid = this;
+        log(`${pref ? pref : `grid#${grid.id}`} : ` + message);
+    }
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     afterGetRows() {
         const grid = this;
-        log('grid ' + grid.id + ': ' + ' 1.0 getRows(). rows = ' + grid.rows.length);
+        grid.log(' 1.0 getRows(). rows = ' + grid.rows.length);
 
         if (grid.columns.length <= 0) {
             grid.columns = grid.getColumns();
             grid.prepareColumns(grid.columns);
 
-            log('grid ' + grid.id + ': ' + ' 1.1 prepareColumns()');
+            grid.log(' 1.1 prepareColumns()');
         }
         grid.calculatePagesCount();
 
-        log('grid ' + grid.id + ': ' + ' 2.0 columns = ' + grid.columns.length);
+        grid.log(' 2.0 columns = ' + grid.columns.length);
 
         grid.onSelectedRowChanged({ grid: grid, prev: grid.selectedRowIndex, new: grid.selectedRowIndex });
     }
@@ -114,7 +119,7 @@ export class ReactGridClass extends BaseComponent {
     setupEvents() {
         const grid = this;
 
-        log('grid ' + grid.id + ': ' + ' 0.1 setupGridEvents');
+        grid.log(' 0.1 setupGridEvents');
 
         grid.setupColumnDrag();
 
@@ -129,11 +134,21 @@ export class ReactGridClass extends BaseComponent {
         document.addEventListener('click', mouseClick);
         document.addEventListener('mousedown', mouseDown);
 
-        grid.removeEvents = function () {
+        grid.clearEvents = function () {
+            grid.log(' 0.11 Clear GridEvents');
+
             document.removeEventListener('click', mouseClick);
             document.removeEventListener('mousedown', mouseDown);
 
             grid.removeColumnDrag();
+        }
+    }
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
+    removeEvents() {
+        const grid = this;
+
+        if (grid.clearEvents) {
+            grid.clearEvents();
         }
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -150,7 +165,7 @@ export class ReactGridClass extends BaseComponent {
         const grid = this;
         grid.ready = false;
 
-        grid.getRows({ filters: grid.collectFilters() }).then(
+        grid.getRows({ filters: grid.collectFilters(), grid: grid }).then(
             rows => {
                 grid.rows = rows;
                 grid.afterGetRows();
@@ -184,7 +199,7 @@ export class ReactGridClass extends BaseComponent {
             w += col.w;
         }
 
-        log('grid ' + grid.id + ': ' + ' 3.1 RENDER(). columns = ' + grid.columns.length + '. w = ' + w);
+        grid.log(' 3.1 RENDER(). columns = ' + grid.columns.length + '. w = ' + w);
 
         return (
             <table
@@ -210,7 +225,7 @@ export class ReactGridClass extends BaseComponent {
                     {columns.map((col, ind) => {
                         return (
                             <th
-                                key={col.id + '_' + col.w + '_'}
+                                key={`${col.id}_${col.w}_${grid.stateind}_`}
                                 grid-header={`${grid.id}_${col.id}_` + grid.stateind + '_' + col.w}
                                 className={`${grid.opt.columnClass ? grid.opt.columnClass : ''} grid-header-th`}
                                 style={{ position: "sticky", top: 0, width: col.w + "px", overflow: "hidden", verticalAlign: "top" }}
@@ -239,8 +254,8 @@ export class ReactGridClass extends BaseComponent {
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     renderBody() {
         const grid = this;
-        log('grid ' + grid.id + ': ' + ' 5.1 RenderBody(). rows = ' + grid.rows.length);
-        log('grid ' + grid.id + ': ' + ' 5.3 ------------------------------ ');
+        grid.log(' 5.1 RenderBody(). rows = ' + grid.rows.length);
+        log(' -------------------------------- ');
 
         if (!grid.columns || !grid.rows) return;
 
@@ -250,7 +265,7 @@ export class ReactGridClass extends BaseComponent {
                     grid.rows.map((row, rind) => {
                         return (
                             <tr
-                                key={'row_' + rind + '_'}
+                                key={`row_${rind}_${grid.stateind}_`}
                                 className={grid.selectedRowIndex === rind ? `grid-selected-row ${grid.opt.selectedRowClass || ''}` : ''}
                             >
                                 {grid.renderRow(row, rind)}

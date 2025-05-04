@@ -65,6 +65,7 @@ export class ModalClass extends BaseComponent {
 
         this.opt.noHeader = props.noHeader;
         this.opt.noFooter = props.noFooter;
+        this.opt.noPadding = props.noPadding;
 
         this.opt.bodyClass = props.bodyClass || 'modal-window-body';
         this.opt.headerClass = props.headerClass || 'modal-window-header';
@@ -140,7 +141,11 @@ export class ModalClass extends BaseComponent {
                     className="modal-window-wnd"
                 >
                     {wnd.opt.noHeader ? <></> : wnd.renderHeader()}
-                    <div wnd-body={1} className={wnd.opt.bodyClass}>
+                    <div
+                        wnd-body={1}
+                        className={wnd.opt.bodyClass}
+                        style={{ padding: this.opt.noPadding ? '0' : '' }}
+                    >
                         {wnd.renderContent()}
                     </div>
                     {wnd.opt.noFooter ? <></> : wnd.renderFooter()}

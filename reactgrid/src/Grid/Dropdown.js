@@ -90,7 +90,10 @@ export class DropdownClass extends BaseComponent {
                 {
                     dd.allowUserFilter ? <></> : <></>
                 }
-                <ul className={`dropdown-ul ${dd.menuClass || ''}`}>
+                <ul
+                    className={`dropdown-ul ${dd.menuClass || ''}`}
+                    style={{ overflowX: 'hidden' }}
+                >
                     {
                         dd.items.map((item, ind) => {
                             return (
@@ -135,6 +138,7 @@ export class DropdownClass extends BaseComponent {
                 noHeader={true}
                 noFooter={true}
                 resizable={false}
+                noPadding={true}
             >
             </Modal> : <></>
         );

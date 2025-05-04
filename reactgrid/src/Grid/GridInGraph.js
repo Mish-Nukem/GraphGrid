@@ -23,7 +23,7 @@ export function GridInGraph(props) {
 
     if (!grid.refreshState) {
         grid.refreshState = function () {
-            grid.log('grid ' + grid.id + ': ' + ' -------------- refreshState ' + grid.stateind + ' --------------- ');
+            grid.log(' -------------- refreshState ' + grid.stateind + ' --------------- ');
             setState({ grid: grid, ind: grid.stateind++ });
         }
     }
@@ -33,7 +33,7 @@ export function GridInGraph(props) {
 
         if (needGetRows && (grid.rows.length <= 0 || grid.columns.length <= 0)) {
 
-            grid.getRows({ filters: grid.collectFilters() }).then(
+            grid.getRows({ filters: grid.collectFilters(), grid: grid }).then(
                 rows => {
                     grid.rows = rows;
                     grid.afterGetRows();
@@ -51,11 +51,11 @@ export function GridInGraph(props) {
         //}
 
         return () => {
-            grid.log('grid ' + grid.id + ': ' + ' 0.11 Clear GridEvents');
+            //grid.log(' 0.11 Clear GridEvents');
 
             grid.removeEvents();
 
-            delete window._graphDict[grid.graphUid];
+            //delete window._graphDict[grid.graphUid];
         }
     }, [grid, needGetRows])
 
@@ -112,6 +112,22 @@ export class GridInGraphClass extends ReactGridClass {
         }
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
+    log(message, pref) {
+        const grid = this;
+        super.log(`${pref ? pref : `grid#${grid.uid ? grid.id + '(' + grid.uid + ')' : grid.id}`} : ` + message, ' ');
+    }
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
+    removeEvents() {
+        const grid = this;
+
+        super.removeEvents();
+
+        if (window._graphDict && grid.graphUid) {
+            grid.log(' delete graph')
+            delete window._graphDict[grid.graphUid];
+        }
+    }
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     connectToParents(noDetectCycles) {
         const grid = this;
         const graph = grid.graph;
@@ -155,9 +171,7 @@ export class GridInGraphClass extends ReactGridClass {
 
                 const activeRow = parentGrid.rows[parentGrid.selectedRowIndex];
 
-                //const id = activeRow[keyField].toString();
                 return activeRow[keyField];
-                //return `${parentGrid.getEntity()}.${keyField}=${activeRow[keyField]}`;
             }
         };
     }
@@ -240,11 +254,11 @@ export class GridInGraphClass extends ReactGridClass {
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     skipOnWaveVisit(e) {
+        //if (e.waveType == WaveType.refresh) {
+        //    if (!this.visible || this.status == NodeStatus.hidden) return true;
+        //    if (this.status == NodeStatus.filter && !this._selecting) return true;
+        //}
         return false;
-        //    if (e.waveType == WaveType.refresh) {
-        //        if (!this.visible || this.status == NodeStatus.hidden) return true;
-        //        if (this.status == NodeStatus.filter && !this._selecting) return true;
-        //    }
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     visitByWave(e) {
@@ -254,7 +268,7 @@ export class GridInGraphClass extends ReactGridClass {
 
         grid.selectedRowIndex = 0;
 
-        grid.getRows({ filters: grid.collectFilters() }).then(
+        grid.getRows({ filters: grid.collectFilters(), grid: grid }).then(
             rows => {
                 grid.rows = rows;
                 grid.afterGetRows(e);

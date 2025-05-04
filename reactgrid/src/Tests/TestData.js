@@ -62,8 +62,31 @@
             res = family;
         }
 
+        e.grid.totalRows = res.length;
+
+        if (e.grid.columns) {
+            let sortCol = null;
+            for (let col of e.grid.columns) {
+                if (col.asc || col.desc) {
+                    sortCol = col;
+                    break;
+                }
+            }
+
+            if (sortCol != null) {
+                res.sort(function (a, b) { return a[sortCol.name] > b[sortCol.name] ? (sortCol.asc ? 1 : -1) : (sortCol.asc ? -1 : 1); });
+            }
+        }
+
+        res = e.grid.pageSize > 0 && e.grid.pageNumber > 0 ? res.slice((e.grid.pageNumber - 1) * e.grid.pageSize, e.grid.pageNumber * e.grid.pageSize) : res;
+
+
         //return page;
         return res;
+    }
+
+    GetFamilyColumns() {
+        return [{ name: 'Id', sortable: true }, { name: 'Name', sortable: true }, { name: 'SecondName', sortable: true }, { name: 'Date', sortable: true }, { name: 'Comment', sortable: true }]
     }
 
     getCity(e) {
@@ -97,7 +120,28 @@
             res = cities;
         }
 
+        e.grid.totalRows = res.length;
+
+        if (e.grid.columns) {
+            let sortCol = null;
+            for (let col of e.grid.columns) {
+                if (col.asc || col.desc) {
+                    sortCol = col;
+                    break;
+                }
+            }
+
+            if (sortCol != null) {
+                res.sort(function (a, b) { return a[sortCol.name] > b[sortCol.name] ? (sortCol.asc ? 1 : -1) : (sortCol.asc ? -1 : 1); });
+            }
+        }
+
+        res = e.grid.pageSize > 0 && e.grid.pageNumber > 0 ? res.slice((e.grid.pageNumber - 1) * e.grid.pageSize, e.grid.pageNumber * e.grid.pageSize) : res;
+
         return res;
     }
 
+    GetCityColumns() {
+        return [{ name: 'Id', sortable: true }, { name: 'City', sortable: true }]
+    }
 }

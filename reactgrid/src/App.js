@@ -6,6 +6,7 @@ import { Overlay } from './Grid/Overlay';
 import { Modal } from './Grid/Modal';
 import { Dropdown } from './Grid/Dropdown';
 import { GridInGraph } from './Grid/GridInGraph';
+import { GridDB } from './Grid/GridDB';
 
 function App() {
     const [state, setState] = useState(0);
@@ -25,6 +26,35 @@ function App() {
         });
     };
 
+    const GetButtons = function () {
+        return [
+            {
+                id: 1,
+                name: 'info',
+                title: 'Persone Info',
+                label: 'Persone Info',
+                click: function (e) {
+                    const selRow = e.grid.selectedRowIndex >= 0 && e.grid.rows.length > 0 ? e.grid.rows[e.grid.selectedRowIndex] : null;
+                    if (!selRow) return;
+
+                    alert(`Persone Name = ${selRow.Name}, Persone Birth Day = ${selRow.Date}`);
+                },
+                getDisabled: function (e) {
+                    return !e.grid.rows || e.grid.rows.length <= 0;
+                }
+            },
+            {
+                id: 2,
+                name: 'clear',
+                title: 'Clear console',
+                label: 'Clear console',
+                click: function (e) {
+                    console.clear();
+                },
+            }
+        ]
+    }
+
     const GetCities = function (e) {
         return new Promise(function (resolve, reject) {
 
@@ -37,6 +67,14 @@ function App() {
             }
         });
     };
+
+    const GetCityColumns = function () {
+        return new TestData().GetCityColumns();
+    }
+
+    const GetFamilyColumns = function () {
+        return new TestData().GetFamilyColumns();
+    }
 
     const ResetColumnsOrder = function () {
         const grid = window.gridComponent;
@@ -56,11 +94,11 @@ function App() {
         return new Promise(function (resolve, reject) {
 
             const items = [
-                { id: 1, text: 'test 01' },
-                { id: 2, text: 'test 02' },
-                { id: 3, text: 'test 03' },
-                { id: 4, text: 'test 04' },
-                { id: 5, text: 'test 05' }
+                { id: 1, text: 'test 1 item' },
+                { id: 2, text: 'test 2 item' },
+                { id: 3, text: 'test 3 item' },
+                { id: 4, text: 'test 4 item' },
+                { id: 5, text: 'test 5 item' }
             ];
             resolve(items);
         });
@@ -84,11 +122,17 @@ function App() {
                     <button onClick={() => { console.clear() }} className="modal-window-footer-button">Clear console</button>
                     <button onClick={(e) => { window.ddComponent.popup(e); }} className="modal-window-footer-button">Show Dropdown</button>
                 </div>
-                <Dropdown init={(dd) => { window.ddComponent = dd; }} getItems={GetPopupItems} onItemClick={(e) => console.log('Item clicked: ' + e.itemId)}></Dropdown >
+                <Dropdown init={(dd) => { window.ddComponent = dd; }} getItems={GetPopupItems} onItemClick={(e) => console.log('Item clicked: ' + e.itemId)}></Dropdown>
             </>
         )
     }
 
+    const drawClearConsole = function () {
+        return (
+            <button onClick={() => { console.clear() }} className="modal-window-footer-button">Clear console</button>
+        );
+    }
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     const getTestApp = () => {
         console.log('state == ' + state);
         switch (state) {
@@ -102,7 +146,7 @@ function App() {
                         <div className="div-on-menu">
                             <button onClick={() => ResetColumnsOrder()} className="modal-window-footer-button">Reset columns order</button>
                             <button onClick={() => ResetColumnsWidths()} className="modal-window-footer-button">Reset columns widths</button>
-                            <button onClick={() => { console.clear() }} className="modal-window-footer-button">Clear console</button>
+                            {drawClearConsole()}
                         </div>
                         <ReactGrid getRows={GetRows} init={(grid) => { window.gridComponent = grid; }}></ReactGrid>
                     </>
@@ -111,7 +155,7 @@ function App() {
                 return (
                     <>
                         <div className="div-on-menu">
-                            <button onClick={() => { console.clear() }} className="modal-window-footer-button">Clear console</button>
+                            {drawClearConsole()}
                         </div>
 
                         <Overlay init={(ovl) => { window.overlayComponent = ovl }} closeWhenEscape={true} closeWhenClick={true}></Overlay>
@@ -133,13 +177,21 @@ function App() {
                 return (
                     <>
                         <div className="div-on-menu">
-                            <button onClick={() => { console.clear() }} className="modal-window-footer-button">Clear console</button>
+                            {drawClearConsole()}
                         </div>
                         <div style={{ padding: "5px" }}>
-                            <GridInGraph getRows={GetRows} uid="people"></GridInGraph>
+                            <GridInGraph uid="people" getRows={GetRows}></GridInGraph>
                         </div>
                         <div style={{ padding: "5px" }}>
-                            <GridInGraph getRows={GetCities} parentGrids="people"></GridInGraph>
+                            <GridInGraph parentGrids="people" getRows={GetCities} getColumns={GetCityColumns}></GridInGraph>
+                        </div>
+                    </>
+                );
+            case 5:
+                return (
+                    <>
+                        <div style={{ padding: "5px" }}>
+                            <GridDB getRows={GetRows} buttons={GetButtons()} getColumns={GetFamilyColumns}></GridDB>
                         </div>
                     </>
                 );
@@ -147,7 +199,7 @@ function App() {
                 return null;
         }
     };
-
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     return (
         <div >
             <select onChange={(e) => {
@@ -159,6 +211,7 @@ function App() {
                 <option>3. Test Modal</option>
                 <option>4. Test Dropdown</option>
                 <option>5. Two Grids</option>
+                <option>6. Test GridDB</option>
             </select>
             <div className="div-on-menu">
                 {getTestApp()}
