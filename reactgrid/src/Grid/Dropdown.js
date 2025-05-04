@@ -139,6 +139,7 @@ export class DropdownClass extends BaseComponent {
                 noFooter={true}
                 resizable={false}
                 noPadding={true}
+                hiddenOverlay={true}
             >
             </Modal> : <></>
         );
@@ -178,7 +179,7 @@ export class DropdownClass extends BaseComponent {
 
             if (dd.items.length <= 0 && !dd.opt.allowUserFilter) return;
 
-            const parentRect = dd.opt.parentElem ? dd.opt.parentElem.getBoundingClientRect() : { x: e.clientX, y: e.clientY, width: e.width || 0, height: e.height || 0 };
+            const parentRect = dd.opt.parentRect ? dd.opt.parentRect : dd.opt.parentElem ?dd.opt.parentElem.getBoundingClientRect(): { x: e.clientX, y: e.clientY, width: e.width || 0, height: e.height || 0 };
 
             dd.pos = {
                 x: parentRect.x,
@@ -235,7 +236,7 @@ export class DropdownClass extends BaseComponent {
                     }
                     else {
                         if (dd.opt.onItemClick) {
-                            dd.opt.onItemClick({ owner: dd.opt.owner, itemId: itemId });
+                            dd.opt.onItemClick({ owner: dd.opt.owner, itemId: itemId, dropdown: dd });
                         }
                         dd.close();
                     }
@@ -257,7 +258,7 @@ export class DropdownClass extends BaseComponent {
                 case 'enter':
                     if (!dd.activeItem) return;
 
-                    dd.opt.onItemClick({ owner: dd.opt.owner, itemId: dd.activeItem.id });
+                    dd.opt.onItemClick({ owner: dd.opt.owner, itemId: dd.activeItem.id, dropdown: dd });
                     dd.close();
                     break;
                 case 'down', 'arrowdown':

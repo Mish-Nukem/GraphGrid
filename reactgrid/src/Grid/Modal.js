@@ -63,6 +63,8 @@ export class ModalClass extends BaseComponent {
         this.opt.resizable = props.resizable !== undefined ? props.resizable : true;
         this.opt.draggable = props.draggable !== undefined ? props.draggable : true;
 
+        this.opt.hiddenOverlay = props.hiddenOverlay;
+
         this.opt.noHeader = props.noHeader;
         this.opt.noFooter = props.noFooter;
         this.opt.noPadding = props.noPadding;
@@ -109,6 +111,7 @@ export class ModalClass extends BaseComponent {
                         renderChild={(zInd) => { return wnd.renderSelf(zInd++) }} closeWhenClick={wnd.opt.closeWhenMiss}
                         init={(ovl) => ovl.visible = wnd.visible}
                         onClose={() => wnd.visible = false}
+                        isHidden={wnd.opt.hiddenOverlay}
                     >
                     </Overlay>
                 </>

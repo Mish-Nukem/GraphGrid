@@ -3,7 +3,6 @@ import { useState, useEffect } from 'react';
 import { GridInGraphClass } from './GridInGraph.js';
 import { Dropdown } from './Dropdown.js';
 import { WaveType } from './Graph.js';
-import { renderToStaticMarkup } from 'react-dom/server';
 
 // ==================================================================================================================================================================
 export function GridDB(props) {
@@ -55,7 +54,7 @@ export function GridDB(props) {
     return (grid.render());
 }
 // ==================================================================================================================================================================
-export default class GridDBClass extends GridInGraphClass {
+export class GridDBClass extends GridInGraphClass {
 
     constructor(props) {
         super(props);
@@ -80,14 +79,12 @@ export default class GridDBClass extends GridInGraphClass {
         super.setupEvents();
 
         const sortClick = function (e) {
-            let gridId, itemId;
-
             switch (e.target.tagName) {
                 case 'SPAN':
                     const th = e.target.closest('TH');
                     if (!th || !th.hasAttribute('grid-header')) return;
 
-                    [, itemId] = th.getAttribute('grid-header').split('_');
+                    let [, itemId] = th.getAttribute('grid-header').split('_');
                     const column = grid.colDict[itemId];
 
                     grid.changeColumnSortOrder(column);
@@ -101,7 +98,6 @@ export default class GridDBClass extends GridInGraphClass {
         grid.clearSortClick = function () {
             document.removeEventListener('click', sortClick);
         }
-        //grid.setupPagerButtons();
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     removeEvents() {
@@ -117,12 +113,13 @@ export default class GridDBClass extends GridInGraphClass {
     skipOnWaveVisit(e) {
         if (super.skipOnWaveVisit(e)) return true;
 
+        const grid = this;
         if (e.waveType == WaveType.value) {
-            if (this.status == NodeStatus.filter && !this._selecting || this.status == NodeStatus.hidden) {
-                this.selectedRowIndex = -1;
-                if (this.status == NodeStatus.filter) {
-                    this.updateNodeControls(true);
-                    this.graph.visitNodesByWave(e);
+            if (grid.status == NodeStatus.filter && !grid._selecting || grid.status == NodeStatus.hidden) {
+                grid.selectedRowIndex = -1;
+                if (grid.status == NodeStatus.filter) {
+                    grid.updateNodeControls(true);
+                    grid.graph.visitNodesByWave(e);
                 }
                 return true;
             }
@@ -148,7 +145,7 @@ export default class GridDBClass extends GridInGraphClass {
                 {grid.renderPager()}
                 {super.render()}
                 {grid.renderPager(true)}
-                <Dropdown init={(dd) => { grid.menuDropdown = dd; }} getItems={grid.getGridSettings} onItemClick={(e) => { grid.onSettingsItemClick(e.itemId); }}></Dropdown>
+                <Dropdown init={(dd) => { grid.menuDropdown = dd; }} getItems={(e) => { return grid.getGridSettings(e); }} onItemClick={(e) => { grid.onSettingsItemClick(e.itemId); }}></Dropdown>
             </>
         )
     }
@@ -170,7 +167,7 @@ export default class GridDBClass extends GridInGraphClass {
                                     className={`grid-toolbar-button ${button.class || grid.opt.toolbarButtonsClass || ''}`}
                                     title={grid.translate(button.title, 'grid-toolbar-button')}
                                     disabled={button.getDisabled && button.getDisabled({ grid: grid }) || button.disabled ? 'disabled' : ''}
-                                    onClick={button.click ? function (e) {
+                                    onClick={button.click ? (e) => {
                                         e.grid = grid;
                                         button.click(e);
                                     } : null}
@@ -553,7 +550,7 @@ export default class GridDBClass extends GridInGraphClass {
             <>
                 <span
                     className={'grid-header-title'}
-                    style={{ cursor: col.sortable ? 'pointer' : '' }}
+                    style={{ cursor: col.sortable ? 'pointer' : '', gridColumn: !sortDir ? 'span 2' : '' }}
                 >
                     {title}
                 </span>
@@ -562,13 +559,20 @@ export default class GridDBClass extends GridInGraphClass {
         );
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
+    getGridSettingsList() {
+        const res = [
+            { id: 0, text: 'Reset columns order' },
+            { id: 1, text: 'Reset columns widths' }
+        ];
+
+        return res;
+    }
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     getGridSettings(e) {
+        const grid = this;
         return new Promise(function (resolve, reject) {
 
-            const items = [
-                { id: 0, text: 'Reset columns order' },
-                { id: 1, text: 'Reset columns widths' }
-            ];
+            const items = grid.getGridSettingsList();
             resolve(items);
         });
     }

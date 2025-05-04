@@ -45,10 +45,58 @@
             { Id: 36, ParentId: [0], Name: 'Ira', SecondName: '???', Date: '??/??/????', Comment: 'Mat Olega' },
         ];
 
-        //e.totalRows = res.length;
+        if (e.autocompleteColumn) {
+            e.grid._autocomplDict = {};
+            e.grid._autocomplCount = 0;
+        }
 
-        //const page = e.pageSize > 0 && e.pageNumber > 0 ? res.slice((e.pageNumber - 1) * e.pageSize, e.pageNumber * e.pageSize) : res;
+        let rows = [];
 
+        for (let row of family) {
+            if (!this.passRow(e.grid, row, e.autocompleteColumn)) continue;
+
+            if (e.autocompleteColumn) {
+                e.grid._autocomplCount++;
+                if (e.grid._autocomplCount > 10) break;
+
+                let cellValue = row[e.autocompleteColumn.name];
+                e.grid._autocomplDict[String(cellValue).toLowerCase()] = 1;
+
+                rows.push(cellValue);
+            }
+            else {
+                rows.push(row);
+            }
+        }
+
+        if (!e.autocompleteColumn) {
+            e.grid.totalRows = rows.length;
+
+            if (e.grid.columns) {
+                let sortCol = null;
+                for (let col of e.grid.columns) {
+                    if (col.asc || col.desc) {
+                        sortCol = col;
+                        break;
+                    }
+                }
+
+                if (sortCol != null) {
+                    rows.sort(function (a, b) { return a[sortCol.name] > b[sortCol.name] ? (sortCol.asc ? 1 : -1) : (sortCol.asc ? -1 : 1); });
+                }
+            }
+        }
+
+        if (e.autocompleteColumn) {
+            rows.sort(function (a, b) { return a > b ? 1 : -1; });
+        }
+        else {
+            rows = e.grid.pageSize > 0 && e.grid.pageNumber > 0 ? rows.slice((e.grid.pageNumber - 1) * e.grid.pageSize, e.grid.pageNumber * e.grid.pageSize) : rows;
+
+            e.grid.rows = rows;
+        }
+
+        /*
         let res = [];
         if (e.filters && e.filters.length) {
             const filter = e.filters[0];
@@ -79,14 +127,14 @@
         }
 
         res = e.grid.pageSize > 0 && e.grid.pageNumber > 0 ? res.slice((e.grid.pageNumber - 1) * e.grid.pageSize, e.grid.pageNumber * e.grid.pageSize) : res;
-
+        */
 
         //return page;
-        return res;
+        return rows;
     }
 
     GetFamilyColumns() {
-        return [{ name: 'Id', sortable: true }, { name: 'Name', sortable: true }, { name: 'SecondName', sortable: true }, { name: 'Date', sortable: true }, { name: 'Comment', sortable: true }]
+        return [{ name: 'Id', sortable: true, filtrable: true }, { name: 'Name', sortable: true, filtrable: true }, { name: 'SecondName', sortable: true, filtrable: true }, { name: 'Date', sortable: true }, { name: 'Comment', sortable: true, filtrable: true }]
     }
 
     getCity(e) {
@@ -107,6 +155,62 @@
             { Id: 14, ParentId: [19, 25, 26], City: 'Energodar' },
         ];
 
+        if (e.autocompleteColumn) {
+            e.grid._autocomplDict = {};
+            e.grid._autocomplCount = 0;
+        }
+
+        let rows = [];
+
+        for (let row of cities) {
+            if (!this.passRow(e.grid, row, e.autocompleteColumn)) continue;
+
+            if (e.filters && e.filters.length) {
+                const filter = e.filters[0];
+                if (!row['ParentId'] || row['ParentId'].indexOf(+filter) < 0) continue;
+            }
+
+            if (e.autocompleteColumn) {
+                e.grid._autocomplCount++;
+                if (e.grid._autocomplCount > 10) break;
+
+                let cellValue = row[e.autocompleteColumn.name];
+                e.grid._autocomplDict[String(cellValue).toLowerCase()] = 1;
+
+                rows.push(cellValue);
+            }
+            else {
+                rows.push(row);
+            }
+        }
+
+        if (!e.autocompleteColumn) {
+            e.grid.totalRows = rows.length;
+
+            if (e.grid.columns) {
+                let sortCol = null;
+                for (let col of e.grid.columns) {
+                    if (col.asc || col.desc) {
+                        sortCol = col;
+                        break;
+                    }
+                }
+
+                if (sortCol != null) {
+                    rows.sort(function (a, b) { return a[sortCol.name] > b[sortCol.name] ? (sortCol.asc ? 1 : -1) : (sortCol.asc ? -1 : 1); });
+                }
+            }
+        }
+
+        if (e.autocompleteColumn) {
+            rows.sort(function (a, b) { return a > b ? 1 : -1; });
+        }
+        else {
+            rows = e.grid.pageSize > 0 && e.grid.pageNumber > 0 ? rows.slice((e.grid.pageNumber - 1) * e.grid.pageSize, e.grid.pageNumber * e.grid.pageSize) : rows;
+
+            e.grid.rows = rows;
+        }
+        /*
         let res = [];
         if (e.filters && e.filters.length) {
             const filter = e.filters[0];
@@ -137,11 +241,38 @@
         }
 
         res = e.grid.pageSize > 0 && e.grid.pageNumber > 0 ? res.slice((e.grid.pageNumber - 1) * e.grid.pageSize, e.grid.pageNumber * e.grid.pageSize) : res;
-
-        return res;
+        */
+        return rows;
     }
 
     GetCityColumns() {
-        return [{ name: 'Id', sortable: true }, { name: 'City', sortable: true }]
+        return [{ name: 'Id', sortable: true }, { name: 'City', sortable: true, filtrable: true }]
+    }
+
+    passRow(grid, row, autocompleteColumn) {
+        if (!grid.columns) return true;
+
+        for (let col of grid.columns) {
+            if (!col.filtrable || (col.filter === undefined || col.filter == '') && !autocompleteColumn) continue;
+
+            const cellValue = String(row[col.name]).toLowerCase();
+            if (cellValue == '') return false;
+
+            const filter = col.filter === undefined || col.filter == '' ? '' : col.filter.toLowerCase();
+
+            if (filter != '') {
+                if (autocompleteColumn) {
+                    if (autocompleteColumn == col && cellValue.indexOf(filter) != 0 || autocompleteColumn != col && cellValue != filter) return false;
+
+                }
+                else {
+                    if (cellValue != filter) return false;
+                }
+            }
+
+            if (autocompleteColumn && grid._autocomplDict[cellValue]) return false;
+        }
+
+        return true;
     }
 }

@@ -7,13 +7,14 @@ import { Modal } from './Grid/Modal';
 import { Dropdown } from './Grid/Dropdown';
 import { GridInGraph } from './Grid/GridInGraph';
 import { GridDB } from './Grid/GridDB';
+import { GridFL } from './Grid/GridFL';
 
 function App() {
     const [state, setState] = useState(0);
 
     window._logEnabled = true;
 
-    const GetRows = function (e) {
+    const GetFamily = function (e) {
         return new Promise(function (resolve, reject) {
 
             const rows = new TestData().getFamily(e);
@@ -110,7 +111,7 @@ function App() {
                 <div className="div-on-menu">
                     <button onClick={() => { console.clear() }} className="modal-window-footer-button">Clear console</button>
                 </div>
-                <ReactGrid getRows={GetRows} init={(grid) => { window.gridComponent = grid }}></ReactGrid>
+                <ReactGrid getRows={GetFamily} init={(grid) => { window.gridComponent = grid }}></ReactGrid>
             </>
         )
     }
@@ -148,7 +149,7 @@ function App() {
                             <button onClick={() => ResetColumnsWidths()} className="modal-window-footer-button">Reset columns widths</button>
                             {drawClearConsole()}
                         </div>
-                        <ReactGrid getRows={GetRows} init={(grid) => { window.gridComponent = grid; }}></ReactGrid>
+                        <ReactGrid getRows={GetFamily} init={(grid) => { window.gridComponent = grid; }}></ReactGrid>
                     </>
                 )
             case 1:
@@ -180,7 +181,7 @@ function App() {
                             {drawClearConsole()}
                         </div>
                         <div style={{ padding: "5px" }}>
-                            <GridInGraph uid="people" getRows={GetRows}></GridInGraph>
+                            <GridInGraph uid="people" getRows={GetFamily}></GridInGraph>
                         </div>
                         <div style={{ padding: "5px" }}>
                             <GridInGraph parentGrids="people" getRows={GetCities} getColumns={GetCityColumns}></GridInGraph>
@@ -191,7 +192,23 @@ function App() {
                 return (
                     <>
                         <div style={{ padding: "5px" }}>
-                            <GridDB getRows={GetRows} buttons={GetButtons()} getColumns={GetFamilyColumns}></GridDB>
+                            <GridDB getRows={GetFamily} buttons={GetButtons()} getColumns={GetFamilyColumns}></GridDB>
+                        </div>
+                    </>
+                );
+            case 6:
+                return (
+                    <>
+                        <div style={{ padding: "5px" }}>
+                            <GridFL getRows={GetFamily} buttons={GetButtons()} getColumns={GetFamilyColumns}></GridFL>
+                        </div>
+                    </>
+                );
+            case 7:
+                return (
+                    <>
+                        <div style={{ padding: "5px" }}>
+                            <GridFL getRows={GetFamily} buttons={GetButtons()} getColumns={GetFamilyColumns}></GridFL>
                         </div>
                     </>
                 );
@@ -212,6 +229,7 @@ function App() {
                 <option>4. Test Dropdown</option>
                 <option>5. Two Grids</option>
                 <option>6. Test GridDB</option>
+                <option>7. Test GridFL</option>
             </select>
             <div className="div-on-menu">
                 {getTestApp()}
