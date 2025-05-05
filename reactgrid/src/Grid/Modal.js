@@ -166,7 +166,7 @@ export class ModalClass extends BaseComponent {
                 <h4 className={wnd.opt.titleClass}>
                     {wnd.opt.title || ''}
                 </h4>
-                <button wnd-btn={`close_${wnd.id}_`} type="button" className="close" style={{ color: "black" }} >×</button>
+                <button wnd-btn={`close_${wnd.id}_`} type="button" className="close" style={{ color: "black" }} onClick={(e) => wnd.close()}>×</button>
             </div>
         )
     }
@@ -185,7 +185,12 @@ export class ModalClass extends BaseComponent {
                 } >
                 {wnd.buttons.map((btn, ind) => {
                     return (
-                        <button wnd-btn={`button_${wnd.id}_${btn._ind}_`} className={wnd.opt.footerButtonClass} title={btn.title}>
+                        <button
+                            wnd-btn={`button_${wnd.id}_${btn._ind}_`}
+                            className={wnd.opt.footerButtonClass}
+                            title={btn.title}
+                            onClick={btn.onclick ? (e) => btn.onclick(e) : null}
+                        >
                             <i className={btn.imageClass}></i>
                             {btn.title}
                         </button>
@@ -257,36 +262,6 @@ export class ModalClass extends BaseComponent {
     setupEvents = function () {
         const wnd = this;
         // -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  
-        function onClick(e) {
-            if (!e.target) return;
-
-            const wndAttr = e.target.getAttribute('wnd-btn') || e.target.id;
-            if (!wndAttr) return;
-
-            const [entity, wndId, buttonId] = wndAttr.split('_');
-            if (wnd.id !== +wndId) return;
-
-            switch (entity) {
-                case 'window':
-                    if (wnd.opt.closeWhenClick) {
-                        wnd.close();
-                    }
-                    break;
-                case 'close':
-                    wnd.close();
-                    break;
-                case 'button':
-                    const button = wnd.buttonsDict[buttonId];
-                    if (!button || !button.onclick) return;
-
-                    e.modal = wnd;
-
-                    button.onclick(e);
-                    break;
-                default:
-            }
-        }
-        // -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  
         function onKeyDown(e) {
             const key = e && e.key ? e.key.toLowerCase() : '';
 
@@ -295,7 +270,7 @@ export class ModalClass extends BaseComponent {
             }
         }
         // -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  
-        document.addEventListener('click', onClick);
+        //document.addEventListener('click', onClick);
         document.addEventListener('keydown', onKeyDown);
 
         if (wnd.opt.draggable) {
@@ -314,7 +289,7 @@ export class ModalClass extends BaseComponent {
                 wnd.clearDrag();
             }
 
-            document.removeEventListener('click', onClick);
+            //document.removeEventListener('click', onClick);
             document.removeEventListener('keydown', onKeyDown);
         }
     }

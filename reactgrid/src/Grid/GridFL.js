@@ -92,24 +92,29 @@ export class GridFLClass extends GridDBClass {
                 {col.filtrable && context !== 'fake' ?
                     <>
                         <input
+                            key={`colfilter_${grid.id}_${col.id}_`}
+                            id={`colfilter_${grid.id}_${col.id}_`}
                             className={`grid-col-filter ${grid.opt.filterInputClass || ''}`}
                             value={col.filter !== undefined ? col.filter : ''}
                             title={col.filter !== undefined ? col.filter : ''}
-                            style={{ gridColumn: !hasFilter ? 'span 2' : '', width: 'calc(100% - 8px)' }}
+                            style={{ gridColumn: !hasFilter ? 'span 2' : '', width: 'calc(100% - 0px)', padding: '0 2px', boxSizing: 'border-box' }}
                             grid-col-filter={`${grid.id}_${col.id}_`}
-                            onChange={(e) => { grid.columnFilterChange(col, e.target.value, e) }}
+                            onChange={(e) => { grid.columnFilterChanging(col, e.target.value, e) }}
                             onClick={(e) => { grid.onAutocompleteClick(col, e); }}
                             onInput={(e) => { grid.onAutocompleteInput(col, e) }}
                             autoFocus={grid._inputingColumn === col}
+                            onFocus={(e) => { grid.onAutocompleteFocus(col, e) }}
+                            onBlur={(e) => { grid.columnFocusLost(col, col.filter, e); }}
                         >
                         </input>
                         {
                             hasFilter ? <button
+                                key={`colfilterClear_${grid.id}_${col.id}_`}
                                 grid-filter-clear={`${grid.id}_${col.id}_`}
                                 className={"grid-filter-clear"}
                                 style={{ color: 'black' }}
                                 type={'button'}
-                                onClick={(e) => { grid.clearColumnFilter(col) }}
+                                onClick={(e) => grid.clearColumnFilter(col)}
                             >×</button> : <></>
                         }
                     </>
@@ -146,21 +151,51 @@ export class GridFLClass extends GridDBClass {
         e.dropdown.items = [];
         grid._autocompleteDropdown.items = [];
 
-        grid.columnFilterChange(grid._inputingColumn, item.text);
+        grid._inputingColumn.prevFilter = item.text;
+        grid.columnFilterChanged(grid._inputingColumn, item.text);
         //delete grid._autocompleteDropdown;
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
 
     showAutocomplete(e) {
         const grid = this;
+
+        if (grid._autocompleteRect) {
+            grid._autocompleteDropdown.opt.parentRect = grid._autocompleteRect;
+        }
+
         grid._autocompleteDropdown.popup(e);
+
+        if (grid._autocompleteRect) {
+            delete grid._autocompleteRect;
+        }
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
-    columnFilterChange(column, filter, e) {
+    columnFilterChanging(column, filter, e) {
         const grid = this;
         if (grid._skipChange) return;
 
         column.filter = filter;
+        if (e && e.target) {
+            grid._autocompleteRect = e.target.getBoundingClientRect();
+        }
+
+        grid._autocompleteDropdown.items = [];
+        grid.refreshState();
+
+        //    grid.pageNumber = 1;
+        //    grid.selectedRowIndex = 0;
+        //    grid.refresh();
+    }
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
+    columnFocusLost(column, filter, e) {
+        const grid = this;
+        if (grid._skipChange || column.filter === column.prevFilter) return;
+
+        delete grid._inputingColumn;
+        column.prevFilter = '';
+        //column.filter = filter;
+        //delete column.newFilter;
         if (e && e.target) {
             grid._autocompleteRect = e.target.getBoundingClientRect();
         }
@@ -170,10 +205,80 @@ export class GridFLClass extends GridDBClass {
         grid.refresh();
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
+    columnFilterChanged(column, filter, e) {
+        const grid = this;
+        if (grid._skipChange /*|| column.filter == filter*/) return;
+
+        column.filter = filter;
+        //delete column.newFilter;
+        if (e && e.target) {
+            grid._autocompleteRect = e.target.getBoundingClientRect();
+        }
+
+        grid.pageNumber = 1;
+        grid.selectedRowIndex = 0;
+        grid.refresh();
+    }
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
+    onAutocompleteClick(col, e) {
+        const grid = this;
+
+        e.target.focus();
+        setTimeout(() => {
+            if (grid._skipAutocomplete) {
+                grid._skipAutocomplete = false;
+                return;
+            }
+
+            grid._inputingColumn = col;
+            grid._autocompleteDropdown.items = [];
+            grid._autocompleteRect = e.target.getBoundingClientRect();
+
+            grid.showAutocomplete(e);
+        }, 150);
+    }
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
+    onAutocompleteFocus(col, e) {
+        const grid = this;
+
+        if (col.prevFilter === undefined) {
+            col.prevFilter = col.filter;
+        }
+
+        const sameColumn = grid._inputingColumn == col;
+        grid._inputingColumn = col;
+        if (grid._autocompleteDropdown.visible && !sameColumn) {
+            grid._autocompleteDropdown.close();
+        }
+    }
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
+    onAutocompleteInput(col, e) {
+        const grid = this;
+
+        grid._autocompleteSeq = grid._autocompleteSeq || 0;
+        let prevSeq = grid._autocompleteSeq;
+        grid._autocompleteSeq++;
+
+
+        setTimeout(() => {
+            if (++prevSeq != grid._autocompleteSeq) return;
+
+            grid._inputingColumn = col;
+            grid._autocompleteDropdown.items = [];
+
+            const elem = document.getElementById(e.target.id);
+
+            grid._autocompleteRect = elem ? elem.getBoundingClientRect() : e.target.getBoundingClientRect();
+
+            grid.showAutocomplete(e);
+        }, 100);
+    }
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     clearColumnFilter(column) {
         const grid = this;
 
         column.filter = '';
+        column.prevFilter = '';
 
         grid.pageNumber = 1;
         grid.selectedRowIndex = 0;
@@ -213,7 +318,7 @@ export class GridFLClass extends GridDBClass {
     onSettingsItemClick(grid, itemId) {
         super.onSettingsItemClick(grid, itemId);
 
-        switch (itemId) {
+        switch (String(itemId)) {
             case '2':
                 grid.clearAllColumnFilters();
                 break;
@@ -257,160 +362,5 @@ export class GridFLClass extends GridDBClass {
         grid.pagerButtonsDict[clear.id] = grid.pagerButtonsDict[clear.name] = clear;
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
-    onAutocompleteClick(col, e) {
-        const grid = this;
-
-        e.target.focus();
-        setTimeout(() => {
-            if (grid._skipAutocomplete) {
-                grid._skipAutocomplete = false;
-                return;
-            }
-
-            grid._inputingColumn = col;
-            grid._autocompleteDropdown.items = [];
-            //grid._autocompleteDropdown.opt.parentElem = e.target;
-            grid._autocompleteRect = e.target.getBoundingClientRect();
-
-            grid.showAutocomplete(e);
-        }, 150);
-    }
-    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
-    onAutocompleteInput(col, e) {
-        const grid = this;
-
-        grid._autocompleteSeq = grid._autocompleteSeq || 0;
-        let prevSeq = grid._autocompleteSeq;
-        grid._autocompleteSeq++;
-
-
-        setTimeout(() => {
-            if (++prevSeq != grid._autocompleteSeq) return;
-
-            grid._inputingColumn = col;
-            grid._autocompleteDropdown.items = [];
-            //grid._autocompleteDropdown.opt.parentElem = e.target;
-            grid._autocompleteRect = e.target.getBoundingClientRect();
-
-            grid.showAutocomplete(e);
-        }, 100);
-    }
 }
 // ==================================================================================================================================================================
-//document.addEventListener('click', function (e) {
-//    let gridId, itemId, grid;
-
-//    switch (e.target.tagName) {
-//        case 'INPUT':
-//            if (!e.target.hasAttribute('grid-col-filter')) return;
-
-//            e.target.focus();
-
-//            [gridId, itemId] = e.target.getAttribute('grid-col-filter').split('_');
-//            grid = window._gridDict[gridId];
-//            const column = grid.colDict[itemId];
-
-//            const parentElem = e.target;
-
-//            setTimeout(function () {
-//                if (grid._skipAutocomplete) {
-//                    grid._skipAutocomplete = false;
-//                    return;
-//                }
-//                grid.showAutocomplete(parentElem, column);
-//            }, 150);
-//            break;
-//    }
-//});
-// -------------------------------------------------------------------------------------------------------------------------------------------------------------
-//document.addEventListener('dblclick', function (e) {
-//    let gridId, itemId, grid, column;
-
-//    switch (e.target.tagName) {
-//        case 'INPUT':
-//            if (!e.target.hasAttribute('grid-col-filter')) return;
-
-//            [gridId, itemId] = e.target.getAttribute('grid-col-filter').split('_');
-//            grid = window._gridDict[gridId];
-//            column = grid.colDict[itemId];
-
-//            grid._skipAutocomplete = true;
-//            break;
-//        case 'DIV':
-//            const th = e.target.closest('TH');
-
-//            if (!th || !th.hasAttribute('grid-header-th')) return;
-
-//            [gridId, itemId] = e.target.getAttribute('grid-header-th').split('_');
-//            grid = window._gridDict[gridId];
-//            column = grid.colDict[itemId];
-
-//            grid._skipAutocomplete = true;
-//            break;
-//    }
-//});
-// -------------------------------------------------------------------------------------------------------------------------------------------------------------
-//document.addEventListener('change', function (e) {
-//    let gridId, itemId, grid;
-
-//    switch (e.target.tagName) {
-//        case 'INPUT':
-//            if (!e.target.hasAttribute('grid-col-filter')) return;
-
-//            [gridId, itemId] = e.target.getAttribute('grid-col-filter').split('_');
-//            grid = window._gridDict[gridId];
-
-//            if (grid._skipChange) return;
-
-//            const column = grid.colDict[itemId];
-//            const filter = e.target.value;
-
-//            grid.columnFilterChange(column, filter);
-//            break;
-//    }
-//});
-// -------------------------------------------------------------------------------------------------------------------------------------------------------------
-//document.addEventListener('input', function (e) {
-//    let gridId, itemId, grid;
-
-//    switch (e.target.tagName) {
-//        case 'INPUT':
-//            if (!e.target.hasAttribute('grid-col-filter')) return;
-
-//            [gridId, itemId] = e.target.getAttribute('grid-col-filter').split('_');
-//            grid = window._gridDict[gridId];
-//            const column = grid.colDict[itemId];
-//            column.filter = e.target.value;
-//            const parentElem = e.target;
-
-//            grid._autocompleteSeq = grid._autocompleteSeq || 0;
-//            let prevSeq = grid._autocompleteSeq;
-//            grid._autocompleteSeq++;
-
-//            setTimeout(function () {
-//                if (++prevSeq != grid._autocompleteSeq) return;
-
-//                grid.showAutocomplete(parentElem, column);
-//            }, 100);
-//            break;
-//    }
-//});
-// -------------------------------------------------------------------------------------------------------------------------------------------------------------
-//document.addEventListener('click', function (e) {
-
-//    switch (e.target.tagName) {
-//        case 'BUTTON':
-//            const attr = e.target.getAttribute('grid-filter-clear');
-//            if (!attr) return;
-
-//            const [gridId, itemId] = attr.split('_');
-
-//            const grid = window._gridDict[gridId];
-//            const column = grid.colDict[itemId];
-
-//            column.filter = '';
-//            grid.columnFilterChange(column, '');
-//            break;
-//    }
-//});
-// -------------------------------------------------------------------------------------------------------------------------------------------------------------

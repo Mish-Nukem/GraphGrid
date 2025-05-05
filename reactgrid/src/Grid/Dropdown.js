@@ -102,6 +102,7 @@ export class DropdownClass extends BaseComponent {
                                     key={`${dd.id}_${item.id}_`}
                                     title={dd.translate(item.title || item.text)}
                                     className={dd.menuItemClass + (dd.activeItem === item ? ' active' : '')}
+                                    onClick={(e) => dd.onItemClick(e, item.id)}
                                 >
                                     {dd.translate(item.text)}
                                 </li>
@@ -114,7 +115,9 @@ export class DropdownClass extends BaseComponent {
                                 <li dropdown-item={`${dd.id}_append_`}
                                     key={`${dd.id}_append_`}
                                     title={dd.translate('load more records')}
-                                    className={dd.menuItemClass}>
+                                    className={dd.menuItemClass}
+                                    onClick={(e) => dd.onItemClick(e, 'append')}
+                                >
                                     ${dd.translate('more...')}
                                 </li>
                             </ul>
@@ -161,7 +164,7 @@ export class DropdownClass extends BaseComponent {
             const renderFake = function () {
                 return (
                     <div>
-                        {dd.renderPopup(true)} 
+                        {dd.renderPopup(true)}
                     </div>
                 )
             }
@@ -179,7 +182,7 @@ export class DropdownClass extends BaseComponent {
 
             if (dd.items.length <= 0 && !dd.opt.allowUserFilter) return;
 
-            const parentRect = dd.opt.parentRect ? dd.opt.parentRect : dd.opt.parentElem ?dd.opt.parentElem.getBoundingClientRect(): { x: e.clientX, y: e.clientY, width: e.width || 0, height: e.height || 0 };
+            const parentRect = dd.opt.parentRect ? dd.opt.parentRect : /*dd.opt.parentElem ? dd.opt.parentElem.getBoundingClientRect() :*/ { x: e.clientX, y: e.clientY, width: e.width || 0, height: e.height || 0 };
 
             dd.pos = {
                 x: parentRect.x,
@@ -218,34 +221,22 @@ export class DropdownClass extends BaseComponent {
         dd.refreshState();
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
-    setupEvents() {
+    onItemClick(e, itemId) {
         const dd = this;
 
-        function onClick(e) {
-            let dropdownId, itemId;
-
-            switch (e.target.tagName) {
-                case 'LI':
-                    if (!e.target.hasAttribute('dropdown-item')) return;
-
-                    [dropdownId, itemId] = e.target.getAttribute('dropdown-item').split('_');
-                    if (+dropdownId !== dd.id) return;
-
-                    if (itemId === 'append') {
-                        dd.appendItems();
-                    }
-                    else {
-                        if (dd.opt.onItemClick) {
-                            dd.opt.onItemClick({ owner: dd.opt.owner, itemId: itemId, dropdown: dd });
-                        }
-                        dd.close();
-                    }
-                    break;
-                default:
-                    break;
-            }
+        if (itemId === 'append') {
+            dd.appendItems();
         }
-
+        else {
+            if (dd.opt.onItemClick) {
+                dd.opt.onItemClick({ owner: dd.opt.owner, itemId: itemId, dropdown: dd });
+            }
+            dd.close();
+        }
+    }
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
+    setupEvents() {
+        const dd = this;
         function onKeyDown(e) {
             const key = e && e.key ? e.key.toLowerCase() : '';
 
@@ -296,12 +287,10 @@ export class DropdownClass extends BaseComponent {
             }
         }
 
-        document.addEventListener('click', onClick);
         document.addEventListener('keydown', onKeyDown);
 
 
         dd.clearEvents = function () {
-            document.removeEventListener('click', onClick);
             document.removeEventListener('keydown', onKeyDown);
         }
     }

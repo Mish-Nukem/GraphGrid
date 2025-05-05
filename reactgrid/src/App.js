@@ -8,6 +8,7 @@ import { Dropdown } from './Grid/Dropdown';
 import { GridInGraph } from './Grid/GridInGraph';
 import { GridDB } from './Grid/GridDB';
 import { GridFL } from './Grid/GridFL';
+import { BootstrapGrid } from './Grid/BootstrapGrid'; 
 
 function App() {
     const [state, setState] = useState(0);
@@ -208,7 +209,7 @@ function App() {
                 return (
                     <>
                         <div style={{ padding: "5px" }}>
-                            <GridFL getRows={GetFamily} buttons={GetButtons()} getColumns={GetFamilyColumns}></GridFL>
+                            <BootstrapGrid getRows={GetFamily} buttons={GetButtons()} getColumns={GetFamilyColumns}></BootstrapGrid>
                         </div>
                     </>
                 );
@@ -230,6 +231,7 @@ function App() {
                 <option>5. Two Grids</option>
                 <option>6. Test GridDB</option>
                 <option>7. Test GridFL</option>
+                <option>8. Test BootstrapGrid</option>
             </select>
             <div className="div-on-menu">
                 {getTestApp()}

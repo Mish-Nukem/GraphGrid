@@ -213,7 +213,7 @@ export class ReactGridClass extends BaseComponent {
         );
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
-    renderHeader(columns) {
+    renderHeader(columns, context) {
         const grid = this;
         columns = columns || grid.columns;
 
@@ -233,7 +233,7 @@ export class ReactGridClass extends BaseComponent {
                                 <div
                                     className={`grid-header-div-default ${grid.opt.headerDivClass || 'grid-header-div'}`}
                                 >
-                                    {grid.renderHeaderCell(col)}
+                                    {grid.renderHeaderCell(col, context)}
                                 </div>
                                 <div
                                     grid-rsz-x={`${grid.id}_${col.id}`}
@@ -369,7 +369,7 @@ export class ReactGridClass extends BaseComponent {
             fakeGrid.style.width = rect.width + 'px';
             fakeGrid.style.height = rect.height + 'px';
 
-            fakeGrid.innerHTML = renderToStaticMarkup(grid.renderHeader([column]));
+            fakeGrid.innerHTML = renderToStaticMarkup(grid.renderHeader([column], 'fake'));
 
             document.body.append(fakeGrid);
             return fakeGrid;
