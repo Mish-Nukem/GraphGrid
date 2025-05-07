@@ -96,40 +96,6 @@
             e.grid.rows = rows;
         }
 
-        /*
-        let res = [];
-        if (e.filters && e.filters.length) {
-            const filter = e.filters[0];
-            for (let row of family) {
-                if (row['ParentId'] && row['ParentId'].indexOf(+filter) >= 0) {
-                    res.push(row);
-                }
-            }
-        }
-        else {
-            res = family;
-        }
-
-        e.grid.totalRows = res.length;
-
-        if (e.grid.columns) {
-            let sortCol = null;
-            for (let col of e.grid.columns) {
-                if (col.asc || col.desc) {
-                    sortCol = col;
-                    break;
-                }
-            }
-
-            if (sortCol != null) {
-                res.sort(function (a, b) { return a[sortCol.name] > b[sortCol.name] ? (sortCol.asc ? 1 : -1) : (sortCol.asc ? -1 : 1); });
-            }
-        }
-
-        res = e.grid.pageSize > 0 && e.grid.pageNumber > 0 ? res.slice((e.grid.pageNumber - 1) * e.grid.pageSize, e.grid.pageNumber * e.grid.pageSize) : res;
-        */
-
-        //return page;
         return rows;
     }
 
@@ -210,38 +176,7 @@
 
             e.grid.rows = rows;
         }
-        /*
-        let res = [];
-        if (e.filters && e.filters.length) {
-            const filter = e.filters[0];
-            for (let row of cities) {
-                if (row['ParentId'] && row['ParentId'].indexOf(+filter) >= 0) {
-                    res.push(row);
-                }
-            }
-        }
-        else {
-            res = cities;
-        }
 
-        e.grid.totalRows = res.length;
-
-        if (e.grid.columns) {
-            let sortCol = null;
-            for (let col of e.grid.columns) {
-                if (col.asc || col.desc) {
-                    sortCol = col;
-                    break;
-                }
-            }
-
-            if (sortCol != null) {
-                res.sort(function (a, b) { return a[sortCol.name] > b[sortCol.name] ? (sortCol.asc ? 1 : -1) : (sortCol.asc ? -1 : 1); });
-            }
-        }
-
-        res = e.grid.pageSize > 0 && e.grid.pageNumber > 0 ? res.slice((e.grid.pageNumber - 1) * e.grid.pageSize, e.grid.pageNumber * e.grid.pageSize) : res;
-        */
         return rows;
     }
 

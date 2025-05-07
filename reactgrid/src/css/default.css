@@ -5,7 +5,7 @@
     border-radius: 3px;
     overflow: hidden;
     background: white;
-    border: 1px solid;
+    border: 1px solid lightgray;
 }
 
 .modal-window-header {
@@ -85,17 +85,19 @@
     .grid-default > thead > tr > th {
         background-color: white;
         /*border: none;*/
-        border: solid;
-        border-width: 0 1px 0 1px;
+        border: solid 1px;
+        box-shadow: inset 1px 0 0 0 gray, inset -1px -1px 0 0 gray;
+        /*border-width: 0 1px 0 1px;*/
         white-space: nowrap;
         text-overflow: clip;
         vertical-align: middle;
     }
 
 .grid-header-div {
-    border: solid;
+    border: none;
     margin: -1px -1px -1px -1px;
-    border-width: 1px 0 1px 1px;
+    /*border: solid;*/
+    /*border-width: 1px 0 1px 1px;*/
 }
 
 .grid-header-th {
@@ -128,6 +130,7 @@
     align-items: flex-end;
     justify-content: flex-end;
     cursor: pointer;
+    align-items: center;
 }
 
 .grid-header-filter {
@@ -141,6 +144,8 @@
     opacity: 0.2;
     display: flex;
     justify-content: center;
+    align-items: center;
+    /*margin: 0 2px;*/
 }
 
     .grid-filter-clear:hover {
@@ -154,8 +159,21 @@
     background-color: lightgray;
 }
 
+.grid-pager-default {
+    display: flex;
+    align-content: center;
+    flex-wrap: nowrap;
+    align-items: center;
+}
+
+    .grid-pager-default > button, .grid-pager-default > span, .grid-pager-default > input, .grid-pager-default > select {
+        margin: 5px 2px;
+    }
+
 .grid-pager-button {
-    margin: 5px 1px;
+    margin: 5px 2px;
+    height: 28px;
+    width: 36px;
 }
 
 .grid-toolbar-button {
@@ -164,6 +182,18 @@
 
 .grid-pager-current {
     width: 3em;
+    height: 22px;
+    margin: 0 2px;
+}
+
+.grid-pager-of {
+    padding: 0 3px;
+    white-space: nowrap;
+}
+
+.grid-pager-total {
+    padding: 0 3px;
+    white-space: nowrap;
 }
 
 .grid-pager-size {
@@ -217,11 +247,13 @@
 .grid-header-title {
     white-space: nowrap;
     overflow: hidden;
+    margin: 2px;
 }
 
 .div-on-menu {
     margin: 10px;
 }
-/*.grid-col-filter {
-    grid-column: span 2;
-}*/
+
+.grid-col-filter {
+    height: 2em;
+}

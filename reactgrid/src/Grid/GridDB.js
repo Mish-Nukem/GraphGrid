@@ -193,7 +193,7 @@ export class GridDBClass extends GridInGraphClass {
             grid.pagerButtons.length <= 0 || bottom && !grid.allowBottomPager ? <></> :
                 <div
                     id={`grid_${grid.id}_pager_${bottom ? 'bottom' : 'top'}_`}
-                    className={grid.opt.pagerClass || 'pager-default'}
+                    className={grid.opt.pagerClass || 'grid-pager-default'}
                 >
                     {
                         grid.pagerButtons.map((button, ind) => {
@@ -356,7 +356,7 @@ export class GridDBClass extends GridInGraphClass {
             render: function (button, bottom) {
                 return (
                     <span
-                        style={{ padding: '0 3px' }}
+                        className={'grid-pager-of'}
                         key={`pager_${bottom ? 'bottom' : 'top'}_${grid.id}_${button.id}_`}
                     >
                         {` ${grid.translate('of', 'pager-button')} ${grid.pagesCount >= 0 ? grid.pagesCount : ''}`}
@@ -453,7 +453,9 @@ export class GridDBClass extends GridInGraphClass {
             label: 'Total Rows',
             render: function (button, bottom) {
                 return (
-                    <span style={{ padding: '0 3px' }} key={`pager_${bottom ? 'bottom' : 'top'}_${grid.id}_${button.id}_`}>
+                    <span
+                        className={'grid-pager-total'}
+                        key={`pager_${bottom ? 'bottom' : 'top'}_${grid.id}_${button.id}_`}>
                         {`${grid.translate('total rows', 'pager-button')} ${grid.totalRows >= 0 ? grid.totalRows : ''}`}
                     </span>
                 );

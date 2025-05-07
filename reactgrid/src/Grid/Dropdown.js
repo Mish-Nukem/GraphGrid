@@ -24,7 +24,7 @@ export function Dropdown(props) {
 
     if (!dd.refreshState) {
         dd.refreshState = function () {
-            log('refreshState ' + dd.stateind);
+            //log('refreshState ' + dd.stateind);
             setState({ dd: dd, ind: dd.stateind++ });
         }
     }
@@ -33,7 +33,7 @@ export function Dropdown(props) {
         dd.setupEvents();
 
         return () => {
-            log(' 0.11 Clear DropdownEvents');
+            //log(' 0.11 Clear DropdownEvents');
 
             dd.clearEvents();
         }
@@ -176,8 +176,8 @@ export class DropdownClass extends BaseComponent {
             fakeDiv.innerHTML = renderToStaticMarkup(renderFake());
             document.body.append(fakeDiv);
             const rect = getComputedStyle(fakeDiv);
-            const w = parseInt(rect.width) + 1;
-            const h = parseInt(rect.height) + 1;
+            const w = parseInt(rect.width) + 2;
+            const h = parseInt(rect.height) + 2;
             fakeDiv.remove();
 
             if (dd.items.length <= 0 && !dd.opt.allowUserFilter) return;

@@ -8,10 +8,10 @@ import { Dropdown } from './Grid/Dropdown';
 import { GridInGraph } from './Grid/GridInGraph';
 import { GridDB } from './Grid/GridDB';
 import { GridFL } from './Grid/GridFL';
-import { BootstrapGrid } from './Grid/BootstrapGrid'; 
-
+//import { BootstrapGrid } from './Grid/BootstrapGrid'; 
+import { LoginPage } from './Pages/LoginPage'
 function App() {
-    const [state, setState] = useState(0);
+    const [state, setState] = useState(-2);
 
     window._logEnabled = true;
 
@@ -138,6 +138,10 @@ function App() {
     const getTestApp = () => {
         console.log('state == ' + state);
         switch (state) {
+            case -1:
+                return (
+                    <></>
+                )
             case 0:
                 return (
                     <>
@@ -209,7 +213,7 @@ function App() {
                 return (
                     <>
                         <div style={{ padding: "5px" }}>
-                            <BootstrapGrid getRows={GetFamily} buttons={GetButtons()} getColumns={GetFamilyColumns}></BootstrapGrid>
+                            {/*<BootstrapGrid getRows={GetFamily} buttons={GetButtons()} getColumns={GetFamilyColumns}></BootstrapGrid>*/}
                         </div>
                     </>
                 );
@@ -219,24 +223,25 @@ function App() {
     };
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     return (
-        <div >
-            <select onChange={(e) => {
-                //console.log('this == ' + e);
-                setState(e.target.selectedIndex);
-            }}>
-                <option>1. Test ReactGrid</option>
-                <option>2. Test Overlay</option>
-                <option>3. Test Modal</option>
-                <option>4. Test Dropdown</option>
-                <option>5. Two Grids</option>
-                <option>6. Test GridDB</option>
-                <option>7. Test GridFL</option>
-                <option>8. Test BootstrapGrid</option>
-            </select>
-            <div className="div-on-menu">
-                {getTestApp()}
+        state < -1 ? <LoginPage afterLogin={(e) => { setState(-1) }}></LoginPage> :
+            <div >
+                <select onChange={(e) => {
+                    //console.log('this == ' + e);
+                    setState(e.target.selectedIndex);
+                }}>
+                    <option>1. Test ReactGrid</option>
+                    <option>2. Test Overlay</option>
+                    <option>3. Test Modal</option>
+                    <option>4. Test Dropdown</option>
+                    <option>5. Two Grids</option>
+                    <option>6. Test GridDB</option>
+                    <option>7. Test GridFL</option>
+                    <option>8. Test BootstrapGrid</option>
+                </select>
+                <div className="div-on-menu">
+                    {getTestApp()}
+                </div>
             </div>
-        </div>
     );
 }
 

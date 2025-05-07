@@ -1,6 +1,8 @@
 ﻿import { useState, useEffect } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { BaseComponent, log } from './Base';
+import { BootstrapTheme as Theme } from './Themes/BootstrapGridTheme';
+//import { DefaultGridTheme as Theme } from './Themes/DefaultGridTheme';
 // ==================================================================================================================================================================
 export function ReactGrid(props) {
     let grid = null;
@@ -80,8 +82,6 @@ export class ReactGridClass extends BaseComponent {
 
         grid.stateind = 0;
 
-
-
     //    if (!props.noAutoRefresh && (grid.rows.length <= 0 || grid.columns.length <= 0)) {
 
     //        grid.getRows({ filters: grid.collectFilters() }).then(
@@ -141,6 +141,11 @@ export class ReactGridClass extends BaseComponent {
             document.removeEventListener('mousedown', mouseDown);
 
             grid.removeColumnDrag();
+        }
+
+        if (Theme !== undefined) {
+            const theme = new Theme();
+            theme.applyTheme(grid);
         }
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------

@@ -1,7 +1,8 @@
-﻿import { useState, useEffect } from 'react';
-import { GridFLClass } from './GridFL.js';
-import '../../node_modules/bootstrap/dist/css/bootstrap.min.css';
+﻿//import { useState, useEffect } from 'react';
+//import { GridFLClass } from './GridFL.js';
+import '../../../node_modules/bootstrap/dist/css/bootstrap.min.css';
 // ==================================================================================================================================================================
+/*
 export function BootstrapGrid(props) {
     let grid = null;
 
@@ -50,37 +51,37 @@ export function BootstrapGrid(props) {
 
     return (grid.render());
 }
+*/
 // ==================================================================================================================================================================
-export class BootstrapGridClass extends GridFLClass {
+export class BootstrapTheme /*extends GridFLClass*/ {
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
+    applyTheme(grid) {
+        //grid.toolbarButtonsClass = 'btn btn-sm btn-success';
+        grid.opt.toolbarButtonsClass = 'btn btn-primary';
+        grid.opt.pagerClass = 'mb-1 grid-pager-default';
 
-    constructor(options) {
-        super(options);
+        grid.opt.gridClass = 'table table-sm table-bordered';
+        //grid.opt.headerDivClass = 'grid-header-div-default';
+        grid.opt.headerDivClass = ' ';
+        grid.opt.selectedRowClass = 'table-active';
+        grid.opt.filterInputClass = 'form-control form-control-sm';
 
-        //this.toolbarButtonsClass = 'btn btn-sm btn-success';
-        this.opt.toolbarButtonsClass = 'btn btn-primary';
-        this.opt.pagerClass = 'mb-1';
+        grid.opt.menuClass = 'list-group';
+        grid.opt.menuItemClass = 'list-group-item list-group-item-action list-group-item-light';
+        grid.opt.dropdownWndClass = 'none';
 
-        this.opt.gridClass = 'table table-sm table-bordered';
-        //this.opt.headerDivClass = 'grid-header-div-default';
-        this.opt.headerDivClass = ' ';
-        this.opt.selectedRowClass = 'table-active';
-        this.opt.filterInputClass = 'form-control form-control-sm';
+        //grid.drawCell = grid.opt.drawCell || grid.drawCell;
+        this.setupPagerButtons(grid);
 
-        this.opt.menuClass = 'list-group';
-        this.opt.menuItemClass = 'list-group-item list-group-item-action list-group-item-light';
-        this.opt.dropdownWndClass = 'none';
-
-        this.drawCell = this.opt.drawCell || this.drawCell;
+        grid.translate = this.translate;
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
-    setupPagerButtons() {
-        const grid = this;
-
-        super.setupPagerButtons();
+    setupPagerButtons(grid) {
+        if (!grid.pagerButtonsDict) return;
 
         let button;
         button = grid.pagerButtonsDict['refresh'];
-        button.class = 'btn btn-primary btn-sm grid-pager-button';
+        button.class = 'btn btn-primary btn-sm';
         button.label = '';
         button.img = () => {
             return (
@@ -91,7 +92,7 @@ export class BootstrapGridClass extends GridFLClass {
         };
 
         button = grid.pagerButtonsDict['settings'];
-        button.class = 'btn btn-primary btn-sm grid-pager-button';
+        button.class = 'btn btn-primary btn-sm';
         button.label = '';
         button.img = () => {
             return (
@@ -102,7 +103,7 @@ export class BootstrapGridClass extends GridFLClass {
         };
 
         button = grid.pagerButtonsDict['first'];
-        button.class = 'btn btn-primary btn-sm grid-pager-button';
+        button.class = 'btn btn-primary btn-sm';
         button.label = '';
         button.img = () => {
             return (
@@ -113,7 +114,7 @@ export class BootstrapGridClass extends GridFLClass {
         };
 
         button = grid.pagerButtonsDict['prev'];
-        button.class = 'btn btn-primary btn-sm grid-pager-button';
+        button.class = 'btn btn-primary btn-sm';
         button.label = '';
         button.img = () => {
             return (
@@ -127,10 +128,10 @@ export class BootstrapGridClass extends GridFLClass {
         button.class = 'form-control form-control-sm';
 
         button = grid.pagerButtonsDict['pages'];
-        button.class = 'btn btn-primary btn-sm grid-pager-button';
+        button.class = 'btn btn-primary btn-sm';
 
         button = grid.pagerButtonsDict['next'];
-        button.class = 'btn btn-primary btn-sm grid-pager-button';
+        button.class = 'btn btn-primary btn-sm';
         button.label = '';
         button.img = () => {
             return (
@@ -141,7 +142,7 @@ export class BootstrapGridClass extends GridFLClass {
         };
 
         button = grid.pagerButtonsDict['last'];
-        button.class = 'btn btn-primary btn-sm grid-pager-button';
+        button.class = 'btn btn-primary btn-sm';
         button.label = '';
         button.img = () => {
             return (
@@ -152,14 +153,14 @@ export class BootstrapGridClass extends GridFLClass {
         };
 
         button = grid.pagerButtonsDict['pgsize'];
-        button.class = 'form-select form-select-sm grid-pager-button';
+        button.class = 'form-select form-select-sm';
 
         button = grid.pagerButtonsDict['rows'];
-        button.class = 'btn btn-primary btn-sm grid-pager-button';
+        button.class = 'btn btn-primary btn-sm';
 
         button = grid.pagerButtonsDict['clear'];
         if (button) {
-            button.class = 'btn btn-primary btn-sm grid-pager-button';
+            button.class = 'btn btn-primary btn-sm';
             button.label = '';
             button.img = () => {
                 return (
