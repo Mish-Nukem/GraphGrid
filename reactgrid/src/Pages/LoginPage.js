@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react';
 import { BaseComponent, log } from '../Grid/Base';
+//import { BootstrapTheme as Theme } from '../Grid/Themes/BootstrapGridTheme';
 export function LoginPage(props) {
     let loginForm = null;
 
-    const [loginState, setState] = useState({ login: '', ind: 0 });
+    const [state, setState] = useState({ form: null, login: '', password: '', ind: 0 });
 
-    loginForm = loginState.login;
+    loginForm = state.form;
     if (!loginForm) {
         loginForm = new loginFormClass(props);
     }
@@ -19,7 +20,7 @@ export function LoginPage(props) {
     if (!loginForm.refreshState) {
         loginForm.refreshState = function () {
             loginForm.log(' -------------- refreshState ' + loginForm.stateind + ' --------------- ');
-            setState({ login: loginForm, ind: loginForm.stateind++ });
+            setState({ form: loginForm, login: loginForm.login, password: loginForm.password, ind: loginForm.stateind++ });
         }
     }
 
@@ -42,18 +43,45 @@ export class loginFormClass extends BaseComponent {
 
         loginForm.afterLogin = props.afterLogin;
 
+        loginForm.dataGetter = props.dataGetter;
+
         loginForm.stateind = 0;
     }
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
+    tryLogin() {
+        const loginForm = this;
 
+        //const pref = appSettings.APIurl;
+        //const guid = 'asdfasdf';
+        const params = [{ key: 'login', value: loginForm.login }, { key: 'password', value: loginForm.password }];
+
+        //const params = { login: loginForm.login, password: loginForm.password };
+
+        loginForm.dataGetter.get({ url: 'system/login', params: params, type: 'text' }).then(
+            (guid) => {
+                if (guid) {
+                    //const obj = JSON.parse(guid);
+                    loginForm.afterLogin(guid);
+                }
+            }
+        );
+    }
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     render() {
         const loginForm = this;
         return (
             <>
-                <button onClick={(e) => loginForm.afterLogin() }>Login</button>
+                <div className="login-form" style={{ width: '400px' }}>
+                    <span className="login-form-item">Login</span>
+                    <input className="login-form-item form-control" onChange={(e) => loginForm.login = e.target.value} value="s_dba"></input>
+                    <span className="login-form-item">Password</span>
+                    <input className="login-form-item form-control" type="password" onChange={(e) => loginForm.password = e.target.value} value="s_admin"></input>
+                    <button className="login-form-item btn btn-primary" onClick={(e) => loginForm.tryLogin()}>Login</button>
+                </div>
             </>
         );
     }
-
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     setupEvents() {
     }
 

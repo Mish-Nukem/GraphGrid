@@ -1,8 +1,8 @@
 ﻿import { useState, useEffect } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { BaseComponent, log } from './Base';
-import { BootstrapTheme as Theme } from './Themes/BootstrapGridTheme';
-//import { DefaultGridTheme as Theme } from './Themes/DefaultGridTheme';
+//import { BootstrapTheme as Theme } from './Themes/BootstrapGridTheme';
+import { DefaultGridTheme as Theme } from './Themes/DefaultGridTheme';
 // ==================================================================================================================================================================
 export function ReactGrid(props) {
     let grid = null;

@@ -86,7 +86,8 @@
         background-color: white;
         /*border: none;*/
         border: solid 1px;
-        box-shadow: inset 1px 0 0 0 gray, inset -1px -1px 0 0 gray;
+        /*box-shadow: inset 1px 0 0 0 gray, inset -1px -1px 0 0 gray;*/
+        /*box-shadow: inset 0 -1px 0 0 gray;*/
         /*border-width: 0 1px 0 1px;*/
         white-space: nowrap;
         text-overflow: clip;
@@ -110,6 +111,7 @@
     grid-template-columns: auto 12px;
     grid-template-rows: auto auto;
     grid-auto-flow: row;
+    align-items: center;
 }
 
 .grid-header-content {
@@ -172,17 +174,22 @@
 
 .grid-pager-button {
     margin: 5px 2px;
-    height: 28px;
-    width: 36px;
+    /*height: 28px;
+    width: 36px;*/
+    height: 2em;
+    width: 2.5em;
 }
 
 .grid-toolbar-button {
     margin: 5px;
+    height: 2em;
+    /*height: 28px;*/
 }
 
 .grid-pager-current {
     width: 3em;
-    height: 22px;
+    height: 1.6em;
+    /*height: 22px;*/
     margin: 0 2px;
 }
 
@@ -247,7 +254,7 @@
 .grid-header-title {
     white-space: nowrap;
     overflow: hidden;
-    margin: 2px;
+    margin: 2px 4px;
 }
 
 .div-on-menu {
@@ -256,4 +263,18 @@
 
 .grid-col-filter {
     height: 2em;
+    margin: 2px;
 }
+
+.login-form {
+    display: grid;
+    align-items: center;
+    align-content: center;
+    margin: 20px;
+}
+
+.login-form-item {
+    margin: 5px;
+}
+    .login-form > input {
+    }

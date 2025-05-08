@@ -9,9 +9,13 @@ import { GridInGraph } from './Grid/GridInGraph';
 import { GridDB } from './Grid/GridDB';
 import { GridFL } from './Grid/GridFL';
 //import { BootstrapGrid } from './Grid/BootstrapGrid'; 
-import { LoginPage } from './Pages/LoginPage'
+import { LoginPage } from './Pages/LoginPage';
+import appSettings from './AppSettings';
+import { DataGetter } from './Utils/DataGetter';
+
+
 function App() {
-    const [state, setState] = useState(-2);
+    const [state, setState] = useState({ menuItem: - 2, guid: '' });
 
     window._logEnabled = true;
 
@@ -137,7 +141,7 @@ function App() {
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     const getTestApp = () => {
         console.log('state == ' + state);
-        switch (state) {
+        switch (state.menuItem) {
             case -1:
                 return (
                     <></>
@@ -223,20 +227,24 @@ function App() {
     };
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     return (
-        state < -1 ? <LoginPage afterLogin={(e) => { setState(-1) }}></LoginPage> :
+        state.menuItem < -1 ?
+            <LoginPage
+                init={(loginForm) => { loginForm.dataGetter = new DataGetter(appSettings) }}
+                afterLogin={(guid) => { setState({ menuItem: -1, guid: guid }) }}>
+            </LoginPage> :
             <div >
                 <select onChange={(e) => {
                     //console.log('this == ' + e);
-                    setState(e.target.selectedIndex);
+                    setState({ menuItem: e.target.selectedIndex, guid: '' });
                 }}>
-                    <option>1. Test ReactGrid</option>
-                    <option>2. Test Overlay</option>
-                    <option>3. Test Modal</option>
-                    <option>4. Test Dropdown</option>
+                    <option>1. ReactGrid</option>
+                    <option>2. Overlay</option>
+                    <option>3. Modal</option>
+                    <option>4. Dropdown</option>
                     <option>5. Two Grids</option>
-                    <option>6. Test GridDB</option>
-                    <option>7. Test GridFL</option>
-                    <option>8. Test BootstrapGrid</option>
+                    <option>6. GridDB</option>
+                    <option>7. GridFL</option>
+                    <option>8. BootstrapGrid</option>
                 </select>
                 <div className="div-on-menu">
                     {getTestApp()}

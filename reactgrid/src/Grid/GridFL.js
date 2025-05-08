@@ -97,7 +97,7 @@ export class GridFLClass extends GridDBClass {
                             className={`grid-col-filter ${grid.opt.filterInputClass || ''}`}
                             value={col.filter !== undefined ? col.filter : ''}
                             title={col.filter !== undefined ? col.filter : ''}
-                            style={{ gridColumn: !hasFilter ? 'span 2' : '', width: 'calc(100% - 0px)', padding: '0 2px', boxSizing: 'border-box' }}
+                            style={{ gridColumn: !hasFilter ? 'span 2' : '', width: 'calc(100% - 4px)', padding: '0 2px', boxSizing: 'border-box' }}
                             grid-col-filter={`${grid.id}_${col.id}_`}
                             onChange={(e) => { grid.columnFilterChanging(col, e.target.value, e) }}
                             onClick={(e) => { grid.onAutocompleteClick(col, e); }}
