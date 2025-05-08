@@ -140,7 +140,7 @@ function App() {
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     const getTestApp = () => {
-        console.log('state == ' + state);
+        console.log('state == ' + state.menuItem);
         switch (state.menuItem) {
             case -1:
                 return (

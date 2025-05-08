@@ -261,7 +261,7 @@ export class GridFLClass extends GridDBClass {
 
 
         setTimeout(() => {
-            if (++prevSeq != grid._autocompleteSeq) return;
+            if (++prevSeq !== grid._autocompleteSeq) return;
 
             grid._inputingColumn = col;
             grid._autocompleteDropdown.items = [];

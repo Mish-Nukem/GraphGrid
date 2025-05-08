@@ -22,7 +22,7 @@ export function Overlay(props) {
 
     if (!ovl.refreshState) {
         ovl.refreshState = function () {
-            log('refreshState ' + ovl.stateind);
+            //log('refreshState ' + ovl.stateind);
             setState({ ovl: ovl, ind: ovl.stateind++ });
         }
     }
@@ -31,7 +31,7 @@ export function Overlay(props) {
         ovl.setupEvents(); 
 
         return () => {
-            log(' 0.11 Clear Overlay Events');
+            //log(' 0.11 Clear Overlay Events');
 
             ovl.clearEvents();
         }

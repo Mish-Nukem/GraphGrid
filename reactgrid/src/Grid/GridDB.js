@@ -510,6 +510,9 @@ export class GridDBClass extends GridInGraphClass {
 
         if (!grid.menuDropdown) return;
 
+        const elem = document.getElementById(e.target.id);
+        grid.menuDropdown.opt.parentRect = elem ? elem.getBoundingClientRect() : e.target.getBoundingClientRect();
+
         grid.menuDropdown.popup(e);
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------

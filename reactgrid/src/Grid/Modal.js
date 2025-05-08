@@ -6,13 +6,9 @@ export function Modal(props) {
     let wnd = null;
 
     const [wndState, setState] = useState({ wnd: wnd, ind: 0 });
-    //const [wndState, setState] = useState(wnd);
 
     const oldWnd = wndState.wnd;
-    //const hide = oldWnd && oldWnd.recreate;
 
-    //wnd = oldWnd && !hide ? oldWnd : new ModalClass(props);
-    //wnd = wndState && wndState.uid === props.uid ? wndState : new ModalClass(props);
     wnd = oldWnd && oldWnd.uid === props.uid ? oldWnd : new ModalClass(props);
 
 
@@ -22,10 +18,8 @@ export function Modal(props) {
 
     if (!wnd.refreshState) {
         wnd.refreshState = function (clear) {
-            log('refreshState ' + wnd.stateind);
-            //if (clear) wnd.recreate = true;
+            //log('refreshState ' + wnd.stateind);
             setState({ wnd: wnd, ind: wnd.stateind++ });
-            //setState(wnd);
         }
     }
 
@@ -33,7 +27,7 @@ export function Modal(props) {
         wnd.setupEvents();
 
         return () => {
-            log(' 0.11 Clear ModalEvents');
+            //log(' 0.11 Clear ModalEvents');
 
             wnd.clearEvents();
         }
