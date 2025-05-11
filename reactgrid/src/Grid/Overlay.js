@@ -37,15 +37,6 @@ export function Overlay(props) {
         }
     }, [ovl])
 
-    const handleKeyDown: KeyboardEventHandler = (event) => {
-        switch (event.key) {
-            case 'Enter':
-            case 'Tab':
-                alert('!!!');
-                event.preventDefault();
-        }
-    };
-
     return (ovl.render());
 }
 // -------------------------------------------------------------------------------------------------------------------------------------------------------------
