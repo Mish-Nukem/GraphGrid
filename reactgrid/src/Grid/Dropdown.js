@@ -16,8 +16,6 @@ export function Dropdown(props) {
         dd = new DropdownClass(props);
     }
 
-    //dd = ddState.dd || new DropdownClass(props);
-
     if (props.init) {
         props.init(dd);
     }

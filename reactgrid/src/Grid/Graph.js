@@ -1,5 +1,6 @@
-﻿// ==================================================================================================================================================================
-export class Graph {
+﻿/* eslint-disable no-mixed-operators */
+// ==================================================================================================================================================================
+export class GraphClass {
     constructor() {
         this.nodesDict = {};
         this.linksDict = {};
@@ -26,7 +27,7 @@ export class Graph {
         if (!e || !e.list || e.list.length <= 0) return;
 
         // если запущена новая однотипная волна, то нет смысла продолжать текущую
-        if (e.waveType == this.lastWaveType && e.waveInd < this.lastWaveInd) return;
+        if (e.waveType === this.lastWaveType && e.waveInd < this.lastWaveInd) return;
 
         const node = e.list.shift();
 
@@ -132,7 +133,7 @@ export class Graph {
                     // изменено: если включен режим allParentsVisited == false, то сначала собираем узлы, у которых все родительские посещены волной, а потом все, у которых посещен хотя бы один родительский узел
 
                     // если moveType == MoveType.All, то будут собраны все соседние узлы, и по родительским, и по дочерним
-                    if (e.moveType != MoveType.fromChild) {
+                    if (e.moveType !== MoveType.fromChild) {
                         // проверяем, что у узла все родительские узлы были посещены волной
                         for (let lid in node.parentLinks) {
                             let link = node.parentLinks[lid];
@@ -143,7 +144,7 @@ export class Graph {
                         }
                     }
 
-                    if ((!needAdd || e.allParentsVisited) && e.moveType != MoveType.fromParent) {
+                    if ((!needAdd || e.allParentsVisited) && e.moveType !== MoveType.fromParent) {
                         // теперь среди дочерних узлов ищем хотя бы один, посещенный волной (если allParentsVisited == true, то все дочерние узлы должны быть посещены волной)
                         for (let lid in node.childLinks) {
                             let link = node.childLinks[lid];
@@ -167,12 +168,12 @@ export class Graph {
                     // берем в волну только те узлы, у которых среди родителей либо предыдущая волна, либо нет номера волны вообще
                     for (let i = currWaveNodes.length - 1; i >= 0; i--) {
                         let node = currWaveNodes[i];
-                        if (e.moveType != MoveType.fromChild && !this.hasParentWithSameWave(node)) {
+                        if (e.moveType !== MoveType.fromChild && !this.hasParentWithSameWave(node)) {
                             _cachedWave.push(node);
                             currWaveNodes.splice(i, 1);
                             added = true;
                         }
-                        else if (e.moveType != MoveType.fromParent && !this.hasChildWithSameWave(node)) {
+                        else if (e.moveType !== MoveType.fromParent && !this.hasChildWithSameWave(node)) {
                             _cachedWave.push(node);
                             currWaveNodes.splice(i, 1);
                             added = true;
@@ -221,7 +222,7 @@ export class Graph {
         if (!node) return;
 
         for (let lid in node.parentLinks) {
-            if (node.parentLinks[lid].parent._waveNum == node._waveNum) return true;
+            if (node.parentLinks[lid].parent._waveNum === node._waveNum) return true;
         }
     };
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -230,7 +231,7 @@ export class Graph {
         if (!node) return;
 
         for (let lid in node.childLinks) {
-            if (node.childLinks[lid].child._waveNum == node._waveNum) return true;
+            if (node.childLinks[lid].child._waveNum === node._waveNum) return true;
         }
     };
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------

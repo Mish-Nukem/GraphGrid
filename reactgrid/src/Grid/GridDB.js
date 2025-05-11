@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import { GridInGraphClass } from './GridInGraph.js';
 import { Dropdown } from './Dropdown.js';
 import { WaveType } from './Graph.js';
-
+import { NodeStatus } from './Base';
 // ==================================================================================================================================================================
 export function GridDB(props) {
     let grid = null;
@@ -73,51 +73,14 @@ export class GridDBClass extends GridInGraphClass {
         grid.setupPagerButtons();
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
-    setupEvents() {
-        const grid = this;
-
-        super.setupEvents();
-
-        const sortClick = function (e) {
-            switch (e.target.tagName) {
-                case 'SPAN':
-                    const th = e.target.closest('TH');
-                    if (!th || !th.hasAttribute('grid-header')) return;
-
-                    let [, itemId] = th.getAttribute('grid-header').split('_');
-                    const column = grid.colDict[itemId];
-
-                    grid.changeColumnSortOrder(column);
-                    break;
-                default:
-            }
-        }
-
-        document.addEventListener('click', sortClick);
-
-        grid.clearSortClick = function () {
-            document.removeEventListener('click', sortClick);
-        }
-    }
-    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
-    removeEvents() {
-        const grid = this;
-
-        super.removeEvents();
-
-        if (grid.clearSortClick) {
-            grid.clearSortClick();
-        }
-    }
-    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     skipOnWaveVisit(e) {
         if (super.skipOnWaveVisit(e)) return true;
 
         const grid = this;
-        if (e.waveType == WaveType.value) {
-            if (grid.status == NodeStatus.filter && !grid._selecting || grid.status == NodeStatus.hidden) {
+        if (e.waveType === WaveType.value) {
+            if (grid.status === NodeStatus.filter && !grid._selecting || grid.status === NodeStatus.hidden) {
                 grid.selectedRowIndex = -1;
-                if (grid.status == NodeStatus.filter) {
+                if (grid.status === NodeStatus.filter) {
                     grid.updateNodeControls(true);
                     grid.graph.visitNodesByWave(e);
                 }
@@ -441,8 +404,6 @@ export class GridDBClass extends GridInGraphClass {
             },
         }
 
-        //value={+size === grid.pageSize ? 'selected' : ''}
-
         grid.pagerButtons.push(pgsize);
         grid.pagerButtonsDict[pgsize.id] = grid.pagerButtonsDict[pgsize.name] = pgsize;
 
@@ -479,6 +440,7 @@ export class GridDBClass extends GridInGraphClass {
                 <span
                     className={'grid-header-title'}
                     style={{ cursor: col.sortable ? 'pointer' : '', gridColumn: !sortDir ? 'span 2' : '' }}
+                    onClick={(e) => grid.changeColumnSortOrder(col)}
                 >
                     {title}
                 </span>
@@ -558,11 +520,3 @@ export class GridDBClass extends GridInGraphClass {
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
 }
-// ==================================================================================================================================================================
-export class NodeStatus {
-    static grid = 0;
-    static hidden = 1;
-    static filter = 2;
-    static lookup = 3;
-    static custom = 4;
-};

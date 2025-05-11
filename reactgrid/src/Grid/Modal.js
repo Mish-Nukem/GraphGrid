@@ -68,6 +68,7 @@ export class ModalClass extends BaseComponent {
         this.opt.footerClass = props.footerClass || 'modal-window-footer';
         this.opt.footerButtonClass = props.footerButtonClass || 'modal-window-footer-button'
         this.opt.titleClass = props.titleClass || 'modal-window-header-title';
+        this.opt.title = props.title;
 
         this.opt.pos.x = !isNaN(this.opt.pos.x) ? this.opt.pos.x + 'px' : this.opt.pos.x;
         this.opt.pos.y = !isNaN(this.opt.pos.y) ? this.opt.pos.y + 'px' : this.opt.pos.y;
@@ -92,7 +93,7 @@ export class ModalClass extends BaseComponent {
         this.stateind = 0;
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
-    render = function () {
+    render() {
         const wnd = this;
         if (!wnd.visible) {
             return <></>;
@@ -115,7 +116,7 @@ export class ModalClass extends BaseComponent {
         return wnd.renderSelf();
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
-    renderSelf = function (zInd) {
+    renderSelf(zInd) {
         const wnd = this;
         return (
             <>
@@ -152,10 +153,11 @@ export class ModalClass extends BaseComponent {
         );
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
-    renderHeader = function () {
+    renderHeader() {
         const wnd = this;
         return (
             <div wnd-header={1} className={wnd.opt.headerClass}
+                onMouseDown={(e) => wnd.mouseDownDrag(e)}
             >
                 <h4 className={wnd.opt.titleClass}>
                     {wnd.opt.title || ''}
@@ -165,10 +167,11 @@ export class ModalClass extends BaseComponent {
         )
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
-    renderFooter = function () {
+    renderFooter() {
         const wnd = this;
         return (
             <div wnd-footer={1} className={wnd.opt.footerClass}
+                onMouseDown={(e) => wnd.mouseDownDrag(e)}
                 style={
                     {
                         display: "flex",
@@ -194,9 +197,8 @@ export class ModalClass extends BaseComponent {
         )
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
-    renderResizables = function () {
+    renderResizables() {
         const wnd = this;
-        if (!wnd.opt.resizable) return;
 
         return (
             <>
@@ -212,6 +214,7 @@ export class ModalClass extends BaseComponent {
                             zIndex: wnd.opt.zInd + 5
                         }
                     }
+                    onMouseDown={(e) => wnd.mouseDownResize(e)}
                 >
                 </div>
                 <div wnd-rsz-x={wnd.id}
@@ -225,7 +228,9 @@ export class ModalClass extends BaseComponent {
                             width: "12px",
                             zIndex: wnd.opt.zInd + 5
                         }
-                    } >
+                    }
+                    onMouseDown={(e) => wnd.mouseDownResize(e)}
+                >
                 </div>
                 <div wnd-rsz-xy={wnd.id}
                     style={
@@ -238,24 +243,23 @@ export class ModalClass extends BaseComponent {
                             width: "16px",
                             zIndex: wnd.opt.zInd + 5
                         }
-                    } >
+                    }
+                    onMouseDown={(e) => wnd.mouseDownResize(e)}
+                >
                 </div>
             </>
         )
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
-    close = function () {
+    close() {
         const wnd = this;
         wnd.visible = false;
-
-        wnd.clearDrag();
 
         wnd.refreshState(true);
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
-    setupEvents = function () {
+    setupEvents() {
         const wnd = this;
-        // -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  
         function onKeyDown(e) {
             const key = e && e.key ? e.key.toLowerCase() : '';
 
@@ -263,152 +267,109 @@ export class ModalClass extends BaseComponent {
                 wnd.close();
             }
         }
-        // -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  
-        //document.addEventListener('click', onClick);
         document.addEventListener('keydown', onKeyDown);
 
-        if (wnd.opt.draggable) {
-            wnd.setupDrag();
-        }
-
-        if (wnd.opt.resizable) {
-            wnd.setupResize();
-        }
-        // -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  
         wnd.clearEvents = function () {
-            if (wnd.opt.resizable) {
-                wnd.clearResize();
-            }
-            if (wnd.opt.draggable) {
-                wnd.clearDrag();
-            }
-
-            //document.removeEventListener('click', onClick);
             document.removeEventListener('keydown', onKeyDown);
         }
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
-    setupDrag = function () {
+    mouseDownDrag(e) {
         const wnd = this;
+        if (!wnd.visible || !wnd.opt.draggable) return;
+
+        if (e.target.tagName !== 'DIV') return;
+
         const pos = wnd.opt.pos;
-        // -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  
-        const mouseDown = function (e) {
-            if (!wnd.visible) return;
 
-            if (e.target.tagName !== 'DIV') return;
+        const elem = document.getElementById(`window_${wnd.id}_`);
+        if (!elem) {
+            log(`Elem window_${wnd.id}_  not found!`);
+            return;
+        }
 
-            if (!e.target.getAttribute('wnd-header') && !e.target.getAttribute('wnd-footer')) return;
+        const rect = elem.getBoundingClientRect();
+        const shiftX = e.clientX - rect.left;
+        const shiftY = e.clientY - rect.top;
 
-            const elem = document.getElementById(`window_${wnd.id}_`);
-            if (!elem) {
-                log(`Elem window_${wnd.id}_  not found!`);
-                return;
-            }
+        moveAt(e.pageX, e.pageY);
 
-            const rect = elem.getBoundingClientRect();
-            const shiftX = e.clientX - rect.left;
-            const shiftY = e.clientY - rect.top;
+        // переносит окно на координаты (pageX, pageY), дополнительно учитывая изначальный сдвиг относительно указателя мыши
+        function moveAt(pageX, pageY) {
+            pos.x = pageX - shiftX;
+            pos.y = pageY - shiftY;
 
+            elem.style.left = pos.x + 'px';
+            elem.style.top = pos.y + 'px';
+        }
+
+        function onMouseMove(e) {
             moveAt(e.pageX, e.pageY);
-
-            // переносит окно на координаты (pageX, pageY), дополнительно учитывая изначальный сдвиг относительно указателя мыши
-            function moveAt(pageX, pageY) {
-                pos.x = pageX - shiftX;
-                pos.y = pageY - shiftY;
-
-                elem.style.left = pos.x + 'px';
-                elem.style.top = pos.y + 'px';
-            }
-
-            function onMouseMove(e) {
-                moveAt(e.pageX, e.pageY);
-            }
-
-            // передвигаем окно при событии mousemove
-            document.addEventListener('mousemove', onMouseMove);
-            document.addEventListener('mouseup', onMouseUp);
-            // отпустить окно, удалить ненужные обработчики
-            function onMouseUp(e) {
-                document.removeEventListener('mousemove', onMouseMove);
-                document.removeEventListener('mouseup', onMouseUp);
-                elem.ondragstart = null;
-            };
-
-            elem.ondragstart = function () {
-                return false;
-            };
-        };
-        // -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  
-        document.addEventListener('mousedown', mouseDown);
-
-        wnd.clearDrag = function () {
-            document.removeEventListener('mousedown', mouseDown);
         }
-    }
+
+        // передвигаем окно при событии mousemove
+        document.addEventListener('mousemove', onMouseMove);
+        document.addEventListener('mouseup', onMouseUp);
+        // отпустить окно, удалить ненужные обработчики
+        function onMouseUp(e) {
+            document.removeEventListener('mousemove', onMouseMove);
+            document.removeEventListener('mouseup', onMouseUp);
+            elem.ondragstart = null;
+        };
+
+        elem.ondragstart = function () {
+            return false;
+        };
+    };
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
-    setupResize = function () {
+    mouseDownResize(e) {
         const wnd = this;
-        const pos = this.opt.pos;
+        if (!wnd.visible || !wnd.opt.resizable) return;
+
+        const pos = wnd.opt.pos;
+
+        const elem = document.getElementById(`window_${wnd.id}_`);
+
+        const cs = getComputedStyle(elem);
+        const [initW, initH] = [parseInt(cs.width), parseInt(cs.height)];
+
+        const shiftX = e.target.hasAttribute('wnd-rsz-x') || e.target.hasAttribute('wnd-rsz-xy') ? e.clientX : -1;
+        const shiftY = e.target.hasAttribute('wnd-rsz-y') || e.target.hasAttribute('wnd-rsz-xy') ? e.clientY : -1;
+
+        resize(e.pageX, e.pageY);
         // -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  
-        const mouseDown = function (e) {
-            if (!wnd.visible) return;
+        function resize(pageX, pageY) {
+            if (shiftX > 0) {
+                const w = initW + pageX - shiftX;
 
-            if (e.target.tagName !== 'DIV') return;
+                pos.w = (!pos.maxW || w <= pos.maxW) && (!pos.minW || w >= pos.minW) ? w : pos.w;
+                elem.style.width = pos.w + 'px';
+            }
+            if (shiftY > 0) {
+                const h = initH + pageY - shiftY;
 
-            const wndAttr = e.target.getAttribute('wnd-rsz-x') || e.target.getAttribute('wnd-rsz-y') || e.target.getAttribute('wnd-rsz-xy');
-            if (wnd.id !== +wndAttr) return;
-
-            //if (!e.target.hasAttribute('wnd-rsz-x') && !e.target.hasAttribute('wnd-rsz-y') && !e.target.hasAttribute('wnd-rsz-xy')) return;
-
-            const elem = document.getElementById(`window_${wnd.id}_`);
-
-            const cs = getComputedStyle(elem);
-            const [initW, initH] = [parseInt(cs.width), parseInt(cs.height)];
-
-            const shiftX = e.target.hasAttribute('wnd-rsz-x') || e.target.hasAttribute('wnd-rsz-xy') ? e.clientX : -1;
-            const shiftY = e.target.hasAttribute('wnd-rsz-y') || e.target.hasAttribute('wnd-rsz-xy') ? e.clientY : -1;
-
+                pos.h = (!pos.maxH || h <= pos.maxH) && (!pos.minH || h >= pos.minH) ? h : pos.h;
+                elem.style.height = pos.h + 'px';
+            }
+        }
+        // -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  
+        function onMouseMove(e) {
             resize(e.pageX, e.pageY);
-            // -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  
-            function resize(pageX, pageY) {
-                if (shiftX > 0) {
-                    const w = initW + pageX - shiftX;
-
-                    pos.w = (!pos.maxW || w <= pos.maxW) && (!pos.minW || w >= pos.minW) ? w : pos.w;
-                    elem.style.width = pos.w + 'px';
-                }
-                if (shiftY > 0) {
-                    const h = initH + pageY - shiftY;
-
-                    pos.h = (!pos.maxH || h <= pos.maxH) && (!pos.minH || h >= pos.minH) ? h : pos.h;
-                    elem.style.height = pos.h + 'px';
-                }
-            }
-            // -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  
-            function onMouseMove(e) {
-                resize(e.pageX, e.pageY);
-            }
-            // -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  
-            document.addEventListener('mousemove', onMouseMove);
-            document.addEventListener('mouseup', onMouseUp);
-            // -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  
-            elem.ondragstart = function () {
-                return false;
-            };
-            // -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  
-            function onMouseUp(e) {
-                document.removeEventListener('mousemove', onMouseMove);
-                document.removeEventListener('mouseup', onMouseUp);
-                elem.ondragstart = null;
-            };
+        }
+        // -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  
+        document.addEventListener('mousemove', onMouseMove);
+        document.addEventListener('mouseup', onMouseUp);
+        // -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  
+        elem.ondragstart = function () {
+            return false;
         };
         // -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  
-        document.addEventListener('mousedown', mouseDown);
-
-        wnd.clearResize = function () {
-            document.removeEventListener('mousedown', mouseDown);
-        }
-    }
+        function onMouseUp(e) {
+            document.removeEventListener('mousemove', onMouseMove);
+            document.removeEventListener('mouseup', onMouseUp);
+            elem.ondragstart = null;
+        };
+    };
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
 }
 // ==================================================================================================================================================================

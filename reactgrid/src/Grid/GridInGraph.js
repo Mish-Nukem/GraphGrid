@@ -1,14 +1,11 @@
 ﻿import { useState, useEffect } from 'react';
-import { ReactGridClass } from './ReactGrid.js';
-import { Graph, WaveType } from './Graph.js';
-
+import { GridClass } from './Grid.js';
+import { GraphClass/*, WaveType*/ } from './Graph.js';
 // ==================================================================================================================================================================
 export function GridInGraph(props) {
     let grid = null;
 
     const [gridState, setState] = useState({ grid: grid, ind: 0 });
-
-    //grid = gridState.grid || new GridInGraphClass(props);
 
     grid = gridState.grid;
     let needGetRows = false;
@@ -46,30 +43,17 @@ export function GridInGraph(props) {
             grid.getColumns();
         }
 
-        //if (props.parentGrids) {
-        //    grid.connectToParents();
-        //}
-
         return () => {
-            //grid.log(' 0.11 Clear GridEvents');
-
             grid.removeEvents();
-
-            //delete window._graphDict[grid.graphUid];
         }
     }, [grid, needGetRows])
 
     return (grid.render());
 }
 // -------------------------------------------------------------------------------------------------------------------------------------------------------------
-
-export class GridInGraphClass extends ReactGridClass {
+export class GridInGraphClass extends GridClass {
 
     constructor(props) {
-        //if (props.parentGrids) {
-        //    props.noAutoRefresh = true;
-        //}
-
         super(props);
 
         const grid = this;
@@ -90,7 +74,7 @@ export class GridInGraphClass extends ReactGridClass {
 
             window._graphDict = window._graphDict || {};
 
-            window._graphDict[grid.graphUid] = window._graphDict[grid.graphUid] || new Graph();
+            window._graphDict[grid.graphUid] = window._graphDict[grid.graphUid] || new GraphClass();
             const graph = window._graphDict[grid.graphUid];
 
             grid.graph = graph;
@@ -136,7 +120,7 @@ export class GridInGraphClass extends ReactGridClass {
 
         const parentUids = ',' + grid.parentGrids + ',';
         for (let id in graph.nodesDict) {
-            if (id == grid.id) continue;
+            if (+id === grid.id) continue;
 
             let parentGrid = graph.nodesDict[id];
             if (parentUids.indexOf(parentGrid.uid) <= 0) continue;
@@ -149,7 +133,6 @@ export class GridInGraphClass extends ReactGridClass {
         }
 
         graph.waveCache = {};
-        //graph.needConnect = false;
 
         if (!noDetectCycles) {
             graph.markCycles();

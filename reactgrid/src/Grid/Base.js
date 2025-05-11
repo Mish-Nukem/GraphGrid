@@ -18,3 +18,11 @@ export function log(message) {
 
     console.log(message);
 }
+
+export class NodeStatus {
+    static grid = 0;
+    static hidden = 1;
+    static filter = 2;
+    static lookup = 3;
+    static custom = 4;
+};

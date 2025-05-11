@@ -1,5 +1,5 @@
 ﻿import { useState, useEffect } from 'react';
-import { BaseComponent, log } from './Base';
+import { BaseComponent/*, log*/ } from './Base';
 // ==================================================================================================================================================================
 export function Overlay(props) {
     let ovl = null;
@@ -28,7 +28,7 @@ export function Overlay(props) {
     }
 
     useEffect(() => {
-        ovl.setupEvents(); 
+        ovl.setupEvents();
 
         return () => {
             //log(' 0.11 Clear Overlay Events');
@@ -37,6 +37,14 @@ export function Overlay(props) {
         }
     }, [ovl])
 
+    const handleKeyDown: KeyboardEventHandler = (event) => {
+        switch (event.key) {
+            case 'Enter':
+            case 'Tab':
+                alert('!!!');
+                event.preventDefault();
+        }
+    };
 
     return (ovl.render());
 }
@@ -50,7 +58,7 @@ export class OverlayClass extends BaseComponent {
         this.id = window._wndSeq++;
         this.uid = props.uid;
 
-        this.opt.zInd = props.zInd || ++window._wndZInd; 
+        this.opt.zInd = props.zInd || ++window._wndZInd;
 
         this.opt.pos = props.pos || { x: 0, y: 0, w: '100%', h: '100%' };
 
@@ -70,34 +78,36 @@ export class OverlayClass extends BaseComponent {
         this.stateind = 0;
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
-    render = function () {
+    render() {
         const ovl = this;
         if (!ovl.visible) return <></>;
 
         return (
             <>
-            <div
-                id={`overlay_${ovl.id}_`}
-                style={
-                    {
-                        width: ovl.opt.pos.w,
-                        height: ovl.opt.pos.h,
-                        top: ovl.opt.pos.y,
-                        left: ovl.opt.pos.x,
-                        opacity: ovl.opt.opacity ? ovl.opt.opacity : ovl.opt.isHidden ? 0 : 0.2,
-                        zIndex: ovl.opt.zInd,
-                        backgroundColor: !ovl.opt.isHidden ? 'black' : ''
+                <div
+                    id={`overlay_${ovl.id}_`}
+                    onClick={(e) => ovl.onClick(e)}
+                    //onKeyDown={(e) => ovl.onKeyDown(e)}
+                    style={
+                        {
+                            width: ovl.opt.pos.w,
+                            height: ovl.opt.pos.h,
+                            top: ovl.opt.pos.y,
+                            left: ovl.opt.pos.x,
+                            opacity: ovl.opt.opacity ? ovl.opt.opacity : ovl.opt.isHidden ? 0 : 0.2,
+                            zIndex: ovl.opt.zInd,
+                            backgroundColor: !ovl.opt.isHidden ? 'black' : ''
+                        }
                     }
-                }
-                className="overlay-default"
-            >
-            </div>
+                    className="overlay-default"
+                >
+                </div>
                 {ovl.renderChild(ovl.opt.zInd + 1)}
             </>
         );
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
-    close = function () {
+    close() {
         const ovl = this;
         ovl.visible = false;
         if (ovl.onClose) {
@@ -108,22 +118,16 @@ export class OverlayClass extends BaseComponent {
         ovl.refreshState();
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
+    onClick(e) {
+        const ovl = this;
+
+        if (ovl.opt && ovl.opt.closeWhenClick) {
+            ovl.close();
+        }
+    }
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     setupEvents = function () {
         const ovl = this;
-        function onClick(e) {
-            if (!e.target) return;
-
-            if (e.target.tagName !== 'DIV') return;
-
-            const [entity, ovlId] = e.target.id.split('_');
-            if (ovl.id !== +ovlId) return;
-
-            if (entity !== 'overlay') return;
-
-            if (ovl.opt && ovl.opt.closeWhenClick) {
-                ovl.close();
-            }
-        }
         function onKeyDown(e) {
             const key = e && e.key ? e.key.toLowerCase() : '';
 
@@ -132,11 +136,9 @@ export class OverlayClass extends BaseComponent {
             }
         }
 
-        document.addEventListener('click', onClick);
         document.addEventListener('keydown', onKeyDown);
 
         ovl.clearEvents = function () {
-            document.removeEventListener('click', onClick);
             document.removeEventListener('keydown', onKeyDown);
         }
     }

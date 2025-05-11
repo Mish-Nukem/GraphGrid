@@ -145,7 +145,7 @@ export class GridFLClass extends GridDBClass {
         const grid = this;
 
         const item = grid._autocompleteDropdown.items.find(function (item, index, array) {
-            return item.id == e.itemId;
+            return String(item.id) === String(e.itemId);
         });
 
         e.dropdown.items = [];
@@ -153,10 +153,8 @@ export class GridFLClass extends GridDBClass {
 
         grid._inputingColumn.prevFilter = item.text;
         grid.columnFilterChanged(grid._inputingColumn, item.text);
-        //delete grid._autocompleteDropdown;
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
-
     showAutocomplete(e) {
         const grid = this;
 
@@ -182,10 +180,6 @@ export class GridFLClass extends GridDBClass {
 
         grid._autocompleteDropdown.items = [];
         grid.refreshState();
-
-        //    grid.pageNumber = 1;
-        //    grid.selectedRowIndex = 0;
-        //    grid.refresh();
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     columnFocusLost(column, filter, e) {
@@ -194,8 +188,6 @@ export class GridFLClass extends GridDBClass {
 
         delete grid._inputingColumn;
         column.prevFilter = '';
-        //column.filter = filter;
-        //delete column.newFilter;
         if (e && e.target) {
             grid._autocompleteRect = e.target.getBoundingClientRect();
         }
@@ -207,10 +199,9 @@ export class GridFLClass extends GridDBClass {
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     columnFilterChanged(column, filter, e) {
         const grid = this;
-        if (grid._skipChange /*|| column.filter == filter*/) return;
+        if (grid._skipChange) return;
 
         column.filter = filter;
-        //delete column.newFilter;
         if (e && e.target) {
             grid._autocompleteRect = e.target.getBoundingClientRect();
         }
@@ -245,7 +236,7 @@ export class GridFLClass extends GridDBClass {
             col.prevFilter = col.filter;
         }
 
-        const sameColumn = grid._inputingColumn == col;
+        const sameColumn = grid._inputingColumn === col;
         grid._inputingColumn = col;
         if (grid._autocompleteDropdown.visible && !sameColumn) {
             grid._autocompleteDropdown.close();

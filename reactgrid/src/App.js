@@ -1,7 +1,7 @@
 import './css/default.css';
 import { useState } from 'react';
 import TestData from './Tests/TestData';
-import { ReactGrid } from './Grid/ReactGrid';
+import { Grid } from './Grid/Grid';
 import { Overlay } from './Grid/Overlay';
 import { Modal } from './Grid/Modal';
 import { Dropdown } from './Grid/Dropdown';
@@ -116,7 +116,7 @@ function App() {
                 <div className="div-on-menu">
                     <button onClick={() => { console.clear() }} className="modal-window-footer-button">Clear console</button>
                 </div>
-                <ReactGrid getRows={GetFamily} init={(grid) => { window.gridComponent = grid }}></ReactGrid>
+                <Grid getRows={GetFamily} init={(grid) => { window.gridComponent = grid }}></Grid>
             </>
         )
     }
@@ -147,6 +147,8 @@ function App() {
                     <></>
                 )
             case 0:
+                return <></>
+            case 1:
                 return (
                     <>
                         <div className="div-on-menu">
@@ -158,10 +160,10 @@ function App() {
                             <button onClick={() => ResetColumnsWidths()} className="modal-window-footer-button">Reset columns widths</button>
                             {drawClearConsole()}
                         </div>
-                        <ReactGrid getRows={GetFamily} init={(grid) => { window.gridComponent = grid; }}></ReactGrid>
+                        <Grid getRows={GetFamily} init={(grid) => { window.gridComponent = grid; }}></Grid>
                     </>
                 )
-            case 1:
+            case 2:
                 return (
                     <>
                         <div className="div-on-menu">
@@ -171,19 +173,19 @@ function App() {
                         <Overlay init={(ovl) => { window.overlayComponent = ovl }} closeWhenEscape={true} closeWhenClick={true}></Overlay>
                     </>
                 )
-            case 2:
+            case 3:
                 return (
                     <>
-                        <Modal uid="m01" isModal={true} renderContent={() => { return drawGridInModal() }} closeWhenEscape={true} pos={{ x: 100, y: 100, w: 300, h: 250 }}></Modal>
+                        <Modal uid="m01" isModal={true} renderContent={() => { return drawGridInModal() }} closeWhenEscape={true} pos={{ x: 100, y: 100, w: 300, h: 250 }} title='Modal Grid'></Modal>
                     </>
                 )
-            case 3:
+            case 4:
                 return (
                     <>
                         <Modal uid="m02" isModal={true} renderContent={() => { return drawDropdownInModal() }} closeWhenEscape={true} pos={{ x: 100, y: 100, w: 300, h: 250 }}></Modal>
                     </>
                 )
-            case 4:
+            case 5:
                 return (
                     <>
                         <div className="div-on-menu">
@@ -197,7 +199,7 @@ function App() {
                         </div>
                     </>
                 );
-            case 5:
+            case 6:
                 return (
                     <>
                         <div style={{ padding: "5px" }}>
@@ -205,7 +207,7 @@ function App() {
                         </div>
                     </>
                 );
-            case 6:
+            case 7:
                 return (
                     <>
                         <div style={{ padding: "5px" }}>
@@ -213,7 +215,7 @@ function App() {
                         </div>
                     </>
                 );
-            case 7:
+            case 8:
                 return (
                     <>
                         <div style={{ padding: "5px" }}>
@@ -237,6 +239,7 @@ function App() {
                     //console.log('this == ' + e);
                     setState({ menuItem: e.target.selectedIndex, guid: '' });
                 }}>
+                    <option>0. None</option>
                     <option>1. ReactGrid</option>
                     <option>2. Overlay</option>
                     <option>3. Modal</option>
