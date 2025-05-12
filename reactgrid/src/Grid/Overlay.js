@@ -22,7 +22,6 @@ export function Overlay(props) {
 
     if (!ovl.refreshState) {
         ovl.refreshState = function () {
-            //log('refreshState ' + ovl.stateind);
             setState({ ovl: ovl, ind: ovl.stateind++ });
         }
     }
@@ -31,8 +30,6 @@ export function Overlay(props) {
         ovl.setupEvents();
 
         return () => {
-            //log(' 0.11 Clear Overlay Events');
-
             ovl.clearEvents();
         }
     }, [ovl])
@@ -77,8 +74,8 @@ export class OverlayClass extends BaseComponent {
             <>
                 <div
                     id={`overlay_${ovl.id}_`}
+                    key={`overlay_${ovl.id}_${ovl.stateind}_`}
                     onClick={(e) => ovl.onClick(e)}
-                    //onKeyDown={(e) => ovl.onKeyDown(e)}
                     style={
                         {
                             width: ovl.opt.pos.w,

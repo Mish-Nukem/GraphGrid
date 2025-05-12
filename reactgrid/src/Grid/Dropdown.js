@@ -8,9 +8,8 @@ export function Dropdown(props) {
 
     const [ddState, setState] = useState({ dd: dd, ind: 0 });
 
-    if (ddState.dd && ddState.dd.frozen) {
+    if (ddState.dd) {
         dd = ddState.dd;
-        dd.frozen = false;
     }
     else {
         dd = new DropdownClass(props);
@@ -97,7 +96,7 @@ export class DropdownClass extends BaseComponent {
                             return (
                                 <li
                                     dropdown-item={`${dd.id}_${item.id}_`}
-                                    key={`${dd.id}_${item.id}_`}
+                                    key={`${dd.id}_${item.id}_${dd.stateind}_`}
                                     title={dd.translate(item.title || item.text)}
                                     className={dd.menuItemClass + (dd.activeItem === item ? ' active' : '')}
                                     onClick={(e) => dd.onItemClick(e, item.id)}
@@ -111,7 +110,7 @@ export class DropdownClass extends BaseComponent {
                         dd.allowUpload && dd.pageSize > 0 && dd.items.length === dd.pageSize * dd.pageNumber ?
                             <ul className={`dropdown-ul ${dd.menuClass || ''}`}>
                                 <li dropdown-item={`${dd.id}_append_`}
-                                    key={`${dd.id}_append_`}
+                                    key={`${dd.id}_append_${dd.stateind}_`}
                                     title={dd.translate('load more records')}
                                     className={dd.menuItemClass}
                                     onClick={(e) => dd.onItemClick(e, 'append')}
@@ -130,7 +129,7 @@ export class DropdownClass extends BaseComponent {
         const dd = this;
 
         return (
-            dd.visible ? <Modal
+            dd.visible && dd.items.length > 0 ? <Modal
                 isModal={!noModal}
                 renderContent={() => { return dd.renderPopup() }}
                 closeWhenEscape={true}
@@ -156,8 +155,7 @@ export class DropdownClass extends BaseComponent {
 
             dd.lastPageNumber = dd.pageNumber;
 
-            dd.visible = true;
-            dd.frozen = true;
+            dd.visible = dd.items.length > 0;
 
             const renderFake = function () {
                 return (
@@ -189,6 +187,8 @@ export class DropdownClass extends BaseComponent {
                 h: h
             };
 
+            log(' DropdownPos w = ' + dd.pos.w + ', h = ' + dd.pos.h);
+
             dd.refreshState();
         }
 
@@ -210,7 +210,6 @@ export class DropdownClass extends BaseComponent {
         if (dd.opt.onClose) {
             dd.opt.onClose();
         }
-        dd.frozen = true;
 
         dd.items = [];
         delete dd.activeItem;
@@ -262,7 +261,6 @@ export class DropdownClass extends BaseComponent {
                         dd.activeItem = dd.items[0];
                     }
 
-                    dd.frozen = true;
                     dd.refreshState();
                     break;
                 case 'up', 'arrowup':
@@ -277,7 +275,6 @@ export class DropdownClass extends BaseComponent {
                         dd.activeItem = dd.items[0];
                     }
 
-                    dd.frozen = true;
                     dd.refreshState();
                     break;
                 default:

@@ -125,7 +125,7 @@ export class GridDBClass extends GridInGraphClass {
                         grid.toolbarButtons.map((button, ind) => {
                             return (
                                 <button
-                                    key={`toolbar_${grid.id}_${button.id}_`}
+                                    key={`toolbar_${grid.id}_${button.id}_${grid.stateind}_`}
                                     grid-toolbar-button={`${grid.id}_${button.id}_`}
                                     className={`grid-toolbar-button ${button.class || grid.opt.toolbarButtonsClass || ''}`}
                                     title={grid.translate(button.title, 'grid-toolbar-button')}
@@ -163,7 +163,7 @@ export class GridDBClass extends GridInGraphClass {
                             return (
                                 button.render ? button.render(button, bottom) :
                                     <button
-                                        key={`pager_${bottom ? 'bottom' : 'top'}_${grid.id}_${button.id}_`}
+                                        key={`pager_${bottom ? 'bottom' : 'top'}_${grid.id}_${button.id}_${grid.stateind}_`}
                                         grid-pager-item={`${grid.id}_${button.id}_`}
                                         className={`${button.class ? button.class : 'grid-pager-button'}`}
                                         title={grid.translate(button.title, 'grid-pager-button')}
@@ -288,7 +288,7 @@ export class GridDBClass extends GridInGraphClass {
             render: function (button, bottom) {
                 return (
                     <input
-                        key={`pager_${bottom ? 'bottom' : 'top'}_${grid.id}_${button.id}_`}
+                        key={`pager_${bottom ? 'bottom' : 'top'}_${grid.id}_${button.id}_${grid.stateind}_`}
                         value={grid.pageNumber}
                         grid-pager-item={`${grid.id}_${button.id}_`}
                         className={`${button.class ? button.class : 'grid-pager-current'}`}
@@ -320,7 +320,7 @@ export class GridDBClass extends GridInGraphClass {
                 return (
                     <span
                         className={'grid-pager-of'}
-                        key={`pager_${bottom ? 'bottom' : 'top'}_${grid.id}_${button.id}_`}
+                        key={`pager_${bottom ? 'bottom' : 'top'}_${grid.id}_${button.id}_${grid.stateind}_`}
                     >
                         {` ${grid.translate('of', 'pager-button')} ${grid.pagesCount >= 0 ? grid.pagesCount : ''}`}
                     </span>
@@ -371,7 +371,7 @@ export class GridDBClass extends GridInGraphClass {
             render: function (button, bottom) {
                 return (
                     <select
-                        key={`pager_${bottom ? 'bottom' : 'top'}_${grid.id}_${button.id}_`}
+                        key={`pager_${bottom ? 'bottom' : 'top'}_${grid.id}_${button.id}_${grid.stateind}_`}
                         grid-pager-item={`${grid.id}_${button.id}_`}
                         className={`grid-pager-size ${button.class ? button.class : ''}`}
                         style={{ width: '4.5em', display: 'inline-block' }}
@@ -392,7 +392,7 @@ export class GridDBClass extends GridInGraphClass {
                                 return (
                                     <option
                                         value={+size}
-                                        key={`pagesize_${grid.id}_${ind}_`}
+                                        key={`pagesize_${grid.id}_${ind}_${grid.stateind}_`}
                                     >
                                         {size}
                                     </option>
@@ -416,7 +416,7 @@ export class GridDBClass extends GridInGraphClass {
                 return (
                     <span
                         className={'grid-pager-total'}
-                        key={`pager_${bottom ? 'bottom' : 'top'}_${grid.id}_${button.id}_`}>
+                        key={`pager_${bottom ? 'bottom' : 'top'}_${grid.id}_${button.id}_${grid.stateind}_`}>
                         {`${grid.translate('total rows', 'pager-button')} ${grid.totalRows >= 0 ? grid.totalRows : ''}`}
                     </span>
                 );

@@ -52,16 +52,18 @@ export class loginFormClass extends BaseComponent {
         const loginForm = this;
 
         //const pref = appSettings.APIurl;
+
+
         //const guid = 'asdfasdf';
         const params = [{ key: 'login', value: loginForm.login }, { key: 'password', value: loginForm.password }];
 
         //const params = { login: loginForm.login, password: loginForm.password };
 
         loginForm.dataGetter.get({ url: 'system/login', params: params, type: 'text' }).then(
-            (guid) => {
-                if (guid) {
+            (tokens) => {
+                if (tokens) {
                     //const obj = JSON.parse(guid);
-                    loginForm.afterLogin(guid);
+                    loginForm.afterLogin(tokens);
                 }
             }
         );

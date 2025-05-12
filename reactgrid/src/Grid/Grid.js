@@ -69,7 +69,9 @@ export class GridClass extends BaseComponent {
 
         grid.log(' 0.0 Grid Constructor ');
 
-        grid.getRows = props.getRows || function ({ filters }) { return new Promise(function (resolve, reject) { resolve([]) }); };
+        if (props.getRows) {
+            grid.getRows = props.getRows;// || function ({ filters }) { return new Promise(function (resolve, reject) { resolve([]) }); };
+        }
 
         grid.getColumns = props.getColumns || grid.getColumns;
 
@@ -254,7 +256,7 @@ export class GridClass extends BaseComponent {
         return grid.columns.map((col, cind) => {
             return (
                 <td
-                    key={'cell_' + rowInd + '_' + cind + '_'}
+                    key={`cell_${rowInd}_${cind}_${grid.stateind}_`}
                 >
                     {grid.renderCell(col, row)}
                 </td>
@@ -276,7 +278,7 @@ export class GridClass extends BaseComponent {
             for (let key in row) {
                 if (grid.colDict[key]) continue;
 
-                const col = { name: key };
+                const col = grid.getColumn(key);
 
                 grid.colDict[col.name] = col;
                 res.push(col);
@@ -284,6 +286,10 @@ export class GridClass extends BaseComponent {
         }
 
         return res;
+    }
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
+    getColumn(name) {
+        return { name: name };
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     prepareColumns(columns) {
@@ -347,7 +353,7 @@ export class GridClass extends BaseComponent {
             fakeGrid.style.left = x + 'px';
         }
         function onMouseMove(e) {
-            drawMovingColumn(e.pageX, e.pageY);
+            drawMovingColumn(e.clientX/*e.pageX*/, e.pageY);
         }
 
         document.addEventListener('mousemove', onMouseMove);
@@ -511,7 +517,7 @@ export class GridClass extends BaseComponent {
 
         const initW = parseInt(getComputedStyle(th).width);
 
-        const shiftX = e.clientX;
+        const shiftX = e.pageX;//e.clientX;
         const columns = column.grid.columns;
 
         let otherColsW = 0;

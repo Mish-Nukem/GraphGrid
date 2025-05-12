@@ -122,7 +122,7 @@ export class ModalClass extends BaseComponent {
             <>
                 <div
                     id={`window_${wnd.id}_`}
-                    key={`window_${wnd.id}_`}
+                    key={`window_${wnd.id}_${wnd.stateind}_`}
                     style={
                         {
                             width: wnd.opt.pos.w,

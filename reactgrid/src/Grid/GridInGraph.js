@@ -178,6 +178,7 @@ export class GridInGraphClass extends GridClass {
         }
 
         grid.keyField = grid.keyField || grid.columns[0].name;
+        return grid.keyField;
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     onSelectedRowChanged(e) {
@@ -229,7 +230,7 @@ export class GridInGraphClass extends GridClass {
                 let filter = link.content.applyLink(link.parent);
                 if (filter === undefined) continue;
 
-                filters.push(filter + '');
+                filters.push(String(filter));
             }
         }
 

@@ -8,6 +8,7 @@ import { Dropdown } from './Grid/Dropdown';
 import { GridInGraph } from './Grid/GridInGraph';
 import { GridDB } from './Grid/GridDB';
 import { GridFL } from './Grid/GridFL';
+import { GridINU } from './Grid/GridINU'; 
 //import { BootstrapGrid } from './Grid/BootstrapGrid'; 
 import { LoginPage } from './Pages/LoginPage';
 import appSettings from './AppSettings';
@@ -15,9 +16,13 @@ import { DataGetter } from './Utils/DataGetter';
 
 
 function App() {
-    const [state, setState] = useState({ menuItem: - 2, guid: '' });
+    const [state, setState] = useState({ menuItem: - 2, atoken: '', rtoken: '' });
 
     window._logEnabled = true;
+
+    const dataGetter = new DataGetter(appSettings);
+    dataGetter.atoken = state.atoken;
+    dataGetter.rtoken = state.rtoken;
 
     const GetFamily = function (e) {
         return new Promise(function (resolve, reject) {
@@ -218,8 +223,14 @@ function App() {
             case 8:
                 return (
                     <>
+                        <div className="div-on-menu">
+                            {drawClearConsole()}
+                        </div>
                         <div style={{ padding: "5px" }}>
-                            {/*<BootstrapGrid getRows={GetFamily} buttons={GetButtons()} getColumns={GetFamilyColumns}></BootstrapGrid>*/}
+                            <GridINU uid="proj" entity="SrRProjectEntity" dataGetter={dataGetter}></GridINU>
+                        </div>
+                        <div style={{ padding: "5px" }}>
+                            <GridINU parentGrids="proj" uid="rem" entity="SrRemarkEntity" dataGetter={dataGetter}></GridINU>
                         </div>
                     </>
                 );
@@ -228,16 +239,22 @@ function App() {
         }
     };
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
+    // init={(loginForm) => { loginForm.dataGetter = dataGetter }}
     return (
         state.menuItem < -1 ?
             <LoginPage
-                init={(loginForm) => { loginForm.dataGetter = new DataGetter(appSettings) }}
-                afterLogin={(guid) => { setState({ menuItem: -1, guid: guid }) }}>
+                dataGetter={dataGetter}
+                afterLogin={(tokens) => {
+                    const arr = tokens.split(';');
+                    if (arr.length !== 2) return;
+
+                    setState({ menuItem: -1, atoken: arr[0], rtoken: arr[1] });
+                }}>
             </LoginPage> :
             <div >
                 <select onChange={(e) => {
                     //console.log('this == ' + e);
-                    setState({ menuItem: e.target.selectedIndex, guid: '' });
+                    setState({ menuItem: e.target.selectedIndex, atoken: state.atoken, rtoken: state.rtoken });
                 }}>
                     <option>0. None</option>
                     <option>1. ReactGrid</option>
@@ -247,7 +264,7 @@ function App() {
                     <option>5. Two Grids</option>
                     <option>6. GridDB</option>
                     <option>7. GridFL</option>
-                    <option>8. BootstrapGrid</option>
+                    <option>8. Two GridINU</option>
                 </select>
                 <div className="div-on-menu">
                     {getTestApp()}
