@@ -53,7 +53,6 @@ export class loginFormClass extends BaseComponent {
 
         //const pref = appSettings.APIurl;
 
-
         //const guid = 'asdfasdf';
         const params = [{ key: 'login', value: loginForm.login }, { key: 'password', value: loginForm.password }];
 

@@ -1,5 +1,8 @@
 import { useState, useEffect } from 'react';
 import { GridFLClass } from './GridFL.js';
+import { NodeStatus } from './Base';
+import { WaveType } from './Graph.js';
+
 // ==================================================================================================================================================================
 export function GridINU(props) {
 	let grid = null;
@@ -93,6 +96,21 @@ export class GridINUClass extends GridFLClass {
 				return activeRow ? parentGrid.entity + (parentGrid.entityAdd || '') + ' = ' + activeRow[keyField] : '1=2';
 			}
 		};
+	}
+	// -------------------------------------------------------------------------------------------------------------------------------------------------------------
+	skipOnWaveVisit(e) {
+		if (super.skipOnWaveVisit(e)) return true;
+
+		const grid = this;
+		if (e.waveType === WaveType.refresh) {
+			if (!grid.visible || grid.status === NodeStatus.hidden) return true;
+			if (grid.status === NodeStatus.filter && !grid._selecting) return true;
+		}
+		else if (e.waveType === WaveType.value) {
+			if (!grid.visible || grid.status === NodeStatus.hidden) return true;
+		}
+
+		return false;
 	}
 	// -------------------------------------------------------------------------------------------------------------------------------------------------------------
 	getColumn(name) {

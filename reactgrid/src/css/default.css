@@ -266,6 +266,27 @@
     margin: 2px;
 }
 
+.graph-tabcontrol-buttons {
+
+}
+
+.graph-filter-line {
+    display: grid;
+    grid-template-columns: auto auto auto auto auto auto;
+    grid-template-rows: auto auto;
+    grid-auto-flow: row;
+    align-items: center;
+    align-content: center;
+}
+
+.graph-filter {
+    display: grid;
+    grid-template-columns: auto 2.5em 2.5em;
+    grid-template-rows: auto auto;
+    grid-auto-flow: row;
+    align-items: center;
+}
+
 .login-form {
     display: grid;
     align-items: center;

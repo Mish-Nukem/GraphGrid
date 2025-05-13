@@ -26,3 +26,10 @@ export class NodeStatus {
     static lookup = 3;
     static custom = 4;
 };
+
+export class FilterType {
+    static combobox = 0;
+    static date = 1;
+    static input = 2;
+    static custom = 3;
+};

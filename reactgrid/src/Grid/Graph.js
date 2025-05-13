@@ -29,14 +29,19 @@ export class GraphClass {
         // если запущена новая однотипная волна, то нет смысла продолжать текущую
         if (e.waveType === this.lastWaveType && e.waveInd < this.lastWaveInd) return;
 
-        const node = e.list.shift();
+        while (e.list.length) {
+            let node = e.list.shift();
 
-        if (e.markVisited) {
-            node.visited = true;
-        }
+            if (node.skipOnWaveVisit && node.skipOnWaveVisit(e)) continue;
 
-        if (node.visitByWave) {
-            node.visitByWave(e);
+            if (e.markVisited) {
+                node.visited = true;
+            }
+
+            if (node.visitByWave) {
+                node.visitByWave(e);
+                break;
+            }
         }
     };
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------

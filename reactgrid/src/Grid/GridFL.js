@@ -324,7 +324,8 @@ export class GridFLClass extends GridDBClass {
     getGridSettingsList() {
         const res = super.getGridSettingsList();
 
-        res.push({ id: 2, text: 'Clear all filters' });
+        const grid = this;
+        res.push({ id: 2, text: grid.translate('Clear all filters', 'grid-menu') });
 
         return res;
     }

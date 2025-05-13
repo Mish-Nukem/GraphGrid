@@ -1,4 +1,6 @@
-﻿export default class TestData {
+﻿import { GraphClass, WaveType } from '../Grid/Graph';
+import { BaseComponent, NodeStatus, FilterType, log } from '../Grid/Base';
+export default class TestData {
 
     //constructor() {
     //}
@@ -209,5 +211,77 @@
         }
 
         return true;
+    }
+
+    getTestGraph() {
+        const graph = new GraphClass();
+
+        graph.noCachWave = true;
+
+        const projectNode = { id: '0', entity: 'SrRProjectEntity', title: 'Проект', status: NodeStatus.filter, keyField: 'ID_SR_R_PROJECT_SRPJ', nameField: 'NAME_PROJ_SRPJ' };
+        const promptNode = { id: '1', entity: 'SrRPromptnessEntity', title: 'Срочность выполнения', status: NodeStatus.filter, keyField: 'ID_SR_R_PROMPTNESS_SRPR', nameField: 'NAME_SRPR' };
+        const statusNode = { id: '2', entity: 'SrRStatusEntity', title: 'Статус задания', status: NodeStatus.filter, keyField: 'ID_SR_R_STATUS_SRST', nameField: 'NAME_STATUS_SRST' };
+        const executorNode = { id: '3', entity: 'SrRExecutiveEntity', title: 'Исполнитель', status: NodeStatus.filter, keyField: 'ID_SR_R_EXECUTIVE_SREX', nameField: 'FIO_SREX' };
+        const authorNode = { id: '4', entity: 'SrRExecutiveEntity', title: 'Автор задания', status: NodeStatus.filter, keyField: 'ID_SR_R_EXECUTIVE_SREX', nameField: 'FIO_SREX' };
+        const datefromNode = { id: '5', title: 'Дата создания От', status: NodeStatus.filter, filterType: FilterType.date };
+        const datetoNode = { id: '6', title: 'Дата создания По', status: NodeStatus.filter, filterType: FilterType.date };
+        const remarkNode = { id: '7', parentGrids: '0,1,2,3,4,5,6', entity: 'SrRemarkEntity', title: 'Задания', status: NodeStatus.grid, keyField: 'ID_SR_REMARK_SRRM' };
+        //const favoriteNode = { id: '8', entity: 'SrRemarkEntity', title: 'Избранное', status: NodeStatus.grid, keyField: 'ID_SR_REMARK_SRRM' };
+        const detailsNode = { id: '9', parentGrids: '7', entity: 'SrDetailRemarkEntity', title: 'Детализация задания', status: NodeStatus.grid, keyField: 'ID_SR_DETAIL_REMARK_SRDR', isBottom: true };
+        const addNode = { id: '10', parentGrids: '7', entity: 'DdObjectEntity', title: 'Дополнительные данные', status: NodeStatus.grid, keyField: 'ID_DD_OBJECT_DDOB', isBottom: true };
+
+        graph.nodesDict[projectNode.id] = projectNode;
+        graph.nodesDict[promptNode.id] = promptNode;
+        graph.nodesDict[statusNode.id] = statusNode;
+        graph.nodesDict[executorNode.id] = executorNode;
+        graph.nodesDict[authorNode.id] = authorNode;
+        graph.nodesDict[datefromNode.id] = datefromNode;
+        graph.nodesDict[datetoNode.id] = datetoNode;
+        graph.nodesDict[remarkNode.id] = remarkNode;
+        //graph.nodesDict[favoriteNode.id] = favoriteNode;
+        graph.nodesDict[detailsNode.id] = detailsNode;
+        graph.nodesDict[addNode.id] = addNode;
+
+        //graph.nodeCount = 10;
+
+        function connect(child, parent) {
+            const link = { parent: parent, child: child };
+
+            graph.linksDict[child.id + '_' + parent.id] = link;
+
+            child.parentLinks = child.parentLinks || {};
+            child.parentLinks[parent.id] = link;
+
+            parent.childLinks = parent.childLinks || {};
+            parent.childLinks[child.id] = link;
+        }
+
+        for (let id in graph.nodesDict) {
+            let node = graph.nodesDict[id];
+            if (!node.parentGrids) continue;
+
+            let parentUids = ',' + node.parentGrids + ',';
+
+            for (let cid in graph.nodesDict) {
+                if (+cid === node.id) continue;
+                let pnode = graph.nodesDict[cid];
+
+                if (parentUids.indexOf(pnode.id) <= 0) continue;
+
+                connect(node, pnode);
+            }
+        }
+
+        //connect(remarkNode, projectNode);
+        //connect(remarkNode, promptNode);
+        //connect(remarkNode, statusNode);
+        //connect(remarkNode, executorNode);
+        //connect(remarkNode, authorNode);
+        //connect(remarkNode, datefromNode);
+        //connect(remarkNode, datetoNode);
+        //connect(detailsNode, remarkNode);
+        //connect(addNode, remarkNode);
+
+        return graph;
     }
 }

@@ -140,6 +140,7 @@ export class DropdownClass extends BaseComponent {
                 resizable={false}
                 noPadding={true}
                 hiddenOverlay={true}
+                onClose={() => dd.visible = false}
             >
             </Modal> : <></>
         );

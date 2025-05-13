@@ -8,7 +8,8 @@ import { Dropdown } from './Grid/Dropdown';
 import { GridInGraph } from './Grid/GridInGraph';
 import { GridDB } from './Grid/GridDB';
 import { GridFL } from './Grid/GridFL';
-import { GridINU } from './Grid/GridINU'; 
+import { GridINU } from './Grid/GridINU';
+import { Graph } from './Grid/GraphComponent'; 
 //import { BootstrapGrid } from './Grid/BootstrapGrid'; 
 import { LoginPage } from './Pages/LoginPage';
 import appSettings from './AppSettings';
@@ -234,6 +235,17 @@ function App() {
                         </div>
                     </>
                 );
+            case 9:
+                return (
+                    <>
+                        <div className="div-on-menu">
+                            {drawClearConsole()}
+                        </div>
+                        <div style={{ padding: "5px" }}>
+                            <Graph uid="PM" graph={new TestData().getTestGraph()} dataGetter={dataGetter}></Graph>
+                        </div>
+                    </>
+                );
             default:
                 return null;
         }
@@ -265,6 +277,7 @@ function App() {
                     <option>6. GridDB</option>
                     <option>7. GridFL</option>
                     <option>8. Two GridINU</option>
+                    <option>9. Graph</option>
                 </select>
                 <div className="div-on-menu">
                     {getTestApp()}

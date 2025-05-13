@@ -75,6 +75,8 @@ export class ModalClass extends BaseComponent {
         this.opt.pos.w = !isNaN(this.opt.pos.w) ? this.opt.pos.w + 'px' : this.opt.pos.w;
         this.opt.pos.h = !isNaN(this.opt.pos.h) ? this.opt.pos.h + 'px' : this.opt.pos.h;
 
+        this.onClose = props.onClose;
+
         this.renderContent = props.renderContent || function () { return null };
 
         this.buttons = [];
@@ -105,7 +107,7 @@ export class ModalClass extends BaseComponent {
                     <Overlay
                         renderChild={(zInd) => { return wnd.renderSelf(zInd++) }} closeWhenClick={wnd.opt.closeWhenMiss}
                         init={(ovl) => ovl.visible = wnd.visible}
-                        onClose={() => wnd.visible = false}
+                        onClose={() => wnd.close()}
                         isHidden={wnd.opt.hiddenOverlay}
                     >
                     </Overlay>
@@ -254,6 +256,10 @@ export class ModalClass extends BaseComponent {
     close() {
         const wnd = this;
         wnd.visible = false;
+
+        if (wnd.onClose) {
+            wnd.onClose();
+        }
 
         wnd.refreshState(true);
     }

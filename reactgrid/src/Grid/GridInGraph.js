@@ -66,11 +66,42 @@ export class GridInGraphClass extends GridClass {
             grid.entity = props.entity;
         }
 
-        if (props.parentGrids || props.uid) {
+        if (props.getDefaultLinkContent) {
+            grid.getDefaultLinkContent = props.getDefaultLinkContent;
+        }
+
+        grid.uid = props.uid || grid.id;
+
+        if (props.graph) {
+            const graph = props.graph;
+            grid.graph = graph;
+
+            const obr = graph.nodesDict[grid.uid];// || graph.nodesDict[grid.entity];
+
+            grid.connectedToParents = true;
+            grid.parentLinks = obr.parentLinks;
+            for (let id in grid.parentLinks) {
+                let link = grid.parentLinks[id];
+                link.child = grid;
+                link.content = grid.getDefaultLinkContent();
+            }
+            grid.childLinks = obr.childLinks;
+            for (let id in grid.childLinks) {
+                let link = grid.childLinks[id];
+                link.parent = grid;
+            }
+
+            if (!graph.nodeCount) {
+                graph.nodeCount = 0;
+                for (let _ in graph.nodesDict) graph.nodeCount++;
+            }
+
+            graph.nodesDict[grid.uid] = grid;
+        }
+        else if (props.parentGrids || props.uid) {
             grid.graphUid = props.graphUid || "defaultGraphUID";
 
             grid.parentGrids = props.parentGrids;
-            grid.uid = props.uid || grid.id;
 
             window._graphDict = window._graphDict || {};
 
@@ -85,10 +116,6 @@ export class GridInGraphClass extends GridClass {
 
             grid.parentLinks = {};
             grid.childLinks = {};
-
-            if (props.getDefaultLinkContent) {
-                grid.getDefaultLinkContent = props.getDefaultLinkContent;
-            }
 
             if (props.parentGrids) {
                 grid.graph.needConnect = true;
@@ -125,7 +152,7 @@ export class GridInGraphClass extends GridClass {
             let parentGrid = graph.nodesDict[id];
             if (parentUids.indexOf(parentGrid.uid) <= 0) continue;
 
-            const link = { content: grid.getDefaultLinkContent(parentGrid), parent: parentGrid, child: grid };
+            const link = { content: grid.getDefaultLinkContent(), parent: parentGrid, child: grid };
 
             graph.linksDict[grid.id + '_' + parentGrid.id] = link;
             grid.parentLinks[parentGrid.id] = link;
@@ -228,7 +255,7 @@ export class GridInGraphClass extends GridClass {
 
             if (link.content.applyLink) {
                 let filter = link.content.applyLink(link.parent);
-                if (filter === undefined) continue;
+                if (filter === undefined || filter === '') continue;
 
                 filters.push(String(filter));
             }

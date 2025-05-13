@@ -1,8 +1,9 @@
 ﻿import { useState, useEffect } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { BaseComponent, log } from './Base';
-//import { BootstrapTheme as Theme } from './Themes/BootstrapGridTheme';
 import { DefaultGridTheme as Theme } from './Themes/DefaultGridTheme';
+//import { BootstrapTheme as NewTheme } from './Themes/BootstrapGridTheme';
+import { DefaultGridTheme as NewTheme } from './Themes/DefaultGridTheme';
 // ==================================================================================================================================================================
 export function Grid(props) {
     let grid = null;
@@ -30,7 +31,7 @@ export function Grid(props) {
     }
 
     useEffect(() => {
-        grid.setupEvents();
+        grid.setupEvents(grid);
 
         if (needGetRows && (grid.rows.length <= 0 || grid.columns.length <= 0)) {
 
@@ -105,24 +106,30 @@ export class GridClass extends BaseComponent {
         grid.onSelectedRowChanged({ grid: grid, prev: grid.selectedRowIndex, new: grid.selectedRowIndex });
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
-    setupEvents() {
-        const grid = this;
-
-        grid.clearEvents = function () { }
-
-        if (Theme !== undefined) {
+    static applyTheme(grid) {
+        if (Theme !== undefined && !grid.themeApplied) {
             const theme = new Theme();
             theme.applyTheme(grid);
+
+            if (NewTheme !== undefined) {
+                const newtheme = new NewTheme();
+                newtheme.applyTheme(grid);
+            }
+
+            grid.themeApplied = true;
         }
+    }
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
+    setupEvents() {
+        const grid = this;
+        grid.clearEvents = function () { }
+
+        GridClass.applyTheme(grid);
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     removeEvents() {
         const grid = this;
         grid.clearEvents();
-    }
-    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
-    translate(text, context) {
-        return text;
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     calculatePagesCount() {

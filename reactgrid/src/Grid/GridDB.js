@@ -135,7 +135,7 @@ export class GridDBClass extends GridInGraphClass {
                                         button.click(e);
                                     } : null}
                                 >
-                                    {button.img ? button.img : ''}
+                                    {button.img ? button.img() : ''}
                                     {button.label ? grid.translate(button.label, 'grid-toolbar-button') : ''}
                                 </button>
                             );
@@ -450,9 +450,10 @@ export class GridDBClass extends GridInGraphClass {
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     getGridSettingsList() {
+        const grid = this;
         const res = [
-            { id: 0, text: 'Reset columns order' },
-            { id: 1, text: 'Reset columns widths' }
+            { id: 0, text: grid.translate('Reset columns order', 'grid-menu') },
+            { id: 1, text: grid.translate('Reset columns widths', 'grid-menu') }
         ];
 
         return res;
