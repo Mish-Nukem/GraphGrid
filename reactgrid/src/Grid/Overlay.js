@@ -20,11 +20,11 @@ export function Overlay(props) {
         props.init(ovl);
     }
 
-    if (!ovl.refreshState) {
+    //if (!ovl.refreshState) {
         ovl.refreshState = function () {
             setState({ ovl: ovl, ind: ovl.stateind++ });
         }
-    }
+    //}
 
     useEffect(() => {
         ovl.setupEvents();

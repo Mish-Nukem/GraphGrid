@@ -19,12 +19,12 @@ export function Dropdown(props) {
         props.init(dd);
     }
 
-    if (!dd.refreshState) {
+    //if (!dd.refreshState) {
         dd.refreshState = function () {
             //log('refreshState ' + dd.stateind);
             setState({ dd: dd, ind: dd.stateind++ });
         }
-    }
+    //}
 
     useEffect(() => {
         dd.setupEvents();
@@ -188,7 +188,7 @@ export class DropdownClass extends BaseComponent {
                 h: h
             };
 
-            log(' DropdownPos w = ' + dd.pos.w + ', h = ' + dd.pos.h);
+            //log(' DropdownPos w = ' + dd.pos.w + ', h = ' + dd.pos.h);
 
             dd.refreshState();
         }

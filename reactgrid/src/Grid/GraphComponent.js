@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { BaseComponent, NodeStatus, FilterType, log } from './Base';
 import { GraphClass, WaveType } from './Graph.js';
-import { GridINU } from './GridINU';
+import { GridINU, GridINUClass } from './GridINU';
 import { GridClass } from './Grid.js';
 import { Modal } from './Modal';
 import AsyncSelect from 'react-select/async';
@@ -20,12 +20,12 @@ export function Graph(props) {
         props.init(gc);
     }
 
-    if (!gc.refreshState) {
+    //if (!gc.refreshState) {
         gc.refreshState = function (clear) {
             //log('refreshState ' + graph.stateind);
             setState({ graphComponent: gc, ind: gc.stateind++ });
         }
-    }
+    //}
 
     useEffect(() => {
         //gc.setupEvents();
@@ -62,15 +62,14 @@ export class GraphComponentClass extends BaseComponent {
         gc.dataGetter = props.dataGetter;
 
         if (props.graph) {
-            //gc.prepareGraph(props.graph);
-            gc.graph = props.graph;
+            gc.prepareGraph(props.graph);
         }
         else {
             gc.schemeName = props.schemeName
         };
 
-        gc.activeMaster = 0;
-        gc.activeDetail = 0;
+        //gc.activeMaster = 0;
+        //gc.activeDetail = 0;
 
         gc.visible = true;
 
@@ -102,32 +101,32 @@ export class GraphComponentClass extends BaseComponent {
             <div>
                 <div className="graph-filter-line">
                     {
-                        nodes.map((node, ind) => { return gc.renderFilter(node, true) })
+                        nodes.map((node) => { return gc.renderFilter(node, true) })
                     }
                 </div>
                 <div className="graph-tabcontrol-buttons">
                     {
-                        nodes.map((node, ind) => { return gc.renderGridTab(node, true, ind) })
+                        nodes.map((node) => { return gc.renderGridTab(node, true) })
                     }
                 </div>
-                <div>
+                <div className="graph-grid">
                     {
-                        nodes.map((node, ind) => { return gc.renderGrid(node, true, ind) })
+                        nodes.map((node) => { return gc.renderGrid(node, true) })
                     }
                 </div>
                 <div className="graph-filter-line">
                     {
-                        nodes.map((node, ind) => { return gc.renderFilter(node, false) })
+                        nodes.map((node) => { return gc.renderFilter(node, false) })
                     }
                 </div>
                 <div className="graph-tabcontrol-buttons">
                     {
-                        nodes.map((node, ind) => { return gc.renderGridTab(node, false, ind) })
+                        nodes.map((node) => { return gc.renderGridTab(node, false) })
                     }
                 </div>
-                <div>
+                <div className="graph-grid">
                     {
-                        nodes.map((node, ind) => { return gc.renderGrid(node, false, ind) })
+                        nodes.map((node, ind) => { return gc.renderGrid(node, false) })
                     }
                 </div>
             </div>
@@ -135,56 +134,74 @@ export class GraphComponentClass extends BaseComponent {
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     renderFilter(node, top) {
-        node.opt = node.opt || {};
+        const gc = this;
+
         GridClass.applyTheme(node);
 
-        if (node.status !== NodeStatus.filter || node.isBottom === top || !top && node.isBottom === undefined) return <></>;
+        if (node.status !== NodeStatus.filter || gc.isTop(node) !== top) return <></>;
+
+        if (node.filterType === FilterType.date) return <></>;
 
         return (
-            <div className="graph-filter">
+            <div className="graph-filter" key={`fltrdiv_${node.id}_${gc.id}_${gc.stateind}_`}>
                 <span
+                    key={`fltrttl_${node.id}_${gc.id}_${gc.stateind}_`}
                     style={{ gridColumn: 'span 3', width: 'calc(100% - 4px)' }}
                 >
                     {node.title}
                 </span>
                 {
-                    node.filterType !== FilterType.date ? <select></select> :
+                    node.filterType !== FilterType.date ?
+                        <select
+                            key={`fltrcmb_${node.id}_${gc.id}_${gc.stateind}_`}
+                            style={{ width: 'calc(100% - 4px)', padding: '0 2px', boxSizing: 'border-box', height: '2.3em' }}
+                        >
+                        </select> :
                         <input
-                            style={{ width: 'calc(100% - 4px)', padding: '0 2px', boxSizing: 'border-box' }}
+                            key={`fltrinp_${node.id}_${gc.id}_${gc.stateind}_`}
+                            style={{ width: 'calc(100% - 4px)', padding: '0 2px', boxSizing: 'border-box', height: '2.3em' }}
                             value={node.value || ''}
                         ></input>
                 }
-                <button className={node.opt.filterButtonClass || ''}>
+                <button
+                    className={node.opt.filterButtonClass || 'graph-filter-button'}
+                    key={`fltrsel_${node.id}_${gc.id}_${gc.stateind}_`}
+                >
                     {node.filterSelectDictImg ? node.filterSelectDictImg() : node.translate('Select', 'graph-filter-select')}
                 </button>
-                <button className={node.opt.filterButtonClass || ''}>
+                <button
+                    key={`fltrclr_${node.id}_${gc.id}_${gc.stateind}_`}
+                    className={node.opt.filterButtonClass || 'graph-filter-button'}
+                    disabled={node.value === undefined || node.value === '' ? 'disabled' : ''}
+                >
                     {node.filterClearImg ? node.filterClearImg() : node.translate('Clear', 'graph-filter-clear')}
                 </button>
             </div>
         );
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
-    renderGridTab(node, top, ind) {
+    renderGridTab(node, top) {
         const gc = this;
-        if (node.status !== NodeStatus.grid || node.isBottom === top || !top && node.isBottom === undefined) return <></>;
+        if (node.status !== NodeStatus.grid || gc.isTop(node) !== top) return <></>;
 
-        const isActive = top && ind === gc.activeMaster || !top && ind === gc.activeDetail;
+        const isActive = top && node.id === gc.activeMaster || !top && node.id === gc.activeDetail;
         return (
             <button
+                key={`tabctrl_${node.id}_${gc.id}_${gc.stateind}_`}
                 disabled={isActive ? 'disabled' : ''}
                 className={node.opt.filterButtonClass || ''}
-                onClick={(e) => gc.selectActiveTab(node, top, ind)}
+                onClick={(e) => gc.selectActiveTab(node, top)}
             >
                 {node.title}
             </button>
         );
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
-    renderGrid(node, top, ind) {
+    renderGrid(node, top) {
         const gc = this;
-        const isActive = top && ind === gc.activeMaster || !top && ind === gc.activeDetail;
+        const isActive = top && node.id === gc.activeMaster || !top && node.id === gc.activeDetail;
 
-        if (node.status !== NodeStatus.grid || node.isBottom === top || !isActive || !top && node.isBottom === undefined) {
+        if (!node.visible || node.status !== NodeStatus.grid || gc.isTop(node) !== top) {
             //if (node.status === NodeStatus.grid) node.visible = false;
             return <></>;
         }
@@ -192,6 +209,7 @@ export class GraphComponentClass extends BaseComponent {
         //node.visible = true;
         return (
             <GridINU
+                findGrid={gc.findGrid}
                 graph={gc.graph}
                 uid={node.uid !== undefined ? node.uid : node.id}
                 entity={node.entity}
@@ -202,19 +220,63 @@ export class GraphComponentClass extends BaseComponent {
         );
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
-    selectActiveTab(node, top, ind) {
+    findGrid(props) {
+        if (!props.graph) return null;
+
+        const graph = props.graph;
+        let grid = graph.nodesDict[props.uid];
+
+        if (grid && grid._replaced) return grid;
+
+        grid = new GridINUClass(props);
+
+        delete grid.refreshState;
+
+        grid._replaced = true;
+        grid.graph = graph;
+
+        //graph.waveCache = {};
+
+        const obr = graph.nodesDict[grid.uid];// || graph.nodesDict[grid.entity];
+        grid.id = obr.id || grid.id;
+
+        grid.getColumns = obr.getColumns || grid.getColumns;
+
+        grid.connectedToParents = true;
+        grid.parentLinks = obr.parentLinks;
+        for (let id in grid.parentLinks) {
+            let link = grid.parentLinks[id];
+            link.child = grid;
+            link.content = grid.getDefaultLinkContent();
+        }
+        grid.childLinks = obr.childLinks;
+        for (let id in grid.childLinks) {
+            let link = grid.childLinks[id];
+            link.parent = grid;
+        }
+
+        if (!graph.nodeCount) {
+            graph.nodeCount = 0;
+            for (let _ in graph.nodesDict) graph.nodeCount++;
+        }
+
+        graph.nodesDict[grid.uid] = grid;
+        return grid;
+    }
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
+    selectActiveTab(node, top) {
         const gc = this;
-        const isActive = top && ind === gc.activeMaster || !top && ind === gc.activeDetail;
+        const isActive = top && node.id === gc.activeMaster || !top && node.id === gc.activeDetail;
 
-        if (node.status !== NodeStatus.grid || node.isBottom === top || isActive) return;
+        if (node.status !== NodeStatus.grid || gc.isTop(node) !== top || isActive) return;
 
-        if (top) gc.activeMaster = ind; else gc.activeDetail = ind;
+        if (top) gc.activeMaster = node.id; else gc.activeDetail = node.id;
 
         for (let uid in gc.graph.nodesDict) {
             let lnode = gc.graph.nodesDict[uid];
             if (node === lnode || lnode.status !== NodeStatus.grid) continue;
 
-            if (node.isBottom === lnode.isBottom) {
+            if (gc.isTop(node) === gc.isTop(lnode)) {
                 lnode.visible = false;
             }
         }
@@ -234,40 +296,50 @@ export class GraphComponentClass extends BaseComponent {
             gc.dataGetter.get({ url: 'system/graphScheme', params: params }).then(
                 (schemeObj) => {
                     //const obj = JSON.parse(schemeObj);
-                    gc.graph = schemeObj;
-                    //gc.prepareGraph(schemeObj);
-                    
+                    gc.prepareGraph(schemeObj);
+
                     resolve(gc.graph, e);
                 }
             );
         });
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
-    //getRows(node) {
-    //	const gc = this;
-
-    //}
+    isTop(node) {
+        return node.isBottom === undefined || node.isBottom === false;
+    };
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
-    prepareGraph(/*schemeObj*/) {
+    prepareGraph(obrGraph) {
         const gc = this;
 
-        //gc.graph = schemeObj;
+        gc.graph = obrGraph;
 
-        let needAdd;
-        if (!gc.graph.nodes || !gc.graph.nodes.length) {
-            gc.graph.nodes = [];
-            needAdd = true;
-        }
+        //    gc.graph = new GraphClass();
+
+        //    gc.graph.nodesDict = obrGraph.nodesDict || gc.graph.nodesDict;
+        //    gc.graph.linksDict = obrGraph.linksDict || gc.graph.linksDict;
 
         for (let uid in gc.graph.nodesDict) {
             let node = gc.graph.nodesDict[uid];
-            if (needAdd) {
-                gc.graph.nodes.push(node);
+
+            node.graph = gc.graph;
+
+            node.opt = node.opt || {};
+
+            if (node.status === NodeStatus.grid) {
+                if (gc.isTop(node)) {
+                    if (gc.activeMaster === undefined) {
+                        gc.activeMaster = node.id;
+                        node.visible = true;
+                    }
+                }
+                else {
+                    if (gc.activeDetail === undefined) {
+                        gc.activeDetail = node.id;
+                        node.visible = true;
+                    }
+                }
             }
-
-            //node.skipOnWaveVisit = gc.skipOnWaveVisit;
         }
-
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
 }

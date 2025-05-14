@@ -12,7 +12,10 @@ export function GridINU(props) {
 	grid = gridState.grid;
 	let needGetRows = false;
 	if (!grid) {
-		grid = new GridINUClass(props);
+		if (props.findGrid) {
+			grid = props.findGrid(props);
+		}
+		grid = grid || new GridINUClass(props);
 		needGetRows = !props.noAutoRefresh && !props.parentGrids;
 	}
 
@@ -20,12 +23,12 @@ export function GridINU(props) {
 		props.init(grid);
 	}
 
-	if (!grid.refreshState) {
+	//if (!grid.refreshState) {
 		grid.refreshState = function () {
 			grid.log(' -------------- refreshState ' + grid.stateind + ' --------------- ');
 			setState({ grid: grid, ind: grid.stateind++ });
 		}
-	}
+	//}
 
 	useEffect(() => {
 		grid.setupEvents();
@@ -65,7 +68,15 @@ export class GridINUClass extends GridFLClass {
 		grid.entityAdd = props.entityAdd;
 		grid.dataGetter = props.dataGetter;
 
+		grid.status = NodeStatus.grid;
+		grid.visible = true;
+
+		grid.isVisible = props.isVisible || grid.isVisible;
 		//grid.getRows = this.getRows;
+	}
+	// -------------------------------------------------------------------------------------------------------------------------------------------------------------
+	isVisible() {
+		return this.visible;
 	}
 	// -------------------------------------------------------------------------------------------------------------------------------------------------------------
 	render() {
@@ -81,19 +92,24 @@ export class GridINUClass extends GridFLClass {
 	getDefaultLinkContent() {
 		const grid = this;
 		return {
-			applyLink: function (parentGrid) {
-				if (!parentGrid || !parentGrid.rows || parentGrid.visible === false) return '';
+			applyLink: function (parentNode) {
+				if (!parentNode || parentNode.visible === false) return '';
 
-				if (parentGrid.getConnectContent) {
-					return parentGrid.getConnectContent({ child: grid });
+				if (parentNode.status === NodeStatus.grid) {
+					if (!parentNode.rows || parentNode.rows.length <= 0) return '1=2'
 				}
 
-				const keyField = parentGrid.getKeyColumn();
+				if (parentNode.getConnectContent) {
+					return parentNode.getConnectContent({ child: grid });
+				}
+
+				const keyField = parentNode.getKeyColumn ? parentNode.getKeyColumn() : parentNode.keyField;
 				if (!keyField) return '';
 
-				const activeRow = parentGrid.rows[parentGrid.selectedRowIndex];
+				const activeRow = parentNode.status === NodeStatus.grid ? parentNode.rows[parentNode.selectedRowIndex] : parentNode.value;
+				if (!activeRow) return '';
 
-				return activeRow ? parentGrid.entity + (parentGrid.entityAdd || '') + ' = ' + activeRow[keyField] : '1=2';
+				return activeRow ? parentNode.entity + (parentNode.entityAdd || '') + ' = ' + activeRow[keyField] : '1=2';
 			}
 		};
 	}
@@ -107,7 +123,7 @@ export class GridINUClass extends GridFLClass {
 			if (grid.status === NodeStatus.filter && !grid._selecting) return true;
 		}
 		else if (e.waveType === WaveType.value) {
-			if (!grid.visible || grid.status === NodeStatus.hidden) return true;
+			if (grid.visible === false || grid.status === NodeStatus.hidden) return true;
 		}
 
 		return false;

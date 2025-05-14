@@ -197,10 +197,10 @@ function App() {
                         <div className="div-on-menu">
                             {drawClearConsole()}
                         </div>
-                        <div style={{ padding: "5px" }}>
+                        <div className="div-with-grid">
                             <GridInGraph uid="people" getRows={GetFamily}></GridInGraph>
                         </div>
-                        <div style={{ padding: "5px" }}>
+                        <div className="div-with-grid">
                             <GridInGraph parentGrids="people" getRows={GetCities} getColumns={GetCityColumns}></GridInGraph>
                         </div>
                     </>
@@ -208,7 +208,7 @@ function App() {
             case 6:
                 return (
                     <>
-                        <div style={{ padding: "5px" }}>
+                        <div className="div-with-grid">
                             <GridDB getRows={GetFamily} buttons={GetButtons()} getColumns={GetFamilyColumns}></GridDB>
                         </div>
                     </>
@@ -216,7 +216,7 @@ function App() {
             case 7:
                 return (
                     <>
-                        <div style={{ padding: "5px" }}>
+                        <div className="div-with-grid">
                             <GridFL getRows={GetFamily} buttons={GetButtons()} getColumns={GetFamilyColumns}></GridFL>
                         </div>
                     </>
@@ -227,10 +227,10 @@ function App() {
                         <div className="div-on-menu">
                             {drawClearConsole()}
                         </div>
-                        <div style={{ padding: "5px" }}>
+                        <div className="div-with-grid">
                             <GridINU uid="proj" entity="SrRProjectEntity" dataGetter={dataGetter}></GridINU>
                         </div>
-                        <div style={{ padding: "5px" }}>
+                        <div className="div-with-grid">
                             <GridINU parentGrids="proj" uid="rem" entity="SrRemarkEntity" dataGetter={dataGetter}></GridINU>
                         </div>
                     </>
@@ -241,7 +241,7 @@ function App() {
                         <div className="div-on-menu">
                             {drawClearConsole()}
                         </div>
-                        <div style={{ padding: "5px" }}>
+                        <div className="div-with-grid">
                             <Graph uid="PM" graph={new TestData().getTestGraph()} dataGetter={dataGetter}></Graph>
                         </div>
                     </>

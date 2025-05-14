@@ -10,7 +10,10 @@ export function GridFL(props) {
     grid = gridState.grid;
     let needGetRows = false;
     if (!grid) {
-        grid = new GridFLClass(props);
+        if (props.findGrid) {
+            grid = props.findGrid(props);
+        }
+        grid = grid || new GridFLClass(props);
         needGetRows = !props.noAutoRefresh && !props.parentGrids;
     }
 
@@ -18,12 +21,12 @@ export function GridFL(props) {
         props.init(grid);
     }
 
-    if (!grid.refreshState) {
+    //if (!grid.refreshState) {
         grid.refreshState = function () {
             grid.log(' -------------- refreshState ' + grid.stateind + ' --------------- ');
             setState({ grid: grid, ind: grid.stateind++ });
         }
-    }
+    //}
 
     useEffect(() => {
         grid.setupEvents();

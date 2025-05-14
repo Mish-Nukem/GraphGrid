@@ -10,7 +10,10 @@ export function GridInGraph(props) {
     grid = gridState.grid;
     let needGetRows = false;
     if (!grid) {
-        grid = new GridInGraphClass(props);
+        if (props.findGrid) {
+            grid = props.findGrid(props);
+        }
+        grid = grid || new GridInGraphClass(props);
         needGetRows = !props.noAutoRefresh && !props.parentGrids;
     }
 
@@ -18,12 +21,12 @@ export function GridInGraph(props) {
         props.init(grid);
     }
 
-    if (!grid.refreshState) {
+    //if (!grid.refreshState) {
         grid.refreshState = function () {
             grid.log(' -------------- refreshState ' + grid.stateind + ' --------------- ');
             setState({ grid: grid, ind: grid.stateind++ });
         }
-    }
+    //}
 
     useEffect(() => {
         grid.setupEvents();
@@ -70,35 +73,7 @@ export class GridInGraphClass extends GridClass {
             grid.getDefaultLinkContent = props.getDefaultLinkContent;
         }
 
-        grid.uid = props.uid || grid.id;
-
-        if (props.graph) {
-            const graph = props.graph;
-            grid.graph = graph;
-
-            const obr = graph.nodesDict[grid.uid];// || graph.nodesDict[grid.entity];
-
-            grid.connectedToParents = true;
-            grid.parentLinks = obr.parentLinks;
-            for (let id in grid.parentLinks) {
-                let link = grid.parentLinks[id];
-                link.child = grid;
-                link.content = grid.getDefaultLinkContent();
-            }
-            grid.childLinks = obr.childLinks;
-            for (let id in grid.childLinks) {
-                let link = grid.childLinks[id];
-                link.parent = grid;
-            }
-
-            if (!graph.nodeCount) {
-                graph.nodeCount = 0;
-                for (let _ in graph.nodesDict) graph.nodeCount++;
-            }
-
-            graph.nodesDict[grid.uid] = grid;
-        }
-        else if (props.parentGrids || props.uid) {
+        if (!props.graph && (props.parentGrids || props.uid)) {
             grid.graphUid = props.graphUid || "defaultGraphUID";
 
             grid.parentGrids = props.parentGrids;
@@ -107,6 +82,11 @@ export class GridInGraphClass extends GridClass {
 
             window._graphDict[grid.graphUid] = window._graphDict[grid.graphUid] || new GraphClass();
             const graph = window._graphDict[grid.graphUid];
+
+            while (graph.nodesDict[window._gridSeq]) {
+                window._gridSeq++;
+            }
+            grid.id = window._gridSeq++;
 
             grid.graph = graph;
             graph.uid = grid.graphUid;
@@ -121,6 +101,8 @@ export class GridInGraphClass extends GridClass {
                 grid.graph.needConnect = true;
             }
         }
+
+        grid.uid = props.uid || grid.id;
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     log(message, pref) {
@@ -251,7 +233,7 @@ export class GridInGraphClass extends GridClass {
 
         for (let id in grid.parentLinks) {
             let link = grid.parentLinks[id];
-            if (!link.content || link.parent.selectedRowIndex < 0) continue;
+            if (!link.content) continue;
 
             if (link.content.applyLink) {
                 let filter = link.content.applyLink(link.parent);

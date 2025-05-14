@@ -261,14 +261,23 @@
     margin: 10px;
 }
 
+.div-with-grid {
+    padding: 5px;
+}
+
 .grid-col-filter {
     height: 2em;
     margin: 2px;
 }
 
 .graph-tabcontrol-buttons {
-
+    margin: 0 1em;
 }
+
+    .graph-tabcontrol-buttons > button {
+        margin: 5px 2px;
+        height: 2.3em;
+    }
 
 .graph-filter-line {
     display: grid;
@@ -285,6 +294,15 @@
     grid-template-rows: auto auto;
     grid-auto-flow: row;
     align-items: center;
+    margin: 0.5em 1em;
+}
+
+.graph-grid {
+    margin: 0.5em 1em;
+}
+
+.graph-filter-button {
+    margin: 5px 2px;
 }
 
 .login-form {
@@ -297,5 +315,6 @@
 .login-form-item {
     margin: 5px;
 }
-    .login-form > input {
-    }
+
+.login-form > input {
+}

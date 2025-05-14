@@ -16,12 +16,12 @@ export function Modal(props) {
         props.init(wnd);
     }
 
-    if (!wnd.refreshState) {
+    //if (!wnd.refreshState) {
         wnd.refreshState = function (clear) {
             //log('refreshState ' + wnd.stateind);
             setState({ wnd: wnd, ind: wnd.stateind++ });
         }
-    }
+    //}
 
     useEffect(() => {
         wnd.setupEvents();

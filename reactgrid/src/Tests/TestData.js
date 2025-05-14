@@ -218,17 +218,17 @@ export default class TestData {
 
         graph.noCachWave = true;
 
-        const projectNode = { id: '0', entity: 'SrRProjectEntity', title: 'Проект', status: NodeStatus.filter, keyField: 'ID_SR_R_PROJECT_SRPJ', nameField: 'NAME_PROJ_SRPJ' };
-        const promptNode = { id: '1', entity: 'SrRPromptnessEntity', title: 'Срочность выполнения', status: NodeStatus.filter, keyField: 'ID_SR_R_PROMPTNESS_SRPR', nameField: 'NAME_SRPR' };
-        const statusNode = { id: '2', entity: 'SrRStatusEntity', title: 'Статус задания', status: NodeStatus.filter, keyField: 'ID_SR_R_STATUS_SRST', nameField: 'NAME_STATUS_SRST' };
-        const executorNode = { id: '3', entity: 'SrRExecutiveEntity', title: 'Исполнитель', status: NodeStatus.filter, keyField: 'ID_SR_R_EXECUTIVE_SREX', nameField: 'FIO_SREX' };
-        const authorNode = { id: '4', entity: 'SrRExecutiveEntity', title: 'Автор задания', status: NodeStatus.filter, keyField: 'ID_SR_R_EXECUTIVE_SREX', nameField: 'FIO_SREX' };
-        const datefromNode = { id: '5', title: 'Дата создания От', status: NodeStatus.filter, filterType: FilterType.date };
-        const datetoNode = { id: '6', title: 'Дата создания По', status: NodeStatus.filter, filterType: FilterType.date };
-        const remarkNode = { id: '7', parentGrids: '0,1,2,3,4,5,6', entity: 'SrRemarkEntity', title: 'Задания', status: NodeStatus.grid, keyField: 'ID_SR_REMARK_SRRM' };
+        const projectNode = { id: 0, entity: 'SrRProjectEntity', title: 'Проект', status: NodeStatus.filter, keyField: 'ID_SR_R_PROJECT_SRPJ', nameField: 'NAME_PROJ_SRPJ' };
+        const promptNode = { id: 1, entity: 'SrRPromptnessEntity', title: 'Срочность выполнения', status: NodeStatus.filter, keyField: 'ID_SR_R_PROMPTNESS_SRPR', nameField: 'NAME_SRPR' };
+        const statusNode = { id: 2, entity: 'SrRStatusEntity', title: 'Статус задания', status: NodeStatus.filter, keyField: 'ID_SR_R_STATUS_SRST', nameField: 'NAME_STATUS_SRST' };
+        const executorNode = { id: 3, entity: 'SrRExecutiveEntity', title: 'Исполнитель', status: NodeStatus.filter, keyField: 'ID_SR_R_EXECUTIVE_SREX', nameField: 'FIO_SREX' };
+        const authorNode = { id: 4, entity: 'SrRExecutiveEntity', title: 'Автор задания', status: NodeStatus.filter, keyField: 'ID_SR_R_EXECUTIVE_SREX', nameField: 'FIO_SREX' };
+        const datefromNode = { id: 5, title: 'Дата создания От', status: NodeStatus.filter, filterType: FilterType.date };
+        const datetoNode = { id: 6, title: 'Дата создания По', status: NodeStatus.filter, filterType: FilterType.date };
+        const remarkNode = { id: 7, parentGrids: '0,1,2,3,4,5,6', entity: 'SrRemarkEntity', title: 'Задания', status: NodeStatus.grid, keyField: 'ID_SR_REMARK_SRRM' };
         //const favoriteNode = { id: '8', entity: 'SrRemarkEntity', title: 'Избранное', status: NodeStatus.grid, keyField: 'ID_SR_REMARK_SRRM' };
-        const detailsNode = { id: '9', parentGrids: '7', entity: 'SrDetailRemarkEntity', title: 'Детализация задания', status: NodeStatus.grid, keyField: 'ID_SR_DETAIL_REMARK_SRDR', isBottom: true };
-        const addNode = { id: '10', parentGrids: '7', entity: 'DdObjectEntity', title: 'Дополнительные данные', status: NodeStatus.grid, keyField: 'ID_DD_OBJECT_DDOB', isBottom: true };
+        const detailsNode = { id: 9, parentGrids: '7', entity: 'SrDetailRemarkEntity', title: 'Детализация задания', status: NodeStatus.grid, keyField: 'ID_SR_DETAIL_REMARK_SRDR', isBottom: true };
+        const addNode = { id: 10, parentGrids: '7', entity: 'DdObjectEntity', title: 'Дополнительные данные', status: NodeStatus.grid, keyField: 'ID_DD_OBJECT_DDOB', isBottom: true };
 
         graph.nodesDict[projectNode.id] = projectNode;
         graph.nodesDict[promptNode.id] = promptNode;
@@ -243,7 +243,254 @@ export default class TestData {
         graph.nodesDict[addNode.id] = addNode;
 
         //graph.nodeCount = 10;
+        remarkNode.getColumns = function () {
+            return [
+                {
+                    name: 'ID_SR_REMARK_SRRM',
+                    title: 'ID задания',
+                    sortable: true,
+                    filtrable: true
+                },
+                {
+                    name: 'NUMBER_PP_SRRM',
+                    title: '№ п/п',
+                    sortable: true,
+                    filtrable: true
+                },
+                {
+                    name: 'DATE_CREATE_SRRM',
+                    title: 'Дата создания',
+                    sortable: true,
+                    filtrable: true
+                },
+                {
+                    name: 'REMARK_SRRM',
+                    title: 'Текст задания',
+                    sortable: true,
+                    filtrable: true
+                },
+                {
+                    name: 'COMMENT_EXECUT_SRRM',
+                    title: 'Комментарий исполнителя',
+                    sortable: true,
+                    filtrable: true
+                },
+                {
+                    name: 'DATE_COMPLETE_SRRM',
+                    title: 'Плановый срок выполнения',
+                    sortable: true,
+                    filtrable: true
+                },
+                {
+                    name: 'NAME_DB_SRRM',
+                    title: 'База данных',
+                    sortable: true,
+                    filtrable: true
+                },
+                {
+                    name: 'PROGRAM_SRRM',
+                    title: 'Программа',
+                    sortable: true,
+                    filtrable: true
+                },
+                {
+                    name: 'PLACE_ERROR_SRRM',
+                    title: 'Место возникновения ошибки',
+                    sortable: true,
+                    filtrable: true
+                },
+                {
+                    name: 'LINK_SRRM',
+                    title: 'Ссылка на документ или скриншот',
+                    sortable: true,
+                    filtrable: true
+                },
+                {
+                    name: 'PARENT_REMARK_SRRM_NAME',
+                    title: 'Замечание-родитель',
+                    sortable: true,
+                    filtrable: true
+                },
+                {
+                    name: 'DATE_EXECUTE_SRRM',
+                    title: 'Дата выполнения',
+                    sortable: true,
+                    filtrable: true
+                },
+                {
+                    name: 'DATE_CHECKED_SRRM',
+                    title: 'Дата приемки',
+                    sortable: true,
+                    filtrable: true
+                },
+                {
+                    name: 'IsFavorite',
+                    title: 'В избранном',
+                    sortable: true,
+                    filtrable: true
+                },
+                {
+                    name: 'VVOD_ID_CONTRACTOR_SRRM',
+                    title: 'Автор ввода',
+                    sortable: true,
+                    filtrable: true
+                },
+                {
+                    name: 'CHANGE_ID_CONTRACTOR_SRRM',
+                    title: 'Автор изменения',
+                    sortable: true,
+                    filtrable: true
+                },
+                {
+                    name: 'DATE_INPUT_SRRM',
+                    title: 'Дата ввода',
+                    sortable: true,
+                    filtrable: true
+                },
+                {
+                    name: 'DATE_CHANGE_SRRM',
+                    title: 'Дата изменения',
+                    sortable: true,
+                    filtrable: true
+                },
+                {
+                    name: 'FROM_WHOM_SRRM_NAME',
+                    title: 'Автор задания',
+                    sortable: true,
+                    filtrable: true
+                },
+                {
+                    name: 'WHOM_SRRM_NAME',
+                    title: 'Исполнитель задания',
+                    sortable: true,
+                    filtrable: true
+                },
+                {
+                    name: 'SR_R_PROJECT_SRRM_NAME',
+                    title: 'Проект',
+                    sortable: true,
+                    filtrable: true
+                },
+                {
+                    name: 'SR_R_PROMPTNESS_SRRM_NAME',
+                    title: 'Срочность',
+                    sortable: true,
+                    filtrable: true
+                },
+                {
+                    name: 'SR_R_STATUS_SRRM_NAME',
+                    title: 'Статус',
+                    sortable: true,
+                    filtrable: true
+                },
+            ];
+        }
 
+        detailsNode.getColumns = function () {
+            return [
+                {
+                    name: 'ID_SR_DETAIL_REMARK_SRDR',
+                    title: 'ID',
+                    sortable: true,
+                    filtrable: true
+                },
+                {
+                    name: 'NUMBER_PP_SRDR',
+                    title: '№ п/п',
+                    sortable: true,
+                    filtrable: true
+                },
+                {
+                    name: 'DESCRIPTION_ACTION_SRDR',
+                    title: 'Описание последовательности действий',
+                    sortable: true,
+                    filtrable: true
+                },
+                {
+                    name: 'LINK_SRDR',
+                    title: 'Ссылка на документ или скриншот',
+                    sortable: true,
+                    filtrable: true
+                },
+                {
+                    name: 'VVOD_ID_CONTRACTOR_SRDR',
+                    title: 'Автор ввода',
+                    sortable: true,
+                    filtrable: true
+                },
+                {
+                    name: 'CHANGE_ID_CONTRACTOR_SRDR',
+                    title: 'Автор изменения',
+                    sortable: true,
+                    filtrable: true
+                },
+                {
+                    name: 'DATE_INPUT_SRDR',
+                    title: 'Дата ввода',
+                    sortable: true,
+                    filtrable: true
+                },
+                {
+                    name: 'DATE_CHANGE_SRDR',
+                    title: 'Дата изменения',
+                    sortable: true,
+                    filtrable: true
+                },
+            ];
+        }
+
+        addNode.getColumns = function () {
+            return [
+                {
+                    name: 'NUMBER_PP_DDOB',
+                    title: '№ п/п',
+                    sortable: true,
+                    filtrable: true
+                },
+                {
+                    name: 'TYPE_DATA_DDOB',
+                    title: 'Тип данных',
+                    sortable: true,
+                    filtrable: true
+                },
+                {
+                    name: 'COMMENT_DDOB',
+                    title: 'Комментарий',
+                    sortable: true,
+                    filtrable: true
+                },
+                {
+                    name: 'NUM_CLASS_DDOB_NAME',
+                    title: 'Имя класса',
+                    sortable: true,
+                    filtrable: true
+                },
+                {
+                    name: 'VVOD_ID_CONTRACTOR_DDOB',
+                    title: 'Автор ввода',
+                    sortable: true,
+                    filtrable: true
+                },
+                {
+                    name: 'CHANGE_ID_CONTRACTOR_DDOB',
+                    title: 'Автор изменения',
+                    sortable: true,
+                    filtrable: true
+                },
+                {
+                    name: 'DATE_INPUT_DDOB',
+                    title: 'Дата ввода',
+                    sortable: true,
+                    filtrable: true
+                },
+                {
+                    name: 'DATE_CHANGE_DDOB',
+                    title: 'Дата изменения',
+                    sortable: true,
+                    filtrable: true
+                },
+            ];
+        }
         function connect(child, parent) {
             const link = { parent: parent, child: child };
 

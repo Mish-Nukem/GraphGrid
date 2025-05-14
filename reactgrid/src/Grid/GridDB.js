@@ -13,7 +13,10 @@ export function GridDB(props) {
     grid = gridState.grid;
     let needGetRows = false;
     if (!grid) {
-        grid = new GridDBClass(props);
+        if (props.findGrid) {
+            grid = props.findGrid(props);
+        }
+        grid = grid || new GridDBClass(props);
         needGetRows = !props.noAutoRefresh && !props.parentGrids;
     }
 
@@ -21,12 +24,12 @@ export function GridDB(props) {
         props.init(grid);
     }
 
-    if (!grid.refreshState) {
+    //if (!grid.refreshState) {
         grid.refreshState = function () {
             grid.log(' -------------- refreshState ' + grid.stateind + ' --------------- ');
             setState({ grid: grid, ind: grid.stateind++ });
         }
-    }
+    //}
 
     useEffect(() => {
         grid.setupEvents();
