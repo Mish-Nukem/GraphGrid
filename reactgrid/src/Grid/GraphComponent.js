@@ -20,12 +20,10 @@ export function Graph(props) {
         props.init(gc);
     }
 
-    //if (!gc.refreshState) {
-        gc.refreshState = function (clear) {
-            //log('refreshState ' + graph.stateind);
-            setState({ graphComponent: gc, ind: gc.stateind++ });
-        }
-    //}
+    gc.refreshState = function () {
+        //log('refreshState ' + graph.stateind);
+        setState({ graphComponent: gc, ind: gc.stateind++ });
+    }
 
     useEffect(() => {
         //gc.setupEvents();
@@ -68,9 +66,6 @@ export class GraphComponentClass extends BaseComponent {
             gc.schemeName = props.schemeName
         };
 
-        //gc.activeMaster = 0;
-        //gc.activeDetail = 0;
-
         gc.visible = true;
 
         gc.opt = {};
@@ -98,39 +93,110 @@ export class GraphComponentClass extends BaseComponent {
         }
 
         return (
-            <div>
-                <div className="graph-filter-line">
-                    {
-                        nodes.map((node) => { return gc.renderFilter(node, true) })
-                    }
+            <>
+                <div>
+                    <div className="graph-filter-line">
+                        {
+                            nodes.map((node) => { return gc.renderFilter(node, true) })
+                        }
+                    </div>
+                    <div className="graph-tabcontrol-buttons">
+                        {
+                            nodes.map((node) => { return gc.renderGridTab(node, true) })
+                        }
+                    </div>
+                    <div className="graph-grid">
+                        {
+                            nodes.map((node) => { return gc.renderGrid(node, true) })
+                        }
+                    </div>
+                    <div className="graph-filter-line">
+                        {
+                            nodes.map((node) => { return gc.renderFilter(node, false) })
+                        }
+                    </div>
+                    <div className="graph-tabcontrol-buttons">
+                        {
+                            nodes.map((node) => { return gc.renderGridTab(node, false) })
+                        }
+                    </div>
+                    <div className="graph-grid">
+                        {
+                            nodes.map((node, ind) => { return gc.renderGrid(node, false) })
+                        }
+                    </div>
                 </div>
-                <div className="graph-tabcontrol-buttons">
-                    {
-                        nodes.map((node) => { return gc.renderGridTab(node, true) })
-                    }
-                </div>
-                <div className="graph-grid">
-                    {
-                        nodes.map((node) => { return gc.renderGrid(node, true) })
-                    }
-                </div>
-                <div className="graph-filter-line">
-                    {
-                        nodes.map((node) => { return gc.renderFilter(node, false) })
-                    }
-                </div>
-                <div className="graph-tabcontrol-buttons">
-                    {
-                        nodes.map((node) => { return gc.renderGridTab(node, false) })
-                    }
-                </div>
-                <div className="graph-grid">
-                    {
-                        nodes.map((node, ind) => { return gc.renderGrid(node, false) })
-                    }
-                </div>
-            </div>
+                {
+                    gc.lookupIsShowing ?
+                        <Modal
+                            renderContent={() => { return gc.renderLookupGrid() }}
+                            pos={gc.lookupPos}
+                            onClose={(e) => gc.closeLookup(e)}
+                            init={(wnd) => { wnd.visible = gc.lookupIsShowing; }}
+                        >
+                        </Modal>
+                        :
+                        <></>
+                }
+            </>
         )
+    }
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
+    renderLookupGrid() {
+        const gc = this;
+        return (
+            <GridINU
+                findGrid={(props) => gc.findGrid(props)}
+                graph={gc.graph}
+                uid={gc.lookupNode.uid || gc.lookupNode.id}
+                entity={gc.lookupNode.entity}
+                dataGetter={gc.dataGetter || gc.lookupNode.dataGetter}
+                init={(grid) => { grid.status = NodeStatus.filter; grid.visible = true; grid.title = gc.lookupNode.title; }}
+                buttons={gc.getLookupButtons()}
+            >
+            </GridINU>
+        );
+    }
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
+    openLookup(e, node) {
+        const gc = this;
+        gc.lookupPos = gc.lookupPos || { x: 100, y: 100, w: 800, h: 600 };
+
+        gc.lookupNode = node;
+        gc.lookupIsShowing = true;
+        gc.refreshState();
+    }
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
+    closeLookup(e) {
+        const gc = this;
+        gc.lookupIsShowing = false;
+        gc.lookupNode = null;
+        gc.refreshState();
+    }
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
+    clearLookup(e, node) {
+        const gc = this;
+        delete node.value;
+        gc.graph.triggerWave({ nodes: [node], withStartNodes: false });
+        gc.refreshState();
+    }
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
+    getLookupButtons() {
+        const gc = this;
+        return [
+            {
+                id: 0,
+                name: 'selectValue',
+                title: 'Select',
+                label: 'Select value',
+                click: function (e) {
+                    gc.lookupNode.value = gc.lookupNode.selectedValue();
+                    gc.graph.triggerWave({ nodes: [gc.lookupNode], withStartNodes: false });
+                    gc.closeLookup();
+                    //console.clear();
+                },
+            }
+        ];
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     renderFilter(node, top) {
@@ -151,7 +217,7 @@ export class GraphComponentClass extends BaseComponent {
                     {node.title}
                 </span>
                 {
-                    node.filterType !== FilterType.date ?
+                    node.filterType !== FilterType.date && false ?
                         <select
                             key={`fltrcmb_${node.id}_${gc.id}_${gc.stateind}_`}
                             style={{ width: 'calc(100% - 4px)', padding: '0 2px', boxSizing: 'border-box', height: '2.3em' }}
@@ -160,12 +226,13 @@ export class GraphComponentClass extends BaseComponent {
                         <input
                             key={`fltrinp_${node.id}_${gc.id}_${gc.stateind}_`}
                             style={{ width: 'calc(100% - 4px)', padding: '0 2px', boxSizing: 'border-box', height: '2.3em' }}
-                            value={node.value || ''}
+                            value={node.value !== undefined && node.selectedText ? node.selectedText() : ''}
                         ></input>
                 }
                 <button
                     className={node.opt.filterButtonClass || 'graph-filter-button'}
                     key={`fltrsel_${node.id}_${gc.id}_${gc.stateind}_`}
+                    onClick={(e) => gc.openLookup(e, node)}
                 >
                     {node.filterSelectDictImg ? node.filterSelectDictImg() : node.translate('Select', 'graph-filter-select')}
                 </button>
@@ -173,6 +240,7 @@ export class GraphComponentClass extends BaseComponent {
                     key={`fltrclr_${node.id}_${gc.id}_${gc.stateind}_`}
                     className={node.opt.filterButtonClass || 'graph-filter-button'}
                     disabled={node.value === undefined || node.value === '' ? 'disabled' : ''}
+                    onClick={(e) => gc.clearLookup(e, node)}
                 >
                     {node.filterClearImg ? node.filterClearImg() : node.translate('Clear', 'graph-filter-clear')}
                 </button>
@@ -209,7 +277,7 @@ export class GraphComponentClass extends BaseComponent {
         //node.visible = true;
         return (
             <GridINU
-                findGrid={gc.findGrid}
+                findGrid={(props) => gc.findGrid(props)}
                 graph={gc.graph}
                 uid={node.uid !== undefined ? node.uid : node.id}
                 entity={node.entity}
@@ -223,6 +291,7 @@ export class GraphComponentClass extends BaseComponent {
     findGrid(props) {
         if (!props.graph) return null;
 
+        const gc = this;
         const graph = props.graph;
         let grid = graph.nodesDict[props.uid];
 
@@ -238,7 +307,12 @@ export class GraphComponentClass extends BaseComponent {
         //graph.waveCache = {};
 
         const obr = graph.nodesDict[grid.uid];// || graph.nodesDict[grid.entity];
-        grid.id = obr.id || grid.id;
+        grid.id = obr.id !== undefined ? obr.id : grid.id;
+
+        grid.title = obr.title;
+        grid.nameField = obr.nameField;
+        grid.keyField = obr.keyField;
+        grid.entityAdd = obr.entityAdd;
 
         grid.getColumns = obr.getColumns || grid.getColumns;
 
@@ -258,6 +332,12 @@ export class GraphComponentClass extends BaseComponent {
         if (!graph.nodeCount) {
             graph.nodeCount = 0;
             for (let _ in graph.nodesDict) graph.nodeCount++;
+        }
+
+        if (gc.lookupNode) {
+            if (String(grid.id) === String(gc.lookupNode.id)) {
+                gc.lookupNode = grid;
+            }
         }
 
         graph.nodesDict[grid.uid] = grid;
@@ -308,6 +388,11 @@ export class GraphComponentClass extends BaseComponent {
         return node.isBottom === undefined || node.isBottom === false;
     };
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
+    checkNeedTriggerWave(node) {
+        const gc = this;
+        return node !== gc.lookupNode;//node == null || gc.lookupNode == null || String(node.id) !== String(gc.lookupNode.id);//  node !== gc.lookupNode;
+    }
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     prepareGraph(obrGraph) {
         const gc = this;
 
@@ -317,6 +402,7 @@ export class GraphComponentClass extends BaseComponent {
 
         //    gc.graph.nodesDict = obrGraph.nodesDict || gc.graph.nodesDict;
         //    gc.graph.linksDict = obrGraph.linksDict || gc.graph.linksDict;
+        gc.graph.checkNeedTriggerWave = (node) => { return gc.checkNeedTriggerWave(node) };
 
         for (let uid in gc.graph.nodesDict) {
             let node = gc.graph.nodesDict[uid];

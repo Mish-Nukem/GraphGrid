@@ -24,12 +24,10 @@ export function GridDB(props) {
         props.init(grid);
     }
 
-    //if (!grid.refreshState) {
-        grid.refreshState = function () {
-            grid.log(' -------------- refreshState ' + grid.stateind + ' --------------- ');
-            setState({ grid: grid, ind: grid.stateind++ });
-        }
-    //}
+    grid.refreshState = function () {
+        grid.log(' -------------- refreshState ' + grid.stateind + ' --------------- ');
+        setState({ grid: grid, ind: grid.stateind++ });
+    }
 
     useEffect(() => {
         grid.setupEvents();
@@ -136,7 +134,7 @@ export class GridDBClass extends GridInGraphClass {
                                     onClick={button.click ? (e) => {
                                         e.grid = grid;
                                         button.click(e);
-                                    } : null}
+                                    } : grid.onButtonClick ? (e) => { grid.onButtonClick(e) } : null}
                                 >
                                     {button.img ? button.img() : ''}
                                     {button.label ? grid.translate(button.label, 'grid-toolbar-button') : ''}

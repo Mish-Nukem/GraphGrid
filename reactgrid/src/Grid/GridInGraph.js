@@ -98,11 +98,11 @@ export class GridInGraphClass extends GridClass {
             grid.childLinks = {};
 
             if (props.parentGrids) {
-                grid.graph.needConnect = true;
+                grid.graph.needCheckIntegrity = true;
             }
         }
 
-        grid.uid = props.uid || grid.id;
+        grid.uid = props.uid !== undefined ? props.uid : grid.id;
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     log(message, pref) {
@@ -158,12 +158,13 @@ export class GridInGraphClass extends GridClass {
                     return parentGrid.getConnectContent({ child: grid });
                 }
 
-                const keyField = parentGrid.getKeyColumn();
-                if (!keyField) return '';
+                return parentGrid.selectedValue();
+            //    const keyField = parentGrid.getKeyColumn();
+            //    if (!keyField) return '';
 
-                const activeRow = parentGrid.rows[parentGrid.selectedRowIndex];
+            //    const activeRow = parentGrid.rows[parentGrid.selectedRowIndex];
 
-                return activeRow[keyField];
+            //    return activeRow[keyField];
             }
         };
     }
@@ -173,45 +174,31 @@ export class GridInGraphClass extends GridClass {
         return grid.entity || 'grid_' + (grid.uid || grid.id);
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
-    getKeyColumn() {
-        const grid = this;
-        if (grid.keyField) return grid.keyField;
-
-        if (!grid.columns || grid.columns.length <= 0) return '';
-
-        for (let col of grid.columns) {
-            if (col.name.toLowerCase() === 'id') {
-                grid.keyField = col.name;
-                break;
-            }
-        }
-
-        grid.keyField = grid.keyField || grid.columns[0].name;
-        return grid.keyField;
-    }
-    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     onSelectedRowChanged(e) {
         super.onSelectedRowChanged(e);
 
         const grid = this;
-        if (grid.graph) {
+        const graph = grid.graph;
+        if (graph) {
 
             if (!grid.connectedToParents) {
                 grid.connectToParents();
             }
 
-            if (grid.graph.needConnect) {
+            if (graph.needCheckIntegrity) {
                 grid.checkGraphIntegrity();
             }
 
-            grid.graph.triggerWave({ nodes: [grid], withStartNodes: false });
+            if (graph.checkNeedTriggerWave && !graph.checkNeedTriggerWave(grid)) return;
+
+            graph.triggerWave({ nodes: [grid], withStartNodes: false });
         }
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     checkGraphIntegrity() {
         const grid = this;
         const graph = grid.graph;
-        graph.needConnect = false;
+        graph.needCheckIntegrity = false;
 
         for (let id in graph.nodesDict) {
             if (id === grid.id) continue;

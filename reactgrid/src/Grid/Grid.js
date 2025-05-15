@@ -484,6 +484,37 @@ export class GridClass extends BaseComponent {
         grid.onSelectedRowChanged({ grid: grid, prev: prevSelectedIndex, new: grid.selectedRowIndex });
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
+    getKeyColumn() {
+        const grid = this;
+        if (grid.keyField) return grid.keyField;
+
+        if (!grid.columns || grid.columns.length <= 0) return '';
+
+        for (let col of grid.columns) {
+            if (col.name.toLowerCase() === 'id') {
+                grid.keyField = col.name;
+                break;
+            }
+        }
+
+        grid.keyField = grid.keyField || grid.columns[0].name;
+        return grid.keyField;
+    }
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
+    selectedValue() {
+        const grid = this;
+        if (grid.selectedRowIndex === undefined || !grid.rows || grid.rows.length <= 0 || grid.selectedRowIndex < 0|| grid.selectedRowIndex >= grid.rows.length) return '';
+
+        return grid.rows[grid.selectedRowIndex][grid.getKeyColumn()];
+    }
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
+    selectedText() {
+        const grid = this;
+        if (grid.selectedRowIndex === undefined || !grid.rows || grid.rows.length <= 0 || grid.selectedRowIndex < 0 || grid.selectedRowIndex >= grid.rows.length || !grid.nameField) return '';
+
+        return grid.rows[grid.selectedRowIndex][grid.nameField];
+    }
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     mouseResizerDoubleClick(e, column) {
         const grid = this;
 

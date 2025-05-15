@@ -238,9 +238,6 @@ function App() {
             case 9:
                 return (
                     <>
-                        <div className="div-on-menu">
-                            {drawClearConsole()}
-                        </div>
                         <div className="div-with-grid">
                             <Graph uid="PM" graph={new TestData().getTestGraph()} dataGetter={dataGetter}></Graph>
                         </div>

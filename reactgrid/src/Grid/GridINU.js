@@ -80,8 +80,6 @@ export class GridINUClass extends GridFLClass {
 	}
 	// -------------------------------------------------------------------------------------------------------------------------------------------------------------
 	render() {
-		//const grid = this;
-
 		return (
 			<>
 				{super.render()}
@@ -106,10 +104,10 @@ export class GridINUClass extends GridFLClass {
 				const keyField = parentNode.getKeyColumn ? parentNode.getKeyColumn() : parentNode.keyField;
 				if (!keyField) return '';
 
-				const activeRow = parentNode.status === NodeStatus.grid ? parentNode.rows[parentNode.selectedRowIndex] : parentNode.value;
-				if (!activeRow) return '';
+				const activeValue = parentNode.status === NodeStatus.grid ? parentNode.selectedValue() : parentNode.value;
+				if (!activeValue) return '';
 
-				return activeRow ? parentNode.entity + (parentNode.entityAdd || '') + ' = ' + activeRow[keyField] : '1=2';
+				return activeValue ? parentNode.entity + (parentNode.entityAdd || '') + ' = ' + activeValue : '1=2';
 			}
 		};
 	}

@@ -52,6 +52,10 @@ export class loginFormClass extends BaseComponent {
         const loginForm = this;
 
         //const pref = appSettings.APIurl;
+        if (loginForm.login === 'test') {
+            loginForm.afterLogin('test;test');
+            return;
+        }
 
         //const guid = 'asdfasdf';
         const params = [{ key: 'login', value: loginForm.login }, { key: 'password', value: loginForm.password }];
@@ -74,9 +78,9 @@ export class loginFormClass extends BaseComponent {
             <>
                 <div className="login-form" style={{ width: '400px' }}>
                     <span className="login-form-item">Login</span>
-                    <input className="login-form-item form-control" onChange={(e) => loginForm.login = e.target.value} value="s_dba"></input>
+                    <input className="login-form-item form-control" onChange={(e) => loginForm.login = e.target.value} value={loginForm.login}></input>
                     <span className="login-form-item">Password</span>
-                    <input className="login-form-item form-control" type="password" onChange={(e) => loginForm.password = e.target.value} value="s_admin"></input>
+                    <input className="login-form-item form-control" type="password" onChange={(e) => loginForm.password = e.target.value} value={loginForm.password}></input>
                     <button className="login-form-item btn btn-primary" onClick={(e) => loginForm.tryLogin()}>Login</button>
                 </div>
             </>

@@ -221,7 +221,7 @@ export default class TestData {
         const projectNode = { id: 0, entity: 'SrRProjectEntity', title: 'Проект', status: NodeStatus.filter, keyField: 'ID_SR_R_PROJECT_SRPJ', nameField: 'NAME_PROJ_SRPJ' };
         const promptNode = { id: 1, entity: 'SrRPromptnessEntity', title: 'Срочность выполнения', status: NodeStatus.filter, keyField: 'ID_SR_R_PROMPTNESS_SRPR', nameField: 'NAME_SRPR' };
         const statusNode = { id: 2, entity: 'SrRStatusEntity', title: 'Статус задания', status: NodeStatus.filter, keyField: 'ID_SR_R_STATUS_SRST', nameField: 'NAME_STATUS_SRST' };
-        const executorNode = { id: 3, entity: 'SrRExecutiveEntity', title: 'Исполнитель', status: NodeStatus.filter, keyField: 'ID_SR_R_EXECUTIVE_SREX', nameField: 'FIO_SREX' };
+        const executorNode = { id: 3, entity: 'SrRExecutiveEntity', entityAdd: '2', title: 'Исполнитель', status: NodeStatus.filter, keyField: 'ID_SR_R_EXECUTIVE_SREX', nameField: 'FIO_SREX' };
         const authorNode = { id: 4, entity: 'SrRExecutiveEntity', title: 'Автор задания', status: NodeStatus.filter, keyField: 'ID_SR_R_EXECUTIVE_SREX', nameField: 'FIO_SREX' };
         const datefromNode = { id: 5, title: 'Дата создания От', status: NodeStatus.filter, filterType: FilterType.date };
         const datetoNode = { id: 6, title: 'Дата создания По', status: NodeStatus.filter, filterType: FilterType.date };
@@ -266,6 +266,36 @@ export default class TestData {
                 {
                     name: 'REMARK_SRRM',
                     title: 'Текст задания',
+                    sortable: true,
+                    filtrable: true
+                },
+                {
+                    name: 'FROM_WHOM_SRRM_NAME',
+                    title: 'Автор задания',
+                    sortable: true,
+                    filtrable: true
+                },
+                {
+                    name: 'WHOM_SRRM_NAME',
+                    title: 'Исполнитель задания',
+                    sortable: true,
+                    filtrable: true
+                },
+                {
+                    name: 'SR_R_PROJECT_SRRM_NAME',
+                    title: 'Проект',
+                    sortable: true,
+                    filtrable: true
+                },
+                {
+                    name: 'SR_R_PROMPTNESS_SRRM_NAME',
+                    title: 'Срочность',
+                    sortable: true,
+                    filtrable: true
+                },
+                {
+                    name: 'SR_R_STATUS_SRRM_NAME',
+                    title: 'Статус',
                     sortable: true,
                     filtrable: true
                 },
@@ -350,36 +380,6 @@ export default class TestData {
                 {
                     name: 'DATE_CHANGE_SRRM',
                     title: 'Дата изменения',
-                    sortable: true,
-                    filtrable: true
-                },
-                {
-                    name: 'FROM_WHOM_SRRM_NAME',
-                    title: 'Автор задания',
-                    sortable: true,
-                    filtrable: true
-                },
-                {
-                    name: 'WHOM_SRRM_NAME',
-                    title: 'Исполнитель задания',
-                    sortable: true,
-                    filtrable: true
-                },
-                {
-                    name: 'SR_R_PROJECT_SRRM_NAME',
-                    title: 'Проект',
-                    sortable: true,
-                    filtrable: true
-                },
-                {
-                    name: 'SR_R_PROMPTNESS_SRRM_NAME',
-                    title: 'Срочность',
-                    sortable: true,
-                    filtrable: true
-                },
-                {
-                    name: 'SR_R_STATUS_SRRM_NAME',
-                    title: 'Статус',
                     sortable: true,
                     filtrable: true
                 },
@@ -491,6 +491,244 @@ export default class TestData {
                 },
             ];
         }
+        projectNode.getColumns = function () {
+            return [
+                {
+                    name: 'NAME_PROJ_SRPJ',
+                    title: 'Наименование проекта',
+                    sortable: true,
+                    filtrable: true
+                },
+                {
+                    name: 'DESCRIPTION_SRPJ',
+                    title: 'Описание проекта',
+                    sortable: true,
+                    filtrable: true
+                },
+                {
+                    name: 'VVOD_ID_CONTRACTOR_SRPJ',
+                    title: 'Автор ввода',
+                    sortable: true,
+                    filtrable: true
+                },
+                {
+                    name: 'CHANGE_ID_CONTRACTOR_SRPJ',
+                    title: 'Автор изменения',
+                    sortable: true,
+                    filtrable: true
+                },
+                {
+                    name: 'DATE_INPUT_SRPJ',
+                    title: 'Дата ввода',
+                    sortable: true,
+                    filtrable: true
+                },
+                {
+                    name: 'DATE_CHANGE_SRPJ',
+                    title: 'Дата изменения',
+                    sortable: true,
+                    filtrable: true
+                },
+            ];
+        }
+
+        promptNode.getColumns = function () {
+            return [
+                {
+                    name: 'NUMBER_PP_SRPR',
+                    title: '№ п/п',
+                    sortable: true,
+                    filtrable: true
+                },
+                {
+                    name: 'NAME_SRPR',
+                    title: 'Наименование',
+                    sortable: true,
+                    filtrable: true
+                },
+                {
+                    name: 'DESCRIPTION_SRPR',
+                    title: 'Описание',
+                    sortable: true,
+                    filtrable: true
+                },
+                {
+                    name: 'VVOD_ID_CONTRACTOR_SRPR',
+                    title: 'Автор ввода',
+                    sortable: true,
+                    filtrable: true
+                },
+                {
+                    name: 'CHANGE_ID_CONTRACTOR_SRPR',
+                    title: 'Автор изменения',
+                    sortable: true,
+                    filtrable: true
+                },
+                {
+                    name: 'DATE_INPUT_SRPR',
+                    title: 'Дата ввода',
+                    sortable: true,
+                    filtrable: true
+                },
+                {
+                    name: 'DATE_CHANGE_SRPR',
+                    title: 'Дата изменения',
+                    sortable: true,
+                    filtrable: true
+                },
+            ];
+        }
+        statusNode.getColumns = function () {
+            return [
+                {
+                    name: 'NUMBER_PP_SRST',
+                    title: '№ п/п',
+                    sortable: true,
+                    filtrable: true
+                },
+                {
+                    name: 'NAME_STATUS_SRST',
+                    title: 'Наименование статуса',
+                    sortable: true,
+                    filtrable: true
+                },
+                {
+                    name: 'COMMENT_SRST',
+                    title: 'Примечание',
+                    sortable: true,
+                    filtrable: true
+                },
+                {
+                    name: 'VVOD_ID_CONTRACTOR_SRST',
+                    title: 'Автор ввода',
+                    sortable: true,
+                    filtrable: true
+                },
+                {
+                    name: 'CHANGE_ID_CONTRACTOR_SRST',
+                    title: 'Автор изменения',
+                    sortable: true,
+                    filtrable: true
+                },
+                {
+                    name: 'DATE_INPUT_SRST',
+                    title: 'Дата ввода',
+                    sortable: true,
+                    filtrable: true
+                },
+                {
+                    name: 'DATE_CHANGE_SRST',
+                    title: 'Дата изменения',
+                    sortable: true,
+                    filtrable: true
+                },
+            ];
+        }
+        executorNode.getColumns = function () {
+            return [
+                {
+                    name: 'NUMBER_PP_SREX',
+                    title: '№ п/п',
+                    sortable: true,
+                    filtrable: true
+                },
+                {
+                    name: 'FIO_SREX',
+                    title: 'ФИО',
+                    sortable: true,
+                    filtrable: true
+                },
+                {
+                    name: 'LOGIN_SREX',
+                    title: 'Логин',
+                    sortable: true,
+                    filtrable: true
+                },
+                {
+                    name: 'LOGIN_IN_CHAT_SREX',
+                    title: 'Логин в рабочем чате',
+                    sortable: true,
+                    filtrable: true
+                },
+                {
+                    name: 'VVOD_ID_CONTRACTOR_SREX',
+                    title: 'Автор ввода',
+                    sortable: true,
+                    filtrable: true
+                },
+                {
+                    name: 'CHANGE_ID_CONTRACTOR_SREX',
+                    title: 'Автор изменения',
+                    sortable: true,
+                    filtrable: true
+                },
+                {
+                    name: 'DATE_INPUT_SREX',
+                    title: 'Дата ввода',
+                    sortable: true,
+                    filtrable: true
+                },
+                {
+                    name: 'DATE_CHANGE_SREX',
+                    title: 'Дата изменения',
+                    sortable: true,
+                    filtrable: true
+                },
+            ];
+        }
+        authorNode.getColumns = function () {
+            return [
+                {
+                    name: 'NUMBER_PP_SREX',
+                    title: '№ п/п',
+                    sortable: true,
+                    filtrable: true
+                },
+                {
+                    name: 'FIO_SREX',
+                    title: 'ФИО',
+                    sortable: true,
+                    filtrable: true
+                },
+                {
+                    name: 'LOGIN_SREX',
+                    title: 'Логин',
+                    sortable: true,
+                    filtrable: true
+                },
+                {
+                    name: 'LOGIN_IN_CHAT_SREX',
+                    title: 'Логин в рабочем чате',
+                    sortable: true,
+                    filtrable: true
+                },
+                {
+                    name: 'VVOD_ID_CONTRACTOR_SREX',
+                    title: 'Автор ввода',
+                    sortable: true,
+                    filtrable: true
+                },
+                {
+                    name: 'CHANGE_ID_CONTRACTOR_SREX',
+                    title: 'Автор изменения',
+                    sortable: true,
+                    filtrable: true
+                },
+                {
+                    name: 'DATE_INPUT_SREX',
+                    title: 'Дата ввода',
+                    sortable: true,
+                    filtrable: true
+                },
+                {
+                    name: 'DATE_CHANGE_SREX',
+                    title: 'Дата изменения',
+                    sortable: true,
+                    filtrable: true
+                },
+            ];
+        }
+
         function connect(child, parent) {
             const link = { parent: parent, child: child };
 
