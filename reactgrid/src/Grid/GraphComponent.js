@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { BaseComponent, NodeStatus, FilterType, log } from './Base';
 import { GraphClass, WaveType } from './Graph.js';
 import { GridINU, GridINUClass } from './GridINU';
+import { CardINU, CardINUClass } from './CardINU';
 import { GridClass } from './Grid.js';
 import { Modal } from './Modal';
 import AsyncSelect from 'react-select/async';
@@ -89,7 +90,10 @@ export class GraphComponentClass extends BaseComponent {
 
         const nodes = [];
         for (let uid in gc.graph.nodesDict) {
-            nodes.push(gc.graph.nodesDict[uid]);
+            let node = gc.graph.nodesDict[uid];
+            nodes.push(node);
+
+            GridClass.applyTheme(node);
         }
 
         return (
@@ -138,6 +142,18 @@ export class GraphComponentClass extends BaseComponent {
                         :
                         <></>
                 }
+                {
+                    gc.cardIsShowing ?
+                        <Modal
+                            renderContent={() => { return gc.renderCard() }}
+                            pos={gc.cardPos}
+                            onClose={(e) => gc.closeCard(e)}
+                            init={(wnd) => { wnd.visible = gc.cardIsShowing; }}
+                        >
+                        </Modal>
+                        :
+                        <></>
+                }
             </>
         )
     }
@@ -146,13 +162,16 @@ export class GraphComponentClass extends BaseComponent {
         const gc = this;
         return (
             <GridINU
-                findGrid={(props) => gc.findGrid(props)}
+                findGrid={(props) => gc.replaceGrid(props)}
                 graph={gc.graph}
                 uid={gc.lookupNode.uid || gc.lookupNode.id}
                 entity={gc.lookupNode.entity}
                 dataGetter={gc.dataGetter || gc.lookupNode.dataGetter}
-                init={(grid) => { grid.status = NodeStatus.filter; grid.visible = true; grid.title = gc.lookupNode.title; }}
-                buttons={gc.getLookupButtons()}
+                init={(grid) => {
+                    grid.status = NodeStatus.filter;
+                    grid.visible = true;
+                    grid.title = gc.lookupNode.title;
+                }}
             >
             </GridINU>
         );
@@ -181,28 +200,114 @@ export class GraphComponentClass extends BaseComponent {
         gc.refreshState();
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
-    getLookupButtons() {
+    selectLookupValue(e) {
         const gc = this;
-        return [
-            {
-                id: 0,
-                name: 'selectValue',
-                title: 'Select',
-                label: 'Select value',
-                click: function (e) {
-                    gc.lookupNode.value = gc.lookupNode.selectedValue();
-                    gc.graph.triggerWave({ nodes: [gc.lookupNode], withStartNodes: false });
-                    gc.closeLookup();
-                    //console.clear();
-                },
-            }
-        ];
+        if (!gc.lookupNode) return;
+
+        gc.lookupNode.value = gc.lookupNode.selectedValue();
+        gc.graph.triggerWave({ nodes: [gc.lookupNode], withStartNodes: false });
+        gc.closeLookup();
+    }
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
+    addLookupButtons(node) {
+        const gc = this;
+
+        if (node._lookupButtonsAdded) return;
+
+        GridClass.applyTheme(node);
+
+        node._lookupButtonsAdded = true;
+        node.toolbarButtons.push({
+            id: node.toolbarButtons.length,
+            name: 'selectValue',
+            title: node.translate('Select'),
+            label: node.images.selectFilterValue ? '' : node.translate('Select value'),
+            click: (e) => gc.selectLookupValue(e),
+            img: node.images.selectFilterValue
+        });
+    }
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
+    addButtons(node) {
+        const gc = this;
+
+        if (node._buttonsAdded) return;
+
+        GridClass.applyTheme(node);
+
+        node._buttonsAdded = true;
+
+        //node.toolbarButtons.push({
+        //    id: node.toolbarButtons.length,
+        //    name: 'edit',
+        //    title: node.translate('Start edit'),
+        //    label: node.images.edit ? '' : node.translate('Start edit'),
+        //    click: (e) => gc.startEditNode(e),
+        //    img: node.images.edit
+        //});
+
+        node.toolbarButtons.push({
+            id: node.toolbarButtons.length,
+            name: 'commit',
+            title: node.translate('Commit changes'),
+            label: node.images.commit ? '' : node.translate('Commit changes'),
+            img: node.images.commit,
+            click: (e) => gc.commitChangesNode(e, node),
+            getDisabled: (e) => gc.commitChangesNodeDisabled(e, node),
+        });
+
+        node.toolbarButtons.push({
+            id: node.toolbarButtons.length,
+            name: 'rollback',
+            title: node.translate('Rollback changes'),
+            label: node.images.rollback ? '' : node.translate('Rollback changes'),
+            img: node.images.rollback,
+            click: (e) => gc.rollbackChangesNode(e, node),
+            getDisabled: (e) => gc.rollbackChangesNodeDisabled(e, node),
+        });
+
+        node.toolbarButtons.push({
+            id: node.toolbarButtons.length,
+            name: 'add',
+            title: node.translate('Add new record'),
+            label: node.images.addRecord ? '' : node.translate('Add new record'),
+            img: node.images.addRecord,
+            click: (e) => gc.addRecordNode(e, node),
+            getDisabled: (e) => gc.addRecordNodeDisabled(e, node),
+        });
+
+        node.toolbarButtons.push({
+            id: node.toolbarButtons.length,
+            name: 'copy',
+            title: node.translate('Copy record'),
+            label: node.images.copyRecord ? '' : node.translate('Copy record'),
+            img: node.images.copyRecord,
+            click: (e) => gc.copyRecordNode(e, node),
+            getDisabled: (e) => gc.copyRecordNodeDisabled(e, node),
+        });
+
+        node.toolbarButtons.push({
+            id: node.toolbarButtons.length,
+            name: 'delete',
+            title: node.translate('Delete record'),
+            label: node.images.deleteRecord ? '' : node.translate('Delete record'),
+            img: node.images.deleteRecord,
+            click: (e) => gc.deleteRecordNode(e, node),
+            getDisabled: (e) => gc.deleteRecordNodeDisabled(e, node),
+        });
+
+        node.toolbarButtons.push({
+            id: node.toolbarButtons.length,
+            name: 'view',
+            title: node.translate('View record'),
+            label: node.images.viewRecord ? '' : node.translate('View record'),
+            img: node.images.viewRecord,
+            click: (e) => gc.viewRecordNode(e, node),
+            getDisabled: (e) => gc.viewRecordNodeDisabled(e, node),
+        });
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     renderFilter(node, top) {
         const gc = this;
-
-        GridClass.applyTheme(node);
 
         if (node.status !== NodeStatus.filter || gc.isTop(node) !== top) return <></>;
 
@@ -234,7 +339,7 @@ export class GraphComponentClass extends BaseComponent {
                     key={`fltrsel_${node.id}_${gc.id}_${gc.stateind}_`}
                     onClick={(e) => gc.openLookup(e, node)}
                 >
-                    {node.filterSelectDictImg ? node.filterSelectDictImg() : node.translate('Select', 'graph-filter-select')}
+                    {node.images.filterSelect ? node.images.filterSelect() : node.translate('Select', 'graph-filter-select')}
                 </button>
                 <button
                     key={`fltrclr_${node.id}_${gc.id}_${gc.stateind}_`}
@@ -242,7 +347,7 @@ export class GraphComponentClass extends BaseComponent {
                     disabled={node.value === undefined || node.value === '' ? 'disabled' : ''}
                     onClick={(e) => gc.clearLookup(e, node)}
                 >
-                    {node.filterClearImg ? node.filterClearImg() : node.translate('Clear', 'graph-filter-clear')}
+                    {node.images.filterClear ? node.images.filterClear() : node.translate('Clear', 'graph-filter-clear')}
                 </button>
             </div>
         );
@@ -267,17 +372,13 @@ export class GraphComponentClass extends BaseComponent {
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     renderGrid(node, top) {
         const gc = this;
-        const isActive = top && node.id === gc.activeMaster || !top && node.id === gc.activeDetail;
 
         if (!node.visible || node.status !== NodeStatus.grid || gc.isTop(node) !== top) {
-            //if (node.status === NodeStatus.grid) node.visible = false;
             return <></>;
         }
-        //getRows = { gc.getRows(node) }
-        //node.visible = true;
         return (
             <GridINU
-                findGrid={(props) => gc.findGrid(props)}
+                findGrid={(props) => gc.replaceGrid(props)}
                 graph={gc.graph}
                 uid={node.uid !== undefined ? node.uid : node.id}
                 entity={node.entity}
@@ -288,7 +389,7 @@ export class GraphComponentClass extends BaseComponent {
         );
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
-    findGrid(props) {
+    replaceGrid(props) {
         if (!props.graph) return null;
 
         const gc = this;
@@ -304,9 +405,7 @@ export class GraphComponentClass extends BaseComponent {
         grid._replaced = true;
         grid.graph = graph;
 
-        //graph.waveCache = {};
-
-        const obr = graph.nodesDict[grid.uid];// || graph.nodesDict[grid.entity];
+        const obr = graph.nodesDict[grid.uid];
         grid.id = obr.id !== undefined ? obr.id : grid.id;
 
         grid.title = obr.title;
@@ -334,14 +433,35 @@ export class GraphComponentClass extends BaseComponent {
             for (let _ in graph.nodesDict) graph.nodeCount++;
         }
 
+        gc.addButtons(grid);
+
         if (gc.lookupNode) {
             if (String(grid.id) === String(gc.lookupNode.id)) {
                 gc.lookupNode = grid;
+
+                //GridClass.applyTheme(gc.lookupNode);
+
+                gc.addLookupButtons(gc.lookupNode);
             }
         }
 
+        grid.onRowDblClick = (e, row) => { gc.onGridRowDblClick(e, grid, row) };
+
         graph.nodesDict[grid.uid] = grid;
         return grid;
+    }
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
+    onGridRowDblClick(e, node, row) {
+        const gc = this;
+
+        if (node.status === NodeStatus.filter) {
+            gc.selectLookupValue(e);
+        }
+        else if (node.status === NodeStatus.grid) {
+            if (!gc.viewRecordNodeDisabled(e, node)) {
+                gc.viewRecordNode(e, node);
+            }
+        }
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     selectActiveTab(node, top) {
@@ -426,6 +546,96 @@ export class GraphComponentClass extends BaseComponent {
                 }
             }
         }
+    }
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
+    isEditing() {
+        const gc = this;
+        return gc._isEditing === true;
+    }
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
+    commitChangesNode(e, node) {
+        const gc = this;
+    }
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
+    commitChangesNodeDisabled(e, node) {
+        const gc = this;
+        return !gc.isEditing();
+    }
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
+    rollbackChangesNode(e, node) {
+        const gc = this;
+    }
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
+    rollbackChangesNodeDisabled(e, node) {
+        const gc = this;
+        return !gc.isEditing();
+    }
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
+    addRecordNode(e, node) {
+        const gc = this;
+    }
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
+    addRecordNodeDisabled(e, node) {
+        const gc = this;
+        return gc.isEditing();
+    }
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
+    copyRecordNode(e, node) {
+        const gc = this;
+    }
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
+    copyRecordNodeDisabled(e, node) {
+        const gc = this;
+        return gc.isEditing() || node.selectedRowIndex === undefined || node.selectedRowIndex < 0 || !node.rows || node.rows.length <= 0;
+    }
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
+    deleteRecordNode(e, node) {
+        const gc = this;
+    }
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
+    deleteRecordNodeDisabled(e, node) {
+        const gc = this;
+        return gc.isEditing() || node.selectedRowIndex === undefined || node.selectedRowIndex < 0 || !node.rows || node.rows.length <= 0;
+    }
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
+    viewRecordNode(e, node) {
+        const gc = this;
+
+        gc.cardPos = gc.cardPos || { x: 110, y: 110, w: 800, h: 600 };
+
+        gc.cardNode = node;
+        gc.cardIsShowing = true;
+        gc.refreshState();
+    }
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
+    viewRecordNodeDisabled(e, node) {
+        const gc = this;
+        return gc.isEditing() || node.selectedRowIndex === undefined || node.selectedRowIndex < 0 || !node.rows || node.rows.length <= 0;
+    }
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
+    closeCard(e) {
+        const gc = this;
+        gc.cardIsShowing = false;
+        gc.cardNode = null;
+        gc.refreshState();
+    }
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
+    renderCard() {
+        const gc = this;
+        return (
+            <CardINU
+                findGrid={(props) => gc.replaceGrid(props)}
+                cardRow={gc.cardNode.selectedRow()}
+                graph={gc.graph}
+                uid={gc.cardNode.uid || gc.cardNode.id}
+                entity={gc.cardNode.entity}
+                dataGetter={gc.dataGetter || gc.cardNode.dataGetter}
+                init={(card) => {
+                    card.visible = true;
+                }}
+            >
+            </CardINU>
+        );
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
 }

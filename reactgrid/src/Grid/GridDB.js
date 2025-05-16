@@ -67,6 +67,7 @@ export class GridDBClass extends GridInGraphClass {
         grid.pageSizes = [5, 10, 15, 20, 30, 40, 50, 100];
 
         grid.toolbarButtons = props.buttons || [];
+        grid.images = {};
 
         grid.opt.toolbarClass = props.toolbarClass;
         grid.opt.toolbarButtonsClass = props.toolbarButtonsClass;

@@ -26,12 +26,10 @@ export function Grid(props) {
 
     grid.log(' 0.1 ReactGrid(). state = ' + grid.stateind);
 
-    //if (!grid.refreshState) {
-        grid.refreshState = function () {
-            grid.log(' -------------- refreshState ' + grid.stateind + ' --------------- ');
-            setState({ grid: grid, ind: grid.stateind++ });
-        }
-    //}
+    grid.refreshState = function () {
+        grid.log(' -------------- refreshState ' + grid.stateind + ' --------------- ');
+        setState({ grid: grid, ind: grid.stateind++ });
+    }
 
     useEffect(() => {
         grid.setupEvents(grid);
@@ -250,7 +248,7 @@ export class GridClass extends BaseComponent {
                             <tr
                                 key={`row_${rind}_${grid.stateind}_`}
                                 className={grid.selectedRowIndex === rind ? `grid-selected-row ${grid.opt.selectedRowClass || ''}` : ''}
-                                onMouseDown={(e) => grid.onSelectGridRow(e)}
+                                onMouseDown={(e) => { e.detail === 2 ? grid.onRowDblClick(e, row) : grid.onSelectGridRow(e) }}
                             >
                                 {grid.renderRow(row, rind)}
                             </tr>
@@ -457,6 +455,9 @@ export class GridClass extends BaseComponent {
         delete grid._targetColumn;
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
+    onRowDblClick(e, row) {
+    }
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     onSelectGridRow(e) {
         const grid = this;
 
@@ -501,18 +502,28 @@ export class GridClass extends BaseComponent {
         return grid.keyField;
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
+    selectedRow() {
+        const grid = this;
+
+        if (grid.selectedRowIndex === undefined || !grid.rows || grid.rows.length <= 0 || grid.selectedRowIndex < 0 || grid.selectedRowIndex >= grid.rows.length) return;
+
+        return grid.rows[grid.selectedRowIndex];
+    }
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     selectedValue() {
         const grid = this;
-        if (grid.selectedRowIndex === undefined || !grid.rows || grid.rows.length <= 0 || grid.selectedRowIndex < 0|| grid.selectedRowIndex >= grid.rows.length) return '';
+        const row = grid.selectedRow();
 
-        return grid.rows[grid.selectedRowIndex][grid.getKeyColumn()];
+        return row !== undefined ? row[grid.getKeyColumn()] : '';
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     selectedText() {
         const grid = this;
-        if (grid.selectedRowIndex === undefined || !grid.rows || grid.rows.length <= 0 || grid.selectedRowIndex < 0 || grid.selectedRowIndex >= grid.rows.length || !grid.nameField) return '';
+        const row = grid.selectedRow();
 
-        return grid.rows[grid.selectedRowIndex][grid.nameField];
+        if (row === undefined || !grid.nameField) return '';
+
+        return row[grid.nameField];
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     mouseResizerDoubleClick(e, column) {

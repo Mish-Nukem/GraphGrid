@@ -159,12 +159,6 @@ export class GridInGraphClass extends GridClass {
                 }
 
                 return parentGrid.selectedValue();
-            //    const keyField = parentGrid.getKeyColumn();
-            //    if (!keyField) return '';
-
-            //    const activeRow = parentGrid.rows[parentGrid.selectedRowIndex];
-
-            //    return activeRow[keyField];
             }
         };
     }
