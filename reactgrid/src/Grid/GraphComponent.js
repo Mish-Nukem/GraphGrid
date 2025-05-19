@@ -142,18 +142,6 @@ export class GraphComponentClass extends BaseComponent {
                         :
                         <></>
                 }
-                {
-                    gc.cardIsShowing ?
-                        <Modal
-                            renderContent={() => { return gc.renderCard() }}
-                            pos={gc.cardPos}
-                            onClose={(e) => gc.closeCard(e)}
-                            init={(wnd) => { wnd.visible = gc.cardIsShowing; }}
-                        >
-                        </Modal>
-                        :
-                        <></>
-                }
             </>
         )
     }
@@ -167,6 +155,7 @@ export class GraphComponentClass extends BaseComponent {
                 uid={gc.lookupNode.uid || gc.lookupNode.id}
                 entity={gc.lookupNode.entity}
                 dataGetter={gc.dataGetter || gc.lookupNode.dataGetter}
+                onSelectValue={(e) => gc.selectLookupValue(e)}
                 init={(grid) => {
                     grid.status = NodeStatus.filter;
                     grid.visible = true;
@@ -209,102 +198,23 @@ export class GraphComponentClass extends BaseComponent {
         gc.closeLookup();
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
-    addLookupButtons(node) {
-        const gc = this;
+    //addLookupButtons(node) {
+    //    const gc = this;
 
-        if (node._lookupButtonsAdded) return;
+    //    if (node._lookupButtonsAdded) return;
 
-        GridClass.applyTheme(node);
+    //    GridClass.applyTheme(node);
 
-        node._lookupButtonsAdded = true;
-        node.toolbarButtons.push({
-            id: node.toolbarButtons.length,
-            name: 'selectValue',
-            title: node.translate('Select'),
-            label: node.images.selectFilterValue ? '' : node.translate('Select value'),
-            click: (e) => gc.selectLookupValue(e),
-            img: node.images.selectFilterValue
-        });
-    }
-    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
-    addButtons(node) {
-        const gc = this;
-
-        if (node._buttonsAdded) return;
-
-        GridClass.applyTheme(node);
-
-        node._buttonsAdded = true;
-
-        //node.toolbarButtons.push({
-        //    id: node.toolbarButtons.length,
-        //    name: 'edit',
-        //    title: node.translate('Start edit'),
-        //    label: node.images.edit ? '' : node.translate('Start edit'),
-        //    click: (e) => gc.startEditNode(e),
-        //    img: node.images.edit
-        //});
-
-        node.toolbarButtons.push({
-            id: node.toolbarButtons.length,
-            name: 'commit',
-            title: node.translate('Commit changes'),
-            label: node.images.commit ? '' : node.translate('Commit changes'),
-            img: node.images.commit,
-            click: (e) => gc.commitChangesNode(e, node),
-            getDisabled: (e) => gc.commitChangesNodeDisabled(e, node),
-        });
-
-        node.toolbarButtons.push({
-            id: node.toolbarButtons.length,
-            name: 'rollback',
-            title: node.translate('Rollback changes'),
-            label: node.images.rollback ? '' : node.translate('Rollback changes'),
-            img: node.images.rollback,
-            click: (e) => gc.rollbackChangesNode(e, node),
-            getDisabled: (e) => gc.rollbackChangesNodeDisabled(e, node),
-        });
-
-        node.toolbarButtons.push({
-            id: node.toolbarButtons.length,
-            name: 'add',
-            title: node.translate('Add new record'),
-            label: node.images.addRecord ? '' : node.translate('Add new record'),
-            img: node.images.addRecord,
-            click: (e) => gc.addRecordNode(e, node),
-            getDisabled: (e) => gc.addRecordNodeDisabled(e, node),
-        });
-
-        node.toolbarButtons.push({
-            id: node.toolbarButtons.length,
-            name: 'copy',
-            title: node.translate('Copy record'),
-            label: node.images.copyRecord ? '' : node.translate('Copy record'),
-            img: node.images.copyRecord,
-            click: (e) => gc.copyRecordNode(e, node),
-            getDisabled: (e) => gc.copyRecordNodeDisabled(e, node),
-        });
-
-        node.toolbarButtons.push({
-            id: node.toolbarButtons.length,
-            name: 'delete',
-            title: node.translate('Delete record'),
-            label: node.images.deleteRecord ? '' : node.translate('Delete record'),
-            img: node.images.deleteRecord,
-            click: (e) => gc.deleteRecordNode(e, node),
-            getDisabled: (e) => gc.deleteRecordNodeDisabled(e, node),
-        });
-
-        node.toolbarButtons.push({
-            id: node.toolbarButtons.length,
-            name: 'view',
-            title: node.translate('View record'),
-            label: node.images.viewRecord ? '' : node.translate('View record'),
-            img: node.images.viewRecord,
-            click: (e) => gc.viewRecordNode(e, node),
-            getDisabled: (e) => gc.viewRecordNodeDisabled(e, node),
-        });
-    }
+    //    node._lookupButtonsAdded = true;
+    //    node.buttons.push({
+    //        id: node.buttons.length,
+    //        name: 'selectValue',
+    //        title: node.translate('Select'),
+    //        label: node.images.selectFilterValue ? '' : node.translate('Select value'),
+    //        click: (e) => gc.selectLookupValue(e),
+    //        img: node.images.selectFilterValue
+    //    });
+    //}
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     renderFilter(node, top) {
         const gc = this;
@@ -433,15 +343,16 @@ export class GraphComponentClass extends BaseComponent {
             for (let _ in graph.nodesDict) graph.nodeCount++;
         }
 
-        gc.addButtons(grid);
+        //gc.addButtons(grid);
 
         if (gc.lookupNode) {
             if (String(grid.id) === String(gc.lookupNode.id)) {
                 gc.lookupNode = grid;
 
                 //GridClass.applyTheme(gc.lookupNode);
+                gc.lookupNode.isSelecting = true;
 
-                gc.addLookupButtons(gc.lookupNode);
+                //gc.addLookupButtons(gc.lookupNode);
             }
         }
 
@@ -622,16 +533,18 @@ export class GraphComponentClass extends BaseComponent {
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     renderCard() {
         const gc = this;
+        //findGrid = {(props) => gc.replaceGrid(props)}
+        //graph={gc.graph}
         return (
             <CardINU
-                findGrid={(props) => gc.replaceGrid(props)}
                 cardRow={gc.cardNode.selectedRow()}
-                graph={gc.graph}
+                
                 uid={gc.cardNode.uid || gc.cardNode.id}
                 entity={gc.cardNode.entity}
                 dataGetter={gc.dataGetter || gc.cardNode.dataGetter}
                 init={(card) => {
                     card.visible = true;
+                    card.columns = gc.cardNode.columns;
                 }}
             >
             </CardINU>

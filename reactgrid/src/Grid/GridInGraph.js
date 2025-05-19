@@ -61,10 +61,6 @@ export class GridInGraphClass extends GridClass {
 
         const grid = this;
 
-        if (props.keyField) {
-            grid.keyField = props.keyField;
-        }
-
         if (props.entity) {
             grid.entity = props.entity;
         }

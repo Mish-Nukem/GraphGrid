@@ -84,8 +84,8 @@
     .grid-default > tbody > tr > th,
     .grid-default > thead > tr > th {
         background-color: white;
-        /*border: none;*/
         border: solid 1px;
+        /*border: none;*/
         /*box-shadow: inset 1px 0 0 0 gray, inset -1px -1px 0 0 gray;*/
         /*box-shadow: inset 0 -1px 0 0 gray;*/
         /*border-width: 0 1px 0 1px;*/
@@ -303,6 +303,33 @@
 
 .graph-filter-button {
     margin: 5px 2px;
+}
+
+.graph-card-button {
+    margin: 5px 2px;
+}
+
+.graph-card-toolbar {
+    margin: 0 1em;
+}
+
+.graph-card-div {
+    display: grid;
+    grid-auto-flow: row;
+    align-items: center;
+    align-content: center;
+    margin: 0.5em;
+    overflow-y: auto;
+}
+
+.graph-card-field {
+    display: grid;
+    grid-template-columns: auto 2.5em 2.5em;
+    grid-template-rows: auto auto;
+    grid-auto-flow: row;
+    align-items: center;
+    align-content: center;
+    margin: 0 1em;
 }
 
 .login-form {

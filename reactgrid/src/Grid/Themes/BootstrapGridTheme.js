@@ -33,6 +33,11 @@ export class BootstrapTheme {
             button.class = 'btn btn-primary btn-sm';
         }
 
+        for (let id in grid.toolbarButtons) {
+            let button = grid.toolbarButtons[id];
+            button.class = 'btn btn-primary btn-sm';
+        }
+
         let button2;
 
         button2 = grid.pagerButtonsDict['curr'];

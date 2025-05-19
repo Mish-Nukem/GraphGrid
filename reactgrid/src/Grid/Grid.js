@@ -81,10 +81,17 @@ export class GridClass extends BaseComponent {
 
         grid.selectedRowIndex = 0;
 
+        grid.keyField = props.keyField;
+        grid.nameField = props.nameField;
+
         grid.rows = [];
         grid.columns = [];
 
         grid.stateind = 0;
+
+        grid.images = {};
+        grid.theme = new Theme();
+        grid.theme.prepareImages(grid);
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     log(message, pref) {
@@ -109,8 +116,8 @@ export class GridClass extends BaseComponent {
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     static applyTheme(grid) {
         if (Theme !== undefined && !grid.themeApplied) {
-            const theme = new Theme();
-            theme.applyTheme(grid);
+            grid.theme = grid.theme || new Theme();
+            grid.theme.applyTheme(grid);
 
             if (NewTheme !== undefined) {
                 const newtheme = new NewTheme();

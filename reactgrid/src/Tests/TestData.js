@@ -249,55 +249,88 @@ export default class TestData {
                     name: 'ID_SR_REMARK_SRRM',
                     title: 'ID задания',
                     sortable: true,
-                    filtrable: true
+                    filtrable: true,
+                    readonly: true,
                 },
                 {
                     name: 'NUMBER_PP_SRRM',
                     title: '№ п/п',
                     sortable: true,
-                    filtrable: true
+                    filtrable: true,
+                    required: true,
                 },
                 {
                     name: 'DATE_CREATE_SRRM',
                     title: 'Дата создания',
                     sortable: true,
-                    filtrable: true
+                    filtrable: true,
+                    type: 'date',
                 },
                 {
                     name: 'REMARK_SRRM',
                     title: 'Текст задания',
                     sortable: true,
-                    filtrable: true
+                    filtrable: true,
+                    required: true,
                 },
                 {
                     name: 'FROM_WHOM_SRRM_NAME',
                     title: 'Автор задания',
                     sortable: true,
-                    filtrable: true
+                    filtrable: true,
+                    type: 'lookup',
+                    entity: 'SrRExecutiveEntity',
+                    keyField: 'ID_FROM_WHOM_SRRM',
+                    refKeyField: 'ID_SR_R_EXECUTIVE_SREX',
+                    refNameField: 'FIO_SREX',
                 },
                 {
                     name: 'WHOM_SRRM_NAME',
                     title: 'Исполнитель задания',
                     sortable: true,
-                    filtrable: true
+                    filtrable: true,
+                    required: true,
+                    type: 'lookup',
+                    entity: 'SrRExecutiveEntity',
+                    keyField: 'ID_WHOM_SRRM',
+                    refKeyField: 'ID_SR_R_EXECUTIVE_SREX',
+                    refNameField: 'FIO_SREX',
                 },
                 {
                     name: 'SR_R_PROJECT_SRRM_NAME',
                     title: 'Проект',
                     sortable: true,
-                    filtrable: true
+                    filtrable: true,
+                    required: true,
+                    type: 'lookup',
+                    entity: 'SrRProjectEntity',
+                    keyField: 'ID_SR_R_PROJECT_SRRM',
+                    refKeyField: 'ID_SR_R_PROJECT_SRPJ',
+                    refNameField: 'NAME_PROJ_SRPJ',
                 },
                 {
                     name: 'SR_R_PROMPTNESS_SRRM_NAME',
                     title: 'Срочность',
                     sortable: true,
-                    filtrable: true
+                    filtrable: true,
+                    required: true,
+                    type: 'lookup',
+                    entity: 'SrRPromptnessEntity',
+                    keyField: 'ID_SR_R_PROMPTNESS_SRRM',
+                    refKeyField: 'ID_SR_R_PROMPTNESS_SRPR',
+                    refNameField: 'NAME_SRPR',
                 },
                 {
                     name: 'SR_R_STATUS_SRRM_NAME',
                     title: 'Статус',
                     sortable: true,
-                    filtrable: true
+                    filtrable: true,
+                    required: true,
+                    type: 'lookup',
+                    entity: 'SrRStatusEntity',
+                    keyField: 'ID_SR_R_STATUS_SRRM',
+                    refKeyField: 'ID_SR_R_STATUS_SRST',
+                    refNameField: 'NAME_STATUS_SRST',
                 },
                 {
                     name: 'COMMENT_EXECUT_SRRM',
@@ -309,7 +342,8 @@ export default class TestData {
                     name: 'DATE_COMPLETE_SRRM',
                     title: 'Плановый срок выполнения',
                     sortable: true,
-                    filtrable: true
+                    filtrable: true,
+                    type: 'date',
                 },
                 {
                     name: 'NAME_DB_SRRM',
@@ -339,19 +373,26 @@ export default class TestData {
                     name: 'PARENT_REMARK_SRRM_NAME',
                     title: 'Замечание-родитель',
                     sortable: true,
-                    filtrable: true
+                    filtrable: true,
+                    type: 'lookup',
+                    entity: 'SrRemarkEntity',
+                    keyField: 'PARENT_REMARK_SRRM',
+                    refKeyField: 'ID_SR_REMARK_SRRM',
+                    refNameField: 'REMARK_SRRM',
                 },
                 {
                     name: 'DATE_EXECUTE_SRRM',
                     title: 'Дата выполнения',
                     sortable: true,
-                    filtrable: true
+                    filtrable: true,
+                    type: 'date',
                 },
                 {
                     name: 'DATE_CHECKED_SRRM',
                     title: 'Дата приемки',
                     sortable: true,
-                    filtrable: true
+                    filtrable: true,
+                    type: 'date',
                 },
                 {
                     name: 'IsFavorite',
@@ -363,25 +404,31 @@ export default class TestData {
                     name: 'VVOD_ID_CONTRACTOR_SRRM',
                     title: 'Автор ввода',
                     sortable: true,
-                    filtrable: true
+                    filtrable: true,
+                    readonly: true,
                 },
                 {
                     name: 'CHANGE_ID_CONTRACTOR_SRRM',
                     title: 'Автор изменения',
                     sortable: true,
-                    filtrable: true
+                    filtrable: true,
+                    readonly: true,
                 },
                 {
                     name: 'DATE_INPUT_SRRM',
                     title: 'Дата ввода',
                     sortable: true,
-                    filtrable: true
+                    filtrable: true,
+                    readonly: true,
+                    type: 'date',
                 },
                 {
                     name: 'DATE_CHANGE_SRRM',
                     title: 'Дата изменения',
                     sortable: true,
-                    filtrable: true
+                    filtrable: true,
+                    readonly: true,
+                    type: 'date',
                 },
             ];
         }

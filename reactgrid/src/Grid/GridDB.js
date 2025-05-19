@@ -66,8 +66,7 @@ export class GridDBClass extends GridInGraphClass {
 
         grid.pageSizes = [5, 10, 15, 20, 30, 40, 50, 100];
 
-        grid.toolbarButtons = props.buttons || [];
-        grid.images = {};
+        grid.buttons = props.buttons || [];
 
         grid.opt.toolbarClass = props.toolbarClass;
         grid.opt.toolbarButtonsClass = props.toolbarButtonsClass;
@@ -115,17 +114,19 @@ export class GridDBClass extends GridInGraphClass {
         )
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
-    renderToolbar() {
+    renderToolbar(buttons) {
         const grid = this;
+        buttons = buttons || grid.buttons;
         return (
-            grid.toolbarButtons.length <= 0 ? <></> :
+            buttons.length <= 0 ? <></> :
                 <div
                     id={`grid_${grid.id}_toolbar_`}
                     className={grid.opt.toolbarClass || 'toolbar-default'}
                 >
                     {
-                        grid.toolbarButtons.map((button, ind) => {
+                        buttons.map((button, ind) => {
                             return (
+                                button.getVisible && !button.getVisible() ? <></> :
                                 <button
                                     key={`toolbar_${grid.id}_${button.id}_${grid.stateind}_`}
                                     grid-toolbar-button={`${grid.id}_${button.id}_`}
