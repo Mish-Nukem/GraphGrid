@@ -127,20 +127,21 @@ export class GridDBClass extends GridInGraphClass {
                         buttons.map((button, ind) => {
                             return (
                                 button.getVisible && !button.getVisible() ? <></> :
-                                <button
-                                    key={`toolbar_${grid.id}_${button.id}_${grid.stateind}_`}
-                                    grid-toolbar-button={`${grid.id}_${button.id}_`}
-                                    className={`grid-toolbar-button ${button.class || grid.opt.toolbarButtonsClass || ''}`}
-                                    title={grid.translate(button.title, 'grid-toolbar-button')}
-                                    disabled={button.getDisabled && button.getDisabled({ grid: grid }) || button.disabled ? 'disabled' : ''}
-                                    onClick={button.click ? (e) => {
-                                        e.grid = grid;
-                                        button.click(e);
-                                    } : grid.onButtonClick ? (e) => { grid.onButtonClick(e) } : null}
-                                >
-                                    {button.img ? button.img() : ''}
-                                    {button.label ? grid.translate(button.label, 'grid-toolbar-button') : ''}
-                                </button>
+                                    <button
+                                        key={`toolbar_${grid.id}_${button.id}_${grid.stateind}_`}
+                                        grid-toolbar-button={`${grid.id}_${button.id}_`}
+                                        className={`grid-toolbar-button ${button.class || grid.opt.toolbarButtonsClass || ''}`}
+                                        style={{ width: button.img ? '2.5em' : ''}}
+                                        title={grid.translate(button.title, 'grid-toolbar-button')}
+                                        disabled={button.getDisabled && button.getDisabled({ grid: grid }) || button.disabled ? 'disabled' : ''}
+                                        onClick={button.click ? (e) => {
+                                            e.grid = grid;
+                                            button.click(e);
+                                        } : grid.onButtonClick ? (e) => { grid.onButtonClick(e) } : null}
+                                    >
+                                        {button.img ? button.img() : ''}
+                                        {button.label ? grid.translate(button.label, 'grid-toolbar-button') : ''}
+                                    </button>
                             );
                         })
                     }

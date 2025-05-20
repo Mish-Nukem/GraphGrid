@@ -74,6 +74,8 @@ export class GridINUClass extends GridFLClass {
 
         grid.onSelectValue = props.onSelectValue || function () { };
 
+        grid.reqInd = 0;
+
         grid.addButtons();
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -89,6 +91,7 @@ export class GridINUClass extends GridFLClass {
                 {
                     node.cardIsShowing ?
                         <Modal
+                            title={node.title}
                             renderContent={() => { return node.renderCard() }}
                             pos={node.cardPos}
                             onClose={(e) => node.closeCard(e)}
@@ -196,6 +199,15 @@ export class GridINUClass extends GridFLClass {
         }
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
+    onRowDblClick(e, row) {
+        const node = this;
+        super.onRowDblClick(e, row);
+
+        if (node.isSelecting && node.onSelectValue) {
+            node.onSelectValue(e);
+        }
+    }
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     isEditing() {
         const node = this;
         return node._isEditing === true;
@@ -221,6 +233,13 @@ export class GridINUClass extends GridFLClass {
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     addRecord(e) {
         const node = this;
+
+        node.cardPos = node.cardPos || { x: 110, y: 110, w: 800, h: 600 };
+
+        node.cardRow = {};
+        node.isNewRecord = true;
+        node.cardIsShowing = true;
+        node.refreshState();
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     addRecordDisabled(e) {
@@ -230,6 +249,14 @@ export class GridINUClass extends GridFLClass {
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     copyRecord(e) {
         const node = this;
+
+        node.cardPos = node.cardPos || { x: 110, y: 110, w: 800, h: 600 };
+
+        node.cardRow = {};
+        Object.assign(node.cardRow, node.selectedRow());
+        node.isNewRecord = true;
+        node.cardIsShowing = true;
+        node.refreshState();
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     copyRecordDisabled(e) {
@@ -239,6 +266,11 @@ export class GridINUClass extends GridFLClass {
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     deleteRecord(e) {
         const node = this;
+
+        // eslint-disable-next-line no-restricted-globals
+        if (confirm('Delete  record?')) {
+            node.deleteRow(e).then(() => node.refresh());
+        }
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     deleteRecordDisabled(e) {
@@ -251,7 +283,7 @@ export class GridINUClass extends GridFLClass {
 
         node.cardPos = node.cardPos || { x: 110, y: 110, w: 800, h: 600 };
 
-        node.cardNode = node;
+        node.cardRow = node.selectedRow();
         node.cardIsShowing = true;
         node.refreshState();
     }
@@ -264,22 +296,28 @@ export class GridINUClass extends GridFLClass {
     closeCard(e) {
         const node = this;
         node.cardIsShowing = false;
-        node.cardNode = null;
-        node.refreshState();
+        if (node.isNewRecord) {
+            node.isNewRecord = false;
+            node.refresh();
+        }
+        else {
+            node.refreshState();
+        }
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     renderCard() {
         const node = this;
         return (
             <CardINU
-                cardRow={node.cardNode.selectedRow()}
-
-                uid={node.cardNode.uid || node.cardNode.id}
-                entity={node.cardNode.entity}
-                dataGetter={node.dataGetter || node.cardNode.dataGetter}
+                cardRow={node.cardRow || {}}
+                isNewRecord={node.isNewRecord}
+                uid={node.uid || node.id}
+                entity={node.entity}
+                keyField={node.keyField}
+                dataGetter={node.dataGetter || node.dataGetter}
                 init={(card) => {
                     card.visible = true;
-                    card.columns = node.cardNode.columns;
+                    card.columns = node.columns;
                 }}
             >
             </CardINU>
@@ -360,16 +398,43 @@ export class GridINUClass extends GridFLClass {
             params.push({ key: 'f' + i++, value: cond });
         }
 
+        params.push({ key: 'reqInd', value: ++grid.reqInd });
+
         return new Promise(function (resolve, reject) {
             grid.dataGetter.get({ url: grid.entity + '/' + (!e.autocompleteColumn ? 'list' : 'autocomplete'), params: params }).then(
                 (res) => {
                     if (res != null) {
+                        if (+res.reqInd !== grid.reqInd) return;
+
                         if (!e.autocompleteColumn) {
                             grid.totalRows = res.count;
                         }
                         resolve(res.rows);
                     } else {
                         reject(Error("Error getting rows"));
+                    }
+                }
+            );
+        });
+    }
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
+    deleteRow(e) {
+        const grid = this;
+
+        const params = [
+            { key: 'atoken', value: grid.dataGetter.atoken },
+            { key: 'rtoken', value: grid.dataGetter.rtoken },
+            { key: 'id', value: grid.selectedValue() || grid.selectedRow()[grid.keyField] },
+        ];
+
+        return new Promise(function (resolve, reject) {
+            grid.dataGetter.get({ url: grid.entity + '/delete', params: params }).then(
+                (res) => {
+                    if (res && String(res.resStr.toLowerCase()) === 'true') {
+                        resolve(res.resStr);
+                    }
+                    else {
+                        reject(Error(res.resStr || "Error saving row"));
                     }
                 }
             );

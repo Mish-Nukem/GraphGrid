@@ -133,6 +133,7 @@ export class GraphComponentClass extends BaseComponent {
                 {
                     gc.lookupIsShowing ?
                         <Modal
+                            title={gc.lookupNode.title}
                             renderContent={() => { return gc.renderLookupGrid() }}
                             pos={gc.lookupPos}
                             onClose={(e) => gc.closeLookup(e)}
@@ -198,24 +199,6 @@ export class GraphComponentClass extends BaseComponent {
         gc.closeLookup();
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
-    //addLookupButtons(node) {
-    //    const gc = this;
-
-    //    if (node._lookupButtonsAdded) return;
-
-    //    GridClass.applyTheme(node);
-
-    //    node._lookupButtonsAdded = true;
-    //    node.buttons.push({
-    //        id: node.buttons.length,
-    //        name: 'selectValue',
-    //        title: node.translate('Select'),
-    //        label: node.images.selectFilterValue ? '' : node.translate('Select value'),
-    //        click: (e) => gc.selectLookupValue(e),
-    //        img: node.images.selectFilterValue
-    //    });
-    //}
-    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     renderFilter(node, top) {
         const gc = this;
 
@@ -228,6 +211,7 @@ export class GraphComponentClass extends BaseComponent {
                 <span
                     key={`fltrttl_${node.id}_${gc.id}_${gc.stateind}_`}
                     style={{ gridColumn: 'span 3', width: 'calc(100% - 4px)' }}
+                    className='graph-filter-title'
                 >
                     {node.title}
                 </span>
@@ -343,16 +327,11 @@ export class GraphComponentClass extends BaseComponent {
             for (let _ in graph.nodesDict) graph.nodeCount++;
         }
 
-        //gc.addButtons(grid);
-
         if (gc.lookupNode) {
             if (String(grid.id) === String(gc.lookupNode.id)) {
                 gc.lookupNode = grid;
 
-                //GridClass.applyTheme(gc.lookupNode);
                 gc.lookupNode.isSelecting = true;
-
-                //gc.addLookupButtons(gc.lookupNode);
             }
         }
 
@@ -369,8 +348,8 @@ export class GraphComponentClass extends BaseComponent {
             gc.selectLookupValue(e);
         }
         else if (node.status === NodeStatus.grid) {
-            if (!gc.viewRecordNodeDisabled(e, node)) {
-                gc.viewRecordNode(e, node);
+            if (!node.viewRecordDisabled(e)) {
+                node.viewRecord(e);
             }
         }
     }
@@ -421,7 +400,7 @@ export class GraphComponentClass extends BaseComponent {
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     checkNeedTriggerWave(node) {
         const gc = this;
-        return node !== gc.lookupNode;//node == null || gc.lookupNode == null || String(node.id) !== String(gc.lookupNode.id);//  node !== gc.lookupNode;
+        return node !== gc.lookupNode;
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     prepareGraph(obrGraph) {
@@ -457,98 +436,6 @@ export class GraphComponentClass extends BaseComponent {
                 }
             }
         }
-    }
-    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
-    isEditing() {
-        const gc = this;
-        return gc._isEditing === true;
-    }
-    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
-    commitChangesNode(e, node) {
-        const gc = this;
-    }
-    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
-    commitChangesNodeDisabled(e, node) {
-        const gc = this;
-        return !gc.isEditing();
-    }
-    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
-    rollbackChangesNode(e, node) {
-        const gc = this;
-    }
-    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
-    rollbackChangesNodeDisabled(e, node) {
-        const gc = this;
-        return !gc.isEditing();
-    }
-    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
-    addRecordNode(e, node) {
-        const gc = this;
-    }
-    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
-    addRecordNodeDisabled(e, node) {
-        const gc = this;
-        return gc.isEditing();
-    }
-    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
-    copyRecordNode(e, node) {
-        const gc = this;
-    }
-    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
-    copyRecordNodeDisabled(e, node) {
-        const gc = this;
-        return gc.isEditing() || node.selectedRowIndex === undefined || node.selectedRowIndex < 0 || !node.rows || node.rows.length <= 0;
-    }
-    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
-    deleteRecordNode(e, node) {
-        const gc = this;
-    }
-    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
-    deleteRecordNodeDisabled(e, node) {
-        const gc = this;
-        return gc.isEditing() || node.selectedRowIndex === undefined || node.selectedRowIndex < 0 || !node.rows || node.rows.length <= 0;
-    }
-    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
-    viewRecordNode(e, node) {
-        const gc = this;
-
-        gc.cardPos = gc.cardPos || { x: 110, y: 110, w: 800, h: 600 };
-
-        gc.cardNode = node;
-        gc.cardIsShowing = true;
-        gc.refreshState();
-    }
-    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
-    viewRecordNodeDisabled(e, node) {
-        const gc = this;
-        return gc.isEditing() || node.selectedRowIndex === undefined || node.selectedRowIndex < 0 || !node.rows || node.rows.length <= 0;
-    }
-    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
-    closeCard(e) {
-        const gc = this;
-        gc.cardIsShowing = false;
-        gc.cardNode = null;
-        gc.refreshState();
-    }
-    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
-    renderCard() {
-        const gc = this;
-        //findGrid = {(props) => gc.replaceGrid(props)}
-        //graph={gc.graph}
-        return (
-            <CardINU
-                cardRow={gc.cardNode.selectedRow()}
-                
-                uid={gc.cardNode.uid || gc.cardNode.id}
-                entity={gc.cardNode.entity}
-                dataGetter={gc.dataGetter || gc.cardNode.dataGetter}
-                init={(card) => {
-                    card.visible = true;
-                    card.columns = gc.cardNode.columns;
-                }}
-            >
-            </CardINU>
-        );
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
 }

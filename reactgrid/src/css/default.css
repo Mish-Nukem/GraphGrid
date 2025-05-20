@@ -19,6 +19,7 @@
     .modal-window-header > h4 {
         white-space: nowrap;
         overflow: hidden;
+        margin-left: 1.5em; 
     }
 
     .modal-window-header > button {
@@ -181,7 +182,7 @@
 }
 
 .grid-toolbar-button {
-    margin: 5px;
+    margin: 5px 2px;
     height: 2em;
     /*height: 28px;*/
 }
@@ -275,8 +276,9 @@
 }
 
     .graph-tabcontrol-buttons > button {
-        margin: 5px 2px;
+        margin: 5px 2px 5px 2px;
         height: 2.3em;
+        font-weight: bold;
     }
 
 .graph-filter-line {
@@ -295,22 +297,33 @@
     grid-auto-flow: row;
     align-items: center;
     margin: 0.5em 1em;
+    min-width: 10em;
+}
+
+.graph-filter-title {
+    font-weight: bold;
+    white-space: nowrap;
 }
 
 .graph-grid {
-    margin: 0.5em 1em;
+    margin: 0 1em 0.5em 1em;
 }
 
 .graph-filter-button {
     margin: 5px 2px;
+    width: 2.5em;
 }
 
 .graph-card-button {
     margin: 5px 2px;
+    width: 2.5em;
 }
 
 .graph-card-toolbar {
     margin: 0 1em;
+    position: sticky;
+    top: 0;
+    background-color: white;
 }
 
 .graph-card-div {
@@ -330,6 +343,10 @@
     align-items: center;
     align-content: center;
     margin: 0 1em;
+}
+
+.graph-card-field > span {
+    font-weight: bold;
 }
 
 .login-form {

@@ -71,11 +71,26 @@ export class GridFLClass extends GridDBClass {
         return (
             <>
                 {super.render()}
-                <Dropdown getItems={(e) => { return grid.getAutocomleteItems(e); }} onItemClick={(e) => { grid.onAutocomleteItemClick(e); }}
+                <Dropdown
+                    getItems={(e) => { return grid.getAutocomleteItems(e); }}
+                    onItemClick={(e) => { grid.onAutocomleteItemClick(e); }}
                     init={(dd) => {
+                        if (grid._autocompleteDropdown) {
+                            dd.visible = grid._autocompleteDropdown.visible;
+                        }
                         grid._autocompleteDropdown = dd;
                         if (grid._autocompleteRect) {
                             dd.opt.parentRect = grid._autocompleteRect;
+                        }
+                    }}
+                    onClose={() => {
+                        if (grid._inputingColumn) {
+                            delete grid._inputingColumn;
+                            if (grid.needRefresh()) {
+                                grid.pageNumber = 1;
+                                grid.selectedRowIndex = 0;
+                                grid.refresh();
+                            }
                         }
                     }}
                 >
@@ -90,13 +105,15 @@ export class GridFLClass extends GridDBClass {
         const hasFilter = col.filtrable && context !== 'fake' && col.filter !== undefined && col.filter !== '';
 
         const needFocus = grid._autoFocusColumn === col;
-        delete grid._autoFocusColumn;
+        if (needFocus) {
+            delete grid._autoFocusColumn;
+        }
 
         return (
             <>
                 {super.renderHeaderCell(col, context)}
 
-                {col.filtrable && context !== 'fake' ?
+                {col.filtrable && context !== 'fake' ? //key={`colfilter_${grid.id}_${col.id}_${grid.stateind}_`}  onFocus={(e) => { grid.onAutocompleteFocus(col, e) }}
                     <>
                         <input
                             key={`colfilter_${grid.id}_${col.id}_${grid.stateind}_`}
@@ -106,24 +123,24 @@ export class GridFLClass extends GridDBClass {
                             title={col.filter !== undefined ? col.filter : ''}
                             style={{ gridColumn: !hasFilter ? 'span 2' : '', width: 'calc(100% - 4px)', padding: '0 2px', boxSizing: 'border-box' }}
                             grid-col-filter={`${grid.id}_${col.id}_`}
-                            onChange={(e) => { grid.columnFilterChanging(col, e.target.value, e) }}
+                            onChange={(e) => { grid.onColumnFilterChanging(col, e.target.value, e) }}
                             onClick={(e) => { grid.onAutocompleteClick(col, e); }}
                             onInput={(e) => { grid.onAutocompleteInput(col, e) }}
                             autoFocus={needFocus}
-                            onFocus={(e) => { grid.onAutocompleteFocus(col, e) }}
-                            onBlur={(e) => { grid.columnFocusLost(col, col.filter, e); }}
+                            
+                            onBlur={(e) => { grid.onColumnFocusLost(col, col.filter, e); }}
                             autoComplete="off"
                         >
                         </input>
                         {
-                            hasFilter ? <button
+                            <button
                                 key={`colfilterClear_${grid.id}_${col.id}_${grid.stateind}_`}
                                 grid-filter-clear={`${grid.id}_${col.id}_`}
                                 className={"grid-filter-clear"}
-                                style={{ color: 'black' }}
+                                style={{ color: 'black', display: hasFilter ? '' : 'none'}}
                                 type={'button'}
                                 onClick={(e) => grid.clearColumnFilter(col)}
-                            >×</button> : <></>
+                            >×</button> /*: <></>*/
                         }
                     </>
                     : <></>}
@@ -135,7 +152,7 @@ export class GridFLClass extends GridDBClass {
         const grid = this;
         return new Promise(function (resolve, reject) {
 
-            grid.getRows({ filters: grid.collectFilters(), grid: grid, autocompleteColumn: grid._inputingColumn }).then(
+            grid.getRows({ filters: grid.collectFilters(true), grid: grid, autocompleteColumn: grid._inputingColumn }).then(
                 rows => {
                     const res = [];
                     let i = 0;
@@ -149,7 +166,7 @@ export class GridFLClass extends GridDBClass {
         });
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
-    collectFilters() {
+    collectFilters(noSaveFilterStr) {
         const grid = this;
         const filters = super.collectFilters();
 
@@ -158,7 +175,18 @@ export class GridFLClass extends GridDBClass {
             filters.push(col.name + ' = ' + col.filter);
         }
 
+        if (!noSaveFilterStr) {
+            grid._lastFilters = filters.join('&+&');
+        }
         return filters;
+    }
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
+    needRefresh() {
+        const grid = this;
+        const prevFilterStr = grid._lastFilters;
+        grid.collectFilters();
+
+        return prevFilterStr !== grid._lastFilters;
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     onAutocomleteItemClick(e) {
@@ -170,11 +198,12 @@ export class GridFLClass extends GridDBClass {
 
         e.dropdown.items = [];
         grid._autocompleteDropdown.items = [];
+        grid._autocompleteDropdown.visible = false;
 
         grid._autoFocusColumn = grid._inputingColumn;
 
-        grid._inputingColumn.prevFilter = item.text;
-        grid.columnFilterChanged(grid._inputingColumn, item.text);
+        //grid._inputingColumn.prevFilter = item.text;
+        grid.onAutocompleteItemSelected(grid._inputingColumn, item.text);
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     showAutocomplete(e) {
@@ -191,62 +220,75 @@ export class GridFLClass extends GridDBClass {
         }
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
-    columnFilterChanging(column, filter, e) {
+    onColumnFilterChanging(column, filter, e) {
         const grid = this;
-        if (grid._skipChange) return;
+        //if (grid._skipChange) return;
 
+        //column.prevFilter = column.filter;
         column.filter = filter;
         if (e && e.target) {
             grid._autocompleteRect = e.target.getBoundingClientRect();
         }
 
         grid._autocompleteDropdown.items = [];
+        //if (grid._skipChange) {
+        //    grid._skipChange = false;
+        //    return;
+        //}
         grid.refreshState();
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
-    columnFocusLost(column, filter, e) {
+    onColumnFocusLost(column, filter, e) {
         const grid = this;
-        if (grid._skipChange || column.filter === column.prevFilter
-            || grid._autoFocusColumn || column === grid._inputingColumn) return;
+        //if (grid._skipChange || column.filter === column.prevFilter /*|| column.filter === filter*/
+        //    || grid._autoFocusColumn/* || column === grid._inputingColumn*/) return;
 
         if (grid._inputingColumn !== column) {
             delete grid._inputingColumn;
         }
-        column.prevFilter = '';
+        //column.prevFilter = '';
         if (e && e.target) {
             grid._autocompleteRect = e.target.getBoundingClientRect();
         }
 
-        grid.pageNumber = 1;
-        grid.selectedRowIndex = 0;
-        grid.refresh();
+        if (grid.needRefresh()) {
+            grid._autocompleteDropdown.visible = false;
+            grid.pageNumber = 1;
+            grid.selectedRowIndex = 0;
+            grid.refresh();
+        }
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
-    columnFilterChanged(column, filter, e) {
+    onAutocompleteItemSelected(column, filter, e) {
         const grid = this;
-        if (grid._skipChange) return;
+        //if (grid._skipChange) return;
 
         column.filter = filter;
         if (e && e.target) {
             grid._autocompleteRect = e.target.getBoundingClientRect();
         }
 
-        grid.pageNumber = 1;
-        grid.selectedRowIndex = 0;
-        grid.refresh();
+        //grid._skipAutocomplete = true;
+
+        if (grid.needRefresh()) {
+            //grid._skipAutocomplete = true;
+            grid.pageNumber = 1;
+            grid.selectedRowIndex = 0;
+            grid.refresh();
+        }
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     onAutocompleteClick(col, e) {
         const grid = this;
 
+        grid._inputingColumn = col;
         e.target.focus();
         setTimeout(() => {
-            if (grid._skipAutocomplete) {
-                grid._skipAutocomplete = false;
-                return;
-            }
+            //if (grid._skipAutocomplete) {
+            //    grid._skipAutocomplete = false;
+            //    return;
+            //}
 
-            grid._inputingColumn = col;
             grid._autocompleteDropdown.items = [];
             grid._autocompleteRect = e.target.getBoundingClientRect();
 
@@ -254,19 +296,24 @@ export class GridFLClass extends GridDBClass {
         }, 150);
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
-    onAutocompleteFocus(col, e) {
-        const grid = this;
+    //onAutocompleteFocus(col, e) {
+    //    return;
+    //    const grid = this;
 
-        if (col.prevFilter === undefined) {
-            col.prevFilter = col.filter;
-        }
+    //    if (col.prevFilter === undefined) {
+    //        col.prevFilter = col.filter;
+    //    }
 
-        const sameColumn = grid._inputingColumn === col;
-        grid._inputingColumn = col;
-        if (grid._autocompleteDropdown.visible && !sameColumn) {
-            grid._autocompleteDropdown.close();
-        }
-    }
+    //    const sameColumn = grid._inputingColumn === col;
+    //    grid._inputingColumn = col;
+    //    if (grid._autocompleteDropdown.visible && !sameColumn) {
+    //        grid._autocompleteDropdown.close();
+
+    //        grid.pageNumber = 1;
+    //        grid.selectedRowIndex = 0;
+    //        grid.refresh();
+    //    }
+    //}
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     onAutocompleteInput(col, e) {
         const grid = this;
@@ -275,17 +322,20 @@ export class GridFLClass extends GridDBClass {
         let prevSeq = grid._autocompleteSeq;
         grid._autocompleteSeq++;
 
+        col.filter = e.target.value;
+        grid._autoFocusColumn = col;
 
         setTimeout(() => {
             if (++prevSeq !== grid._autocompleteSeq) return;
 
             grid._inputingColumn = col;
-            grid._autoFocusColumn = col;
             grid._autocompleteDropdown.items = [];
 
             const elem = document.getElementById(e.target.id);
 
             grid._autocompleteRect = elem ? elem.getBoundingClientRect() : e.target.getBoundingClientRect();
+
+            //grid._skipChange = true;
 
             grid.showAutocomplete(e);
         }, 100);
@@ -295,7 +345,7 @@ export class GridFLClass extends GridDBClass {
         const grid = this;
 
         column.filter = '';
-        column.prevFilter = '';
+        //column.prevFilter = '';
 
         grid.pageNumber = 1;
         grid.selectedRowIndex = 0;

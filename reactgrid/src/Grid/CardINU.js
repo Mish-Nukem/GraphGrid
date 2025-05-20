@@ -61,12 +61,14 @@ export class CardINUClass extends GridFLClass {
 
         const card = this;
 
-        card.cardRow = props.cardRow || {};
-        card.initialRow = {};
+        card.cardRow = {};
+        card.initialRow = props.cardRow;
+        Object.assign(card.cardRow, card.initialRow);
+
         if (props.isNewRecord) {
             card.isNewRecord = true;
+            card._rowChanged = true;
         }
-        Object.assign(card.initialRow, card.cardRow);
 
         card.visible = true;
         card.isVisible = props.isVisible || card.isVisible;
@@ -156,7 +158,7 @@ export class CardINUClass extends GridFLClass {
                     </div>
                 )
             //case 'date':
-            //    break;
+            //    break; //key={`cardinp_${card.id}_${card.stateind}_`}
             default:
                 return (
                     <div className="graph-card-field">
@@ -166,7 +168,8 @@ export class CardINUClass extends GridFLClass {
                             {col.title || col.name}
                         </span>
                         <input
-                            value={value}
+
+                            value={value !== undefined ? value : ''}
                             style={{ width: 'calc(100% - 4px)', padding: '0 2px', boxSizing: 'border-box', height: '2.3em', gridColumn: col.required || col.readonly ? 'span 3' : 'span 2' }}
                             onChange={(e) => card.changeField(e, col)}
                             disabled={col.readonly ? 'disabled' : ''}
@@ -227,21 +230,32 @@ export class CardINUClass extends GridFLClass {
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     commitChangesNodeDisabled(e) {
         const card = this;
-        return !card._rowCahnged;
+        return !card._rowChanged;
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     rollbackChangesNodeDisabled(e) {
         const card = this;
-        return !card._rowCahnged;
+        return !card._rowChanged;
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     commitChangesNode(e) {
+        const card = this;
+        card.saveRow(e).then(
+            () => {
+                card._rowChanged = false;
+                Object.assign(card.initialRow, card.cardRow);
+                card.refreshState();
+            }
+        ).catch((message) => {
+            Object.assign(card.cardRow, card.initialRow);
+            card.refreshState();
+            alert(message || 'Error!');
+        });
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     rollbackChangesNode(e) {
         const card = this;
         if (card.isNewRecord) {
-            //card.cardRow = card.initialRow;
             Object.assign(card.cardRow, card.initialRow);
             card.refreshState();
         }
@@ -250,6 +264,8 @@ export class CardINUClass extends GridFLClass {
                 rows => {
                     card.rows = rows;
                     card.cardRow = rows[0];
+                    Object.assign(card.initialRow, card.cardRow);
+                    card._rowChanged = false;
                     card.afterGetRows();
                     card.refreshState();
                 }
@@ -306,7 +322,7 @@ export class CardINUClass extends GridFLClass {
         else {
             card.cardRow[col.name] = '';
         }
-        card._rowCahnged = true;
+        card._rowChanged = true;
         card.refreshState();
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -314,7 +330,7 @@ export class CardINUClass extends GridFLClass {
         const card = this;
         card.cardRow[card.lookupField.keyField] = card.lookupGrid.selectedValue();
         card.cardRow[card.lookupField.name] = card.lookupGrid.selectedText();
-        card._rowCahnged = true;
+        card._rowChanged = true;
         card.closeLookup();
         card.refreshState();
     }
@@ -322,7 +338,7 @@ export class CardINUClass extends GridFLClass {
     changeField(e, col) {
         const card = this;
         card.cardRow[col.name] = e.target.value;
-        card._rowCahnged = true;
+        card._rowChanged = true;
         card.refreshState();
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -363,24 +379,26 @@ export class CardINUClass extends GridFLClass {
             { key: 'columns', value: card.keyField },
         ];
 
-        params.push({ key: 'f0', value: card.keyField + ' = ' + card.cardRow[card.keyField] });
+        if (!card.isNewRecord) {
+            params.push({ key: 'f0', value: card.keyField + ' = ' + card.cardRow[card.keyField] });
+        }
 
         return new Promise(function (resolve, reject) {
             card.dataGetter.get({ url: card.entity + '/' + (card.isNewRecord ? 'add' : 'update'), params: params }).then(
                 (res) => {
-                    if (+res > 0) {
+                    if (res && +res.resStr > 0) {
                         if (card.isNewRecord) {
                             card.cardRow[card.keyField] = +res;
                             card.initialRow[card.keyField] = +res;
                             card.isNewRecord = false;
                         }
-                        resolve(res);
+                        resolve(res.resStr);
                     }
-                    else if (String(res) === 'true') {
-                        resolve(res);
+                    else if (String(res.resStr.toLowerCase()) === 'true') {
+                        resolve(res.resStr);
                     }
                     else {
-                        reject(Error("Error saving row"));
+                        reject(Error(res.resStr || "Error saving row"));
                     }
                 }
             );

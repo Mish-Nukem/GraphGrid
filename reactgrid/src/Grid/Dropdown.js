@@ -19,12 +19,10 @@ export function Dropdown(props) {
         props.init(dd);
     }
 
-    //if (!dd.refreshState) {
-        dd.refreshState = function () {
-            //log('refreshState ' + dd.stateind);
-            setState({ dd: dd, ind: dd.stateind++ });
-        }
-    //}
+    dd.refreshState = function () {
+        //log('refreshState ' + dd.stateind);
+        setState({ dd: dd, ind: dd.stateind++ });
+    }
 
     useEffect(() => {
         dd.setupEvents();
@@ -61,6 +59,7 @@ export class DropdownClass extends BaseComponent {
         this.stateind = 0;
 
         this.opt.onItemClick = props.onItemClick;
+        this.opt.onClose = props.onClose;
 
         this.visible = false;
     }
@@ -79,7 +78,7 @@ export class DropdownClass extends BaseComponent {
         );
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
-    renderPopup() {
+    renderSelf() {
         const dd = this;
 
         return (
@@ -130,8 +129,12 @@ export class DropdownClass extends BaseComponent {
 
         return (
             dd.visible && dd.items.length > 0 ? <Modal
+                init={(wnd) => {
+                    wnd.visible = dd.visible;
+                    wnd.opt.pos = dd.pos;
+                }}
                 isModal={!noModal}
-                renderContent={() => { return dd.renderPopup() }}
+                renderContent={() => { return dd.renderSelf() }}
                 closeWhenEscape={true}
                 pos={dd.pos}
                 closeWhenMiss={true}
@@ -140,7 +143,12 @@ export class DropdownClass extends BaseComponent {
                 resizable={false}
                 noPadding={true}
                 hiddenOverlay={true}
-                onClose={() => dd.visible = false}
+                onClose={() => {
+                    dd.visible = false;
+                    if (dd.opt.onClose) {
+                        dd.opt.onClose();
+                    }
+                }}
             >
             </Modal> : <></>
         );
@@ -161,7 +169,7 @@ export class DropdownClass extends BaseComponent {
             const renderFake = function () {
                 return (
                     <div>
-                        {dd.renderPopup(true)}
+                        {dd.renderSelf(true)}
                     </div>
                 )
             }
@@ -208,9 +216,9 @@ export class DropdownClass extends BaseComponent {
     close() {
         const dd = this;
         dd.visible = false;
-        if (dd.opt.onClose) {
-            dd.opt.onClose();
-        }
+        //if (dd.opt.onClose) {
+        //    dd.opt.onClose();
+        //}
 
         dd.items = [];
         delete dd.activeItem;
