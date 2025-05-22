@@ -216,7 +216,7 @@ export default class TestData {
     getTestGraph() {
         const graph = new GraphClass();
 
-        graph.noCachWave = true;
+        //graph.noCachWave = true;
 
         const projectNode = { id: 0, entity: 'SrRProjectEntity', title: 'Проект', status: NodeStatus.filter, keyField: 'ID_SR_R_PROJECT_SRPJ', nameField: 'NAME_PROJ_SRPJ' };
         const promptNode = { id: 1, entity: 'SrRPromptnessEntity', title: 'Срочность выполнения', status: NodeStatus.filter, keyField: 'ID_SR_R_PROMPTNESS_SRPR', nameField: 'NAME_SRPR' };
@@ -272,6 +272,7 @@ export default class TestData {
                     sortable: true,
                     filtrable: true,
                     required: true,
+                    maxW: 600,
                 },
                 {
                     name: 'FROM_WHOM_SRRM_NAME',
@@ -779,23 +780,28 @@ export default class TestData {
         function connect(child, parent) {
             const link = { parent: parent, child: child };
 
-            graph.linksDict[child.id + '_' + parent.id] = link;
+            const lkey = child.id + '_' + parent.id;
+            graph.linksDict[lkey] = link;
 
-            child.parentLinks = child.parentLinks || {};
-            child.parentLinks[parent.id] = link;
+            child.parents = child.parents || [];
+            child.parents.push(parent.uid);
 
-            parent.childLinks = parent.childLinks || {};
-            parent.childLinks[child.id] = link;
+            parent.children = parent.children || [];
+            parent.children.push(child.uid);
         }
 
-        for (let id in graph.nodesDict) {
-            let node = graph.nodesDict[id];
+        for (let uid in graph.nodesDict) {
+            let node = graph.nodesDict[uid];
+            node.uid = uid;
+            node.children = node.children || [];
+            node.parents = node.parents || [];
+
             if (!node.parentGrids) continue;
 
             let parentUids = ',' + node.parentGrids + ',';
 
             for (let cid in graph.nodesDict) {
-                if (+cid === node.id) continue;
+                if (cid === node.uid) continue;
                 let pnode = graph.nodesDict[cid];
 
                 if (parentUids.indexOf(pnode.id) <= 0) continue;

@@ -140,6 +140,7 @@ export class ModalClass extends BaseComponent {
                 >
                     {wnd.opt.noHeader ? <></> : wnd.renderHeader()}
                     <div
+                        key={`window_${wnd.id}_${wnd.stateind}_body_`}
                         wnd-body={1}
                         className={wnd.opt.bodyClass}
                         style={{ padding: this.opt.noPadding ? '0' : '' }}
@@ -156,7 +157,10 @@ export class ModalClass extends BaseComponent {
     renderHeader() {
         const wnd = this;
         return (
-            <div wnd-header={1} className={wnd.opt.headerClass}
+            <div
+                key={`window_${wnd.id}_${wnd.stateind}_header_`}
+                wnd-header={1}
+                className={wnd.opt.headerClass}
                 onMouseDown={(e) => wnd.mouseDownDrag(e)}
             >
                 <h4 className={wnd.opt.titleClass}>
@@ -170,7 +174,10 @@ export class ModalClass extends BaseComponent {
     renderFooter() {
         const wnd = this;
         return (
-            <div wnd-footer={1} className={wnd.opt.footerClass}
+            <div
+                key={`window_${wnd.id}_${wnd.stateind}_footer_`}
+                wnd-footer={1}
+                className={wnd.opt.footerClass}
                 onMouseDown={(e) => wnd.mouseDownDrag(e)}
                 style={
                     {
@@ -183,6 +190,7 @@ export class ModalClass extends BaseComponent {
                 {wnd.buttons.map((btn, ind) => {
                     return (
                         <button
+                            key={`window_${wnd.id}_${btn._ind}_${wnd.stateind}_button_`}
                             wnd-btn={`button_${wnd.id}_${btn._ind}_`}
                             className={wnd.opt.footerButtonClass}
                             title={btn.title}

@@ -24,10 +24,11 @@ export class GraphClass {
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     // посещает узлы из списка list волной
     visitNodesByWave(e) {
+        const graph = this;
         if (!e || !e.list || e.list.length <= 0) return;
 
         // если запущена новая однотипная волна, то нет смысла продолжать текущую
-        if (e.waveType === this.lastWaveType && e.waveInd < this.lastWaveInd) return;
+        if (e.waveType === graph.lastWaveType && e.waveInd < graph.lastWaveInd) return;
 
         while (e.list.length) {
             let node = e.list.shift();
@@ -52,8 +53,9 @@ export class GraphClass {
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     // очищает пометки о посещении волной
     clearWaveVisits() {
-        for (let id in this.nodesDict) {
-            this.nodesDict[id]._waveNum = -1;
+        const graph = this;
+        for (let uid in graph.nodesDict) {
+            graph.nodesDict[uid]._waveNum = -1;
         }
     };
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -69,8 +71,9 @@ export class GraphClass {
     // moveType             - способ распространения волны по графу: fromParent - от родителя к детям, fromChild - от ребенка к родителям
     triggerWave(e) {
         e = e || {};
+        const graph = this;
 
-        if (this._isMakingWave || !e.nodes || e.nodes.length <= 0) return;
+        if (graph._isMakingWave || !e.nodes || e.nodes.length <= 0) return;
 
         if (e.waveType === undefined) e.waveType = WaveType.value;
         if (e.withStartNodes === undefined) e.withStartNodes = true;
@@ -79,21 +82,21 @@ export class GraphClass {
         e.list = [];
 
         // текущая конфигурация волны
-        e.waveUid = this.getWaveUid(e);
+        e.waveUid = graph.getWaveUid(e);
 
-        this.lastWaveType = e.waveType;
-        e.waveInd = ++this.lastWaveInd;
+        graph.lastWaveType = e.waveType;
+        e.waveInd = ++graph.lastWaveInd;
 
         // выставляем у графа признак "пущена волна"
-        this._isMakingWave = true;
+        graph._isMakingWave = true;
 
         // пытаемся найти готовую волну среди закешированных волн
-        let _cachedWave = this.waveCache[e.waveUid];
-        if (!this.noCachWave && _cachedWave) {
+        let _cachedWave = graph.waveCache[e.waveUid];
+        if (!graph.noCachWave && _cachedWave) {
             // удалось найти закешированную волну, просто проходим по ней
             Object.assign(e.list, _cachedWave);
-            this.visitNodesByWave(e);
-            this._isMakingWave = false;
+            graph.visitNodesByWave(e);
+            graph._isMakingWave = false;
             return;
         }
 
@@ -102,7 +105,7 @@ export class GraphClass {
         let error;
         try {
             // очищаем пометки узлов о посещении волной
-            this.clearWaveVisits();
+            graph.clearWaveVisits();
 
             // уровень волны
             let waveNum = 0;
@@ -122,14 +125,14 @@ export class GraphClass {
             // нужно добавить найденный узел в список текущего уровня волны
             let needAdd;
 
-            while (found && this.nodeCount > waveNum) {
+            while (found && graph.nodeCount > waveNum) {
                 found = false;
                 waveNum++;
 
                 const currWaveNodes = [];
 
-                for (let id in this.nodesDict) {
-                    let node = this.nodesDict[id];
+                for (let uid in graph.nodesDict) {
+                    let node = graph.nodesDict[uid];
                     // текущий узел должен браться из еще не посещенных волной
                     if (node._waveNum >= 0) continue;
 
@@ -140,10 +143,10 @@ export class GraphClass {
                     // если moveType == MoveType.All, то будут собраны все соседние узлы, и по родительским, и по дочерним
                     if (e.moveType !== MoveType.fromChild) {
                         // проверяем, что у узла все родительские узлы были посещены волной
-                        for (let lid in node.parentLinks) {
-                            let link = node.parentLinks[lid];
+                        for (let pid of node.parents) {
+                            let link = graph.linksDict[node.id + '_' + graph.nodesDict[pid].id];
                             // дополнительная проверка skipLink может запретить включение узла в список, несмотря на то, что он связан с предыдущим уровнем
-                            needAdd = link.parent._waveNum >= 0 && link.parent._waveNum < waveNum && !this.skipLink(link, e.waveType);
+                            needAdd = link.parent._waveNum >= 0 && link.parent._waveNum < waveNum && !graph.skipLink(link, e.waveType);
 
                             if (!e.allParentsVisited && needAdd || e.allParentsVisited && !needAdd) break;
                         }
@@ -151,10 +154,10 @@ export class GraphClass {
 
                     if ((!needAdd || e.allParentsVisited) && e.moveType !== MoveType.fromParent) {
                         // теперь среди дочерних узлов ищем хотя бы один, посещенный волной (если allParentsVisited == true, то все дочерние узлы должны быть посещены волной)
-                        for (let lid in node.childLinks) {
-                            let link = node.childLinks[lid];
+                        for (let cid of node.children) {
+                            let link = graph.linksDict[graph.nodesDict[cid].id + '_' + node.id];
                             // дополнительная проверка skipLink может запретить включение узла в список, несмотря на то, что он связан с предыдущим уровнем
-                            needAdd = link.child._waveNum >= 0 && link.child._waveNum < waveNum && !this.skipLink(link, e.waveType);
+                            needAdd = link.child._waveNum >= 0 && link.child._waveNum < waveNum && !graph.skipLink(link, e.waveType);
                             if (!e.allParentsVisited && needAdd || e.allParentsVisited && !needAdd) break;
                         }
                     }
@@ -173,12 +176,12 @@ export class GraphClass {
                     // берем в волну только те узлы, у которых среди родителей либо предыдущая волна, либо нет номера волны вообще
                     for (let i = currWaveNodes.length - 1; i >= 0; i--) {
                         let node = currWaveNodes[i];
-                        if (e.moveType !== MoveType.fromChild && !this.hasParentWithSameWave(node)) {
+                        if (e.moveType !== MoveType.fromChild && !graph.hasParentWithSameWave(node)) {
                             _cachedWave.push(node);
                             currWaveNodes.splice(i, 1);
                             added = true;
                         }
-                        else if (e.moveType !== MoveType.fromParent && !this.hasChildWithSameWave(node)) {
+                        else if (e.moveType !== MoveType.fromParent && !graph.hasChildWithSameWave(node)) {
                             _cachedWave.push(node);
                             currWaveNodes.splice(i, 1);
                             added = true;
@@ -205,56 +208,59 @@ export class GraphClass {
 
             // после определения списка узлов, добавленных в порядке возрастания номера волны, проходим по этим узлам
             Object.assign(e.list, _cachedWave);
-            this.visitNodesByWave(e);
+            graph.visitNodesByWave(e);
         }
         catch (x) {
             error = true;
-            if (this.debug) alert(x);
+            if (graph.debug) alert(x);
         }
         finally {
-            this.clearWaveVisits();
-            this._isMakingWave = false;
+            graph.clearWaveVisits();
+            graph._isMakingWave = false;
 
             // если проход волн закончился неудачей, то кешировать последовательность нет смысла
             if (!error) {
-                this.waveCache[e.waveUid] = _cachedWave;
+                graph.waveCache[e.waveUid] = _cachedWave;
             }
         }
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     // возвращает истину, если среди родительских узлов есть хотя бы один с тем же номером волны
     hasParentWithSameWave(node) {
+        const graph = this;
         if (!node) return;
 
-        for (let lid in node.parentLinks) {
-            if (node.parentLinks[lid].parent._waveNum === node._waveNum) return true;
+        for (let pid of node.parents) {
+            if (graph.nodesDict[pid]._waveNum === node._waveNum) return true;
         }
     };
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     // возвращает истину, если среди родительских узлов есть хотя бы один с тем же номером волны
     hasChildWithSameWave(node) {
+        const graph = this;
         if (!node) return;
 
-        for (let lid in node.childLinks) {
-            if (node.childLinks[lid].child._waveNum === node._waveNum) return true;
+        for (let lid of node.children) {
+            if (graph.nodesDict[lid]._waveNum === node._waveNum) return true;
         }
     };
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     // помечает все узлы графа, которые входят хотя бы в один цикл
     markCycles() {
+        const graph = this;
         // Если вершина имеет только входные или только выходные дуги, то она явно не входит ни в один цикл. Можно удалить все такие вершины из графа 
         // вместе со связанными с ними дугами. В результате появятся новые вершины, имеющие только входные или выходные дуги. Они также удаляются. 
         // Итерации повторяются до тех пор, пока граф не перестанет изменяться. Отсутствие изменений свидетельствует об отсутствии циклов, 
         // если все вершины были удалены. Все оставшиеся вершины обязательно принадлежат циклам.
         const hasParents = function (node) {
-            for (let lid in node.parentLinks) {
-                if (!node.parentLinks[lid].parent.excluded) return true;
+            for (let pid of node.parents) {
+                if (!graph.nodesDict[pid].excluded) return true;
             }
         };
 
         const hasChildren = function (node) {
-            for (let lid in node.childLinks) {
-                if (node.childLinks[lid].child.excluded) return true;
+            for (let lid in node.children) {
+                if (graph.nodesDict[lid].excluded) return true;
             }
         };
 
@@ -264,8 +270,8 @@ export class GraphClass {
         while (changesDone) {
             changesDone = false;
 
-            for (let id in this.nodesDict) {
-                let node = this.nodesDict[id];
+            for (let uid in graph.nodesDict) {
+                let node = graph.nodesDict[uid];
                 if (node.excluded) continue;
 
                 // если узел висячий в какую-либо из сторон, или вообще несвязанный
@@ -277,8 +283,8 @@ export class GraphClass {
             }
         }
 
-        for (let id in this.nodesDict) {
-            let node = this.nodesDict[id];
+        for (let uid in graph.nodesDict) {
+            let node = graph.nodesDict[uid];
             if (node.excluded) {
                 delete node.excluded;
             }

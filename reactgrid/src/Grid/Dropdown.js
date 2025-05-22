@@ -61,6 +61,8 @@ export class DropdownClass extends BaseComponent {
         this.opt.onItemClick = props.onItemClick;
         this.opt.onClose = props.onClose;
 
+        this.maxW = props.maxW;
+
         this.visible = false;
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -196,6 +198,9 @@ export class DropdownClass extends BaseComponent {
                 h: h
             };
 
+            if (dd.maxW !== undefined) {
+                dd.pos.w = Math.min(dd.pos.w, dd.maxW);
+            }
             //log(' DropdownPos w = ' + dd.pos.w + ', h = ' + dd.pos.h);
 
             dd.refreshState();
@@ -250,7 +255,7 @@ export class DropdownClass extends BaseComponent {
 
             switch (key) {
                 case 'esc', 'escape':
-                    dd.close();;
+                    dd.close();
                     break;
                 case 'enter':
                     if (!dd.activeItem) return;
@@ -286,13 +291,15 @@ export class DropdownClass extends BaseComponent {
 
                     dd.refreshState();
                     break;
+                case 'tab':
+                    dd.close();
+                    break;
                 default:
                     break;
             }
         }
 
         document.addEventListener('keydown', onKeyDown);
-
 
         dd.clearEvents = function () {
             document.removeEventListener('keydown', onKeyDown);

@@ -267,8 +267,7 @@ export class GridINUClass extends GridFLClass {
     deleteRecord(e) {
         const node = this;
 
-        // eslint-disable-next-line no-restricted-globals
-        if (confirm('Delete  record?')) {
+        if (window.confirm('Delete  record?')) {
             node.deleteRow(e).then(() => node.refresh());
         }
     }
@@ -327,24 +326,24 @@ export class GridINUClass extends GridFLClass {
     getDefaultLinkContent() {
         const grid = this;
         return {
-            applyLink: function (parentNode) {
-                if (!parentNode || parentNode.visible === false) return '';
+            applyLink: function (link) {
+                if (!link.parent || (link.parent.visible === false && link.parent.status !== NodeStatus.hidden)) return '';
 
-                if (parentNode.status === NodeStatus.grid) {
-                    if (!parentNode.rows || parentNode.rows.length <= 0) return '1=2'
+                if (link.parent.status === NodeStatus.grid) {
+                    if (!link.parent.rows || link.parent.rows.length <= 0) return '1=2'
                 }
 
-                if (parentNode.getConnectContent) {
-                    return parentNode.getConnectContent({ child: grid });
+                if (link.parent.getConnectContent) {
+                    return link.parent.getConnectContent({ child: grid });
                 }
 
-                const keyField = parentNode.getKeyColumn ? parentNode.getKeyColumn() : parentNode.keyField;
+                const keyField = link.parent.getKeyColumn ? link.parent.getKeyColumn() : link.parent.keyField;
                 if (!keyField) return '';
 
-                const activeValue = parentNode.status === NodeStatus.grid ? parentNode.selectedValue() : parentNode.value;
+                const activeValue = link.parent.status === NodeStatus.grid ? link.parent.selectedValue() : link.parent.value;
                 if (!activeValue) return '';
 
-                return activeValue ? parentNode.entity + (parentNode.entityAdd || '') + ' = ' + activeValue : '1=2';
+                return activeValue ? link.parent.entity ? link.parent.entity + (link.parent.uid ? ';' + link.parent.uid : '') + ' = ' + activeValue : activeValue : '1=2';
             }
         };
     }
@@ -366,6 +365,18 @@ export class GridINUClass extends GridFLClass {
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     getColumn(name) {
         return { name: name, sortable: true, filtrable: true };
+    }
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
+    prepareColumns(columns) {
+        const grid = this;
+        super.prepareColumns(columns);
+
+        for (let col of grid.columns) {
+            if (col._readonly !== undefined) {
+                col.readonly = col._readonly;
+                delete col._readonly;
+            }
+        }
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     getRows(e) {

@@ -103,6 +103,7 @@ export class CardINUClass extends GridFLClass {
                 {
                     card.lookupIsShowing ?
                         <Modal
+                            title={card.lookupField.title}
                             renderContent={() => { return card.renderLookupGrid(card.lookupField) }}
                             pos={card.lookupPos}
                             onClose={(e) => card.closeLookup(e)}
@@ -119,7 +120,7 @@ export class CardINUClass extends GridFLClass {
     renderField(col) {
         const card = this;
         const value = card.cardRow[col.name];
-        if (col.type === undefined) {
+        if (col.type === undefined || col.type === null) {
             col.type = '';
         }
         switch (col.type.toLowerCase()) {
@@ -167,13 +168,16 @@ export class CardINUClass extends GridFLClass {
                         >
                             {col.title || col.name}
                         </span>
-                        <input
-
-                            value={value !== undefined ? value : ''}
-                            style={{ width: 'calc(100% - 4px)', padding: '0 2px', boxSizing: 'border-box', height: '2.3em', gridColumn: col.required || col.readonly ? 'span 3' : 'span 2' }}
-                            onChange={(e) => card.changeField(e, col)}
-                            disabled={col.readonly ? 'disabled' : ''}
-                        ></input>
+                        {
+                            //col.maxW !== undefined && +col.maxW >= 200 ?
+                            <textarea
+                                value={value !== undefined ? value : ''}
+                                style={{ width: 'calc(100% - 4px)', height: col.maxW !== undefined && +col.maxW >= 200 ? '5em' : '2.3em', padding: '0 2px', boxSizing: 'border-box', gridColumn: col.required || col.readonly ? 'span 3' : 'span 2', resize: 'vertical' }}
+                                onChange={(e) => card.changeField(e, col)}
+                                disabled={col.readonly ? 'disabled' : ''}
+                            >
+                            </textarea>
+                        }
                         {
                             !col.required && !col.readonly ?
                                 <button

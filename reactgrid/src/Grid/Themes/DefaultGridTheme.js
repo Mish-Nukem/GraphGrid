@@ -232,20 +232,32 @@ export class DefaultGridTheme {
     translate(text, context) {
 
         const dict = {
+            'ADD': 'Добавить',
+            'ADD NEW RECORD': 'Добавить новую строку',
+            'COPY': 'Копировать',
+            'COPY RECORD': 'Копировать строку',
             'CLEAR ALL FILTERS': 'Очистить все фильтры',
+            'COMMIT': 'Сохранить',
+            'COMMIT CHANGES': 'Сохранить изменения',
+            'DELETE': 'Удалить',
+            'DELETE RECORD': 'Удалить строку',
             'FIRST': 'К началу',
             'LAST': 'В конец',
+            'LOAD MORE RECORDS': 'Загрузить еще строк',
+            'MORE...': 'еще...',
             'NEXT': 'Следующая',
             'OF': 'из',
             'PREV': 'Предыдущая',
             'REFRESH': 'Обновить',
             'RESET COLUMNS ORDER': 'Сбросить порядок колонок',
             'RESET COLUMNS WIDTHS': 'Сбросить ширину колонок',
+            'ROLLBACK': 'Откатить',
+            'ROLLBACK CHANGES': 'Откатить изменения',
             'SETTINGS': 'Настройки',
             'SELECT': 'Выбор',
+            'SELECT VALUE': 'Выбрать значение',
             'TOTAL ROWS': 'Всего строк',
-            'MORE...': 'еще...',
-            'LOAD MORE RECORDS': 'Загрузить еще строк'
+            'VIEW': 'Просмотр',
         };
         return dict[text.toUpperCase()] || text;
     }

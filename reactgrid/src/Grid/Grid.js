@@ -65,7 +65,7 @@ export class GridClass extends BaseComponent {
 
         const grid = this;
 
-        grid.opt = { zInd: 1 };
+        grid.opt = { zInd: props.zInd || 1 };
 
         grid.id = window._gridSeq++;
 
@@ -76,8 +76,6 @@ export class GridClass extends BaseComponent {
         }
 
         grid.getColumns = props.getColumns || grid.getColumns;
-
-        grid.opt.zInd = props.zInd || 1;
 
         grid.selectedRowIndex = 0;
 
@@ -555,6 +553,10 @@ export class GridClass extends BaseComponent {
         for (let row of grid.rows) {
             fakeDiv.innerHTML = renderToStaticMarkup(grid.renderCell(column, row));
             contentSize = Math.max(contentSize, parseInt(getComputedStyle(fakeDiv).width));
+        }
+
+        if (column.maxW !== undefined) {
+            contentSize = Math.min(contentSize, +column.maxW);
         }
 
         const newW = contentSize + 12;//Math.max(column.w, contentSize);

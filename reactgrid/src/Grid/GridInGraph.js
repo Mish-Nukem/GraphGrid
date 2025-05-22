@@ -87,18 +87,21 @@ export class GridInGraphClass extends GridClass {
             grid.graph = graph;
             graph.uid = grid.graphUid;
 
-            graph.nodeCount++;
-            graph.nodesDict[grid.id] = grid;
-
-            grid.parentLinks = {};
-            grid.childLinks = {};
+            grid.parents = [];
+            grid.children = [];
 
             if (props.parentGrids) {
                 grid.graph.needCheckIntegrity = true;
             }
-        }
 
-        grid.uid = props.uid !== undefined ? props.uid : grid.id;
+            grid.uid = props.uid !== undefined ? props.uid : grid.id;
+            graph.nodeCount++;
+            graph.nodesDict[grid.uid] = grid;
+
+        }
+        else {
+            grid.uid = props.uid !== undefined ? props.uid : grid.id;
+        }
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     log(message, pref) {
@@ -124,17 +127,18 @@ export class GridInGraphClass extends GridClass {
         grid.connectedToParents = true;
 
         const parentUids = ',' + grid.parentGrids + ',';
-        for (let id in graph.nodesDict) {
-            if (+id === grid.id) continue;
+        for (let uid in graph.nodesDict) {
+            if (uid === grid.uid) continue;
 
-            let parentGrid = graph.nodesDict[id];
+            let parentGrid = graph.nodesDict[uid];
             if (parentUids.indexOf(parentGrid.uid) <= 0) continue;
 
             const link = { content: grid.getDefaultLinkContent(), parent: parentGrid, child: grid };
 
-            graph.linksDict[grid.id + '_' + parentGrid.id] = link;
-            grid.parentLinks[parentGrid.id] = link;
-            parentGrid.childLinks[grid.id] = link;
+            const lkey = grid.id + '_' + parentGrid.id;
+            graph.linksDict[lkey] = link;
+            grid.parents.push(parentGrid.uid);
+            parentGrid.children.push(grid.uid);
         }
 
         graph.waveCache = {};
@@ -147,14 +151,14 @@ export class GridInGraphClass extends GridClass {
     getDefaultLinkContent() {
         const grid = this;
         return {
-            applyLink: function (parentGrid) {
-                if (!parentGrid || !parentGrid.rows) return '';
+            applyLink: function (link) {
+                if (!link.parent || !link.parent.rows) return '';
 
-                if (parentGrid.getConnectContent) {
-                    return parentGrid.getConnectContent({ child: grid });
+                if (link.parent.getConnectContent) {
+                    return link.parent.getConnectContent({ child: grid });
                 }
 
-                return parentGrid.selectedValue();
+                return link.parent.selectedValue();
             }
         };
     }
@@ -190,10 +194,10 @@ export class GridInGraphClass extends GridClass {
         const graph = grid.graph;
         graph.needCheckIntegrity = false;
 
-        for (let id in graph.nodesDict) {
-            if (id === grid.id) continue;
+        for (let uid in graph.nodesDict) {
+            if (uid === grid.id) continue;
 
-            let node = graph.nodesDict[id];
+            let node = graph.nodesDict[uid];
             if (!node.connectedToParents) {
                 node.connectToParents();
             }
@@ -208,12 +212,14 @@ export class GridInGraphClass extends GridClass {
             return ["1=2"];
         }
 
-        for (let id in grid.parentLinks) {
-            let link = grid.parentLinks[id];
+        if (!grid.parents || grid.parents.length <= 0) return filters;
+
+        for (let uid of grid.parents) {
+            let link = grid.graph.linksDict[grid.id + '_' + grid.graph.nodesDict[uid].id];
             if (!link.content) continue;
 
             if (link.content.applyLink) {
-                let filter = link.content.applyLink(link.parent);
+                let filter = link.content.applyLink(link);
                 if (filter === undefined || filter === '') continue;
 
                 filters.push(String(filter));

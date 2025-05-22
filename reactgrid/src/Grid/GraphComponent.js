@@ -31,7 +31,8 @@ export function Graph(props) {
 
         if (!gc.graph) {
             gc.getScheme().then(
-                () => {
+                (graph) => {
+                    gc.graph = graph;
                     gc.refreshState();
                 }
             );
@@ -98,33 +99,33 @@ export class GraphComponentClass extends BaseComponent {
 
         return (
             <>
-                <div>
-                    <div className="graph-filter-line">
+                <div key={`graphall_${gc.stateind}_`}>
+                    <div className="graph-filter-line" key={`filterstop_${gc.stateind}_`}>
                         {
                             nodes.map((node) => { return gc.renderFilter(node, true) })
                         }
                     </div>
-                    <div className="graph-tabcontrol-buttons">
+                    <div className="graph-tabcontrol-buttons" key={`tabsstop_${gc.stateind}_`}>
                         {
                             nodes.map((node) => { return gc.renderGridTab(node, true) })
                         }
                     </div>
-                    <div className="graph-grid">
+                    <div className="graph-grid" key={`gridstop_${gc.stateind}_`}>
                         {
                             nodes.map((node) => { return gc.renderGrid(node, true) })
                         }
                     </div>
-                    <div className="graph-filter-line">
+                    <div className="graph-filter-line" key={`filterslow_${gc.stateind}_`}>
                         {
                             nodes.map((node) => { return gc.renderFilter(node, false) })
                         }
                     </div>
-                    <div className="graph-tabcontrol-buttons">
+                    <div className="graph-tabcontrol-buttons" key={`tabsslow_${gc.stateind}_`}>
                         {
                             nodes.map((node) => { return gc.renderGridTab(node, false) })
                         }
                     </div>
-                    <div className="graph-grid">
+                    <div className="graph-grid" key={`gridslow_${gc.stateind}_`}>
                         {
                             nodes.map((node, ind) => { return gc.renderGrid(node, false) })
                         }
@@ -202,12 +203,19 @@ export class GraphComponentClass extends BaseComponent {
     renderFilter(node, top) {
         const gc = this;
 
-        if (node.status !== NodeStatus.filter || gc.isTop(node) !== top) return <></>;
+        if (+node.status !== +NodeStatus.filter || gc.isTop(node) !== top) return <></>;
 
-        if (node.filterType === FilterType.date) return <></>;
+        //if (node.filterType === FilterType.date) return <></>;
+
+        if (!gc.isTop(node) && node.parents.indexOf(gc.activeMaster) < 0) return <></>;
+
+        if (gc.isTop(node) && node.children.indexOf(gc.activeMaster) < 0) return <></>;
 
         return (
-            <div className="graph-filter" key={`fltrdiv_${node.id}_${gc.id}_${gc.stateind}_`}>
+            <div
+                className="graph-filter"
+                key={`fltrdiv_${node.id}_${gc.id}_${gc.stateind}_`}
+            >
                 <span
                     key={`fltrttl_${node.id}_${gc.id}_${gc.stateind}_`}
                     style={{ gridColumn: 'span 3', width: 'calc(100% - 4px)' }}
@@ -226,6 +234,7 @@ export class GraphComponentClass extends BaseComponent {
                             key={`fltrinp_${node.id}_${gc.id}_${gc.stateind}_`}
                             style={{ width: 'calc(100% - 4px)', padding: '0 2px', boxSizing: 'border-box', height: '2.3em' }}
                             value={node.value !== undefined && node.selectedText ? node.selectedText() : ''}
+                            readOnly={true}
                         ></input>
                 }
                 <button
@@ -249,9 +258,11 @@ export class GraphComponentClass extends BaseComponent {
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     renderGridTab(node, top) {
         const gc = this;
-        if (node.status !== NodeStatus.grid || gc.isTop(node) !== top) return <></>;
+        if (+node.status !== +NodeStatus.grid || gc.isTop(node) !== top) return <></>;
 
-        const isActive = top && node.id === gc.activeMaster || !top && node.id === gc.activeDetail;
+        if (!gc.isTop(node) && node.parents.indexOf(gc.activeMaster) < 0) return <></>;
+
+        const isActive = top && node.uid === gc.activeMaster || !top && node.uid === gc.activeDetail;
         return (
             <button
                 key={`tabctrl_${node.id}_${gc.id}_${gc.stateind}_`}
@@ -267,9 +278,10 @@ export class GraphComponentClass extends BaseComponent {
     renderGrid(node, top) {
         const gc = this;
 
-        if (!node.visible || node.status !== NodeStatus.grid || gc.isTop(node) !== top) {
-            return <></>;
-        }
+        if (!node.visible || +node.status !== +NodeStatus.grid || gc.isTop(node) !== top) return <></>;
+
+        if (!gc.isTop(node) && node.parents.indexOf(gc.activeMaster) < 0) return <></>;
+
         return (
             <GridINU
                 findGrid={(props) => gc.replaceGrid(props)}
@@ -302,29 +314,41 @@ export class GraphComponentClass extends BaseComponent {
         const obr = graph.nodesDict[grid.uid];
         grid.id = obr.id !== undefined ? obr.id : grid.id;
 
+        grid.uid = obr.uid;
         grid.title = obr.title;
         grid.nameField = obr.nameField;
         grid.keyField = obr.keyField;
-        grid.entityAdd = obr.entityAdd;
+        //grid.entityAdd = obr.entityAdd;
 
+        if (obr._readonly !== undefined) {
+            grid.readonly = obr._readonly;
+        }
+
+        grid.columns = obr.columns || grid.columns;
         grid.getColumns = obr.getColumns || grid.getColumns;
 
+        if (grid.columns && grid.columns.length > 0) {
+            grid.prepareColumns(grid.columns);
+        }
+
         grid.connectedToParents = true;
-        grid.parentLinks = obr.parentLinks;
-        for (let id in grid.parentLinks) {
-            let link = grid.parentLinks[id];
+        grid.parents = obr.parents;
+        for (let pid of grid.parents) {
+            let link = graph.linksDict[grid.id + '_' + graph.nodesDict[pid].id];
             link.child = grid;
             link.content = grid.getDefaultLinkContent();
         }
-        grid.childLinks = obr.childLinks;
-        for (let id in grid.childLinks) {
-            let link = grid.childLinks[id];
+        grid.children = obr.children;
+        for (let cid of grid.children) {
+            let link = graph.linksDict[graph.nodesDict[cid].id + '_' + grid.id];
             link.parent = grid;
         }
 
         if (!graph.nodeCount) {
             graph.nodeCount = 0;
-            for (let _ in graph.nodesDict) graph.nodeCount++;
+            for (let uid in graph.nodesDict) {
+                if (graph.nodesDict[uid] !== undefined) graph.nodeCount++
+            }
         }
 
         if (gc.lookupNode) {
@@ -344,10 +368,10 @@ export class GraphComponentClass extends BaseComponent {
     onGridRowDblClick(e, node, row) {
         const gc = this;
 
-        if (node.status === NodeStatus.filter) {
+        if (+node.status === +NodeStatus.filter) {
             gc.selectLookupValue(e);
         }
-        else if (node.status === NodeStatus.grid) {
+        else if (+node.status === +NodeStatus.grid) {
             if (!node.viewRecordDisabled(e)) {
                 node.viewRecord(e);
             }
@@ -356,15 +380,15 @@ export class GraphComponentClass extends BaseComponent {
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     selectActiveTab(node, top) {
         const gc = this;
-        const isActive = top && node.id === gc.activeMaster || !top && node.id === gc.activeDetail;
+        const isActive = top && node.uid === gc.activeMaster || !top && node.uid === gc.activeDetail;
 
-        if (node.status !== NodeStatus.grid || gc.isTop(node) !== top || isActive) return;
+        if (+node.status !== +NodeStatus.grid || gc.isTop(node) !== top || isActive) return;
 
-        if (top) gc.activeMaster = node.id; else gc.activeDetail = node.id;
+        if (top) gc.activeMaster = node.uid; else gc.activeDetail = node.uid;
 
         for (let uid in gc.graph.nodesDict) {
             let lnode = gc.graph.nodesDict[uid];
-            if (node === lnode || lnode.status !== NodeStatus.grid) continue;
+            if (node === lnode || +lnode.status !== +NodeStatus.grid) continue;
 
             if (gc.isTop(node) === gc.isTop(lnode)) {
                 lnode.visible = false;
@@ -381,7 +405,11 @@ export class GraphComponentClass extends BaseComponent {
 
         return new Promise(function (resolve, reject) {
 
-            const params = [{ key: 'scheme', value: gc.schemeName }];
+            const params = [
+                { key: 'atoken', value: gc.dataGetter.atoken },
+                { key: 'rtoken', value: gc.dataGetter.rtoken },
+                { key: 'graphScheme', value: gc.schemeName }
+            ];
 
             gc.dataGetter.get({ url: 'system/graphScheme', params: params }).then(
                 (schemeObj) => {
@@ -406,7 +434,10 @@ export class GraphComponentClass extends BaseComponent {
     prepareGraph(obrGraph) {
         const gc = this;
 
-        gc.graph = obrGraph;
+        gc.graph = new GraphClass();
+        gc.graph.nodesDict = obrGraph.nodesDict;
+        gc.graph.linksDict = obrGraph.linksDict;
+        gc.graph.nodeCount = 0;
 
         //    gc.graph = new GraphClass();
 
@@ -418,19 +449,28 @@ export class GraphComponentClass extends BaseComponent {
             let node = gc.graph.nodesDict[uid];
 
             node.graph = gc.graph;
+            gc.graph.nodeCount++;
 
             node.opt = node.opt || {};
+
+            if (node._readonly !== undefined) {
+                node.readonly = node._readonly;
+                delete node._readonly;
+            }
+
+            //log(' node ' + node.entity + '. status = ' + String(node.status));
+            //log(' String(NodeStatus.grid) ' + String(NodeStatus.grid));
 
             if (node.status === NodeStatus.grid) {
                 if (gc.isTop(node)) {
                     if (gc.activeMaster === undefined) {
-                        gc.activeMaster = node.id;
+                        gc.activeMaster = node.uid;
                         node.visible = true;
                     }
                 }
                 else {
                     if (gc.activeDetail === undefined) {
-                        gc.activeDetail = node.id;
+                        gc.activeDetail = node.uid;
                         node.visible = true;
                     }
                 }

@@ -196,6 +196,11 @@ export class GridFLClass extends GridDBClass {
             return String(item.id) === String(e.itemId);
         });
 
+        if (!item) {
+            grid.log('onAutocomleteItemClick: ' + e.itemId + ' - does not found!');
+            return;
+        }
+
         e.dropdown.items = [];
         grid._autocompleteDropdown.items = [];
         grid._autocompleteDropdown.visible = false;
@@ -211,6 +216,11 @@ export class GridFLClass extends GridDBClass {
 
         if (grid._autocompleteRect) {
             grid._autocompleteDropdown.opt.parentRect = grid._autocompleteRect;
+        }
+
+        delete grid._autocompleteDropdown.maxW;
+        if (grid._inputingColumn && grid._inputingColumn.maxW) {
+            grid._autocompleteDropdown.maxW = +grid._inputingColumn.maxW;
         }
 
         grid._autocompleteDropdown.popup(e);
@@ -262,6 +272,7 @@ export class GridFLClass extends GridDBClass {
     onAutocompleteItemSelected(column, filter, e) {
         const grid = this;
         //if (grid._skipChange) return;
+        if (!column) return;
 
         column.filter = filter;
         if (e && e.target) {

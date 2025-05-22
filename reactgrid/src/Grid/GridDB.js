@@ -121,6 +121,7 @@ export class GridDBClass extends GridInGraphClass {
             buttons.length <= 0 ? <></> :
                 <div
                     id={`grid_${grid.id}_toolbar_`}
+                    key={`gridtoolbar_${grid.id}_${grid.stateind}_`}
                     className={grid.opt.toolbarClass || 'toolbar-default'}
                 >
                     {
@@ -128,7 +129,7 @@ export class GridDBClass extends GridInGraphClass {
                             return (
                                 button.getVisible && !button.getVisible() ? <></> :
                                     <button
-                                        key={`toolbar_${grid.id}_${button.id}_${grid.stateind}_`}
+                                        key={`toolbarbutton_${grid.id}_${button.id}_${grid.stateind}_`}
                                         grid-toolbar-button={`${grid.id}_${button.id}_`}
                                         className={`grid-toolbar-button ${button.class || grid.opt.toolbarButtonsClass || ''}`}
                                         style={{ width: button.img ? '2.5em' : ''}}

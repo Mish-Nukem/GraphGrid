@@ -243,6 +243,14 @@ function App() {
                         </div>
                     </>
                 );
+            case 10:
+                return (
+                    <>
+                        <div className="div-with-grid">
+                            <Graph uid="PM" schemeName="Remarks_scheme" dataGetter={dataGetter}></Graph>
+                        </div>
+                    </>
+                );
             default:
                 return null;
         }
@@ -275,6 +283,7 @@ function App() {
                     <option>7. GridFL</option>
                     <option>8. Two GridINU</option>
                     <option>9. Graph</option>
+                    <option>10. Graph (Remarks_scheme)</option>
                 </select>
                 <div className="div-on-menu">
                     {getTestApp()}
