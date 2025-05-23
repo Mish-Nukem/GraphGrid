@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { GridFLClass } from './GridFL.js';
+﻿import { useState, useEffect } from 'react';
+import { GridINUBaseClass } from './GridINUBase.js';
 import { NodeStatus } from './Base';
 import { WaveType } from './Graph.js';
 import { CardINU } from './CardINU';
@@ -56,25 +56,14 @@ export function GridINU(props) {
 }
 
 // ==================================================================================================================================================================
-export class GridINUClass extends GridFLClass {
+export class GridINUClass extends GridINUBaseClass {
 
     constructor(props) {
         super(props);
 
         const grid = this;
 
-        grid.entity = props.entity;
-        grid.entityAdd = props.entityAdd;
-        grid.dataGetter = props.dataGetter;
-
         grid.status = NodeStatus.grid;
-        grid.visible = true;
-
-        grid.isVisible = props.isVisible || grid.isVisible;
-
-        grid.onSelectValue = props.onSelectValue || function () { };
-
-        grid.reqInd = 0;
 
         grid.addButtons();
     }
@@ -103,6 +92,89 @@ export class GridINUClass extends GridFLClass {
                 }
             </>
         )
+    }
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
+    renderCard() {
+        const node = this;
+        return (
+            <CardINU
+                cardRow={node.cardRow || {}}
+                isNewRecord={node.isNewRecord}
+                uid={node.uid || node.id}
+                entity={node.entity}
+                keyField={node.keyField}
+                dataGetter={node.dataGetter || node.dataGetter}
+                init={(card) => {
+                    card.visible = true;
+                    card.columns = node.columns;
+                }}
+            >
+            </CardINU>
+        );
+    }
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
+    renderLookupGrid(lookupField) {
+        const node = this;
+        const info = node._lookupEntityInfo[node.lookupField.entity];
+        return (
+            <GridINU
+                entity={node.lookupField.entity}
+                dataGetter={node.dataGetter}
+                keyField={node.lookupField.refKeyField}
+                nameField={node.lookupField.refNameField}
+                onSelectValue={(e) => node.selectLookupValue(e)}
+                getColumns={info.columns ? () => { return info.columns; } : null}
+                init={(grid) => {
+                    grid.visible = true;
+                    grid.title = node.lookupField.title;
+                    grid.isSelecting = true;
+                    node.lookupGrid = grid;
+                }}
+            >
+            </GridINU>
+        );
+    }
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
+    renderCell(col, row) {
+        const node = this;
+        const value = row[col.name];
+        if (col.type === undefined || col.type === null) {
+            col.type = '';
+        }
+        //{node.images.filterSelect ? node.images.filterSelect() : node.translate('Select', 'graph-filter-select')}
+        switch (col.type.toLowerCase()) {
+            case 'lookup':
+                return (
+                    <div style={{ border: 'none' }} className='grid-cell-lookup'>
+                        <span
+                            key={`gridlookup_${node.id}_${col.id}_${node.stateind}_`}
+                            style={{ width: 'calc(100% - 4px)', gridColumn: col.required || col.readonly ? 'span 2' : '', overflowX: 'hidden' }}
+                        >
+                            {value}
+                        </span>
+                        <button
+                            key={`gridlookupbtn_${node.id}_${col.id}_${node.stateind}_`}
+                            className={'grid-cell-button'}
+                            onClick={(e) => node.openLookupField(e, col, row)}
+                        >
+                            {'...'}
+                        </button>
+                        {
+                            col.required || col.readonly ? <></>
+                                :
+                                <button
+                                    key={`gridlookupclear_${node.id}_${col.id}_${node.stateind}_`}
+                                    className={'grid-cell-button'}
+                                    onClick={(e) => node.clearField(e, col, row)}
+                                >
+                                    {'×'}
+                                </button>
+                        }
+                    </div>
+                );
+            default:
+                return value !== undefined ? value : '';
+        }
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     addButtons() {
@@ -208,11 +280,6 @@ export class GridINUClass extends GridFLClass {
         }
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
-    isEditing() {
-        const node = this;
-        return node._isEditing === true;
-    }
-    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     commitChanges(e) {
         const node = this;
     }
@@ -302,154 +369,6 @@ export class GridINUClass extends GridFLClass {
         else {
             node.refreshState();
         }
-    }
-    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
-    renderCard() {
-        const node = this;
-        return (
-            <CardINU
-                cardRow={node.cardRow || {}}
-                isNewRecord={node.isNewRecord}
-                uid={node.uid || node.id}
-                entity={node.entity}
-                keyField={node.keyField}
-                dataGetter={node.dataGetter || node.dataGetter}
-                init={(card) => {
-                    card.visible = true;
-                    card.columns = node.columns;
-                }}
-            >
-            </CardINU>
-        );
-    }
-    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
-    getDefaultLinkContent() {
-        const grid = this;
-        return {
-            applyLink: function (link) {
-                if (!link.parent || (link.parent.visible === false && link.parent.status !== NodeStatus.hidden)) return '';
-
-                if (link.parent.status === NodeStatus.grid) {
-                    if (!link.parent.rows || link.parent.rows.length <= 0) return '1=2'
-                }
-
-                if (link.parent.getConnectContent) {
-                    return link.parent.getConnectContent({ child: grid });
-                }
-
-                const keyField = link.parent.getKeyColumn ? link.parent.getKeyColumn() : link.parent.keyField;
-                if (!keyField) return '';
-
-                const activeValue = link.parent.status === NodeStatus.grid ? link.parent.selectedValue() : link.parent.value;
-                if (!activeValue) return '';
-
-                return activeValue ? link.parent.entity ? link.parent.entity + (link.parent.uid ? ';' + link.parent.uid : '') + ' = ' + activeValue : activeValue : '1=2';
-            }
-        };
-    }
-    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
-    skipOnWaveVisit(e) {
-        if (super.skipOnWaveVisit(e)) return true;
-
-        const grid = this;
-        if (e.waveType === WaveType.refresh) {
-            if (!grid.visible || grid.status === NodeStatus.hidden) return true;
-            if (grid.status === NodeStatus.filter && !grid._selecting) return true;
-        }
-        else if (e.waveType === WaveType.value) {
-            if (grid.visible === false || grid.status === NodeStatus.hidden) return true;
-        }
-
-        return false;
-    }
-    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
-    getColumn(name) {
-        return { name: name, sortable: true, filtrable: true };
-    }
-    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
-    prepareColumns(columns) {
-        const grid = this;
-        super.prepareColumns(columns);
-
-        for (let col of grid.columns) {
-            if (col._readonly !== undefined) {
-                col.readonly = col._readonly;
-                delete col._readonly;
-            }
-        }
-    }
-    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
-    getRows(e) {
-        const grid = this;
-
-        const params = [
-            { key: 'atoken', value: grid.dataGetter.atoken },
-            { key: 'rtoken', value: grid.dataGetter.rtoken },
-            { key: 'pageSize', value: grid.pageSize },
-            { key: 'pageNumber', value: grid.pageNumber },
-        ];
-
-        let orderBy = '';
-        for (let col of grid.columns) {
-            orderBy += col.asc ? (orderBy ? ', ' : '') + col.name : '';
-            orderBy += col.desc ? (orderBy ? ', ' : '') + col.name + ' desc' : '';
-        }
-
-        if (orderBy) {
-            params.push({ key: 'orderBy', value: orderBy });
-        }
-
-        if (e.autocompleteColumn) {
-            params.push({ key: 'autocompl', value: true });
-            params.push({ key: 'columns', value: e.autocompleteColumn.name });
-        }
-
-        let i = 0;
-        for (let cond of e.filters) {
-            params.push({ key: 'f' + i++, value: cond });
-        }
-
-        params.push({ key: 'reqInd', value: ++grid.reqInd });
-
-        return new Promise(function (resolve, reject) {
-            grid.dataGetter.get({ url: grid.entity + '/' + (!e.autocompleteColumn ? 'list' : 'autocomplete'), params: params }).then(
-                (res) => {
-                    if (res != null) {
-                        if (+res.reqInd !== grid.reqInd) return;
-
-                        if (!e.autocompleteColumn) {
-                            grid.totalRows = res.count;
-                        }
-                        resolve(res.rows);
-                    } else {
-                        reject(Error("Error getting rows"));
-                    }
-                }
-            );
-        });
-    }
-    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
-    deleteRow(e) {
-        const grid = this;
-
-        const params = [
-            { key: 'atoken', value: grid.dataGetter.atoken },
-            { key: 'rtoken', value: grid.dataGetter.rtoken },
-            { key: 'id', value: grid.selectedValue() || grid.selectedRow()[grid.keyField] },
-        ];
-
-        return new Promise(function (resolve, reject) {
-            grid.dataGetter.get({ url: grid.entity + '/delete', params: params }).then(
-                (res) => {
-                    if (res && String(res.resStr.toLowerCase()) === 'true') {
-                        resolve(res.resStr);
-                    }
-                    else {
-                        reject(Error(res.resStr || "Error saving row"));
-                    }
-                }
-            );
-        });
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
 }

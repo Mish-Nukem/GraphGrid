@@ -2,14 +2,16 @@
 // ==================================================================================================================================================================
 export class GraphClass {
     constructor() {
-        this.nodesDict = {};
-        this.linksDict = {};
+        const graph = this;
 
-        this.waveCache = {};
+        graph.nodesDict = {};
+        graph.linksDict = {};
 
-        this.nodeCount = 0;
+        graph.waveCache = {};
 
-        this.lastWaveInd = 0;
+        graph.nodeCount = 0;
+
+        graph.lastWaveInd = 0;
     }
 
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------

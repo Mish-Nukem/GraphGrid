@@ -270,6 +270,27 @@
     height: 2em;
     margin: 2px;
 }
+.grid-cell-lookup {
+    display: grid;
+    grid-template-columns: calc(100% - 40px) 20px 20px;
+    grid-template-rows: auto;
+    align-items: center;
+    align-content: center;
+}
+
+.grid-cell-button {
+    height: 1.5em;
+    width: 1.5em;
+    display: flex;
+    padding: 0;
+    margin: 0;
+    border: 1px;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: nowrap;
+    border-radius: 3px;
+    border-style: solid;
+}
 
 .graph-tabcontrol-buttons {
     margin: 0 1em;

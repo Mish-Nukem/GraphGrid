@@ -47,6 +47,7 @@ export function Grid(props) {
 
         if (grid.columns.length <= 0 && grid.getColumns) {
             grid.getColumns();
+            grid.prepareColumns(grid.columns);
         }
 
         return () => {
@@ -480,7 +481,8 @@ export class GridClass extends BaseComponent {
             prevSelRow.classList.remove(grid.opt.selectedRowClass);
         }
 
-        grid.selectedRowIndex = e.target.parentElement.rowIndex - 1;
+        //grid.selectedRowIndex = e.target.parentElement.rowIndex - 1;
+        grid.selectedRowIndex = e.target.closest('TR').rowIndex - 1;
         const newSelRow = rows[grid.selectedRowIndex];
         newSelRow.classList.add(`grid-selected-row`);
         if (grid.opt.selectedRowClass) {

@@ -258,6 +258,7 @@ export class DefaultGridTheme {
             'SELECT VALUE': 'Выбрать значение',
             'TOTAL ROWS': 'Всего строк',
             'VIEW': 'Просмотр',
+            'VIEW RECORD': 'Карточка',
         };
         return dict[text.toUpperCase()] || text;
     }

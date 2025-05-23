@@ -38,59 +38,60 @@ export class ModalClass extends BaseComponent {
     constructor(props) {
         super(props);
 
-        this.uid = props.uid;
+        const wnd = this;
+        wnd.uid = props.uid;
 
-        this.opt = {};
+        wnd.opt = {};
 
-        this.id = window._wndSeq++;
+        wnd.id = window._wndSeq++;
 
-        this.opt.zInd = props.zInd || ++window._wndZInd;
+        wnd.opt.zInd = props.zInd || ++window._wndZInd;
 
-        this.opt.pos = props.pos || { x: 0, y: 0, w: '100%', h: '100%' };
+        wnd.opt.pos = props.pos || { x: 0, y: 0, w: '100%', h: '100%' };
 
-        this.opt.closeWhenClick = props.closeWhenClick;
-        this.opt.closeWhenEscape = props.closeWhenEscape;
-        this.opt.isModal = props.isModal !== undefined ? props.isModal : true;
-        this.opt.closeWhenMiss = props.closeWhenMiss;
-        this.opt.resizable = props.resizable !== undefined ? props.resizable : true;
-        this.opt.draggable = props.draggable !== undefined ? props.draggable : true;
+        wnd.opt.closeWhenClick = props.closeWhenClick;
+        wnd.opt.closeWhenEscape = props.closeWhenEscape;
+        wnd.opt.isModal = props.isModal !== undefined ? props.isModal : true;
+        wnd.opt.closeWhenMiss = props.closeWhenMiss;
+        wnd.opt.resizable = props.resizable !== undefined ? props.resizable : true;
+        wnd.opt.draggable = props.draggable !== undefined ? props.draggable : true;
 
-        this.opt.hiddenOverlay = props.hiddenOverlay;
+        wnd.opt.hiddenOverlay = props.hiddenOverlay;
 
-        this.opt.noHeader = props.noHeader;
-        this.opt.noFooter = props.noFooter;
-        this.opt.noPadding = props.noPadding;
+        wnd.opt.noHeader = props.noHeader;
+        wnd.opt.noFooter = props.noFooter;
+        wnd.opt.noPadding = props.noPadding;
 
-        this.opt.bodyClass = props.bodyClass || 'modal-window-body';
-        this.opt.headerClass = props.headerClass || 'modal-window-header';
-        this.opt.footerClass = props.footerClass || 'modal-window-footer';
-        this.opt.footerButtonClass = props.footerButtonClass || 'modal-window-footer-button'
-        this.opt.titleClass = props.titleClass || 'modal-window-header-title';
-        this.opt.title = props.title;
+        wnd.opt.bodyClass = props.bodyClass || 'modal-window-body';
+        wnd.opt.headerClass = props.headerClass || 'modal-window-header';
+        wnd.opt.footerClass = props.footerClass || 'modal-window-footer';
+        wnd.opt.footerButtonClass = props.footerButtonClass || 'modal-window-footer-button'
+        wnd.opt.titleClass = props.titleClass || 'modal-window-header-title';
+        wnd.opt.title = props.title;
 
-        this.opt.pos.x = !isNaN(this.opt.pos.x) ? this.opt.pos.x + 'px' : this.opt.pos.x;
-        this.opt.pos.y = !isNaN(this.opt.pos.y) ? this.opt.pos.y + 'px' : this.opt.pos.y;
-        this.opt.pos.w = !isNaN(this.opt.pos.w) ? this.opt.pos.w + 'px' : this.opt.pos.w;
-        this.opt.pos.h = !isNaN(this.opt.pos.h) ? this.opt.pos.h + 'px' : this.opt.pos.h;
+        wnd.opt.pos.x = !isNaN(wnd.opt.pos.x) ? wnd.opt.pos.x + 'px' : wnd.opt.pos.x;
+        wnd.opt.pos.y = !isNaN(wnd.opt.pos.y) ? wnd.opt.pos.y + 'px' : wnd.opt.pos.y;
+        wnd.opt.pos.w = !isNaN(wnd.opt.pos.w) ? wnd.opt.pos.w + 'px' : wnd.opt.pos.w;
+        wnd.opt.pos.h = !isNaN(wnd.opt.pos.h) ? wnd.opt.pos.h + 'px' : wnd.opt.pos.h;
 
-        this.onClose = props.onClose;
+        wnd.onClose = props.onClose;
 
-        this.renderContent = props.renderContent || function () { return null };
+        wnd.renderContent = props.renderContent || function () { return null };
 
-        this.buttons = [];
+        wnd.buttons = [];
         if (props.footerButtons) {
-            this.buttonsDict = {};
+            wnd.buttonsDict = {};
             let seq = 0;
             for (let btn of props.footerButtons) {
                 btn._ind = seq++;
-                this.buttonsDict[btn._ind] = btn;
-                this.buttons.push(btn);
+                wnd.buttonsDict[btn._ind] = btn;
+                wnd.buttons.push(btn);
             }
         }
 
-        this.visible = props.visible !== undefined ? props.visible : true;
+        wnd.visible = props.visible !== undefined ? props.visible : true;
 
-        this.stateind = 0;
+        wnd.stateind = 0;
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     render() {
@@ -143,7 +144,7 @@ export class ModalClass extends BaseComponent {
                         key={`window_${wnd.id}_${wnd.stateind}_body_`}
                         wnd-body={1}
                         className={wnd.opt.bodyClass}
-                        style={{ padding: this.opt.noPadding ? '0' : '' }}
+                        style={{ padding: wnd.opt.noPadding ? '0' : '' }}
                     >
                         {wnd.renderContent()}
                     </div>

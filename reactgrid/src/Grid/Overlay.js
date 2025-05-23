@@ -41,29 +41,30 @@ export class OverlayClass extends BaseComponent {
     constructor(props) {
         super(props);
 
-        this.opt = {};
+        const ovl = this;
+        ovl.opt = {};
 
-        this.id = window._wndSeq++;
-        this.uid = props.uid;
+        ovl.id = window._wndSeq++;
+        ovl.uid = props.uid;
 
-        this.opt.zInd = props.zInd || ++window._wndZInd;
+        ovl.opt.zInd = props.zInd || ++window._wndZInd;
 
-        this.opt.pos = props.pos || { x: 0, y: 0, w: '100%', h: '100%' };
+        ovl.opt.pos = props.pos || { x: 0, y: 0, w: '100%', h: '100%' };
 
-        this.opt.isHidden = props.isHidden;
-        this.opt.closeWhenClick = props.closeWhenClick;
-        this.opt.closeWhenEscape = props.closeWhenEscape;
+        ovl.opt.isHidden = props.isHidden;
+        ovl.opt.closeWhenClick = props.closeWhenClick;
+        ovl.opt.closeWhenEscape = props.closeWhenEscape;
 
-        this.opt.pos.x = !isNaN(this.opt.pos.x) ? this.opt.pos.x + 'px' : this.opt.pos.x;
-        this.opt.pos.y = !isNaN(this.opt.pos.y) ? this.opt.pos.y + 'px' : this.opt.pos.y;
-        this.opt.pos.w = !isNaN(this.opt.pos.w) ? this.opt.pos.w + 'px' : this.opt.pos.w;
-        this.opt.pos.h = !isNaN(this.opt.pos.h) ? this.opt.pos.h + 'px' : this.opt.pos.h;
+        ovl.opt.pos.x = !isNaN(ovl.opt.pos.x) ? ovl.opt.pos.x + 'px' : ovl.opt.pos.x;
+        ovl.opt.pos.y = !isNaN(ovl.opt.pos.y) ? ovl.opt.pos.y + 'px' : ovl.opt.pos.y;
+        ovl.opt.pos.w = !isNaN(ovl.opt.pos.w) ? ovl.opt.pos.w + 'px' : ovl.opt.pos.w;
+        ovl.opt.pos.h = !isNaN(ovl.opt.pos.h) ? ovl.opt.pos.h + 'px' : ovl.opt.pos.h;
 
-        this.renderChild = props.renderChild || function () { return null };
+        ovl.renderChild = props.renderChild || function () { return null };
 
-        this.visible = props.visible !== undefined ? props.visible : true;
+        ovl.visible = props.visible !== undefined ? props.visible : true;
 
-        this.stateind = 0;
+        ovl.stateind = 0;
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     render() {

@@ -1,12 +1,12 @@
 /* eslint-disable no-mixed-operators */
 import { useState, useEffect } from 'react';
 import { BaseComponent, NodeStatus, FilterType, log } from './Base';
-import { GraphClass, WaveType } from './Graph.js';
+import { GraphClass, WaveType } from './Graph';
 import { GridINU, GridINUClass } from './GridINU';
-import { CardINU, CardINUClass } from './CardINU';
-import { GridClass } from './Grid.js';
+import { GridClass } from './Grid';
 import { Modal } from './Modal';
 import AsyncSelect from 'react-select/async';
+import { DatePicker } from './OuterComponents/DatePicker';
 // ==================================================================================================================================================================
 export function Graph(props) {
     let gc = null;
@@ -132,13 +132,13 @@ export class GraphComponentClass extends BaseComponent {
                     </div>
                 </div>
                 {
-                    gc.lookupIsShowing ?
+                    gc.nodeSelectIsShowing ?
                         <Modal
-                            title={gc.lookupNode.title}
+                            title={gc.selectingNode.title}
                             renderContent={() => { return gc.renderLookupGrid() }}
-                            pos={gc.lookupPos}
+                            pos={gc.selectingNodePos}
                             onClose={(e) => gc.closeLookup(e)}
-                            init={(wnd) => { wnd.visible = gc.lookupIsShowing; }}
+                            init={(wnd) => { wnd.visible = gc.nodeSelectIsShowing; }}
                         >
                         </Modal>
                         :
@@ -151,17 +151,27 @@ export class GraphComponentClass extends BaseComponent {
     renderLookupGrid() {
         const gc = this;
         return (
+            gc.selectingNode.filterType === FilterType.date ?
+                <DatePicker
+                    date={gc.selectingNode.value}
+                    onSelect={(date) => {
+                        gc.selectingNode.value = date;
+                        gc.graph.triggerWave({ nodes: [gc.selectingNode], withStartNodes: false });
+                        gc.closeLookup();
+                    }}
+                ></DatePicker>
+            :
             <GridINU
                 findGrid={(props) => gc.replaceGrid(props)}
                 graph={gc.graph}
-                uid={gc.lookupNode.uid || gc.lookupNode.id}
-                entity={gc.lookupNode.entity}
-                dataGetter={gc.dataGetter || gc.lookupNode.dataGetter}
+                uid={gc.selectingNode.uid || gc.selectingNode.id}
+                entity={gc.selectingNode.entity}
+                dataGetter={gc.dataGetter || gc.selectingNode.dataGetter}
                 onSelectValue={(e) => gc.selectLookupValue(e)}
                 init={(grid) => {
                     grid.status = NodeStatus.filter;
                     grid.visible = true;
-                    grid.title = gc.lookupNode.title;
+                    grid.title = gc.selectingNode.title;
                 }}
             >
             </GridINU>
@@ -170,17 +180,17 @@ export class GraphComponentClass extends BaseComponent {
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     openLookup(e, node) {
         const gc = this;
-        gc.lookupPos = gc.lookupPos || { x: 100, y: 100, w: 800, h: 600 };
+        gc.selectingNodePos = gc.selectingNodePos || { x: 100, y: 100, w: 800, h: 600 };
 
-        gc.lookupNode = node;
-        gc.lookupIsShowing = true;
+        gc.selectingNode = node;
+        gc.nodeSelectIsShowing = true;
         gc.refreshState();
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     closeLookup(e) {
         const gc = this;
-        gc.lookupIsShowing = false;
-        gc.lookupNode = null;
+        gc.nodeSelectIsShowing = false;
+        gc.selectingNode = null;
         gc.refreshState();
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -193,10 +203,10 @@ export class GraphComponentClass extends BaseComponent {
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     selectLookupValue(e) {
         const gc = this;
-        if (!gc.lookupNode) return;
+        if (!gc.selectingNode) return;
 
-        gc.lookupNode.value = gc.lookupNode.selectedValue();
-        gc.graph.triggerWave({ nodes: [gc.lookupNode], withStartNodes: false });
+        gc.selectingNode.value = gc.selectingNode.selectedValue();
+        gc.graph.triggerWave({ nodes: [gc.selectingNode], withStartNodes: false });
         gc.closeLookup();
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -233,7 +243,12 @@ export class GraphComponentClass extends BaseComponent {
                         <input
                             key={`fltrinp_${node.id}_${gc.id}_${gc.stateind}_`}
                             style={{ width: 'calc(100% - 4px)', padding: '0 2px', boxSizing: 'border-box', height: '2.3em' }}
-                            value={node.value !== undefined && node.selectedText ? node.selectedText() : ''}
+                            value={
+                                node.filterType !== FilterType.date ?
+                                    (node.value !== undefined && node.selectedText ? node.selectedText() : '')
+                                    :
+                                    (node.value !== undefined ? node.value : '')
+                            }
                             readOnly={true}
                         ></input>
                 }
@@ -351,11 +366,11 @@ export class GraphComponentClass extends BaseComponent {
             }
         }
 
-        if (gc.lookupNode) {
-            if (String(grid.id) === String(gc.lookupNode.id)) {
-                gc.lookupNode = grid;
+        if (gc.selectingNode) {
+            if (String(grid.id) === String(gc.selectingNode.id)) {
+                gc.selectingNode = grid;
 
-                gc.lookupNode.isSelecting = true;
+                gc.selectingNode.isSelecting = true;
             }
         }
 
@@ -428,7 +443,7 @@ export class GraphComponentClass extends BaseComponent {
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     checkNeedTriggerWave(node) {
         const gc = this;
-        return node !== gc.lookupNode;
+        return node !== gc.selectingNode;
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     prepareGraph(obrGraph) {
@@ -475,6 +490,13 @@ export class GraphComponentClass extends BaseComponent {
                     }
                 }
             }
+        }
+
+        for (let lid in gc.graph.linksDict) {
+            let link = gc.graph.linksDict[lid];
+
+            link.parent = link.parent ? gc.graph.nodesDict[link.parent] : link.parent;
+            link.child = link.child ? gc.graph.nodesDict[link.child] : link.child;
         }
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------

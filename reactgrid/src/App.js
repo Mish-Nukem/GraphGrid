@@ -281,9 +281,9 @@ function App() {
                     <option>5. Two Grids</option>
                     <option>6. GridDB</option>
                     <option>7. GridFL</option>
-                    <option>8. Two GridINU</option>
-                    <option>9. Graph</option>
-                    <option>10. Graph (Remarks_scheme)</option>
+                    <option>8. Two Grids (INU)</option>
+                    <option>9. Graph (INU, handmade)</option>
+                    <option>10. Graph (INU, Remarks_scheme)</option>
                 </select>
                 <div className="div-on-menu">
                     {getTestApp()}

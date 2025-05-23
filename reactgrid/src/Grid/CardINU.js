@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { GridClass } from './Grid.js';
 import { Modal } from './Modal';
 import { GridFLClass } from './GridFL.js';
+import { GridINUBaseClass } from './GridINUBase.js';
 // =================================================================================================================================================================
 export function CardINU(props) {
     let card = null;
@@ -54,7 +55,7 @@ export function CardINU(props) {
     return (card.render());
 }
 // =================================================================================================================================================================
-export class CardINUClass extends GridFLClass {
+export class CardINUClass extends GridINUBaseClass {
 
     constructor(props) {
         super(props);
@@ -70,19 +71,19 @@ export class CardINUClass extends GridFLClass {
             card._rowChanged = true;
         }
 
-        card.visible = true;
-        card.isVisible = props.isVisible || card.isVisible;
+        //card.visible = true;
+        //card.isVisible = props.isVisible || card.isVisible;
 
         card.cardButtons = [];
 
-        card.entity = props.entity;
-        card.entityAdd = props.entityAdd;
-        card.dataGetter = props.dataGetter;
+        //    card.entity = props.entity;
+        //    card.entityAdd = props.entityAdd;
+        //    card.dataGetter = props.dataGetter;
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
-    isVisible() {
-        return this.visible;
-    }
+    //isVisible() {
+    //    return this.visible;
+    //}
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     render() {
         const card = this;
@@ -100,18 +101,18 @@ export class CardINUClass extends GridFLClass {
                         card.columns.map((col) => { return card.renderField(col) })
                     }
                 </div>
-                {
-                    card.lookupIsShowing ?
-                        <Modal
-                            title={card.lookupField.title}
-                            renderContent={() => { return card.renderLookupGrid(card.lookupField) }}
-                            pos={card.lookupPos}
-                            onClose={(e) => card.closeLookup(e)}
-                            init={(wnd) => { wnd.visible = card.lookupIsShowing; }}
-                        >
-                        </Modal>
-                        :
-                        <></>
+                {super.renderLookup()
+                    //    card.lookupIsShowing ?
+                    //        <Modal
+                    //            title={card.lookupField.title}
+                    //            renderContent={() => { return card.renderLookupGrid(card.lookupField) }}
+                    //            pos={card.lookupPos}
+                    //            onClose={(e) => card.closeLookup(e)}
+                    //            init={(wnd) => { wnd.visible = card.lookupIsShowing; }}
+                    //        >
+                    //        </Modal>
+                    //        :
+                    //        <></>
                 }
             </>
         )
@@ -133,24 +134,25 @@ export class CardINUClass extends GridFLClass {
                             {col.title || col.name}
                         </span>
                         <input
+                            key={`cardlookup_${card.id}_${col.id}_${card.stateind}_`}
                             value={value}
                             style={{ width: 'calc(100% - 4px)', padding: '0 2px', boxSizing: 'border-box', height: '2.3em', gridColumn: col.required || col.readonly ? 'span 2' : '' }}
                             disabled='disabled'
                         ></input>
                         <button
+                            key={`cardlookupbtn_${card.id}_${col.id}_${card.stateind}_`}
                             className={'graph-card-button'}
-                            key={`cardsel_${card.id}_${card.stateind}_`}
-                            onClick={(e) => card.openLookupField(e, col)}
+                            onClick={(e) => card.openLookupField(e, col, card.cardRow)}
                         >
                             {card.images.filterSelect ? card.images.filterSelect() : card.translate('Select', 'graph-filter-select')}
                         </button>
                         {
                             !col.required && !col.readonly ?
                                 <button
-                                    key={`cardclr_${card.id}_${card.stateind}_`}
+                                    key={`cardlookupclear_${card.id}_${col.id}_${card.stateind}_`}
                                     className={'graph-card-button'}
                                     disabled={value === undefined || value === '' ? 'disabled' : ''}
-                                    onClick={(e) => card.clearField(e, col)}
+                                    onClick={(e) => card.clearField(e, col, card.cardRow)}
                                 >
                                     {card.images.filterClear ? card.images.filterClear() : card.translate('Clear', 'graph-filter-clear')}
                                 </button>
@@ -170,10 +172,14 @@ export class CardINUClass extends GridFLClass {
                         </span>
                         {
                             //col.maxW !== undefined && +col.maxW >= 200 ?
+                            //
+                            //    contentEditable={!col.readonly}
+
                             <textarea
-                                value={value !== undefined ? value : ''}
+                                
+                                value={card.cardRow[col.name] !== undefined ? card.cardRow[col.name] : ''}
                                 style={{ width: 'calc(100% - 4px)', height: col.maxW !== undefined && +col.maxW >= 200 ? '5em' : '2.3em', padding: '0 2px', boxSizing: 'border-box', gridColumn: col.required || col.readonly ? 'span 3' : 'span 2', resize: 'vertical' }}
-                                onChange={(e) => card.changeField(e, col)}
+                                onChange={(e) => card.changeField(e, col, card.cardRow)}
                                 disabled={col.readonly ? 'disabled' : ''}
                             >
                             </textarea>
@@ -181,10 +187,10 @@ export class CardINUClass extends GridFLClass {
                         {
                             !col.required && !col.readonly ?
                                 <button
-                                    key={`cardclr_${card.id}_${card.stateind}_`}
+                                    key={`cardfieldclear_${card.id}_${col.id}_${card.stateind}_`}
                                     className={'graph-card-button'}
                                     disabled={value === undefined || value === '' ? 'disabled' : ''}
-                                    onClick={(e) => card.clearField(e, col)}
+                                    onClick={(e) => card.clearField(e, col, card.cardRow)}
                                 >
                                     {card.images.filterClear ? card.images.filterClear() : card.translate('Clear', 'graph-filter-clear')}
                                 </button>
@@ -279,16 +285,15 @@ export class CardINUClass extends GridFLClass {
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     renderLookupGrid(lookupField) {
         const card = this;
+        const info = card._lookupEntityInfo[card.lookupField.entity];
         return (
             <GridINU
-                //findGrid={(props) => gc.replaceGrid(props)}
-                //graph={gc.graph}
-                //uid={gc.lookupField.entity}
                 entity={card.lookupField.entity}
                 dataGetter={card.dataGetter}
                 keyField={card.lookupField.refKeyField}
                 nameField={card.lookupField.refNameField}
                 onSelectValue={(e) => card.selectLookupValue(e)}
+                getColumns={info.columns ? () => { return info.columns; } : null}
                 init={(grid) => {
                     grid.visible = true;
                     grid.title = card.lookupField.title;
@@ -300,51 +305,36 @@ export class CardINUClass extends GridFLClass {
         );
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
-    openLookupField(e, col) {
+    selectedRow() {
         const card = this;
-        card.lookupPos = card.lookupPos || { x: 100, y: 100, w: 800, h: 600 };
+        return card.cardRow;
+    }
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
+    //openLookupField(e, col) {
+    //    const card = this;
+    //    card.lookupPos = card.lookupPos || { x: 100, y: 100, w: 800, h: 600 };
 
-        card.lookupField = col;
-        card.lookupIsShowing = true;
-        card.refreshState();
-    }
+    //    card.lookupField = col;
+    //    card.lookupIsShowing = true;
+    //    card.lookupRow = card.cardRow;
+    //    card.refreshState();
+    //}
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
-    closeLookup(e) {
-        const card = this;
-        card.lookupIsShowing = false;
-        delete card.lookupField;
-        delete card.lookupGrid;
-        card.refreshState();
-    }
+    //closeLookup(e) {
+    //    const card = this;
+    //    card.lookupIsShowing = false;
+    //    delete card.lookupField;
+    //    delete card.lookupGrid;
+    //    card.refreshState();
+    //}
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
-    clearField(e, col) {
-        const card = this;
-        if (col.type === 'lookup') {
-            card.cardRow[col.keyField] = '';
-            card.cardRow[col.name] = '';
-        }
-        else {
-            card.cardRow[col.name] = '';
-        }
-        card._rowChanged = true;
-        card.refreshState();
-    }
-    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
-    selectLookupValue(e) {
-        const card = this;
-        card.cardRow[card.lookupField.keyField] = card.lookupGrid.selectedValue();
-        card.cardRow[card.lookupField.name] = card.lookupGrid.selectedText();
-        card._rowChanged = true;
-        card.closeLookup();
-        card.refreshState();
-    }
-    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
-    changeField(e, col) {
-        const card = this;
-        card.cardRow[col.name] = e.target.value;
-        card._rowChanged = true;
-        card.refreshState();
-    }
+    //selectLookupValue(e) {
+    //    const card = this;
+    //    card.cardRow[card.lookupField.keyField] = card.lookupGrid.selectedValue();
+    //    card.cardRow[card.lookupField.name] = card.lookupGrid.selectedText();
+    //    card._rowChanged = true;
+    //    card.closeLookup();
+    //}
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     getRows(e) {
         const card = this;
