@@ -132,6 +132,10 @@ export class GridINUBaseClass extends GridFLClass {
         const node = this;
         row[col.name] = e.target.value;
         node._rowChanged = true;
+        node._changingCol = col;
+
+        node._remCursorPos = e.currentTarget.selectionEnd;
+
         node.refreshState();
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------

@@ -145,9 +145,9 @@ export class GridINUClass extends GridINUBaseClass {
         switch (col.type.toLowerCase()) {
             case 'lookup':
                 return (
-                    <div style={{ border: 'none' }} className='grid-cell-lookup'>
+                    <div style={{ border: 'none' }} className='grid-cell-lookup' key={`gridlookupdiv_${node.id}_${col.id}_${node.stateind}_`}>
                         <span
-                            key={`gridlookup_${node.id}_${col.id}_${node.stateind}_`}
+                            key={`gridlookuptitle_${node.id}_${col.id}_${node.stateind}_`}
                             style={{ width: 'calc(100% - 4px)', gridColumn: col.required || col.readonly ? 'span 2' : '', overflowX: 'hidden' }}
                         >
                             {value}

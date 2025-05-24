@@ -5,7 +5,7 @@ export class BaseComponent {
         window._wndSeq = window._wndSeq || 0;
         window._wndZInd = window._wndZInd || 999;
 
-        window._logEnabled = true;
+        //window._logEnabled = true;
     }
 
     translate(text, context) {

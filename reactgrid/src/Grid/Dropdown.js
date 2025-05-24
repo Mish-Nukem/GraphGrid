@@ -89,6 +89,7 @@ export class DropdownClass extends BaseComponent {
                     dd.allowUserFilter ? <></> : <></>
                 }
                 <ul
+                    key={`dropdown_${dd.id}_${dd.stateind}_`}
                     className={`dropdown-ul ${dd.menuClass || ''}`}
                     style={{ overflowX: 'hidden' }}
                 >
@@ -97,7 +98,7 @@ export class DropdownClass extends BaseComponent {
                             return (
                                 <li
                                     dropdown-item={`${dd.id}_${item.id}_`}
-                                    key={`${dd.id}_${item.id}_${dd.stateind}_`}
+                                    key={`dropdownitem_${dd.id}_${item.id}_${dd.stateind}_`}
                                     title={dd.translate(item.title || item.text)}
                                     className={dd.menuItemClass + (dd.activeItem === item ? ' active' : '')}
                                     onClick={(e) => dd.onItemClick(e, item.id)}
@@ -109,9 +110,9 @@ export class DropdownClass extends BaseComponent {
                     }
                     {
                         dd.allowUpload && dd.pageSize > 0 && dd.items.length === dd.pageSize * dd.pageNumber ?
-                            <ul className={`dropdown-ul ${dd.menuClass || ''}`}>
+                            <ul className={`dropdown-ul ${dd.menuClass || ''}`} key={`dropdownadd_${dd.id}_${dd.stateind}_`}>
                                 <li dropdown-item={`${dd.id}_append_`}
-                                    key={`${dd.id}_append_${dd.stateind}_`}
+                                    key={`dropdownitem_$${dd.id}_append_${dd.stateind}_`}
                                     title={dd.translate('load more records')}
                                     className={dd.menuItemClass}
                                     onClick={(e) => dd.onItemClick(e, 'append')}

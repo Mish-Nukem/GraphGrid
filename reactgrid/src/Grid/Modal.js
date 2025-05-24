@@ -146,7 +146,7 @@ export class ModalClass extends BaseComponent {
                         className={wnd.opt.bodyClass}
                         style={{ padding: wnd.opt.noPadding ? '0' : '' }}
                     >
-                        {wnd.renderContent()}
+                        {wnd.renderContent(wnd)}
                     </div>
                     {wnd.opt.noFooter ? <></> : wnd.renderFooter()}
                     {!wnd.opt.resizable ? <></> : wnd.renderResizables()}
@@ -212,6 +212,7 @@ export class ModalClass extends BaseComponent {
         return (
             <>
                 <div wnd-rsz-y={wnd.id}
+                    key={`wnd-rsz-y_${wnd.id}_${wnd.stateind}_`}
                     style={
                         {
                             position: "absolute",
@@ -227,6 +228,7 @@ export class ModalClass extends BaseComponent {
                 >
                 </div>
                 <div wnd-rsz-x={wnd.id}
+                    key={`wnd-rsz-x_${wnd.id}_${wnd.stateind}_`}
                     style={
                         {
                             position: "absolute",
@@ -242,6 +244,7 @@ export class ModalClass extends BaseComponent {
                 >
                 </div>
                 <div wnd-rsz-xy={wnd.id}
+                    key={`wnd-rsz-xy_${wnd.id}_${wnd.stateind}_`}
                     style={
                         {
                             position: "absolute",

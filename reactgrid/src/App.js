@@ -19,7 +19,7 @@ import { DataGetter } from './Utils/DataGetter';
 function App() {
     const [state, setState] = useState({ menuItem: - 2, atoken: '', rtoken: '' });
 
-    window._logEnabled = true;
+    //window._logEnabled = true;
 
     const dataGetter = new DataGetter(appSettings);
     dataGetter.atoken = state.atoken;
@@ -127,14 +127,22 @@ function App() {
         )
     }
 
-    const drawDropdownInModal = function () {
+    const drawDropdownInModal = function (wnd) {
         return (
             <>
                 <div className="div-on-menu">
                     <button onClick={() => { console.clear() }} className="modal-window-footer-button">Clear console</button>
                     <button onClick={(e) => { window.ddComponent.popup(e); }} className="modal-window-footer-button">Show Dropdown</button>
                 </div>
-                <Dropdown init={(dd) => { window.ddComponent = dd; }} getItems={GetPopupItems} onItemClick={(e) => console.log('Item clicked: ' + e.itemId)}></Dropdown>
+                <div>
+                    {
+                        window.ddComponent && window.ddComponent.clickedItem ? <span>{'Item Clicked : ' + window.ddComponent.clickedItem}</span> : <></>
+                    }
+                </div>
+                <Dropdown init={(dd) => { window.ddComponent = dd; }} getItems={GetPopupItems}
+                    onItemClick={(e) => { /*console.log('Item clicked: ' + e.itemId); */window.ddComponent.clickedItem = e.itemId; wnd.refreshState(); }}
+                >
+                </Dropdown>
             </>
         )
     }
@@ -188,7 +196,7 @@ function App() {
             case 4:
                 return (
                     <>
-                        <Modal uid="m02" isModal={true} renderContent={() => { return drawDropdownInModal() }} closeWhenEscape={true} pos={{ x: 100, y: 100, w: 300, h: 250 }}></Modal>
+                        <Modal uid="m02" isModal={true} renderContent={(wnd) => { return drawDropdownInModal(wnd) }} closeWhenEscape={true} pos={{ x: 100, y: 100, w: 300, h: 250 }}></Modal>
                     </>
                 )
             case 5:
@@ -230,7 +238,7 @@ function App() {
                         <div className="div-with-grid">
                             <GridINU uid="proj" entity="SrRProjectEntity" dataGetter={dataGetter}></GridINU>
                         </div>
-                        <div className="div-with-grid">
+                        < div className="div-with-grid">
                             <GridINU parentGrids="proj" uid="rem" entity="SrRemarkEntity" dataGetter={dataGetter}></GridINU>
                         </div>
                     </>

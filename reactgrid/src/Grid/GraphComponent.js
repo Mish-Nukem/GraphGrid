@@ -90,11 +90,32 @@ export class GraphComponentClass extends BaseComponent {
         }
 
         const nodes = [];
+        const topFilters = [];
+        const lowFilters = [];
+        const topGrids = [];
+        const lowGrids = [];
         for (let uid in gc.graph.nodesDict) {
             let node = gc.graph.nodesDict[uid];
             nodes.push(node);
 
             GridClass.applyTheme(node);
+
+            if (node.status === NodeStatus.filter) {
+                if (gc.isTop(node)) {
+                    if (node.children.indexOf(gc.activeMaster) >= 0) topFilters.push(node);
+                }
+                else {
+                    if (node.parents.indexOf(gc.activeMaster) >= 0) lowFilters.push(node);
+                }
+            }
+            else if (node.status === NodeStatus.grid) {
+                if (gc.isTop(node)) {
+                    topGrids.push(node);
+                }
+                else {
+                    if (node.parents.indexOf(gc.activeMaster) >= 0) lowGrids.push(node);
+                }
+            }
         }
 
         return (
@@ -102,32 +123,36 @@ export class GraphComponentClass extends BaseComponent {
                 <div key={`graphall_${gc.stateind}_`}>
                     <div className="graph-filter-line" key={`filterstop_${gc.stateind}_`}>
                         {
-                            nodes.map((node) => { return gc.renderFilter(node, true) })
+                            topFilters.map((node) => { return gc.renderFilter(node, true) })
                         }
                     </div>
                     <div className="graph-tabcontrol-buttons" key={`tabsstop_${gc.stateind}_`}>
                         {
-                            nodes.map((node) => { return gc.renderGridTab(node, true) })
+                            topGrids.map((node) => { return gc.renderGridTab(node, true) })
                         }
                     </div>
                     <div className="graph-grid" key={`gridstop_${gc.stateind}_`}>
                         {
-                            nodes.map((node) => { return gc.renderGrid(node, true) })
+                            gc.renderGrid(gc.graph.nodesDict[gc.activeMaster], true)
+
+                            /*nodes.map((node) => { return gc.renderGrid(node, true) })*/
                         }
                     </div>
                     <div className="graph-filter-line" key={`filterslow_${gc.stateind}_`}>
                         {
-                            nodes.map((node) => { return gc.renderFilter(node, false) })
+                            lowFilters.map((node) => { return gc.renderFilter(node, false) })
                         }
                     </div>
                     <div className="graph-tabcontrol-buttons" key={`tabsslow_${gc.stateind}_`}>
                         {
-                            nodes.map((node) => { return gc.renderGridTab(node, false) })
+                            lowGrids.map((node) => { return gc.renderGridTab(node, false) })
                         }
                     </div>
                     <div className="graph-grid" key={`gridslow_${gc.stateind}_`}>
                         {
-                            nodes.map((node, ind) => { return gc.renderGrid(node, false) })
+                            gc.renderGrid(gc.graph.nodesDict[gc.activeDetail], false)
+
+                            /*nodes.map((node, ind) => { return gc.renderGrid(node, false) })*/
                         }
                     </div>
                 </div>
@@ -160,21 +185,21 @@ export class GraphComponentClass extends BaseComponent {
                         gc.closeLookup();
                     }}
                 ></DatePicker>
-            :
-            <GridINU
-                findGrid={(props) => gc.replaceGrid(props)}
-                graph={gc.graph}
-                uid={gc.selectingNode.uid || gc.selectingNode.id}
-                entity={gc.selectingNode.entity}
-                dataGetter={gc.dataGetter || gc.selectingNode.dataGetter}
-                onSelectValue={(e) => gc.selectLookupValue(e)}
-                init={(grid) => {
-                    grid.status = NodeStatus.filter;
-                    grid.visible = true;
-                    grid.title = gc.selectingNode.title;
-                }}
-            >
-            </GridINU>
+                :
+                <GridINU
+                    findGrid={(props) => gc.replaceGrid(props)}
+                    graph={gc.graph}
+                    uid={gc.selectingNode.uid || gc.selectingNode.id}
+                    entity={gc.selectingNode.entity}
+                    dataGetter={gc.dataGetter || gc.selectingNode.dataGetter}
+                    onSelectValue={(e) => gc.selectLookupValue(e)}
+                    init={(grid) => {
+                        grid.status = NodeStatus.filter;
+                        grid.visible = true;
+                        grid.title = gc.selectingNode.title;
+                    }}
+                >
+                </GridINU>
         );
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
