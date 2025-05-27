@@ -12,7 +12,7 @@ export function GridINU(props) {
 
     grid = gridState.grid;
     let needGetRows = false;
-    if (!grid) {
+    if (!grid || grid && grid.uid !== props.uid) {
         if (props.findGrid) {
             grid = props.findGrid(props);
         }
@@ -127,6 +127,11 @@ export class GridINUClass extends GridINUBaseClass {
                 init={(grid) => {
                     grid.visible = true;
                     grid.title = node.lookupField.title;
+                    if (node.activeRow) {
+                        grid.value = node.activeRow;
+                        grid.activeRow = node.activeRow;
+                        delete node.activeRow;
+                    }
                     grid.isSelecting = true;
                     node.lookupGrid = grid;
                 }}
@@ -137,6 +142,8 @@ export class GridINUClass extends GridINUBaseClass {
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     renderCell(col, row) {
         const node = this;
+        //if (row !== node.selectedRow()) return super.renderCell(col, row);
+
         const value = row[col.name];
         if (col.type === undefined || col.type === null) {
             col.type = '';
@@ -160,7 +167,7 @@ export class GridINUClass extends GridINUBaseClass {
                             {'...'}
                         </button>
                         {
-                            col.required || col.readonly ? <></>
+                            col.required || col.readonly || value === undefined || value === '' ? <></>
                                 :
                                 <button
                                     key={`gridlookupclear_${node.id}_${col.id}_${node.stateind}_`}
@@ -253,6 +260,14 @@ export class GridINUClass extends GridINUBaseClass {
             img: node.images.viewRecord,
             click: (e) => node.viewRecord(e),
             getDisabled: (e) => node.viewRecordDisabled(e),
+        });
+
+        node.buttons.push({
+            id: node.buttons.length,
+            name: 'test',
+            title: node.translate('TEST'),
+            label: node.translate('Test'),
+            click: (e) => node.test(e)
         });
 
         node.buttons.push({
@@ -357,6 +372,42 @@ export class GridINUClass extends GridINUBaseClass {
     viewRecordDisabled(e) {
         const node = this;
         return node.isEditing() || node.selectedRowIndex === undefined || node.selectedRowIndex < 0 || !node.rows || node.rows.length <= 0;
+    }
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
+    //isRowSelected(row, rowInd) {
+    //    const node = this;
+    //    return node.value !== undefined && node.value !== '' ? row[node.keyField] === node.value : node.selectedRowIndex === rowInd;
+    //}
+    //// -------------------------------------------------------------------------------------------------------------------------------------------------------------
+    //onSelectedRowChanged(e) {
+    //    const node = this;
+    //    if (e.source && e.source === 'rowClick') {
+    //        node.value = node.selectedValue();
+    //    }
+    //}
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
+    getSelectedRowIndex() {
+        const node = this;
+        if (node.value === undefined || node.value === '') return;
+
+        let i = 0;
+        for (let row of node.rows) {
+            if (row[node.keyField] === node.value) {
+                node.selectedRowIndex = i;
+                break;
+            }
+            i++;
+        }
+    }
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
+    test(e) {
+        const node = this;
+
+        const func = async function () {
+            let rows = await node.getRows();
+        }
+
+        func();
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     closeCard(e) {

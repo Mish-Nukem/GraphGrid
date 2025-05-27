@@ -181,6 +181,13 @@
     width: 2.5em;
 }
 
+.toolbar-default {
+    display: flex;
+    align-content: center;
+    flex-wrap: nowrap;
+    align-items: center;
+}
+
 .grid-toolbar-button {
     margin: 5px 2px;
     height: 2em;
@@ -383,3 +390,14 @@
 
 .login-form > input {
 }
+
+.filter-select {
+    height: 2.5em;
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: center;
+}
+
+    .filter-select > div {
+        width: 100%;
+    }

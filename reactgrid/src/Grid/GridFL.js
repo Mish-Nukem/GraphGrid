@@ -381,8 +381,9 @@ export class GridFLClass extends GridDBClass {
         return res;
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
-    onSettingsItemClick(grid, itemId) {
-        super.onSettingsItemClick(grid, itemId);
+    onSettingsItemClick(itemId) {
+        super.onSettingsItemClick(itemId);
+        const grid = this;
 
         switch (String(itemId)) {
             case '2':

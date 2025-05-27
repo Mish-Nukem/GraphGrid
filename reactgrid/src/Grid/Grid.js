@@ -109,8 +109,15 @@ export class GridClass extends BaseComponent {
             grid.log(' 1.1 prepareColumns(). columns = ' + grid.columns.length);
         }
         grid.calculatePagesCount();
-
-        grid.onSelectedRowChanged({ grid: grid, prev: grid.selectedRowIndex, new: grid.selectedRowIndex });
+        grid.getSelectedRowIndex();
+        grid.onSelectedRowChanged({ grid: grid, prev: grid.selectedRowIndex, new: grid.selectedRowIndex, source: 'afterGetRows' });
+    }
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
+    getSelectedRowIndex() {
+        const grid = this;
+        if (grid.selectedRowIndex === undefined || grid.selectedRowIndex < 0) {
+            grid.selectedRowIndex = 0;
+        }
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     static applyTheme(grid) {
@@ -208,7 +215,7 @@ export class GridClass extends BaseComponent {
                     {columns.map((col, ind) => {
                         return (
                             <th
-                                key={`${col.id}_${col.w}_${grid.stateind}_`}
+                                key={`headercell_${grid.id}_${col.id}_${col.w}_${grid.stateind}_`}
                                 grid-header={`${grid.id}_${col.id}_` + grid.stateind + '_' + col.w}
                                 className={`${grid.opt.columnClass ? grid.opt.columnClass : ''} grid-header-th`}
                                 style={{ position: "sticky", top: 0, width: col.w + "px", overflow: "hidden", verticalAlign: "top" }}
@@ -252,8 +259,8 @@ export class GridClass extends BaseComponent {
                     grid.rows.map((row, rind) => {
                         return (
                             <tr
-                                key={`row_${rind}_${grid.stateind}_`}
-                                className={grid.selectedRowIndex === rind ? `grid-selected-row ${grid.opt.selectedRowClass || ''}` : ''}
+                                key={`gridrow_${grid.id}_${rind}_${grid.stateind}_`}
+                                className={grid.isRowSelected(row, rind) ? `grid-selected-row ${grid.opt.selectedRowClass || ''}` : ''}
                                 onMouseDown={(e) => { e.detail === 2 ? grid.onRowDblClick(e, row) : grid.onSelectGridRow(e) }}
                             >
                                 {grid.renderRow(row, rind)}
@@ -265,12 +272,17 @@ export class GridClass extends BaseComponent {
         );
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
+    isRowSelected(row, rowInd) {
+        const grid = this;
+        return grid.selectedRowIndex === rowInd;
+    }
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     renderRow(row, rowInd) {
         const grid = this;
         return grid.columns.map((col, cind) => {
             return (
                 <td
-                    key={`cell_${rowInd}_${cind}_${grid.stateind}_`}
+                    key={`gridcell_${grid.id}_${rowInd}_${cind}_${grid.stateind}_`}
                 >
                     {grid.renderCell(col, row)}
                 </td>
@@ -489,7 +501,7 @@ export class GridClass extends BaseComponent {
             newSelRow.classList.add(grid.opt.selectedRowClass);
         }
 
-        grid.onSelectedRowChanged({ grid: grid, prev: prevSelectedIndex, new: grid.selectedRowIndex });
+        grid.onSelectedRowChanged({ grid: grid, prev: prevSelectedIndex, new: grid.selectedRowIndex, source: 'rowClick' });
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     getKeyColumn() {

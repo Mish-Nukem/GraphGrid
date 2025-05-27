@@ -160,6 +160,11 @@ export class GridINUBaseClass extends GridFLClass {
         node.lookupIsShowing = true;
         node.lookupRow = row; // || node.selectedRow();
 
+        const currValue = row[col.keyField];
+        if (currValue) {
+            node.activeRow = currValue;
+        }
+
         if (node._lookupEntityInfo[col.entity]) {
             node.refreshState();
             return;
@@ -280,6 +285,7 @@ export class GridINUBaseClass extends GridFLClass {
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     getRows(e) {
         const grid = this;
+        e = e || { filters: [] };
 
         const params = [
             { key: 'atoken', value: grid.dataGetter.atoken },
@@ -303,6 +309,11 @@ export class GridINUBaseClass extends GridFLClass {
             params.push({ key: 'columns', value: e.autocompleteColumn.name });
         }
 
+        if (grid.activeRow) {
+            params.push({ key: 'activeRow', value: grid.activeRow });
+            delete grid.activeRow;
+        }
+
         let i = 0;
         for (let cond of e.filters) {
             params.push({ key: 'f' + i++, value: cond });
@@ -319,6 +330,11 @@ export class GridINUBaseClass extends GridFLClass {
                         if (!e.autocompleteColumn) {
                             grid.totalRows = res.count;
                         }
+
+                        if (+res.pageNum > 0) {
+                            grid.pageNumber = res.pageNum;
+                        }
+
                         resolve(res.rows);
                     } else {
                         reject(Error("Error getting rows"));
