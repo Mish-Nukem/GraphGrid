@@ -114,6 +114,16 @@ export class GridDBClass extends GridInGraphClass {
         )
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
+    isEditing() {
+        const grid = this;
+        return grid._isEditing === true;
+    }
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
+    setEditing(value) {
+        const grid = this;
+        grid._isEditing = value;
+    }
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     renderToolbar() {
         const grid = this;
         grid.buttons = grid.buttons || [];
@@ -193,7 +203,7 @@ export class GridDBClass extends GridInGraphClass {
                                         grid-pager-item={`${grid.id}_${button.id}_`}
                                         className={`${button.class ? button.class : 'grid-pager-button'}`}
                                         title={grid.translate(button.title, 'grid-pager-button')}
-                                        disabled={button.getDisabled && button.getDisabled({ grid: grid }) || button.disabled ? 'disabled' : ''}
+                                        disabled={grid.isEditing() || button.getDisabled && button.getDisabled({ grid: grid }) || button.disabled ? 'disabled' : ''}
                                         onClick={button.click ? button.click : null}
                                     >
                                         {button.img ? button.img() : ''}
@@ -319,6 +329,7 @@ export class GridDBClass extends GridInGraphClass {
                         grid-pager-item={`${grid.id}_${button.id}_`}
                         className={`${button.class ? button.class : 'grid-pager-current'}`}
                         style={{ width: '3em', display: 'inline-block' }}
+                        disabled={grid.isEditing() ? 'disabled' : ''}
                         onChange={function (e) {
                             const newPage = +e.target.value;
 
@@ -402,6 +413,7 @@ export class GridDBClass extends GridInGraphClass {
                         className={`grid-pager-size ${button.class ? button.class : ''}`}
                         style={{ width: '4.5em', display: 'inline-block' }}
                         value={grid.pageSize}
+                        disabled={grid.isEditing() ? 'disabled' : ''}
                         onChange={function (e) {
                             const newSize = +e.target.value;
 
@@ -465,7 +477,7 @@ export class GridDBClass extends GridInGraphClass {
             <>
                 <span
                     className={'grid-header-title'}
-                    style={{ cursor: col.sortable ? 'pointer' : '', gridColumn: !sortDir ? 'span 2' : '' }}
+                    style={{ cursor: col.sortable && !grid.isEditing() ? 'pointer' : '', gridColumn: !sortDir ? 'span 2' : '' }}
                     onClick={(e) => grid.changeColumnSortOrder(col)}
                 >
                     {title}
@@ -522,7 +534,7 @@ export class GridDBClass extends GridInGraphClass {
     changeColumnSortOrder(column) {
         const grid = this;
 
-        if (!column.sortable) return;
+        if (!column.sortable || grid.isEditing()) return;
 
         if (column.asc) {
             delete column.asc;

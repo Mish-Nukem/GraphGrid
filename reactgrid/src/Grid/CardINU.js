@@ -17,7 +17,7 @@ export function CardINU(props) {
             card = props.findGrid(props);
         }
         card = card || new CardINUClass(props);
-        needGetRows = !card.cardRow;
+        needGetRows = !card.changedRow;
     }
 
     if (props.init) {
@@ -62,13 +62,13 @@ export class CardINUClass extends GridINUBaseClass {
 
         const card = this;
 
-        card.cardRow = {};
+        card.changedRow = {};
         card.initialRow = props.cardRow;
-        Object.assign(card.cardRow, card.initialRow);
+        Object.assign(card.changedRow, card.initialRow);
 
         if (props.isNewRecord) {
             card.isNewRecord = true;
-            card._rowChanged = true;
+            card.setEditing(true);
         }
 
         card.cardButtons = [];
@@ -98,7 +98,7 @@ export class CardINUClass extends GridINUBaseClass {
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     renderField(col) {
         const card = this;
-        const value = card.cardRow[col.name];
+        const value = card.changedRow[col.name];
         if (col.type === undefined || col.type === null) {
             col.type = '';
         }
@@ -121,7 +121,7 @@ export class CardINUClass extends GridINUBaseClass {
                         <button
                             key={`cardlookupbtn_${card.id}_${col.id}_${card.stateind}_`}
                             className={'graph-card-button'}
-                            onClick={(e) => card.openLookupField(e, col, card.cardRow)}
+                            onClick={(e) => card.openLookupField(e, col, card.changedRow)}
                         >
                             {card.images.filterSelect ? card.images.filterSelect() : card.translate('Select', 'graph-filter-select')}
                         </button>
@@ -129,7 +129,7 @@ export class CardINUClass extends GridINUBaseClass {
                             key={`cardlookupclear_${card.id}_${col.id}_${card.stateind}_`}
                             className={'graph-card-button'}
                             disabled={value === undefined || value === '' ? 'disabled' : ''}
-                            onClick={(e) => card.clearField(e, col, card.cardRow)}
+                            onClick={(e) => card.clearField(e, col, card.changedRow)}
                             style={{ display: !col.required && !col.readonly ? '' : 'none' }}
                         >
                             {card.images.filterClear ? card.images.filterClear() : card.translate('Clear', 'graph-filter-clear')}
@@ -150,9 +150,9 @@ export class CardINUClass extends GridINUBaseClass {
                         <textarea
                             key={`cardlookuptextarea_${card.id}_${col.id}_${card.stateind}_`}
                             
-                            value={card.cardRow[col.name] !== undefined ? card.cardRow[col.name] : ''}
+                            value={card.changedRow[col.name] !== undefined ? card.changedRow[col.name] : ''}
                             style={{ width: 'calc(100% - 4px)', height: col.maxW !== undefined && +col.maxW >= 200 ? '5em' : '2.3em', padding: '0 2px', boxSizing: 'border-box', gridColumn: col.required || col.readonly ? 'span 3' : 'span 2', resize: 'vertical' }}
-                            onChange={(e) => card.changeField(e, col, card.cardRow)}
+                            onChange={(e) => card.changeField(e, col, card.changedRow)}
                             disabled={col.readonly ? 'disabled' : ''}
                             autoFocus={col === card._changingCol}
                             onFocus={e => {
@@ -167,7 +167,7 @@ export class CardINUClass extends GridINUBaseClass {
                             key={`cardfieldclear_${card.id}_${col.id}_${card.stateind}_`}
                             className={'graph-card-button'}
                             disabled={value === undefined || value === '' ? 'disabled' : ''}
-                            onClick={(e) => card.clearField(e, col, card.cardRow)}
+                            onClick={(e) => card.clearField(e, col, card.changedRow)}
                             style={{ display: !col.required && !col.readonly ? '' : 'none' }}
                         >
                             {card.images.filterClear ? card.images.filterClear() : card.translate('Clear', 'graph-filter-clear')}
@@ -216,24 +216,24 @@ export class CardINUClass extends GridINUBaseClass {
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     commitChangesNodeDisabled(e) {
         const card = this;
-        return !card._rowChanged;
+        return !card.isEditing();
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     rollbackChangesNodeDisabled(e) {
         const card = this;
-        return !card._rowChanged;
+        return !card.isEditing();
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     commitChangesNode(e) {
         const card = this;
-        card.saveRow(e).then(
+        card.saveRow({ row: card.initialRow, changedRow: card.changedRow }).then(
             () => {
-                card._rowChanged = false;
-                Object.assign(card.initialRow, card.cardRow);
+                card.setEditing(false);
+                Object.assign(card.initialRow, card.changedRow);
                 card.refreshState();
             }
         ).catch((message) => {
-            Object.assign(card.cardRow, card.initialRow);
+            Object.assign(card.changedRow, card.initialRow);
             card.refreshState();
             alert(message || 'Error!');
         });
@@ -242,16 +242,17 @@ export class CardINUClass extends GridINUBaseClass {
     rollbackChangesNode(e) {
         const card = this;
         if (card.isNewRecord) {
-            Object.assign(card.cardRow, card.initialRow);
+            Object.assign(card.changedRow, card.initialRow);
+            card.setEditing(false);
             card.refreshState();
         }
         else {
             card.getRows({ filters: card.collectFilters(), card: card }).then(
                 rows => {
                     card.rows = rows;
-                    card.cardRow = rows[0];
-                    Object.assign(card.initialRow, card.cardRow);
-                    card._rowChanged = false;
+                    card.changedRow = rows[0];
+                    Object.assign(card.initialRow, card.changedRow);
+                    card.setEditing(false);
                     card.afterGetRows();
                     card.refreshState();
                 }
@@ -283,7 +284,7 @@ export class CardINUClass extends GridINUBaseClass {
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     selectedRow() {
         const card = this;
-        return card.cardRow;
+        return card.changedRow;
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     getRows(e) {
@@ -296,7 +297,7 @@ export class CardINUClass extends GridINUBaseClass {
             { key: 'pageNumber', value: 1 },
         ];
 
-        params.push({ key: 'f0', value: card.keyField + ' = ' + card.cardRow[card.keyField] });
+        params.push({ key: 'f0', value: card.keyField + ' = ' + card.initialRow[card.keyField] });
 
         return new Promise(function (resolve, reject) {
             card.dataGetter.get({ url: card.entity + '/list', params: params }).then(
@@ -306,43 +307,6 @@ export class CardINUClass extends GridINUBaseClass {
                         resolve(res.rows);
                     } else {
                         reject(Error("Error getting rows"));
-                    }
-                }
-            );
-        });
-    }
-    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
-    saveRow(e) {
-        const card = this;
-
-        const params = [
-            { key: 'atoken', value: card.dataGetter.atoken },
-            { key: 'rtoken', value: card.dataGetter.rtoken },
-            { key: 'row', value: card.initialRow },
-            { key: 'upd', value: card.cardRow },
-            { key: 'columns', value: card.keyField },
-        ];
-
-        if (!card.isNewRecord) {
-            params.push({ key: 'f0', value: card.keyField + ' = ' + card.cardRow[card.keyField] });
-        }
-
-        return new Promise(function (resolve, reject) {
-            card.dataGetter.get({ url: card.entity + '/' + (card.isNewRecord ? 'add' : 'update'), params: params }).then(
-                (res) => {
-                    if (res && +res.resStr > 0) {
-                        if (card.isNewRecord) {
-                            card.cardRow[card.keyField] = +res;
-                            card.initialRow[card.keyField] = +res;
-                            card.isNewRecord = false;
-                        }
-                        resolve(res.resStr);
-                    }
-                    else if (String(res.resStr.toLowerCase()) === 'true') {
-                        resolve(res.resStr);
-                    }
-                    else {
-                        reject(Error(res.resStr || "Error saving row"));
                     }
                 }
             );

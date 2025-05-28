@@ -65,6 +65,8 @@ export class GridINUClass extends GridINUBaseClass {
 
         grid.status = NodeStatus.grid;
 
+        grid.allowEditGrid = true;
+
         grid.addButtons();
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -142,12 +144,16 @@ export class GridINUClass extends GridINUBaseClass {
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     renderCell(col, row) {
         const node = this;
-        //if (row !== node.selectedRow()) return super.renderCell(col, row);
 
-        const value = row[col.name];
+        if (col.readonly || row !== node.selectedRow()) return super.renderCell(col, row);
+
+        const value = !node.isEditing() ? row[col.name] : node.changedRow && node.changedRow[col.name] !== undefined ? node.changedRow[col.name] : row[col.name];
         if (col.type === undefined || col.type === null) {
             col.type = '';
         }
+
+        const noClear = col.required || value === undefined || value === '';
+
         //{node.images.filterSelect ? node.images.filterSelect() : node.translate('Select', 'graph-filter-select')}
         switch (col.type.toLowerCase()) {
             case 'lookup':
@@ -155,7 +161,7 @@ export class GridINUClass extends GridINUBaseClass {
                     <div style={{ border: 'none' }} className='grid-cell-lookup' key={`gridlookupdiv_${node.id}_${col.id}_${node.stateind}_`}>
                         <span
                             key={`gridlookuptitle_${node.id}_${col.id}_${node.stateind}_`}
-                            style={{ width: 'calc(100% - 4px)', gridColumn: col.required || col.readonly ? 'span 2' : '', overflowX: 'hidden' }}
+                            style={{ width: 'calc(100% - 4px)', gridColumn: noClear ? 'span 2' : '', overflowX: 'hidden' }}
                         >
                             {value}
                         </span>
@@ -167,7 +173,7 @@ export class GridINUClass extends GridINUBaseClass {
                             {'...'}
                         </button>
                         {
-                            col.required || col.readonly || value === undefined || value === '' ? <></>
+                            noClear ? <></>
                                 :
                                 <button
                                     key={`gridlookupclear_${node.id}_${col.id}_${node.stateind}_`}
@@ -180,7 +186,42 @@ export class GridINUClass extends GridINUBaseClass {
                     </div>
                 );
             default:
-                return value !== undefined ? value : '';
+                return (
+                    <div style={{ border: 'none' }} className='grid-cell-edit' key={`grideditdiv_${node.id}_${col.id}_${node.stateind}_`}>
+                        <textarea
+                            key={`gridedittextarea_${node.id}_${col.id}_${node.stateind}_`}
+                            value={value}
+                            style={{
+                                width: '100%',
+                                height: '1.7em',
+                                padding: '0',
+                                boxSizing: 'border-box',
+                                gridColumn: noClear ? 'span 2' : '',
+                                resize: 'vertical',
+                                overflowX: 'hidden',
+                            }}
+                            onChange={(e) => node.changeField(e, col, row)}
+                            autoFocus={col === node._changingCol && node.isEditing()}
+                            onFocus={e => {
+                                if (col === node._changingCol) {
+                                    e.currentTarget.selectionStart = e.currentTarget.selectionEnd = node._remCursorPos;
+                                }
+                            }}
+                        >
+                        </textarea>
+                        {
+                            noClear ? <></>
+                                :
+                                <button
+                                    key={`gridlookupclear_${node.id}_${col.id}_${node.stateind}_`}
+                                    className={'grid-cell-button'}
+                                    onClick={(e) => node.clearField(e, col, row)}
+                                >
+                                    {'×'}
+                                </button>
+                        }
+                    </div>
+                );
         }
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -262,13 +303,13 @@ export class GridINUClass extends GridINUBaseClass {
             getDisabled: (e) => node.viewRecordDisabled(e),
         });
 
-        node.buttons.push({
-            id: node.buttons.length,
-            name: 'test',
-            title: node.translate('TEST'),
-            label: node.translate('Test'),
-            click: (e) => node.test(e)
-        });
+        //node.buttons.push({
+        //    id: node.buttons.length,
+        //    name: 'test',
+        //    title: node.translate('TEST'),
+        //    label: node.translate('Test'),
+        //    click: (e) => node.test(e)
+        //});
 
         node.buttons.push({
             id: node.buttons.length,
@@ -297,6 +338,20 @@ export class GridINUClass extends GridINUBaseClass {
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     commitChanges(e) {
         const node = this;
+
+        const row = node.selectedRow();
+
+        node.saveRow({ row: row, changedRow: node.changedRow }).then(
+            () => {
+                node.setEditing(false);
+                Object.assign(row, node.changedRow);
+                node.refreshState();
+            }
+        ).catch((message) => {
+            Object.assign(node.changedRow, row);
+            node.refreshState();
+            alert(message || 'Error!');
+        });
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     commitChangesDisabled(e) {
@@ -306,6 +361,10 @@ export class GridINUClass extends GridINUBaseClass {
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     rollbackChanges(e) {
         const node = this;
+
+        delete node.changedRow;
+        node.setEditing(false);
+        node.refreshState();
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     rollbackChangesDisabled(e) {
@@ -378,13 +437,13 @@ export class GridINUClass extends GridINUBaseClass {
     //    const node = this;
     //    return node.value !== undefined && node.value !== '' ? row[node.keyField] === node.value : node.selectedRowIndex === rowInd;
     //}
-    //// -------------------------------------------------------------------------------------------------------------------------------------------------------------
-    //onSelectedRowChanged(e) {
-    //    const node = this;
-    //    if (e.source && e.source === 'rowClick') {
-    //        node.value = node.selectedValue();
-    //    }
-    //}
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
+    onSelectedRowChanged(e) {
+        const node = this;
+        super.onSelectedRowChanged(e);
+
+        node.refreshState();
+    }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     getSelectedRowIndex() {
         const node = this;
@@ -398,6 +457,36 @@ export class GridINUClass extends GridINUBaseClass {
             }
             i++;
         }
+    }
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
+    async canLeaveRow(rowIndex) {
+        const node = this;
+        if (!node.allowEditGrid || !node.isEditing()) return true;
+
+        let res;
+
+        if (node.detailNodeChangesSaved) {
+            res = await node.detailNodeChangesSaved();
+            if (!res) return false;
+        }
+
+        const row = node.rows[rowIndex];
+
+        await node.saveRow({ row: row, changedRow: node.changedRow }).then(
+            () => {
+                node.setEditing(false);
+                Object.assign(row, node.changedRow);
+                node.refreshState();
+                res = true;
+            }
+        ).catch((message) => {
+            Object.assign(node.changedRow, row);
+            node.refreshState();
+            res = false;
+            alert(message || 'Error!');
+        });
+
+        return res;
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     test(e) {

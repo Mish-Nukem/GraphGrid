@@ -476,16 +476,26 @@ export class GridClass extends BaseComponent {
     onRowDblClick(e, row) {
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
-    onSelectGridRow(e) {
+    async canLeaveRow(rowIndex) {
+        return true;
+    }
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
+    async onSelectGridRow(e) {
         const grid = this;
 
         const gridElement = e.target.closest('TABLE');
+        const rows = gridElement.tBodies[0].rows;
+        const clickedRow = e.target.closest('TR');
 
         const prevSelectedIndex = grid.selectedRowIndex;
+        const newSelectedIndex = clickedRow.rowIndex - 1;
 
-        if (e.target.parentElement.rowIndex - 1 === prevSelectedIndex) return;
+        if (newSelectedIndex === prevSelectedIndex) return;
 
-        const rows = gridElement.tBodies[0].rows;
+        const saved = await grid.canLeaveRow(prevSelectedIndex);
+
+        if (!saved) return;
+
 
         const prevSelRow = rows[grid.selectedRowIndex];
         prevSelRow.classList.remove('grid-selected-row');
@@ -493,8 +503,7 @@ export class GridClass extends BaseComponent {
             prevSelRow.classList.remove(grid.opt.selectedRowClass);
         }
 
-        //grid.selectedRowIndex = e.target.parentElement.rowIndex - 1;
-        grid.selectedRowIndex = e.target.closest('TR').rowIndex - 1;
+        grid.selectedRowIndex = newSelectedIndex;
         const newSelRow = rows[grid.selectedRowIndex];
         newSelRow.classList.add(`grid-selected-row`);
         if (grid.opt.selectedRowClass) {

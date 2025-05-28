@@ -130,8 +130,11 @@ export class GridINUBaseClass extends GridFLClass {
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     changeField(e, col, row) {
         const node = this;
-        row[col.name] = e.target.value;
-        node._rowChanged = true;
+
+        node.changedRow = node.changedRow || {};
+
+        node.changedRow[col.name] = e.target.value;
+        node.setEditing(true);
         node._changingCol = col;
 
         node._remCursorPos = e.currentTarget.selectionEnd;
@@ -141,14 +144,17 @@ export class GridINUBaseClass extends GridFLClass {
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     clearField(e, col, row) {
         const node = this;
+
+        node.changedRow = node.changedRow || {};
+
         if (col.type === 'lookup') {
-            row[col.keyField] = '';
-            row[col.name] = '';
+            node.changedRow[col.keyField] = '';
+            node.changedRow[col.name] = '';
         }
         else {
-            row[col.name] = '';
+            node.changedRow[col.name] = '';
         }
-        node._rowChanged = true;
+        node.setEditing(true);
         node.refreshState();
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -158,9 +164,9 @@ export class GridINUBaseClass extends GridFLClass {
 
         node.lookupField = col;
         node.lookupIsShowing = true;
-        node.lookupRow = row; // || node.selectedRow();
+        node.changedRow = node.changedRow || {};
 
-        const currValue = row[col.keyField];
+        const currValue = node.changedRow[col.keyField] !== undefined ? node.changedRow[col.keyField] : row[col.keyField];
         if (currValue) {
             node.activeRow = currValue;
         }
@@ -187,9 +193,9 @@ export class GridINUBaseClass extends GridFLClass {
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     selectLookupValue(e) {
         const node = this;
-        node.lookupRow[node.lookupField.keyField] = node.lookupGrid.selectedValue();
-        node.lookupRow[node.lookupField.name] = node.lookupGrid.selectedText();
-        node._rowChanged = true;
+        node.changedRow[node.lookupField.keyField] = node.lookupGrid.selectedValue();
+        node.changedRow[node.lookupField.name] = node.lookupGrid.selectedText();
+        node.setEditing(true);
         node.closeLookup();
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -278,11 +284,6 @@ export class GridINUBaseClass extends GridFLClass {
         }
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
-    isEditing() {
-        const node = this;
-        return node._isEditing === true;
-    }
-    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     getRows(e) {
         const grid = this;
         e = e || { filters: [] };
@@ -357,6 +358,57 @@ export class GridINUBaseClass extends GridFLClass {
             grid.dataGetter.get({ url: grid.entity + '/delete', params: params }).then(
                 (res) => {
                     if (res && String(res.resStr.toLowerCase()) === 'true') {
+                        resolve(res.resStr);
+                    }
+                    else {
+                        reject(Error(res.resStr || "Error saving row"));
+                    }
+                }
+            );
+        });
+    }
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
+    isRowChanged(row) {
+        const grid = this;
+        if (!grid.changedRow) return false;
+
+        let res = false;
+        for (let col in grid.changedRow) {
+            if (grid.changedRow[col] !== row[col]) return true;
+        }
+
+        return res;
+    }
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
+    saveRow(e) {
+        const grid = this;
+
+        if (!grid.isRowChanged(e.row)) return new Promise(function (resolve, reject) { resolve(true); });
+
+        const params = [
+            { key: 'atoken', value: grid.dataGetter.atoken },
+            { key: 'rtoken', value: grid.dataGetter.rtoken },
+            { key: 'row', value: e.row },
+            { key: 'upd', value: e.changedRow },
+            { key: 'columns', value: grid.keyField },
+        ];
+
+        if (!grid.isNewRecord) {
+            params.push({ key: 'f0', value: grid.keyField + ' = ' + e.row[grid.keyField] });
+        }
+
+        return new Promise(function (resolve, reject) {
+            grid.dataGetter.get({ url: grid.entity + '/' + (grid.isNewRecord ? 'add' : 'update'), params: params }).then(
+                (res) => {
+                    if (res && +res.resStr > 0) {
+                        if (grid.isNewRecord) {
+                            e.row[grid.keyField] = +res;
+                            e.changedRow[grid.keyField] = +res;
+                            grid.isNewRecord = false;
+                        }
+                        resolve(res.resStr);
+                    }
+                    else if (String(res.resStr.toLowerCase()) === 'true') {
                         resolve(res.resStr);
                     }
                     else {

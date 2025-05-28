@@ -125,7 +125,7 @@ export class GridFLClass extends GridDBClass {
                             onClick={(e) => { grid.onColumnFilterClick(col, e); }}
                             onInput={(e) => { grid.onColumnFilterInput(col, e) }}
                             autoFocus={needFocus}
-
+                            disabled={grid.isEditing() ? 'disabled' : '' }
                             onBlur={(e) => { grid.onColumnFocusLost(col, col.filter, e); }}
                             autoComplete="off"
                         >
@@ -137,6 +137,7 @@ export class GridFLClass extends GridDBClass {
                                 className={"grid-filter-clear"}
                                 style={{ color: 'black', display: hasFilter ? '' : 'none' }}
                                 type={'button'}
+                                disabled={grid.isEditing() ? 'disabled' : ''}
                                 onClick={(e) => grid.clearColumnFilter(col)}
                             >×</button> /*: <></>*/
                         }

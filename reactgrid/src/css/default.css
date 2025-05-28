@@ -285,6 +285,14 @@
     align-content: center;
 }
 
+.grid-cell-edit {
+    display: grid;
+    grid-template-columns: calc(100% - 20px) 20px;
+    grid-template-rows: auto;
+    align-items: center;
+    align-content: center;
+}
+
 .grid-cell-button {
     height: 1.5em;
     width: 1.5em;

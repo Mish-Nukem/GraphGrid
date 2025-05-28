@@ -258,7 +258,7 @@ export class GraphComponentClass extends BaseComponent {
                     node.filterType === FilterType.combobox ?
                         <Select
                             value={node._selectedOption}
-                            getOptions={(filter, pageNum) => gc.promiseOptions2(filter, node, pageNum)}
+                            getOptions={(filter, pageNum) => gc.promiseOptions(filter, node, pageNum)}
                             onChange={(e) => {
                                 node.value = e.value;
                                 node._selectedOption = { value: e.value, label: e.label };
@@ -266,6 +266,7 @@ export class GraphComponentClass extends BaseComponent {
                                 gc.refreshState();
                             }}
                             init={(e) => { node.setComboboxValue = e.setComboboxValue; }}
+                            disabled={gc.isEditing()}
                         >
                         </Select>
                         :
@@ -279,6 +280,7 @@ export class GraphComponentClass extends BaseComponent {
                                     (node.value !== undefined ? node.value : '')
                             }
                             readOnly={true}
+                            disabled={gc.isEditing() ? 'disabled' : ''}
                         ></input>
                 }
                 {
@@ -287,6 +289,7 @@ export class GraphComponentClass extends BaseComponent {
                             className={node.opt.filterButtonClass || 'graph-filter-button'}
                             key={`fltrsel_${node.id}_${gc.id}_${gc.stateind}_`}
                             onClick={(e) => gc.openFilterGrid(e, node)}
+                            disabled={gc.isEditing() ? 'disabled' : ''}
                         >
                             {node.images.filterSelect ? node.images.filterSelect() : node.translate('Select', 'graph-filter-select')}
                         </button>
@@ -295,7 +298,7 @@ export class GraphComponentClass extends BaseComponent {
                 <button
                     key={`fltrclr_${node.id}_${gc.id}_${gc.stateind}_`}
                     className={node.opt.filterButtonClass || 'graph-filter-button'}
-                    disabled={node.value === undefined || node.value === '' ? 'disabled' : ''}
+                    disabled={gc.isEditing() || node.value === undefined || node.value === '' ? 'disabled' : ''}
                     onClick={(e) => gc.clearFilter(e, node)}
                 >
                     {node.images.filterClear ? node.images.filterClear() : node.translate('Clear', 'graph-filter-clear')}
@@ -314,7 +317,7 @@ export class GraphComponentClass extends BaseComponent {
         return (
             <button
                 key={`tabctrl_${node.id}_${gc.id}_${gc.stateind}_`}
-                disabled={isActive ? 'disabled' : ''}
+                disabled={isActive || gc.isEditing() ? 'disabled' : ''}
                 className={node.opt.filterButtonClass || ''}
                 onClick={(e) => gc.selectActiveTab(node, top)}
             >
@@ -394,6 +397,160 @@ export class GraphComponentClass extends BaseComponent {
         gc.closeFilterGrid();
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
+    onGridRowDblClick(e, node, row) {
+        const gc = this;
+
+        if (+node.status === +NodeStatus.filter) {
+            gc.selectFilterValue(e);
+        }
+        else if (+node.status === +NodeStatus.grid) {
+            if (!node.viewRecordDisabled(e)) {
+                node.viewRecord(e);
+            }
+        }
+    }
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
+    selectActiveTab(node, top) {
+        const gc = this;
+        const isActive = top && node.uid === gc.activeMaster || !top && node.uid === gc.activeDetail;
+
+        if (+node.status !== +NodeStatus.grid || gc.isTop(node) !== top || isActive) return;
+
+        if (top) gc.activeMaster = node.uid; else gc.activeDetail = node.uid;
+
+        for (let uid in gc.graph.nodesDict) {
+            let lnode = gc.graph.nodesDict[uid];
+            if (node === lnode || +lnode.status !== +NodeStatus.grid) continue;
+
+            if (gc.isTop(node) === gc.isTop(lnode)) {
+                lnode.visible = false;
+            }
+        }
+
+        node.visible = true;
+
+        gc.refreshState();
+    }
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
+    getScheme(e) {
+        const gc = this;
+
+        return new Promise(function (resolve, reject) {
+
+            const params = [
+                { key: 'atoken', value: gc.dataGetter.atoken },
+                { key: 'rtoken', value: gc.dataGetter.rtoken },
+                { key: 'graphScheme', value: gc.schemeName }
+            ];
+
+            gc.dataGetter.get({ url: 'system/graphScheme', params: params }).then(
+                (schemeObj) => {
+                    //const obj = JSON.parse(schemeObj);
+                    gc.prepareGraph(schemeObj);
+
+                    resolve(gc.graph, e);
+                }
+            );
+        });
+    }
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
+    promiseOptions(filter, node, pageNum) {
+        const gc = this;
+
+        return new Promise((resolve) => {
+            const ev = { filters: [] };
+
+            if (filter !== undefined && filter !== '') {
+                ev.filters = [`${node.nameField} starts ${filter}`];
+            }
+
+            if (!node._replaced) {
+                node = gc.replaceGrid({ graph: gc.graph, uid: node.uid, dataGetter: gc.dataGetter || node.dataGetter, entity: node.entity });
+            }
+
+            node.pageSize = 100;
+            node.pageNumber = pageNum || 1;
+            //node.pageNumber = +e.Page || 1;
+
+            node.getRows(ev).then(
+                (rows) => {
+                    const result = {
+                        options: [],
+                        hasMore: false,
+                        additional: {
+                            page: pageNum + 1,
+                            node: node
+                        },
+                    };
+                    for (let row of rows) {
+                        result.options.push({ value: row[node.keyField], label: row[node.nameField] });
+                    }
+                    result.hasMore = node.pageSize * node.pageNumber < node.totalRows;
+                    resolve(result);
+                }
+            );
+        });
+    }
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
+    isTop(node) {
+        return node.isBottom === undefined || node.isBottom === false;
+    };
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
+    isEditing() {
+        const gc = this;
+        return gc._masterIsEditing || gc._detailIsEditing;
+
+    //    const master = gc.graph.nodesDict[gc.activeMaster];
+    //    const detail = gc.graph.nodesDict[gc.activeDetail];
+
+    //    return master && master.isEditing && master.isEditing() || detail && detail.isEditing && detail.isEditing();
+    }
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
+    setEditing(grid, value) {
+        const gc = this;
+        if (grid.uid === gc.activeMaster) {
+            gc._masterIsEditing = value;
+        }
+        else if (grid.uid === gc.activeDetail) {
+            gc._detailIsEditing = value;
+        }
+        gc.refreshState();
+    }
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
+    async detailNodeChangesSaved(node) {
+        const gc = this;
+        if (node.uid !== gc.activeMaster) return true;
+
+        const detail = gc.graph.nodesDict[gc.activeDetail];
+
+        if (!detail.rows || detail.rows.length <= 0) return true;
+
+        let res;
+        const row = detail.rows[detail.selectedRowIndex];
+        if (!row) return true;
+
+        await detail.saveRow({ row: row, changedRow: detail.changedRow }).then(
+            () => {
+                detail.setEditing(false);
+                Object.assign(row, detail.changedRow);
+                detail.refreshState();
+                res = true;
+            }
+        ).catch((message) => {
+            Object.assign(detail.changedRow, row);
+            detail.refreshState();
+            res = false;
+            alert(message || 'Error!');
+        });
+
+        return res;
+    }
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
+    checkNeedTriggerWave(node) {
+        const gc = this;
+        return node !== gc.selectingNode;
+    }
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     replaceGrid(props) {
         if (!props.graph) return null;
 
@@ -471,245 +628,16 @@ export class GraphComponentClass extends BaseComponent {
 
         grid.onRowDblClick = (e, row) => { gc.onGridRowDblClick(e, grid, row) };
 
+        grid.remSetEditing = grid.setEditing;
+        grid.setEditing = (value) => { grid.remSetEditing(value); gc.setEditing(grid, value); /*gc.refreshState();*/ };
+        grid.isEditing = () => { return gc.isEditing(); };
+
+        if (gc.isTop(grid)) {
+            grid.detailNodeChangesSaved = async () => { const res = await gc.detailNodeChangesSaved(grid); return res; };
+        }
+
         graph.nodesDict[grid.uid] = grid;
         return grid;
-    }
-    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
-    onGridRowDblClick(e, node, row) {
-        const gc = this;
-
-        if (+node.status === +NodeStatus.filter) {
-            gc.selectFilterValue(e);
-        }
-        else if (+node.status === +NodeStatus.grid) {
-            if (!node.viewRecordDisabled(e)) {
-                node.viewRecord(e);
-            }
-        }
-    }
-    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
-    selectActiveTab(node, top) {
-        const gc = this;
-        const isActive = top && node.uid === gc.activeMaster || !top && node.uid === gc.activeDetail;
-
-        if (+node.status !== +NodeStatus.grid || gc.isTop(node) !== top || isActive) return;
-
-        if (top) gc.activeMaster = node.uid; else gc.activeDetail = node.uid;
-
-        for (let uid in gc.graph.nodesDict) {
-            let lnode = gc.graph.nodesDict[uid];
-            if (node === lnode || +lnode.status !== +NodeStatus.grid) continue;
-
-            if (gc.isTop(node) === gc.isTop(lnode)) {
-                lnode.visible = false;
-            }
-        }
-
-        node.visible = true;
-
-        gc.refreshState();
-    }
-    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
-    getScheme(e) {
-        const gc = this;
-
-        return new Promise(function (resolve, reject) {
-
-            const params = [
-                { key: 'atoken', value: gc.dataGetter.atoken },
-                { key: 'rtoken', value: gc.dataGetter.rtoken },
-                { key: 'graphScheme', value: gc.schemeName }
-            ];
-
-            gc.dataGetter.get({ url: 'system/graphScheme', params: params }).then(
-                (schemeObj) => {
-                    //const obj = JSON.parse(schemeObj);
-                    gc.prepareGraph(schemeObj);
-
-                    resolve(gc.graph, e);
-                }
-            );
-        });
-    }
-    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
-    promiseOptions(filter, node) {
-        const gc = this;
-
-        return new Promise((resolve) => {
-            const ev = { filters: [] };
-
-            if (filter !== undefined && filter !== '') {
-                ev.filters = [`${node.nameField} starts ${filter}`];
-            }
-
-            if (!node._replaced) {
-                node = gc.replaceGrid({ graph: gc.graph, uid: node.uid, dataGetter: gc.dataGetter || node.dataGetter, entity: node.entity });
-            }
-
-            node.pageSize = 100;
-            node.pageNumber = 1;
-            //node.pageNumber = +e.Page || 1;
-
-            node.getRows(ev).then(
-                (rows) => {
-                    node._lastComboboxRows = {
-                        options: [],
-                        hasMore: false,
-                        additional: {
-                            //page: e.page + 1,
-                            node: node
-                        },
-                    };
-                    for (let row of rows) {
-                        node._lastComboboxRows.options.push({ value: row[node.keyField], label: row[node.nameField] });
-                    }
-                    node._lastComboboxRows.hasMore = node.pageSize * node.pageNumber < node.totalRows;
-                    resolve(node._lastComboboxRows.options);
-                }
-            );
-        });
-    }
-
-    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
-    promiseOptions2(filter, node, pageNum) {
-        const gc = this;
-
-        return new Promise((resolve) => {
-            const ev = { filters: [] };
-
-            if (filter !== undefined && filter !== '') {
-                ev.filters = [`${node.nameField} starts ${filter}`];
-            }
-
-            if (!node._replaced) {
-                node = gc.replaceGrid({ graph: gc.graph, uid: node.uid, dataGetter: gc.dataGetter || node.dataGetter, entity: node.entity });
-            }
-
-            node.pageSize = 100;
-            node.pageNumber = pageNum || 1;
-            //node.pageNumber = +e.Page || 1;
-
-            node.getRows(ev).then(
-                (rows) => {
-                    const result = {
-                        options: [],
-                        hasMore: false,
-                        additional: {
-                            page: pageNum + 1,
-                            node: node
-                        },
-                    };
-                    for (let row of rows) {
-                        result.options.push({ value: row[node.keyField], label: row[node.nameField] });
-                    }
-                    result.hasMore = node.pageSize * node.pageNumber < node.totalRows;
-                    resolve(result);
-                }
-            );
-        });
-    }
-    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
-    loadNodeComboboxValues(filter, callback, node) {
-        //const node = e.node;
-
-        const result = {
-            options: [],
-            hasMore: false,
-            additional: {
-                //page: e.page + 1,
-                node: node
-            },
-        };
-
-        //if (!node._lastComboboxRowsWaiting) {
-        //    node._lastComboboxRowsWaiting = true;
-
-        const ev = { filters: [] };
-
-        if (filter !== undefined && filter !== '') {
-            ev.filters = [`${node.nameField} starts ${filter}`];
-        }
-
-        node.pageSize = 100;
-        node.pageNumber = 1;
-        //node.pageNumber = +e.Page || 1;
-
-        node.getRows(ev).then(
-            (rows) => {
-                node._lastComboboxRows = {
-                    options: [],
-                    hasMore: false,
-                    additional: {
-                        //page: e.page + 1,
-                        node: node
-                    },
-                };
-                for (let i of rows) {
-                    let row = rows[i];
-                    node._lastComboboxRows.options.push({ value: row[node.keyField], label: row[node.nameField] });
-                }
-                node._lastComboboxRows.hasMore = node.pageSize * node.pageNumber < node.totalRows;
-                callback(node._lastComboboxRows.options);
-            }
-        );
-
-        //const rows = await node.getRows(ev);
-
-        //node._lastComboboxRows = {
-        //    options: [],
-        //    hasMore: false,
-        //    additional: {
-        //        page: e.page + 1,
-        //        node: node
-        //    },
-        //};
-        //for (let i of rows) {
-        //    let row = rows[i];
-        //    node._lastComboboxRows.options.push({ value: row[node.keyField], label: row[node.nameField] });
-        //}
-        //node._lastComboboxRows.hasMore = node.pageSize * node.pageNumber < node.totalRows;
-
-        //return new Promise((resolve, reject) => {
-        //    // using setTimeout to emulate a call to server
-        //    setTimeout(() => {
-        //        node.getRows(ev).then(
-        //            (rows) => {
-        //                node._lastComboboxRows = {
-        //                    options: [],
-        //                    hasMore: false,
-        //                    additional: {
-        //                        page: e.page + 1,
-        //                        node: node
-        //                    },
-        //                };
-        //                for (let i of rows) {
-        //                    let row = rows[i];
-        //                    node._lastComboboxRows.options.push({ value: row[node.keyField], label: row[node.nameField] });
-        //                }
-        //                node._lastComboboxRows.hasMore = node.pageSize * node.pageNumber < node.totalRows;
-        //                resolve(node._lastComboboxRows.options);
-        //            }
-        //        );
-        //    }, 2000);
-        //});
-
-
-        //if (node._lastComboboxRows) {
-        //    node._lastComboboxRowsWaiting = false;
-        //return node._lastComboboxRows;
-        //}
-        //}
-
-        //return result;
-    }
-    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
-    isTop(node) {
-        return node.isBottom === undefined || node.isBottom === false;
-    };
-    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
-    checkNeedTriggerWave(node) {
-        const gc = this;
-        return node !== gc.selectingNode;
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     prepareGraph(obrGraph) {

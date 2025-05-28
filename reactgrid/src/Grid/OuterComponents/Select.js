@@ -16,7 +16,7 @@ export function Select(props) {
 
     const loadOptions = async (inputValue, loadedOptions, { page }) => {
 
-        if (getOptions) {
+        if (getOptions && !props.disabled) {
             const res = await getOptions(inputValue, page);
             return res;
         }
@@ -65,6 +65,7 @@ export function Select(props) {
                 onChange={(e) => { props.onChange(e); onChange(e); }}
                 placeholder=""
                 styles={customStyles}
+                isDisabled={props.disabled ? true : false}
             >
             </AsyncPaginate >
         </>
