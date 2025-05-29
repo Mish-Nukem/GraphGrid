@@ -12,7 +12,7 @@ export function GridINU(props) {
 
     grid = gridState.grid;
     let needGetRows = false;
-    if (!grid || grid && grid.uid !== props.uid) {
+    if (!grid || grid.uid !== props.uid) {
         if (props.findGrid) {
             grid = props.findGrid(props);
         }
@@ -65,7 +65,11 @@ export class GridINUClass extends GridINUBaseClass {
 
         grid.status = NodeStatus.grid;
 
-        grid.allowEditGrid = true;
+        grid.allowEditGrid = props.allowEditGrid;
+
+        if (grid.columns.length <= 0 && grid.entity) {
+            grid.getColumns = grid.getColumnsFromEntity;
+        }
 
         grid.addButtons();
     }
@@ -145,7 +149,7 @@ export class GridINUClass extends GridINUBaseClass {
     renderCell(col, row) {
         const node = this;
 
-        if (col.readonly || row !== node.selectedRow()) return super.renderCell(col, row);
+        if (!node.allowEditGrid || col.readonly || row !== node.selectedRow()) return super.renderCell(col, row);
 
         const value = !node.isEditing() ? row[col.name] : node.changedRow && node.changedRow[col.name] !== undefined ? node.changedRow[col.name] : row[col.name];
         if (col.type === undefined || col.type === null) {
@@ -187,9 +191,13 @@ export class GridINUClass extends GridINUBaseClass {
                 );
             default:
                 return (
-                    <div style={{ border: 'none' }} className='grid-cell-edit' key={`grideditdiv_${node.id}_${col.id}_${node.stateind}_`}>
+                    <div
+                        style={{ border: 'none' }}
+                        className='grid-cell-edit'
+                        key={`grideditdiv_${node.id}_${col.id}_`}
+                    >
                         <textarea
-                            key={`gridedittextarea_${node.id}_${col.id}_${node.stateind}_`}
+                            key={`gridedittextarea_${node.id}_${col.id}_`}
                             value={value}
                             style={{
                                 width: '100%',
@@ -213,7 +221,7 @@ export class GridINUClass extends GridINUBaseClass {
                             noClear ? <></>
                                 :
                                 <button
-                                    key={`gridlookupclear_${node.id}_${col.id}_${node.stateind}_`}
+                                    key={`gridlookupclear_${node.id}_${col.id}_`}
                                     className={'grid-cell-button'}
                                     onClick={(e) => node.clearField(e, col, row)}
                                 >
@@ -303,13 +311,13 @@ export class GridINUClass extends GridINUBaseClass {
             getDisabled: (e) => node.viewRecordDisabled(e),
         });
 
-        //node.buttons.push({
-        //    id: node.buttons.length,
-        //    name: 'test',
-        //    title: node.translate('TEST'),
-        //    label: node.translate('Test'),
-        //    click: (e) => node.test(e)
-        //});
+        node.buttons.push({
+            id: node.buttons.length,
+            name: 'test',
+            title: node.translate('TEST'),
+            label: node.translate('Test'),
+            click: (e) => node.test(e)
+        });
 
         node.buttons.push({
             id: node.buttons.length,
@@ -461,15 +469,17 @@ export class GridINUClass extends GridINUBaseClass {
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     async canLeaveRow(rowIndex) {
         const node = this;
-        if (!node.allowEditGrid || !node.isEditing()) return true;
-
         let res;
 
-        if (node.detailNodeChangesSaved) {
-            res = await node.detailNodeChangesSaved();
-            if (!res) return false;
-        }
+        //if (node.detailNodeChangesSaved) {
+        //    res = await node.detailNodeChangesSaved();
+        //    if (!res) return false;
+        //}
 
+        res = await node.detailNodesChangesSaved();
+        if (!res) return false;
+
+        if (!node.allowEditGrid || !node.isEditing()) return true;
         const row = node.rows[rowIndex];
 
         await node.saveRow({ row: row, changedRow: node.changedRow }).then(
@@ -489,14 +499,44 @@ export class GridINUClass extends GridINUBaseClass {
         return res;
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
+    async detailNodesChangesSaved() {
+        const node = this;
+        const graph = node.graph;
+        if (!graph || !node.children || node.children.length <= 0) return true;
+
+        for (let cuid of node.children) {
+            let child = graph.nodesDict[cuid];
+
+            if (!child.visible || !child.allowEditGrid || !child.isEditing() || !child.rows || child.rows.length <= 0) continue;
+
+            let row = child.selectedRow();
+            let res = true;
+
+            await child.saveRow({ row: row, changedRow: child.changedRow }).then(
+                () => {
+                    child.setEditing(false);
+                    Object.assign(row, child.changedRow);
+                    res = true;
+                }
+            ).catch((message) => {
+                Object.assign(child.changedRow, row);
+                child.refreshState();
+                res = false;
+                alert(message || 'Error!');
+            });
+
+            if (!res) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     test(e) {
         const node = this;
 
-        const func = async function () {
-            let rows = await node.getRows();
-        }
-
-        func();
+        node.saveColumnsConfig(e);
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     closeCard(e) {

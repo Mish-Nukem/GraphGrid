@@ -179,7 +179,8 @@ export class GridINUBaseClass extends GridFLClass {
             const params = [
                 { key: 'atoken', value: node.dataGetter.atoken },
                 { key: 'rtoken', value: node.dataGetter.rtoken },
-                { key: 'entity', value: col.entity }
+                { key: 'entity', value: col.entity },
+                { key: 'configUid', value: node.getConfigUid() },
             ];
 
             node.dataGetter.get({ url: 'system/entityInfo', params: params }).then(
@@ -189,6 +190,26 @@ export class GridINUBaseClass extends GridFLClass {
                 }
             );
         }
+    }
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
+    async getColumnsFromEntity() {
+        const node = this;
+        const params = [
+            { key: 'atoken', value: node.dataGetter.atoken },
+            { key: 'rtoken', value: node.dataGetter.rtoken },
+            { key: 'entity', value: node.entity },
+            { key: 'configUid', value: node.getConfigUid() },
+        ];
+
+        let res = [];
+        await node.dataGetter.get({ url: 'system/entityInfo', params: params }).then(
+            (columns) => {
+                res = columns;
+                //node.prepareColumns(node.columns);
+            }
+        );
+
+        return res;
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     selectLookupValue(e) {
@@ -417,6 +438,65 @@ export class GridINUBaseClass extends GridFLClass {
                 }
             );
         });
+    }
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
+    getConfigUid() {
+        const grid = this;
+        const graph = grid.graph;
+        let configUid = `${grid.entity}_`;
+
+        if (!graph || !graph.nodesDict || !graph.nodesDict[grid.uid]) return configUid;
+
+        configUid += `${graph.uid}_${grid.uid}_`;
+
+        return configUid;
+    }
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
+    saveColumnsConfig(e) {
+        const grid = this;
+
+        let savingColumns = [];
+        for (let col of grid.columns) {
+            let scol = { n: col.name, w: col.w };
+            if (col.visible === false) scol.v = '0';
+            if (col.asc) scol.s = '1'; else if (col.desc) scol.s = '0';
+            savingColumns.push(scol);
+        }
+
+        if (savingColumns.length <= 0) return;
+
+        const params = [
+            { key: 'atoken', value: grid.dataGetter.atoken },
+            { key: 'rtoken', value: grid.dataGetter.rtoken },
+            { key: 'configUid', value: grid.getConfigUid() },
+            { key: 'columns', value: savingColumns },
+        ];
+
+        grid.dataGetter.get({ url: 'system/saveColumnsSettings', params: params, type: 'text' }).then(
+            (res) => {
+            }
+        );
+    }
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
+    afterSortColumn(column) {
+        super.afterSortColumn(column);
+
+        const grid = this;
+        grid.saveColumnsConfig();
+    }
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
+    afterResizeColumn(column) {
+        super.afterResizeColumn(column);
+
+        const grid = this;
+        grid.saveColumnsConfig();
+    }
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
+    afterDragColumn(column) {
+        super.afterDragColumn(column);
+
+        const grid = this;
+        grid.saveColumnsConfig();
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
 }

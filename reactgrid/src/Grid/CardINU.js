@@ -81,12 +81,17 @@ export class CardINUClass extends GridINUBaseClass {
         card.addCardButtons();
         card.buttons = card.cardButtons;
 
+        //key={`cardbodydiv_${card.id}_${card.stateind}_`}
         return (
             <>
-                <div className='graph-card-toolbar' key={`cardtoolbardiv_${card.id}_${card.stateind}_`}>
+                <div className='graph-card-toolbar'
+                    key={`cardtoolbardiv_${card.id}_${card.stateind}_`}
+                >
                     {super.renderToolbar()}
                 </div>
-                <div className="graph-card-div" key={`cardbodydiv_${card.id}_${card.stateind}_`}>
+                <div className="graph-card-div"
+                    key={`cardbodydiv_${card.id}_`}
+                >
                     {
                         card.columns.map((col) => { return card.renderField(col) })
                     }
@@ -103,9 +108,11 @@ export class CardINUClass extends GridINUBaseClass {
             col.type = '';
         }
         switch (col.type.toLowerCase()) {
-            case 'lookup':
+            case 'lookup': //key={`cardlookupdiv_${card.id}_${col.id}_${card.stateind}_`}
                 return (
-                    <div className="graph-card-field" key={`cardlookupdiv_${card.id}_${col.id}_${card.stateind}_`}>
+                    <div className="graph-card-field"
+                        key={`cardlookupdiv_${card.id}_${col.id}_`}
+                    >
                         <span
                             key={`cardlookuptitle_${card.id}_${col.id}_${card.stateind}_`}
                             style={{ gridColumn: 'span 3', width: 'calc(100% - 4px)' }}
@@ -137,10 +144,12 @@ export class CardINUClass extends GridINUBaseClass {
                     </div>
                 )
             //case 'date':
-            //    break; //key={`cardinp_${card.id}_${card.stateind}_`}
+            //    break; //key={`cardinp_${card.id}_${card.stateind}_`} key={`cardlookuptextarea_${card.id}_${col.id}_${card.stateind}_`} key={`cardfielddiv_${card.id}_${col.id}_${card.stateind}_`}
             default:
                 return (
-                    <div className="graph-card-field" key={`cardfielddiv_${card.id}_${col.id}_${card.stateind}_`}>
+                    <div className="graph-card-field"
+                        key={`cardfielddiv_${card.id}_${col.id}_`}
+                    >
                         <span
                             key={`cardfieldtitle_${card.id}_${col.id}_${card.stateind}_`}
                             style={{ gridColumn: 'span 3', width: 'calc(100% - 4px)' }}
@@ -148,7 +157,7 @@ export class CardINUClass extends GridINUBaseClass {
                             {col.title || col.name}
                         </span>
                         <textarea
-                            key={`cardlookuptextarea_${card.id}_${col.id}_${card.stateind}_`}
+                            key={`cardlookuptextarea_${card.id}_${col.id}_`}
                             
                             value={card.changedRow[col.name] !== undefined ? card.changedRow[col.name] : ''}
                             style={{ width: 'calc(100% - 4px)', height: col.maxW !== undefined && +col.maxW >= 200 ? '5em' : '2.3em', padding: '0 2px', boxSizing: 'border-box', gridColumn: col.required || col.readonly ? 'span 3' : 'span 2', resize: 'vertical' }}

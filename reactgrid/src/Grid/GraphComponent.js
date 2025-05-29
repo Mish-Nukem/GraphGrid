@@ -517,34 +517,34 @@ export class GraphComponentClass extends BaseComponent {
         gc.refreshState();
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
-    async detailNodeChangesSaved(node) {
-        const gc = this;
-        if (node.uid !== gc.activeMaster) return true;
+    //async detailNodeChangesSaved(node) {
+    //    const gc = this;
+    //    if (node.uid !== gc.activeMaster) return true;
 
-        const detail = gc.graph.nodesDict[gc.activeDetail];
+    //    const detail = gc.graph.nodesDict[gc.activeDetail];
 
-        if (!detail.rows || detail.rows.length <= 0) return true;
+    //    if (!detail.rows || detail.rows.length <= 0) return true;
 
-        let res;
-        const row = detail.rows[detail.selectedRowIndex];
-        if (!row) return true;
+    //    let res;
+    //    const row = detail.rows[detail.selectedRowIndex];
+    //    if (!row) return true;
 
-        await detail.saveRow({ row: row, changedRow: detail.changedRow }).then(
-            () => {
-                detail.setEditing(false);
-                Object.assign(row, detail.changedRow);
-                detail.refreshState();
-                res = true;
-            }
-        ).catch((message) => {
-            Object.assign(detail.changedRow, row);
-            detail.refreshState();
-            res = false;
-            alert(message || 'Error!');
-        });
+    //    await detail.saveRow({ row: row, changedRow: detail.changedRow }).then(
+    //        () => {
+    //            detail.setEditing(false);
+    //            Object.assign(row, detail.changedRow);
+    //            detail.refreshState();
+    //            res = true;
+    //        }
+    //    ).catch((message) => {
+    //        Object.assign(detail.changedRow, row);
+    //        detail.refreshState();
+    //        res = false;
+    //        alert(message || 'Error!');
+    //    });
 
-        return res;
-    }
+    //    return res;
+    //}
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     checkNeedTriggerWave(node) {
         const gc = this;
@@ -574,6 +574,8 @@ export class GraphComponentClass extends BaseComponent {
         grid.title = obr.title;
         grid.nameField = obr.nameField;
         grid.keyField = obr.keyField;
+
+        grid.allowEditGrid = obr.allowEditGrid;
 
         if (obr.status !== undefined) {
             grid.status = obr.status;
@@ -632,9 +634,9 @@ export class GraphComponentClass extends BaseComponent {
         grid.setEditing = (value) => { grid.remSetEditing(value); gc.setEditing(grid, value); /*gc.refreshState();*/ };
         grid.isEditing = () => { return gc.isEditing(); };
 
-        if (gc.isTop(grid)) {
-            grid.detailNodeChangesSaved = async () => { const res = await gc.detailNodeChangesSaved(grid); return res; };
-        }
+        //if (gc.isTop(grid)) {
+        //    grid.detailNodeChangesSaved = async () => { const res = await gc.detailNodeChangesSaved(grid); return res; };
+        //}
 
         graph.nodesDict[grid.uid] = grid;
         return grid;
@@ -646,6 +648,11 @@ export class GraphComponentClass extends BaseComponent {
         gc.graph = new GraphClass();
         gc.graph.nodesDict = obrGraph.nodesDict;
         gc.graph.linksDict = obrGraph.linksDict;
+
+        if (obrGraph.uid !== undefined) {
+            gc.graph.uid = obrGraph.uid;
+        }
+
         gc.graph.nodeCount = 0;
 
         //    gc.graph = new GraphClass();

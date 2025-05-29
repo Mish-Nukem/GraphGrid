@@ -259,7 +259,7 @@ export class GridClass extends BaseComponent {
                     grid.rows.map((row, rind) => {
                         return (
                             <tr
-                                key={`gridrow_${grid.id}_${rind}_${grid.stateind}_`}
+                                key={`gridrow_${grid.id}_${rind}_`}
                                 className={grid.isRowSelected(row, rind) ? `grid-selected-row ${grid.opt.selectedRowClass || ''}` : ''}
                                 onMouseDown={(e) => { e.detail === 2 ? grid.onRowDblClick(e, row) : grid.onSelectGridRow(e) }}
                             >
@@ -282,7 +282,7 @@ export class GridClass extends BaseComponent {
         return grid.columns.map((col, cind) => {
             return (
                 <td
-                    key={`gridcell_${grid.id}_${rowInd}_${cind}_${grid.stateind}_`}
+                    key={`gridcell_${grid.id}_${rowInd}_${cind}_`}
                 >
                     {grid.renderCell(col, row)}
                 </td>
@@ -416,6 +416,7 @@ export class GridClass extends BaseComponent {
                     }
                 }
                 grid.columns = newColumns;
+                grid.afterDragColumn(column);
                 grid.refreshState();
             }
 
@@ -586,6 +587,7 @@ export class GridClass extends BaseComponent {
 
         if (newW !== initW) {
             column.w = newW;
+            grid.afterResizeColumn(column);
             grid.refreshState();
         }
 
@@ -654,6 +656,7 @@ export class GridClass extends BaseComponent {
             if (resizing) {
                 resizing = false;
                 if (initW !== column.w) {
+                    grid.afterResizeColumn(column);
                     grid.refreshState();
                 }
             }
@@ -662,5 +665,9 @@ export class GridClass extends BaseComponent {
         document.addEventListener('mousemove', onMouseMove);
         document.addEventListener('mouseup', onMouseUp);
     }
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
+    afterResizeColumn(column) { }
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
+    afterDragColumn(column) { }
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
 }
-// -------------------------------------------------------------------------------------------------------------------------------------------------------------
