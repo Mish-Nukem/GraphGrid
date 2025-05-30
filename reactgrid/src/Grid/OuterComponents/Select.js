@@ -57,6 +57,7 @@ export function Select(props) {
         <>
             <AsyncPaginate
                 value={value}
+                isMulti={props.isMulti}
                 cacheOptions
                 loadOptions={loadOptions}
                 additional={{

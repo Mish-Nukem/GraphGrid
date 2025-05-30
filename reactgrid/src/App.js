@@ -19,7 +19,7 @@ import { DataGetter } from './Utils/DataGetter';
 function App() {
     const [state, setState] = useState({ menuItem: - 2, atoken: '', rtoken: '' });
 
-    //window._logEnabled = true;
+    window._logEnabled = true;
 
     const dataGetter = new DataGetter(appSettings);
     dataGetter.atoken = state.atoken;

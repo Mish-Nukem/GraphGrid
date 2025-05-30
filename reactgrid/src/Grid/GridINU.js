@@ -17,7 +17,7 @@ export function GridINU(props) {
             grid = props.findGrid(props);
         }
         grid = grid || new GridINUClass(props);
-        needGetRows = !props.noAutoRefresh && !props.parentGrids;
+        needGetRows = !props.noAutoRefresh && !grid.hasParentGrids();//props.parentGrids;
     }
 
     if (props.init) {
@@ -25,7 +25,6 @@ export function GridINU(props) {
     }
 
     grid.refreshState = function () {
-        grid.log(' -------------- refreshState ' + grid.stateind + ' --------------- ');
         setState({ grid: grid, ind: grid.stateind++ });
     }
 
@@ -311,13 +310,13 @@ export class GridINUClass extends GridINUBaseClass {
             getDisabled: (e) => node.viewRecordDisabled(e),
         });
 
-        node.buttons.push({
-            id: node.buttons.length,
-            name: 'test',
-            title: node.translate('TEST'),
-            label: node.translate('Test'),
-            click: (e) => node.test(e)
-        });
+        //node.buttons.push({
+        //    id: node.buttons.length,
+        //    name: 'test',
+        //    title: node.translate('TEST'),
+        //    label: node.translate('Test'),
+        //    click: (e) => node.test(e)
+        //});
 
         node.buttons.push({
             id: node.buttons.length,
@@ -339,7 +338,7 @@ export class GridINUClass extends GridINUBaseClass {
         const node = this;
         super.onRowDblClick(e, row);
 
-        if (node.isSelecting && node.onSelectValue) {
+        if (node.isSelecting && !node.multi && node.onSelectValue) {
             node.onSelectValue(e);
         }
     }
@@ -531,6 +530,18 @@ export class GridINUClass extends GridINUBaseClass {
         }
 
         return true;
+    }
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
+    hasParentGrids() {
+        const node = this;
+        if (!node.graph) return false;
+
+        for (let puid of node.parents) {
+            let pnode = node.graph.nodesDict[puid];
+            if (pnode.visible !== false && pnode.status === NodeStatus.grid) return true;
+        }
+
+        return false;
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     test(e) {

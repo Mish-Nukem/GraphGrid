@@ -23,7 +23,6 @@ export function Graph(props) {
     }
 
     gc.refreshState = function () {
-        log('refreshState gc ' + gc.stateind);
         setState({ graphComponent: gc, ind: gc.stateind++ });
     }
 
@@ -87,7 +86,7 @@ export class GraphComponentClass extends BaseComponent {
         const gc = this;
 
         if (window._graphDict && gc.uid) {
-            log(' delete graph')
+            log(' delete graph: ' + gc.uid);
             delete window._graphDict[gc.uid];
         }
     }
@@ -118,15 +117,9 @@ export class GraphComponentClass extends BaseComponent {
             GridClass.applyTheme(node);
 
             if (node.status === NodeStatus.filter) {
-                //if (!node._replaced) {
-                //    node = gc.replaceGrid({ graph: gc.graph, uid: node.uid, dataGetter: gc.dataGetter || node.dataGetter, entity: node.entity });
-                //}
-
-                node._selectedOption = node._selectedOption || {};
-
-                if (node.value !== node._selectedOption.value) {
-                    node._selectedOption.value = node.value;
-                    node._selectedOption.label = node.value !== undefined && node.value !== '' ? node.selectedText() : '';
+                const comboValue = gc.getValueFromCombobox(node);
+                if (node.value !== comboValue) {
+                    node._selectedOptions = node.value !== undefined && node.value !== '' ? [{ value: node.value, label: node.selectedText() }] : [];
                 }
 
                 if (gc.isTop(node)) {
@@ -220,7 +213,6 @@ export class GraphComponentClass extends BaseComponent {
                     uid={gc.selectingNode.uid || gc.selectingNode.id}
                     entity={gc.selectingNode.entity}
                     dataGetter={gc.dataGetter || gc.selectingNode.dataGetter}
-                    onSelectValue={(e) => gc.selectFilterValue(e)}
                     init={(grid) => {
                         grid.status = NodeStatus.filter;
                         grid.visible = true;
@@ -257,11 +249,12 @@ export class GraphComponentClass extends BaseComponent {
                 {
                     node.filterType === FilterType.combobox ?
                         <Select
-                            value={node._selectedOption}
+                            value={node._selectedOptions}
+                            isMulti={node.multi}
                             getOptions={(filter, pageNum) => gc.promiseOptions(filter, node, pageNum)}
                             onChange={(e) => {
-                                node.value = e.value;
-                                node._selectedOption = { value: e.value, label: e.label };
+                                node._selectedOptions = node.multi ? e : [e];
+                                gc.getValueFromCombobox(node, true);
                                 gc.graph.triggerWave({ nodes: [node], withStartNodes: false });
                                 gc.refreshState();
                             }}
@@ -360,6 +353,7 @@ export class GraphComponentClass extends BaseComponent {
         }
 
         gc.selectingNode = node;
+        gc.selectingNode.isSelecting = true;
 
         gc.nodeSelectIsShowing = true;
         gc.refreshState();
@@ -368,17 +362,22 @@ export class GraphComponentClass extends BaseComponent {
     closeFilterGrid(e) {
         const gc = this;
         gc.nodeSelectIsShowing = false;
-        gc.selectingNode = null;
+        if (gc.selectingNode) {
+            gc.selectingNode.isSelecting = false;
+            gc.selectingNode = null;
+        }
         gc.refreshState();
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     clearFilter(e, node) {
         const gc = this;
         delete node.value;
-        node._selectedOption = { value: '', label: '' };
+        node._selectedOptions = [];
         if (node.setComboboxValue) {
-            node.setComboboxValue(null);
+            node.setComboboxValue([]);
         }
+
+        gc.saveGraphConfig();
 
         gc.graph.triggerWave({ nodes: [node], withStartNodes: false });
         gc.refreshState();
@@ -390,8 +389,16 @@ export class GraphComponentClass extends BaseComponent {
 
         gc.selectingNode.value = gc.selectingNode.selectedValue();
         if (gc.selectingNode.setComboboxValue) {
-            gc.selectingNode.setComboboxValue({ value: gc.selectingNode.value, label: gc.selectingNode.selectedText() });
+            if (gc.selectingNode.multi) {
+                gc.selectingNode.setComboboxValue(gc.selectingNode.selectedValues());
+            }
+            else {
+                gc.selectingNode.setComboboxValue([{ value: gc.selectingNode.value, label: gc.selectingNode.selectedText() }]);
+            }
         }
+
+        gc.selectingNode.isSelecting = false;
+        gc.saveGraphConfig();
 
         gc.graph.triggerWave({ nodes: [gc.selectingNode], withStartNodes: false });
         gc.closeFilterGrid();
@@ -401,7 +408,9 @@ export class GraphComponentClass extends BaseComponent {
         const gc = this;
 
         if (+node.status === +NodeStatus.filter) {
-            gc.selectFilterValue(e);
+            if (!node.multi) {
+                gc.selectFilterValue(e);
+            }
         }
         else if (+node.status === +NodeStatus.grid) {
             if (!node.viewRecordDisabled(e)) {
@@ -452,6 +461,43 @@ export class GraphComponentClass extends BaseComponent {
                 }
             );
         });
+    }
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
+    saveGraphConfig() {
+        const gc = this;
+        if (gc.noSaveConfig || !gc.graph || !gc.graph.uid) return;
+
+        let savingData = {};
+        for (let uid in gc.graph.nodesDict) {
+            let node = gc.graph.nodesDict[uid];
+            if (node.value === undefined || node.value === '') continue;
+
+            let so = { u: node.uid, v: node.value, o: [] };
+            if (node._selectedRows) {
+                for (let uid in node._selectedRows) {
+                    let row = node._selectedRows[uid];
+                    so.o.push({ v: row[node.keyField], t: row[node.nameField] });
+                }
+            }
+            else if (node._selectedOptions) {
+                for (let opt of node._selectedOptions) {
+                    so.o.push({ v: opt.value, t: opt.label });
+                }
+            }
+            savingData[node.uid] = so;
+        }
+
+        const params = [
+            { key: 'atoken', value: gc.dataGetter.atoken },
+            { key: 'rtoken', value: gc.dataGetter.rtoken },
+            { key: 'configUid', value: gc.graph.uid },
+            { key: 'gdata', value: savingData },
+        ];
+
+        gc.dataGetter.get({ url: 'system/saveGraphSettings', params: params, type: 'text' }).then(
+            (res) => {
+            }
+        );
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     promiseOptions(filter, node, pageNum) {
@@ -546,6 +592,33 @@ export class GraphComponentClass extends BaseComponent {
     //    return res;
     //}
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
+    getValueFromCombobox(node, changeValue) {
+        const gc = this;
+        node._selectedOptions = node._selectedOptions || [];
+        let arr = [];
+        if (changeValue) {
+            node._selectedRows = {}
+        }
+
+        for (let opt of node._selectedOptions) {
+            arr.push(opt.value);
+            if (changeValue) {
+                let fakeRow = {};
+                fakeRow[node.keyField] = opt.value;
+                fakeRow[node.nameField] = opt.label;
+                node._selectedRows[opt.value] = fakeRow;
+            }
+        }
+
+        const res = arr.join(',');
+        if (changeValue) {
+            node.value = res;
+            gc.saveGraphConfig();
+        }
+
+        return res;
+    }
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     checkNeedTriggerWave(node) {
         const gc = this;
         return node !== gc.selectingNode;
@@ -577,6 +650,8 @@ export class GraphComponentClass extends BaseComponent {
 
         grid.allowEditGrid = obr.allowEditGrid;
 
+        grid.multi = obr.multi;
+
         if (obr.status !== undefined) {
             grid.status = obr.status;
         }
@@ -591,6 +666,12 @@ export class GraphComponentClass extends BaseComponent {
 
         if (obr.value !== undefined) {
             grid.value = obr.value;
+        }
+
+        if (obr._selectedOptions) {
+            grid._selectedOptions = obr._selectedOptions;
+
+            gc.getValueFromCombobox(grid, true);
         }
 
         grid.columns = obr.columns || grid.columns;
@@ -628,7 +709,8 @@ export class GraphComponentClass extends BaseComponent {
             }
         }
 
-        grid.onRowDblClick = (e, row) => { gc.onGridRowDblClick(e, grid, row) };
+        grid.onSelectValue = (e) => gc.selectFilterValue(e);
+        grid.onRowDblClick = (e, row) => gc.onGridRowDblClick(e, grid, row);
 
         grid.remSetEditing = grid.setEditing;
         grid.setEditing = (value) => { grid.remSetEditing(value); gc.setEditing(grid, value); /*gc.refreshState();*/ };
@@ -690,6 +772,10 @@ export class GraphComponentClass extends BaseComponent {
                         node.visible = true;
                     }
                 }
+            }
+
+            if (node.status === NodeStatus.filter && node.filterType === FilterType.combobox) {
+                node.multi = true;
             }
         }
 

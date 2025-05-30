@@ -25,7 +25,6 @@ export function CardINU(props) {
     }
 
     card.refreshState = function () {
-        card.log(' -------------- refreshState ' + card.stateind + ' --------------- ');
         setState({ grid: card, ind: card.stateind++ });
     }
 

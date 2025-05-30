@@ -22,7 +22,6 @@ export function GridFL(props) {
     }
 
     grid.refreshState = function () {
-        grid.log(' -------------- refreshState ' + grid.stateind + ' --------------- ');
         setState({ grid: grid, ind: grid.stateind++ });
     }
 

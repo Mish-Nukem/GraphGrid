@@ -24,10 +24,10 @@ export function Grid(props) {
         props.init(grid);
     }
 
-    grid.log(' 0.1 ReactGrid(). state = ' + grid.stateind);
+    //grid.log(' 0.1 ReactGrid(). state = ' + grid.stateind);
 
     grid.refreshState = function () {
-        grid.log(' -------------- refreshState ' + grid.stateind + ' --------------- ');
+        //grid.log(' -------------- refreshState ' + grid.stateind + ' --------------- ');
         setState({ grid: grid, ind: grid.stateind++ });
     }
 
@@ -70,10 +70,8 @@ export class GridClass extends BaseComponent {
 
         grid.id = window._gridSeq++;
 
-        grid.log(' 0.0 Grid Constructor ');
-
         if (props.getRows) {
-            grid.getRows = props.getRows;// || function ({ filters }) { return new Promise(function (resolve, reject) { resolve([]) }); };
+            grid.getRows = props.getRows;
         }
 
         grid.getColumns = props.getColumns || grid.getColumns;
@@ -82,6 +80,12 @@ export class GridClass extends BaseComponent {
 
         grid.keyField = props.keyField;
         grid.nameField = props.nameField;
+
+        grid._selectedRows = {};
+        if (props.multi === true && props.keyField) {
+            grid.multi = true;
+            grid._allRowsOnPageSelected = false;
+        }
 
         grid.rows = [];
         grid.columns = [];
@@ -100,13 +104,13 @@ export class GridClass extends BaseComponent {
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     afterGetRows() {
         const grid = this;
-        grid.log(' 1.0 getRows(). rows = ' + grid.rows.length);
+        grid.log('getRows(). rows = ' + grid.rows.length + '. state = ' + grid.stateind);
 
         if (grid.columns.length <= 0) {
             grid.columns = grid.getColumns();
             grid.prepareColumns(grid.columns);
 
-            grid.log(' 1.1 prepareColumns(). columns = ' + grid.columns.length);
+            //grid.log(' 1.1 prepareColumns(). columns = ' + grid.columns.length);
         }
         grid.calculatePagesCount();
         grid.getSelectedRowIndex();
@@ -189,7 +193,8 @@ export class GridClass extends BaseComponent {
             w += col.w;
         }
 
-        grid.log(' 3.1 RENDER(). columns = ' + grid.columns.length + '. w = ' + w + '. rows = ' + grid.rows.length);
+        grid.log('RENDER(). columns = ' + grid.columns.length + '. w = ' + w + '. rows = ' + grid.rows.length + '. state = ' + grid.stateind);
+        log(' -------------------------------------------------------------------------------------------------------------------------------------- ');
 
         return (
             <table
@@ -212,6 +217,7 @@ export class GridClass extends BaseComponent {
         return (
             <thead>
                 <tr>
+                    {grid.multi ? grid.renderSelectColumnHeader() : <></>}
                     {columns.map((col, ind) => {
                         return (
                             <th
@@ -242,14 +248,45 @@ export class GridClass extends BaseComponent {
         );
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
+    renderSelectColumnHeader() {
+        const grid = this;
+        return (
+            <th
+                key={`headercell_${grid.id}_select_${grid.stateind}_`}
+                grid-header={`${grid.id}_select_`}
+                className={`${grid.opt.columnClass ? grid.opt.columnClass : ''} grid-header-th`}
+                style={{ position: "sticky", top: 0, width: "2em", overflow: "hidden", verticalAlign: "top" }}
+            >
+                <input type='checkbox'
+                    className={`grid-select-checkbox`}
+                    onChange={(e) => grid.selectAllRows(e)}
+                    checked={grid._allRowsOnPageSelected}
+                />
+            </th>
+        );
+    }
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
+    renderSelectColumn(row, rind) {
+        const grid = this;
+        return (
+            <td
+                key={`gridcell_${grid.id}_${rind}_select_${grid.stateind}_`}
+            >
+                <input type='checkbox'
+                    className={`grid-select-checkbox`}
+                    onChange={(e) => grid.selectRow(e, row)}
+                    checked={grid._selectedRows[row[grid.keyField]] !== undefined}
+                />
+            </td>
+        );
+    }
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     renderHeaderCell(col, context) {
         return (this.translate(col.title || col.name));
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     renderBody() {
         const grid = this;
-        grid.log(' 5.1 RenderBody().');
-        log(' -------------------------------- ');
 
         if (!grid.columns || !grid.rows) return;
 
@@ -279,15 +316,22 @@ export class GridClass extends BaseComponent {
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     renderRow(row, rowInd) {
         const grid = this;
-        return grid.columns.map((col, cind) => {
-            return (
-                <td
-                    key={`gridcell_${grid.id}_${rowInd}_${cind}_`}
-                >
-                    {grid.renderCell(col, row)}
-                </td>
-            );
-        });
+        return (
+            <>
+                {grid.multi ? grid.renderSelectColumn(row) : <></>}
+                {
+                    grid.columns.map((col, cind) => {
+                        return (
+                            <td
+                                key={`gridcell_${grid.id}_${rowInd}_${cind}_`}
+                            >
+                                {grid.renderCell(col, row)}
+                            </td>
+                        );
+                    })
+                }
+            </>
+        )
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     renderCell(col, row) {
@@ -539,20 +583,98 @@ export class GridClass extends BaseComponent {
         return grid.rows[grid.selectedRowIndex];
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
-    selectedValue() {
+    selectedValue(delim) {
         const grid = this;
-        const row = grid.selectedRow();
 
-        return row !== undefined ? row[grid.getKeyColumn()] : '';
+        const keyColumn = grid.getKeyColumn();
+        if (!grid.multi) {
+            const row = grid.selectedRow();
+
+            return row !== undefined ? row[keyColumn] : '';
+        }
+        else {
+            delim = delim || ',';
+            const res = [];
+            for (let id in grid._selectedRows) {
+                let row = grid._selectedRows[id];
+                res.push(row[keyColumn]);
+            }
+            return res.join(delim);
+        }
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
-    selectedText() {
+    selectedText(delim) {
         const grid = this;
-        const row = grid.selectedRow();
+        if (!grid.nameField) return '';
 
-        if (row === undefined || !grid.nameField) return '';
+        if (!grid.multi) {
+            const row = grid.selectedRow();
+            return row !== undefined ? row[grid.nameField] : '';
+        }
+        else {
+            delim = delim || ',';
+            const res = [];
+            for (let row in grid._selectedRows) {
+                res.push(row[grid.nameField]);
+            }
+            return res.join(delim);
+        }
+    }
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
+    selectedRows() {
+        const grid = this;
+        return grid._selectedRows || {};
+    }
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
+    selectedValues() {
+        const grid = this;
 
-        return row[grid.nameField];
+        const keyColumn = grid.getKeyColumn();
+        if (!grid.multi) {
+            const row = grid.selectedRow();
+
+            return row !== undefined ? [{ value: row[keyColumn], label: row[grid.nameField] }] : [];
+        }
+        else {
+            const res = [];
+            for (let id in grid._selectedRows) {
+                let row = grid._selectedRows[id];
+                res.push({ value: row[keyColumn], label: row[grid.nameField] });
+            }
+            return res;
+        }
+    }
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
+    selectRow(e, row) {
+        const grid = this;
+        if (grid._selectedRows[row[grid.keyField]]) {
+            delete grid._selectedRows[row[grid.keyField]];
+        }
+        else {
+            grid._selectedRows[row[grid.keyField]] = row;
+        }
+        grid.refreshState();
+    }
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
+    selectAllRows(e) {
+        const grid = this;
+
+        grid._allRowsOnPageSelected = grid._allRowsOnPageSelected ? false : true;
+
+        for (let row of grid.rows) {
+            if (grid._allRowsOnPageSelected) {
+                grid._selectedRows[row[grid.keyField]] = row;
+            }
+            else {
+                delete grid._selectedRows[row[grid.keyField]];
+            }
+        }
+        grid.refreshState();
+    }
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
+    clearAllSelectedRows() {
+        const grid = this;
+        grid._selectedRows = {};
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     mouseResizerDoubleClick(e, column) {

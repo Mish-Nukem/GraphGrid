@@ -21,12 +21,9 @@ export function GridInGraph(props) {
         props.init(grid);
     }
 
-    //if (!grid.refreshState) {
-        grid.refreshState = function () {
-            grid.log(' -------------- refreshState ' + grid.stateind + ' --------------- ');
-            setState({ grid: grid, ind: grid.stateind++ });
-        }
-    //}
+    grid.refreshState = function () {
+        setState({ grid: grid, ind: grid.stateind++ });
+    }
 
     useEffect(() => {
         grid.setupEvents();

@@ -24,7 +24,6 @@ export function GridINUBase(props) {
     }
 
     grid.refreshState = function () {
-        grid.log(' -------------- refreshState ' + grid.stateind + ' --------------- ');
         setState({ grid: grid, ind: grid.stateind++ });
     }
 
@@ -284,7 +283,7 @@ export class GridINUBaseClass extends GridFLClass {
 
                 if (!activeValue) return '';
 
-                return `${pref};${parent.uid};${scheme || ''}  = ${activeValue}`;
+                return `${pref};${parent.uid};${scheme || ''} = ${activeValue}`;
             }
         };
     }
