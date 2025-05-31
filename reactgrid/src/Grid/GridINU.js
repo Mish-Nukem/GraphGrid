@@ -43,11 +43,12 @@ export function GridINU(props) {
         }
 
         if (grid.columns.length <= 0 && grid.getColumns) {
-            grid.getColumns();
+            grid.columns = grid.getColumns();
+            grid.prepareColumns(grid.columns);
         }
 
         return () => {
-            grid.removeEvents();
+            grid.clearEvents();
         }
     }, [grid, needGetRows])
 
@@ -66,8 +67,15 @@ export class GridINUClass extends GridINUBaseClass {
 
         grid.allowEditGrid = props.allowEditGrid;
 
-        if (grid.columns.length <= 0 && grid.entity) {
-            grid.getColumns = grid.getColumnsFromEntity;
+        if (grid.columns.length <= 0 && grid.entity && !props.getColumns) {
+            grid.getColumns = () => {
+                grid.getColumnsFromEntity().then((columns) => {
+                    grid.columns = columns;
+                    grid.prepareColumns(grid.columns);
+                    grid.refreshState();
+                });
+                return grid.columns;
+            };
         }
 
         grid.addButtons();
@@ -105,7 +113,7 @@ export class GridINUClass extends GridINUBaseClass {
             <CardINU
                 cardRow={node.cardRow || {}}
                 isNewRecord={node.isNewRecord}
-                uid={node.uid || node.id}
+                uid={(node.uid || node.id) + '_card_'}
                 entity={node.entity}
                 keyField={node.keyField}
                 dataGetter={node.dataGetter || node.dataGetter}
@@ -161,15 +169,15 @@ export class GridINUClass extends GridINUBaseClass {
         switch (col.type.toLowerCase()) {
             case 'lookup':
                 return (
-                    <div style={{ border: 'none' }} className='grid-cell-lookup' key={`gridlookupdiv_${node.id}_${col.id}_${node.stateind}_`}>
+                    <div style={{ border: 'none' }} className='grid-cell-lookup' key={`gridlookupdiv_${node.id}_${col.id}_`}>
                         <span
-                            key={`gridlookuptitle_${node.id}_${col.id}_${node.stateind}_`}
+                            key={`gridlookuptitle_${node.id}_${col.id}_`}
                             style={{ width: 'calc(100% - 4px)', gridColumn: noClear ? 'span 2' : '', overflowX: 'hidden' }}
                         >
                             {value}
                         </span>
                         <button
-                            key={`gridlookupbtn_${node.id}_${col.id}_${node.stateind}_`}
+                            key={`gridlookupbtn_${node.id}_${col.id}_`}
                             className={'grid-cell-button'}
                             onClick={(e) => node.openLookupField(e, col, row)}
                         >
@@ -179,7 +187,7 @@ export class GridINUClass extends GridINUBaseClass {
                             noClear ? <></>
                                 :
                                 <button
-                                    key={`gridlookupclear_${node.id}_${col.id}_${node.stateind}_`}
+                                    key={`gridlookupclear_${node.id}_${col.id}_`}
                                     className={'grid-cell-button'}
                                     onClick={(e) => node.clearField(e, col, row)}
                                 >
@@ -449,7 +457,9 @@ export class GridINUClass extends GridINUBaseClass {
         const node = this;
         super.onSelectedRowChanged(e);
 
-        node.refreshState();
+        if (node.allowEditGrid) {
+            node.refreshState();
+        }
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     getSelectedRowIndex() {
@@ -560,6 +570,17 @@ export class GridINUClass extends GridINUBaseClass {
         else {
             node.refreshState();
         }
+    }
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
+    selectedText(delim) {
+        const grid = this;
+        let res = super.selectedText(delim);
+
+        if (res !== undefined && res !== '') return res;
+
+        if (grid.status === NodeStatus.filter && grid.value !== undefined && grid.value !== '' && grid._restoredText !== undefined && grid._restoredText !== '') return grid._restoredText;
+
+        return res;
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
 }

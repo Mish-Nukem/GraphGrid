@@ -43,11 +43,12 @@ export function CardINU(props) {
         }
 
         if (card.columns.length <= 0 && card.getColumns) {
-            card.getColumns();
+            card.columns = card.getColumns();
+            card.prepareColumns(card.columns);
         }
 
         return () => {
-            card.removeEvents();
+            card.clearEvents();
         }
     }, [card, needGetRows])
 
@@ -76,15 +77,14 @@ export class CardINUClass extends GridINUBaseClass {
     render() {
         const card = this;
 
-        GridClass.applyTheme(card);
+        //GridClass.applyTheme(card);
         card.addCardButtons();
         card.buttons = card.cardButtons;
 
-        //key={`cardbodydiv_${card.id}_${card.stateind}_`}
         return (
             <>
                 <div className='graph-card-toolbar'
-                    key={`cardtoolbardiv_${card.id}_${card.stateind}_`}
+                    key={`cardtoolbardiv_${card.id}_`}
                 >
                     {super.renderToolbar()}
                 </div>
@@ -107,32 +107,32 @@ export class CardINUClass extends GridINUBaseClass {
             col.type = '';
         }
         switch (col.type.toLowerCase()) {
-            case 'lookup': //key={`cardlookupdiv_${card.id}_${col.id}_${card.stateind}_`}
+            case 'lookup': 
                 return (
                     <div className="graph-card-field"
                         key={`cardlookupdiv_${card.id}_${col.id}_`}
                     >
                         <span
-                            key={`cardlookuptitle_${card.id}_${col.id}_${card.stateind}_`}
+                            key={`cardlookuptitle_${card.id}_${col.id}_`}
                             style={{ gridColumn: 'span 3', width: 'calc(100% - 4px)' }}
                         >
                             {col.title || col.name}
                         </span>
                         <input
-                            key={`cardlookupinput_${card.id}_${col.id}_${card.stateind}_`}
+                            key={`cardlookupinput_${card.id}_${col.id}_`}
                             value={value}
                             style={{ width: 'calc(100% - 4px)', padding: '0 2px', boxSizing: 'border-box', height: '2.3em', gridColumn: col.required || col.readonly ? 'span 2' : '' }}
                             disabled='disabled'
                         ></input>
                         <button
-                            key={`cardlookupbtn_${card.id}_${col.id}_${card.stateind}_`}
+                            key={`cardlookupbtn_${card.id}_${col.id}_`}
                             className={'graph-card-button'}
                             onClick={(e) => card.openLookupField(e, col, card.changedRow)}
                         >
                             {card.images.filterSelect ? card.images.filterSelect() : card.translate('Select', 'graph-filter-select')}
                         </button>
                         <button
-                            key={`cardlookupclear_${card.id}_${col.id}_${card.stateind}_`}
+                            key={`cardlookupclear_${card.id}_${col.id}_`}
                             className={'graph-card-button'}
                             disabled={value === undefined || value === '' ? 'disabled' : ''}
                             onClick={(e) => card.clearField(e, col, card.changedRow)}
@@ -143,14 +143,14 @@ export class CardINUClass extends GridINUBaseClass {
                     </div>
                 )
             //case 'date':
-            //    break; //key={`cardinp_${card.id}_${card.stateind}_`} key={`cardlookuptextarea_${card.id}_${col.id}_${card.stateind}_`} key={`cardfielddiv_${card.id}_${col.id}_${card.stateind}_`}
+            //    break;
             default:
                 return (
                     <div className="graph-card-field"
                         key={`cardfielddiv_${card.id}_${col.id}_`}
                     >
                         <span
-                            key={`cardfieldtitle_${card.id}_${col.id}_${card.stateind}_`}
+                            key={`cardfieldtitle_${card.id}_${col.id}_`}
                             style={{ gridColumn: 'span 3', width: 'calc(100% - 4px)' }}
                         >
                             {col.title || col.name}
@@ -172,7 +172,7 @@ export class CardINUClass extends GridINUBaseClass {
                             
                         </textarea>
                         <button
-                            key={`cardfieldclear_${card.id}_${col.id}_${card.stateind}_`}
+                            key={`cardfieldclear_${card.id}_${col.id}_`}
                             className={'graph-card-button'}
                             disabled={value === undefined || value === '' ? 'disabled' : ''}
                             onClick={(e) => card.clearField(e, col, card.changedRow)}

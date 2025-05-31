@@ -40,11 +40,12 @@ export function GridFL(props) {
         }
 
         if (grid.columns.length <= 0 && grid.getColumns) {
-            grid.getColumns();
+            grid.columns = grid.getColumns();
+            grid.prepareColumns(grid.columns);
         }
 
         return () => {
-            grid.removeEvents();
+            grid.clearEvents();
         }
     }, [grid, needGetRows])
 
@@ -113,7 +114,7 @@ export class GridFLClass extends GridDBClass {
                 {col.filtrable && context !== 'fake' ? //key={`colfilter_${grid.id}_${col.id}_${grid.stateind}_`}  onFocus={(e) => { grid.onAutocompleteFocus(col, e) }}
                     <>
                         <input
-                            key={`colfilter_${grid.id}_${col.id}_${grid.stateind}_`}
+                            key={`colfilter_${grid.id}_${col.id}_`}
                             id={`colfilter_${grid.id}_${col.id}_`}
                             className={`grid-col-filter ${grid.opt.filterInputClass || ''}`}
                             value={col.filter !== undefined ? col.filter : ''}
@@ -131,8 +132,7 @@ export class GridFLClass extends GridDBClass {
                         </input>
                         {
                             <button
-                                key={`colfilterClear_${grid.id}_${col.id}_${grid.stateind}_`}
-                                grid-filter-clear={`${grid.id}_${col.id}_`}
+                                key={`colfilterClear_${grid.id}_${col.id}_`}
                                 className={"grid-filter-clear"}
                                 style={{ color: 'black', display: hasFilter ? '' : 'none' }}
                                 type={'button'}
@@ -399,7 +399,8 @@ export class GridFLClass extends GridDBClass {
         super.setupPagerButtons();
 
         if (!grid.columns && grid.opt.getColumns) {
-            grid.prepareColumns(grid.opt.getColumns());
+            grid.columns = grid.opt.getColumns();
+            grid.prepareColumns(grid.columns);
 
             let hasFiltrable = false;
             for (let col of grid.columns) {

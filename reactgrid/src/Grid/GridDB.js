@@ -4,6 +4,7 @@ import { GridInGraphClass } from './GridInGraph.js';
 import { Dropdown } from './Dropdown.js';
 import { WaveType } from './Graph.js';
 import { NodeStatus } from './Base';
+import { BaseComponent, log } from './Base';
 // ==================================================================================================================================================================
 export function GridDB(props) {
     let grid = null;
@@ -43,11 +44,12 @@ export function GridDB(props) {
         }
 
         if (grid.columns.length <= 0 && grid.getColumns) {
-            grid.getColumns();
+            grid.columns = grid.getColumns();
+            grid.prepareColumns(grid.columns);
         }
 
         return () => {
-            grid.removeEvents();
+            grid.clearEvents();
         }
     }, [grid, needGetRows])
 
@@ -71,6 +73,8 @@ export class GridDBClass extends GridInGraphClass {
         grid.opt.toolbarButtonsClass = props.toolbarButtonsClass;
         grid.opt.pagerClass = props.pagerClass;
         grid.setupPagerButtons();
+
+        BaseComponent.ThemeObj.Apply(grid);
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     skipOnWaveVisit(e) {
@@ -126,19 +130,19 @@ export class GridDBClass extends GridInGraphClass {
     renderToolbar() {
         const grid = this;
         grid.buttons = grid.buttons || [];
-        return (//id={`grid_${grid.id}_toolbar_`}
+        return (
             false ?
                 <div
 
-                    key={`gridtoolbardiv_${grid.id}_${grid.stateind}_`}
+                    key={`gridtoolbardiv_${grid.id}_`}
                     className={grid.opt.toolbarClass || 'toolbar-default'}
                 >
                     {
                         grid.buttons.map((button, ind) => {
                             return (
-                                button.getVisible && !button.getVisible() ? <span key={`toolbarbutton_${grid.id}_${button.id}_${ind}_${grid.stateind}_`}></span> :
+                                button.getVisible && !button.getVisible() ? <span key={`toolbarbutton_${grid.id}_${button.id}_${ind}_`}></span> :
                                     <button
-                                        key={`toolbarbutton_${grid.id}_${button.id}_${ind}_${grid.stateind}_`}
+                                        key={`toolbarbutton_${grid.id}_${button.id}_${ind}_`}
                                     ></button>
                             )
                         })
@@ -150,15 +154,14 @@ export class GridDBClass extends GridInGraphClass {
                 grid.buttons.length <= 0 ? <></> :
                     <div
 
-                        key={`gridtoolbardiv_${grid.id}_${grid.stateind}_`}
+                        key={`gridtoolbardiv_${grid.id}_`}
                         className={grid.opt.toolbarClass || 'toolbar-default'}
                     >
                         {
                             grid.buttons.map((button, ind) => {
                                 return (
                                     <button
-                                        key={`toolbarbutton_${grid.id}_${button.id}_${ind}_${grid.stateind}_`}
-                                        id={`toolbarbutton_${grid.id}_${button.id}_${ind}_${grid.stateind}_`}
+                                        key={`toolbarbutton_${grid.id}_${button.id}_${ind}_`}
                                         grid-toolbar-button={`${grid.id}_${button.id}_`}
                                         className={`grid-toolbar-button ${button.class || grid.opt.toolbarButtonsClass || ''}`}
                                         style={{ width: button.img ? '2.5em' : '', display: button.getVisible && !button.getVisible() ? 'none' : '' }}
@@ -189,8 +192,7 @@ export class GridDBClass extends GridInGraphClass {
         return (
             grid.pagerButtons.length <= 0 || bottom && !grid.allowBottomPager ? <></> :
                 <div
-                    key={`pagerdiv_${bottom ? 'bottom' : 'top'}_${grid.id}_${grid.stateind}_`}
-                    id={`grid_${grid.id}_pager_${bottom ? 'bottom' : 'top'}_`}
+                    key={`pagerdiv_${bottom ? 'bottom' : 'top'}_${grid.id}_`}
                     className={grid.opt.pagerClass || 'grid-pager-default'}
                 >
                     {
@@ -198,7 +200,7 @@ export class GridDBClass extends GridInGraphClass {
                             return (
                                 button.render ? button.render(button, bottom) :
                                     <button
-                                        key={`pager_${bottom ? 'bottom' : 'top'}_${grid.id}_${button.id}_${grid.stateind}_${ind}_`}
+                                        key={`pager_${bottom ? 'bottom' : 'top'}_${grid.id}_${button.id}_${ind}_`}
                                         grid-pager-item={`${grid.id}_${button.id}_`}
                                         className={`${button.class ? button.class : 'grid-pager-button'}`}
                                         title={grid.translate(button.title, 'grid-pager-button')}
@@ -249,6 +251,11 @@ export class GridDBClass extends GridInGraphClass {
         const grid = this;
         grid.pagerButtons = [];
         grid.pagerButtonsDict = {};
+
+        grid.images = {};
+        if (grid.theme) {
+            grid.theme.prepareImages(grid);
+        }
 
         const refresh = {
             id: 0,
@@ -323,7 +330,7 @@ export class GridDBClass extends GridInGraphClass {
             render: function (button, bottom) {
                 return (
                     <input
-                        key={`pager_${bottom ? 'bottom' : 'top'}_${grid.id}_${button.id}_${grid.stateind}_`}
+                        key={`pager_${bottom ? 'bottom' : 'top'}_${grid.id}_${button.id}_`}
                         value={grid.pageNumber}
                         grid-pager-item={`${grid.id}_${button.id}_`}
                         className={`${button.class ? button.class : 'grid-pager-current'}`}
@@ -356,7 +363,7 @@ export class GridDBClass extends GridInGraphClass {
                 return (
                     <span
                         className={'grid-pager-of'}
-                        key={`pager_${bottom ? 'bottom' : 'top'}_${grid.id}_${button.id}_${grid.stateind}_`}
+                        key={`pager_${bottom ? 'bottom' : 'top'}_${grid.id}_${button.id}_`}
                     >
                         {` ${grid.translate('of', 'pager-button')} ${grid.pagesCount >= 0 ? grid.pagesCount : ''}`}
                     </span>
@@ -407,7 +414,7 @@ export class GridDBClass extends GridInGraphClass {
             render: function (button, bottom) {
                 return (
                     <select
-                        key={`pager_${bottom ? 'bottom' : 'top'}_${grid.id}_${button.id}_${grid.stateind}_`}
+                        key={`pager_${bottom ? 'bottom' : 'top'}_${grid.id}_${button.id}_`}
                         grid-pager-item={`${grid.id}_${button.id}_`}
                         className={`grid-pager-size ${button.class ? button.class : ''}`}
                         style={{ width: '4.5em', display: 'inline-block' }}
@@ -429,7 +436,7 @@ export class GridDBClass extends GridInGraphClass {
                                 return (
                                     <option
                                         value={+size}
-                                        key={`pagesize_${grid.id}_${ind}_${grid.stateind}_`}
+                                        key={`pagesize_${grid.id}_${ind}_`}
                                     >
                                         {size}
                                     </option>
@@ -453,7 +460,7 @@ export class GridDBClass extends GridInGraphClass {
                 return (
                     <span
                         className={'grid-pager-total'}
-                        key={`pager_${bottom ? 'bottom' : 'top'}_${grid.id}_${button.id}_${grid.stateind}_`}>
+                        key={`pager_${bottom ? 'bottom' : 'top'}_${grid.id}_${button.id}_`}>
                         {`${grid.translate('total rows', 'pager-button')} ${grid.totalRows >= 0 ? grid.totalRows : ''}`}
                     </span>
                 );

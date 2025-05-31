@@ -1,3 +1,6 @@
+import { DefaultGridTheme as Theme } from './Themes/DefaultGridTheme';
+//import { BootstrapTheme as NewTheme } from './Themes/BootstrapGridTheme';
+import { DefaultGridTheme as NewTheme } from './Themes/DefaultGridTheme';
 export class BaseComponent {
 
     constructor(props) {
@@ -10,6 +13,38 @@ export class BaseComponent {
 
     translate(text, context) {
         return text;
+    }
+
+    static ThemeObj = {
+        prepared: false,
+        Prepare() {
+            if (this.prepared) return;
+
+            this.theme = new Theme();
+            this.prepared = true;
+            this.images = {};
+            this.theme.prepareImages(this.images);
+
+            if (NewTheme !== undefined) {
+                this.newtheme = new NewTheme();
+            }
+
+        },
+        Apply(grid) {
+            if (!grid || grid.themeApplied) return;
+
+            grid.themeApplied = true;
+            this.Prepare();
+
+            grid.translate = this.theme.translate;
+            this.theme.setupPagerButtons(grid, this.images);
+
+            grid.images = this.images;
+
+            if (this.newtheme) {
+                this.newtheme.applyTheme(grid, this.images);
+            }
+        }
     }
 }
 

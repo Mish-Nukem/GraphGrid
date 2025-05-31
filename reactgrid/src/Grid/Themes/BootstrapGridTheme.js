@@ -19,10 +19,7 @@ export class BootstrapTheme {
 
         grid.opt.filterButtonClass = 'btn btn-primary';
 
-        //grid.drawCell = grid.opt.drawCell || grid.drawCell;
         this.setupPagerButtons(grid);
-
-        //grid.translate = this.translate;
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     setupPagerButtons(grid) {
@@ -46,25 +43,5 @@ export class BootstrapTheme {
         button2 = grid.pagerButtonsDict['pgsize'];
         button2.class = 'form-select form-select-sm';
     }
-    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
-    //translate(text, context) {
-
-    //    const dict = {
-    //        'CLEAR ALL FILTERS': 'Очистить все фильтры',
-    //        'FIRST': 'К началу',
-    //        'LAST': 'В конец',
-    //        'NEXT': 'Следующая',
-    //        'OF': 'из',
-    //        'PREV': 'Предыдущая',
-    //        'REFRESH': 'Обновить',
-    //        'RESET COLUMNS ORDER': 'Сбросить порядок колонок',
-    //        'RESET COLUMNS WIDTHS': 'Сбросить ширину колонок',
-    //        'SETTINGS': 'Настройки',
-    //        'TOTAL ROWS': 'Всего строк',
-    //        'MORE...': 'еще...',
-    //        'LOAD MORE RECORDS': 'Загрузить еще строк'
-    //    };
-    //    return dict[text.toUpperCase()] || text;
-    //}
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
 }

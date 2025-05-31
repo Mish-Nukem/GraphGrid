@@ -217,6 +217,7 @@ export default class TestData {
         const graph = new GraphClass();
 
         //graph.noCachWave = true;
+        graph.uid = 'TestPMGraph';
 
         const projectNode = { id: 0, entity: 'SrRProjectEntity', title: 'Проект', status: NodeStatus.filter, keyField: 'ID_SR_R_PROJECT_SRPJ', nameField: 'NAME_PROJ_SRPJ' };
         const promptNode = { id: 1, entity: 'SrRPromptnessEntity', title: 'Срочность выполнения', status: NodeStatus.filter, keyField: 'ID_SR_R_PROMPTNESS_SRPR', nameField: 'NAME_SRPR' };
@@ -242,6 +243,7 @@ export default class TestData {
         graph.nodesDict[detailsNode.id] = detailsNode;
         graph.nodesDict[addNode.id] = addNode;
 
+        /*
         //graph.nodeCount = 10;
         remarkNode.getColumns = function () {
             return [
@@ -776,7 +778,7 @@ export default class TestData {
                 },
             ];
         }
-
+        */
         function connect(child, parent) {
             const link = { parent: parent, child: child };
 

@@ -236,7 +236,7 @@ function App() {
                             {drawClearConsole()}
                         </div>
                         <div className="div-with-grid">
-                            <GridINU uid="proj" entity="SrRProjectEntity" dataGetter={dataGetter}></GridINU>
+                            <GridINU uid="proj" entity="SrRProjectEntity" dataGetter={dataGetter} keyField='ID_SR_R_PROJECT_SRPJ'></GridINU>
                         </div>
                         < div className="div-with-grid">
                             <GridINU parentGrids="proj" uid="rem" entity="SrRemarkEntity" dataGetter={dataGetter}></GridINU>
@@ -247,7 +247,7 @@ function App() {
                 return (
                     <>
                         <div className="div-with-grid">
-                            <Graph uid="PM" graph={new TestData().getTestGraph()} dataGetter={dataGetter}></Graph>
+                            <Graph uid="testGraph" graph={new TestData().getTestGraph()} dataGetter={dataGetter}></Graph>
                         </div>
                     </>
                 );

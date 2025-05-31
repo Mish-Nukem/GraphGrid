@@ -40,11 +40,12 @@ export function GridInGraph(props) {
         }
 
         if (grid.columns.length <= 0 && grid.getColumns) {
-            grid.getColumns();
+            grid.columns = grid.getColumns();
+            grid.prepareColumns(grid.columns);
         }
 
         return () => {
-            grid.removeEvents();
+            grid.clearEvents();
         }
     }, [grid, needGetRows])
 
@@ -106,10 +107,10 @@ export class GridInGraphClass extends GridClass {
         super.log(`${pref ? pref : `grid#${grid.uid ? grid.id + '(' + grid.uid + ')' : grid.id}`} : ` + message, ' ');
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
-    removeEvents() {
+    clearEvents() {
         const grid = this;
 
-        super.removeEvents();
+        super.clearEvents();
 
         if (window._graphDict && grid.graphUid) {
             grid.log(' delete graph')

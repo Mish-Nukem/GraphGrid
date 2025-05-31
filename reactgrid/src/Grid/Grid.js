@@ -46,7 +46,7 @@ export function Grid(props) {
         }
 
         if (grid.columns.length <= 0 && grid.getColumns) {
-            grid.getColumns();
+            grid.columns = grid.getColumns();
             grid.prepareColumns(grid.columns);
         }
 
@@ -92,9 +92,7 @@ export class GridClass extends BaseComponent {
 
         grid.stateind = 0;
 
-        grid.images = {};
-        grid.theme = new Theme();
-        grid.theme.prepareImages(grid);
+        //grid.theme = new Theme();
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     log(message, pref) {
@@ -124,30 +122,25 @@ export class GridClass extends BaseComponent {
         }
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
-    static applyTheme(grid) {
-        if (Theme !== undefined && !grid.themeApplied) {
-            grid.theme = grid.theme || new Theme();
-            grid.theme.applyTheme(grid);
+    //static applyTheme(grid) {
+    //    if (Theme !== undefined && !grid.themeApplied) {
+    //        grid.theme = grid.theme || new Theme();
+    //        grid.theme.applyTheme(grid);
 
-            if (NewTheme !== undefined) {
-                const newtheme = new NewTheme();
-                newtheme.applyTheme(grid);
-            }
+    //        if (NewTheme !== undefined) {
+    //            const newtheme = new NewTheme();
+    //            newtheme.applyTheme(grid);
+    //        }
 
-            grid.themeApplied = true;
-        }
-    }
+    //        grid.themeApplied = true;
+    //    }
+    //}
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     setupEvents() {
         const grid = this;
         grid.clearEvents = function () { }
 
-        GridClass.applyTheme(grid);
-    }
-    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
-    removeEvents() {
-        const grid = this;
-        grid.clearEvents();
+        //GridClass.applyTheme(grid);
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     calculatePagesCount() {
@@ -172,19 +165,6 @@ export class GridClass extends BaseComponent {
         return [];
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
-    remove() {
-        const grid = this;
-
-        const gridElement = document.getElementById(`grid_${grid.id}_${grid.stateind}_`);
-        gridElement.setAttribute('display', 'none');
-
-        grid.removeEvents();
-
-        setTimeout(function () {
-            gridElement.remove();
-        }, 10);
-    }
-    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     render() {
         const grid = this;
 
@@ -198,7 +178,7 @@ export class GridClass extends BaseComponent {
 
         return (
             <table
-                id={`grid_${grid.id}_${grid.stateind}_`}
+                key={`grid_${grid.id}_`}
                 className={grid.opt.gridClass || 'grid-default'}
                 style={{ width: w + "px" }}
             >
@@ -219,9 +199,9 @@ export class GridClass extends BaseComponent {
                 <tr>
                     {grid.multi ? grid.renderSelectColumnHeader() : <></>}
                     {columns.map((col, ind) => {
-                        return (
+                        return (//key={`headercell_${grid.id}_${col.id}_${col.w}_${grid.stateind}_`}
                             <th
-                                key={`headercell_${grid.id}_${col.id}_${col.w}_${grid.stateind}_`}
+                                key={`headercell_${grid.id}_${col.id}_${col.w}_${ind}_`}
                                 grid-header={`${grid.id}_${col.id}_` + grid.stateind + '_' + col.w}
                                 className={`${grid.opt.columnClass ? grid.opt.columnClass : ''} grid-header-th`}
                                 style={{ position: "sticky", top: 0, width: col.w + "px", overflow: "hidden", verticalAlign: "top" }}
@@ -250,9 +230,9 @@ export class GridClass extends BaseComponent {
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     renderSelectColumnHeader() {
         const grid = this;
-        return (
+        return (//key={`headercell_${grid.id}_select_${grid.stateind}_`}
             <th
-                key={`headercell_${grid.id}_select_${grid.stateind}_`}
+                key={`headercell_${grid.id}_select_`}
                 grid-header={`${grid.id}_select_`}
                 className={`${grid.opt.columnClass ? grid.opt.columnClass : ''} grid-header-th`}
                 style={{ position: "sticky", top: 0, width: "2em", overflow: "hidden", verticalAlign: "top" }}
@@ -268,9 +248,9 @@ export class GridClass extends BaseComponent {
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     renderSelectColumn(row, rind) {
         const grid = this;
-        return (
+        return (//key={`gridcell_${grid.id}_${rind}_select_${grid.stateind}_`}
             <td
-                key={`gridcell_${grid.id}_${rind}_select_${grid.stateind}_`}
+                key={`gridcell_${grid.id}_${rind}_select_`}
             >
                 <input type='checkbox'
                     className={`grid-select-checkbox`}

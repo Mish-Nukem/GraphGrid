@@ -1,12 +1,11 @@
 /* eslint-disable no-mixed-operators */
 import { useState, useEffect } from 'react';
 import { BaseComponent, NodeStatus, FilterType, log } from './Base';
-import { GraphClass, WaveType } from './Graph';
+import { GraphClass } from './Graph';
 import { GridINU, GridINUClass } from './GridINU';
 import { GridClass } from './Grid';
 import { Modal } from './Modal';
 import { Select } from './OuterComponents/Select';
-//import { AsyncPaginate } from 'react-select-async-paginate';
 import { DatePicker } from './OuterComponents/DatePicker';
 // ==================================================================================================================================================================
 export function Graph(props) {
@@ -37,22 +36,21 @@ export function Graph(props) {
                 }
             );
         }
+        else {
+            gc.getGraphInfo().then(
+                (gInfo) => {
+                    gc.applyRestoredParams(gInfo);
+                    gc.refreshState();
+                }
+            );
+        }
 
         return () => {
             //log(' 0.11 Clear GraphEvents');
 
-            gc.removeEvents();
+            gc.clearEvents();
         }
     }, [gc])
-
-    //if (!gc.graph) {
-    //    gc.getScheme().then(
-    //        (graph) => {
-    //            gc.graph = graph;
-    //            gc.refreshState();
-    //        }
-    //    );
-    //}
 
     return (gc.render());
 }
@@ -63,8 +61,8 @@ export class GraphComponentClass extends BaseComponent {
 
         const gc = this;
 
-        window._graphSeq = window._graphSeq || 0;
-        window._graphDict = window._graphDict || {};
+        //window._graphSeq = window._graphSeq || 0;
+        //window._graphDict = window._graphDict || {};
 
         gc.id = window._graphSeq++;
         gc.uid = props.uid || gc.id;
@@ -82,7 +80,7 @@ export class GraphComponentClass extends BaseComponent {
         gc.opt = {};
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
-    removeEvents() {
+    clearEvents() {
         const gc = this;
 
         if (window._graphDict && gc.uid) {
@@ -114,7 +112,7 @@ export class GraphComponentClass extends BaseComponent {
         for (let uid in gc.graph.nodesDict) {
             let node = gc.graph.nodesDict[uid];
 
-            GridClass.applyTheme(node);
+            //GridClass.applyTheme(node);
 
             if (node.status === NodeStatus.filter) {
                 const comboValue = gc.getValueFromCombobox(node);
@@ -254,7 +252,7 @@ export class GraphComponentClass extends BaseComponent {
                             getOptions={(filter, pageNum) => gc.promiseOptions(filter, node, pageNum)}
                             onChange={(e) => {
                                 node._selectedOptions = node.multi ? e : [e];
-                                gc.getValueFromCombobox(node, true);
+                                gc.getValueFromCombobox(node, true, true);
                                 gc.graph.triggerWave({ nodes: [node], withStartNodes: false });
                                 gc.refreshState();
                             }}
@@ -396,6 +394,9 @@ export class GraphComponentClass extends BaseComponent {
                 gc.selectingNode.setComboboxValue([{ value: gc.selectingNode.value, label: gc.selectingNode.selectedText() }]);
             }
         }
+        else {
+            gc.selectingNode._selectedOptions = gc.selectingNode.selectedValues();
+        }
 
         gc.selectingNode.isSelecting = false;
         gc.saveGraphConfig();
@@ -454,10 +455,33 @@ export class GraphComponentClass extends BaseComponent {
 
             gc.dataGetter.get({ url: 'system/graphScheme', params: params }).then(
                 (schemeObj) => {
-                    //const obj = JSON.parse(schemeObj);
                     gc.prepareGraph(schemeObj);
 
                     resolve(gc.graph, e);
+                }
+            );
+        });
+    }
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
+    getGraphInfo(e) {
+        const gc = this;
+
+        return new Promise(function (resolve, reject) {
+
+            if (!gc.graph || !gc.graph.uid) {
+                resolve({});
+                return;
+            }
+
+            const params = [
+                { key: 'atoken', value: gc.dataGetter.atoken },
+                { key: 'rtoken', value: gc.dataGetter.rtoken },
+                { key: 'configUid', value: gc.graph.uid }
+            ];
+
+            gc.dataGetter.get({ url: 'system/getGraphSettings', params: params }).then(
+                (gInfo) => {
+                    resolve(gInfo);
                 }
             );
         });
@@ -473,17 +497,19 @@ export class GraphComponentClass extends BaseComponent {
             if (node.value === undefined || node.value === '') continue;
 
             let so = { u: node.uid, v: node.value, o: [] };
-            if (node._selectedRows) {
+            if (node._selectedOptions) {
+                for (let opt of node._selectedOptions) {
+                    so.o.push({ v: opt.value, t: opt.label });
+                }
+            } 
+            else if (node._selectedRows) {
                 for (let uid in node._selectedRows) {
                     let row = node._selectedRows[uid];
                     so.o.push({ v: row[node.keyField], t: row[node.nameField] });
                 }
             }
-            else if (node._selectedOptions) {
-                for (let opt of node._selectedOptions) {
-                    so.o.push({ v: opt.value, t: opt.label });
-                }
-            }
+            so.t = so.o.length === 1 ? so.o[0].t : `${so.o.length} ${node.translate('items selected')}`;
+
             savingData[node.uid] = so;
         }
 
@@ -592,7 +618,7 @@ export class GraphComponentClass extends BaseComponent {
     //    return res;
     //}
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
-    getValueFromCombobox(node, changeValue) {
+    getValueFromCombobox(node, changeValue, saveConfig) {
         const gc = this;
         node._selectedOptions = node._selectedOptions || [];
         let arr = [];
@@ -613,7 +639,9 @@ export class GraphComponentClass extends BaseComponent {
         const res = arr.join(',');
         if (changeValue) {
             node.value = res;
-            gc.saveGraphConfig();
+            if (saveConfig) {
+                gc.saveGraphConfig();
+            }
         }
 
         return res;
@@ -647,6 +675,8 @@ export class GraphComponentClass extends BaseComponent {
         grid.title = obr.title;
         grid.nameField = obr.nameField;
         grid.keyField = obr.keyField;
+
+        graph.nodesDict[grid.uid] = grid;
 
         grid.allowEditGrid = obr.allowEditGrid;
 
@@ -720,7 +750,6 @@ export class GraphComponentClass extends BaseComponent {
         //    grid.detailNodeChangesSaved = async () => { const res = await gc.detailNodeChangesSaved(grid); return res; };
         //}
 
-        graph.nodesDict[grid.uid] = grid;
         return grid;
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -750,6 +779,8 @@ export class GraphComponentClass extends BaseComponent {
             gc.graph.nodeCount++;
 
             node.opt = node.opt || {};
+
+            node.translate = node.translate || (text => { return text; });
 
             if (node._readonly !== undefined) {
                 node.readonly = node._readonly;
@@ -784,6 +815,27 @@ export class GraphComponentClass extends BaseComponent {
 
             link.parent = link.parent ? gc.graph.nodesDict[link.parent] : link.parent;
             link.child = link.child ? gc.graph.nodesDict[link.child] : link.child;
+        }
+    }
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
+    applyRestoredParams(gInfo) {
+        const gc = this;
+        if (!gInfo || !gc.graph) return;
+
+        for (let uid in gc.graph.nodesDict) {
+            let node = gc.graph.nodesDict[uid];
+
+            let obr = gInfo[uid];
+            if (!obr) continue;
+
+            node.value = obr.v || node.value;
+            if (obr.o && obr.o.length > 0) {
+                node._selectedOptions = obr.o;
+            }
+
+            if (node.value && obr.t) {
+                node._restoredText = obr.t;
+            }
         }
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------

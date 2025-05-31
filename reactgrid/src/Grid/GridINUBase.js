@@ -42,11 +42,12 @@ export function GridINUBase(props) {
         }
 
         if (grid.columns.length <= 0 && grid.getColumns) {
-            grid.getColumns();
+            grid.columns = grid.getColumns();
+            grid.prepareColumns(grid.columns);
         }
 
         return () => {
-            grid.removeEvents();
+            grid.clearEvents();
         }
     }, [grid, needGetRows])
 
@@ -120,6 +121,7 @@ export class GridINUBaseClass extends GridFLClass {
                     grid.visible = true;
                     grid.title = node.lookupField.title;
                     grid.isSelecting = true;
+                    grid.uid = node.uid + '_lookup_' + grid.entity + '_';
                     node.lookupGrid = grid;
                 }}
             >
@@ -179,7 +181,7 @@ export class GridINUBaseClass extends GridFLClass {
                 { key: 'atoken', value: node.dataGetter.atoken },
                 { key: 'rtoken', value: node.dataGetter.rtoken },
                 { key: 'entity', value: col.entity },
-                { key: 'configUid', value: node.getConfigUid() },
+                { key: 'configUid', value: col.entity + '_' }, // + node.graph.uid + '_' + node.uid + '_lookup_' + col.entity + '_'
             ];
 
             node.dataGetter.get({ url: 'system/entityInfo', params: params }).then(
@@ -204,7 +206,8 @@ export class GridINUBaseClass extends GridFLClass {
         await node.dataGetter.get({ url: 'system/entityInfo', params: params }).then(
             (columns) => {
                 res = columns;
-                //node.prepareColumns(node.columns);
+            //    node.columns = columns;
+            //    node.prepareColumns(node.columns);
             }
         );
 
