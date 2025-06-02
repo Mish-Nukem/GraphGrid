@@ -109,7 +109,7 @@
 .grid-header-div-default {
     user-select: none;
     display: grid;
-    grid-template-columns: auto 12px;
+    grid-template-columns: auto 18px;
     grid-template-rows: auto auto;
     grid-auto-flow: row;
     align-items: center;

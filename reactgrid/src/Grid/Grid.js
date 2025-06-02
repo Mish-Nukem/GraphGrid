@@ -188,6 +188,10 @@ export class GridClass extends BaseComponent {
         );
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
+    keyAdd() {
+        return '';
+    }
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     renderHeader(columns, context) {
         const grid = this;
         columns = columns || grid.columns;
@@ -199,10 +203,10 @@ export class GridClass extends BaseComponent {
                 <tr>
                     {grid.multi ? grid.renderSelectColumnHeader() : <></>}
                     {columns.map((col, ind) => {
-                        return (//key={`headercell_${grid.id}_${col.id}_${col.w}_${grid.stateind}_`}
+                        return (
                             <th
-                                key={`headercell_${grid.id}_${col.id}_${col.w}_${ind}_`}
-                                grid-header={`${grid.id}_${col.id}_` + grid.stateind + '_' + col.w}
+                                key={`headercell_${grid.id}_${col.id}_${col.w}_${ind}_${grid.keyAdd()}_`}
+                                grid-header={`${grid.id}_${col.id}_${col.w}_`}
                                 className={`${grid.opt.columnClass ? grid.opt.columnClass : ''} grid-header-th`}
                                 style={{ position: "sticky", top: 0, width: col.w + "px", overflow: "hidden", verticalAlign: "top" }}
                                 onMouseDown={(e) => grid.mouseDownColumnDrag(e, col)}
@@ -230,9 +234,9 @@ export class GridClass extends BaseComponent {
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     renderSelectColumnHeader() {
         const grid = this;
-        return (//key={`headercell_${grid.id}_select_${grid.stateind}_`}
+        return (
             <th
-                key={`headercell_${grid.id}_select_`}
+                key={`headercell_${grid.id}_select_${grid.keyAdd()}_`}
                 grid-header={`${grid.id}_select_`}
                 className={`${grid.opt.columnClass ? grid.opt.columnClass : ''} grid-header-th`}
                 style={{ position: "sticky", top: 0, width: "2em", overflow: "hidden", verticalAlign: "top" }}
@@ -248,9 +252,9 @@ export class GridClass extends BaseComponent {
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     renderSelectColumn(row, rind) {
         const grid = this;
-        return (//key={`gridcell_${grid.id}_${rind}_select_${grid.stateind}_`}
+        return (
             <td
-                key={`gridcell_${grid.id}_${rind}_select_`}
+                key={`gridcell_${grid.id}_${rind}_select_${grid.keyAdd()}_`}
             >
                 <input type='checkbox'
                     className={`grid-select-checkbox`}
@@ -276,7 +280,7 @@ export class GridClass extends BaseComponent {
                     grid.rows.map((row, rind) => {
                         return (
                             <tr
-                                key={`gridrow_${grid.id}_${rind}_`}
+                                key={`gridrow_${grid.id}_${rind}_${grid.keyAdd()}_`}
                                 className={grid.isRowSelected(row, rind) ? `grid-selected-row ${grid.opt.selectedRowClass || ''}` : ''}
                                 onMouseDown={(e) => { e.detail === 2 ? grid.onRowDblClick(e, row) : grid.onSelectGridRow(e) }}
                             >
@@ -303,7 +307,7 @@ export class GridClass extends BaseComponent {
                     grid.columns.map((col, cind) => {
                         return (
                             <td
-                                key={`gridcell_${grid.id}_${rowInd}_${cind}_`}
+                                key={`gridcell_${grid.id}_${rowInd}_${cind}_${grid.keyAdd()}_`}
                             >
                                 {grid.renderCell(col, row)}
                             </td>

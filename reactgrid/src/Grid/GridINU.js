@@ -1,7 +1,6 @@
 ﻿import { useState, useEffect } from 'react';
 import { GridINUBaseClass } from './GridINUBase.js';
 import { NodeStatus } from './Base';
-import { WaveType } from './Graph.js';
 import { CardINU } from './CardINU';
 import { Modal } from './Modal';
 // ==================================================================================================================================================================
@@ -86,18 +85,18 @@ export class GridINUClass extends GridINUBaseClass {
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     render() {
-        const node = this;
+        const grid = this;
         return (
             <>
                 {super.render()}
                 {
-                    node.cardIsShowing ?
+                    grid.cardIsShowing ?
                         <Modal
-                            title={node.title}
-                            renderContent={() => { return node.renderCard() }}
-                            pos={node.cardPos}
-                            onClose={(e) => node.closeCard(e)}
-                            init={(wnd) => { wnd.visible = node.cardIsShowing; }}
+                            title={grid.title}
+                            renderContent={() => { return grid.renderCard() }}
+                            pos={grid.cardPos}
+                            onClose={(e) => grid.closeCard(e)}
+                            init={(wnd) => { wnd.visible = grid.cardIsShowing; }}
                         >
                         </Modal>
                         :
@@ -108,18 +107,18 @@ export class GridINUClass extends GridINUBaseClass {
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     renderCard() {
-        const node = this;
+        const grid = this;
         return (
             <CardINU
-                cardRow={node.cardRow || {}}
-                isNewRecord={node.isNewRecord}
-                uid={(node.uid || node.id) + '_card_'}
-                entity={node.entity}
-                keyField={node.keyField}
-                dataGetter={node.dataGetter || node.dataGetter}
+                cardRow={grid.cardRow || {}}
+                isNewRecord={grid.isNewRecord}
+                uid={(grid.uid || grid.id) + '_card_'}
+                entity={grid.entity}
+                keyField={grid.keyField}
+                dataGetter={grid.dataGetter || grid.dataGetter}
                 init={(card) => {
                     card.visible = true;
-                    card.columns = node.columns;
+                    card.columns = grid.columns;
                 }}
             >
             </CardINU>
@@ -127,26 +126,26 @@ export class GridINUClass extends GridINUBaseClass {
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     renderLookupGrid(lookupField) {
-        const node = this;
-        const info = node._lookupEntityInfo[node.lookupField.entity];
+        const grid = this;
+        const info = grid._lookupEntityInfo[grid.lookupField.entity];
         return (
             <GridINU
-                entity={node.lookupField.entity}
-                dataGetter={node.dataGetter}
-                keyField={node.lookupField.refKeyField}
-                nameField={node.lookupField.refNameField}
-                onSelectValue={(e) => node.selectLookupValue(e)}
+                entity={grid.lookupField.entity}
+                dataGetter={grid.dataGetter}
+                keyField={grid.lookupField.refKeyField}
+                nameField={grid.lookupField.refNameField}
+                onSelectValue={(e) => grid.selectLookupValue(e)}
                 getColumns={info.columns ? () => { return info.columns; } : null}
-                init={(grid) => {
-                    grid.visible = true;
-                    grid.title = node.lookupField.title;
-                    if (node.activeRow) {
-                        grid.value = node.activeRow;
-                        grid.activeRow = node.activeRow;
-                        delete node.activeRow;
+                init={(lookupGrid) => {
+                    lookupGrid.visible = true;
+                    lookupGrid.title = grid.lookupField.title;
+                    if (grid.activeRow) {
+                        lookupGrid.value = grid.activeRow;
+                        lookupGrid.activeRow = grid.activeRow;
+                        delete grid.activeRow;
                     }
-                    grid.isSelecting = true;
-                    node.lookupGrid = grid;
+                    lookupGrid.isSelecting = true;
+                    grid.lookupGrid = lookupGrid;
                 }}
             >
             </GridINU>
@@ -154,32 +153,31 @@ export class GridINUClass extends GridINUBaseClass {
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     renderCell(col, row) {
-        const node = this;
+        const grid = this;
 
-        if (!node.allowEditGrid || col.readonly || row !== node.selectedRow()) return super.renderCell(col, row);
+        if (!grid.allowEditGrid || col.readonly || row !== grid.selectedRow()) return super.renderCell(col, row);
 
-        const value = !node.isEditing() ? row[col.name] : node.changedRow && node.changedRow[col.name] !== undefined ? node.changedRow[col.name] : row[col.name];
+        const value = !grid.isEditing() ? row[col.name] : grid.changedRow && grid.changedRow[col.name] !== undefined ? grid.changedRow[col.name] : row[col.name];
         if (col.type === undefined || col.type === null) {
             col.type = '';
         }
 
         const noClear = col.required || value === undefined || value === '';
 
-        //{node.images.filterSelect ? node.images.filterSelect() : node.translate('Select', 'graph-filter-select')}
         switch (col.type.toLowerCase()) {
             case 'lookup':
                 return (
-                    <div style={{ border: 'none' }} className='grid-cell-lookup' key={`gridlookupdiv_${node.id}_${col.id}_`}>
+                    <div style={{ border: 'none' }} className='grid-cell-lookup' key={`gridlookupdiv_${grid.id}_${col.id}_`}>
                         <span
-                            key={`gridlookuptitle_${node.id}_${col.id}_`}
+                            key={`gridlookuptitle_${grid.id}_${col.id}_`}
                             style={{ width: 'calc(100% - 4px)', gridColumn: noClear ? 'span 2' : '', overflowX: 'hidden' }}
                         >
                             {value}
                         </span>
                         <button
-                            key={`gridlookupbtn_${node.id}_${col.id}_`}
+                            key={`gridlookupbtn_${grid.id}_${col.id}_`}
                             className={'grid-cell-button'}
-                            onClick={(e) => node.openLookupField(e, col, row)}
+                            onClick={(e) => grid.openLookupField(e, col, row)}
                         >
                             {'...'}
                         </button>
@@ -187,9 +185,9 @@ export class GridINUClass extends GridINUBaseClass {
                             noClear ? <></>
                                 :
                                 <button
-                                    key={`gridlookupclear_${node.id}_${col.id}_`}
+                                    key={`gridlookupclear_${grid.id}_${col.id}_`}
                                     className={'grid-cell-button'}
-                                    onClick={(e) => node.clearField(e, col, row)}
+                                    onClick={(e) => grid.clearField(e, col, row)}
                                 >
                                     {'×'}
                                 </button>
@@ -201,10 +199,10 @@ export class GridINUClass extends GridINUBaseClass {
                     <div
                         style={{ border: 'none' }}
                         className='grid-cell-edit'
-                        key={`grideditdiv_${node.id}_${col.id}_`}
+                        key={`grideditdiv_${grid.id}_${col.id}_`}
                     >
                         <textarea
-                            key={`gridedittextarea_${node.id}_${col.id}_`}
+                            key={`gridedittextarea_${grid.id}_${col.id}_`}
                             value={value}
                             style={{
                                 width: '100%',
@@ -215,11 +213,11 @@ export class GridINUClass extends GridINUBaseClass {
                                 resize: 'vertical',
                                 overflowX: 'hidden',
                             }}
-                            onChange={(e) => node.changeField(e, col, row)}
-                            autoFocus={col === node._changingCol && node.isEditing()}
+                            onChange={(e) => grid.changeField(e, col, row)}
+                            autoFocus={col === grid._changingCol && grid.isEditing()}
                             onFocus={e => {
-                                if (col === node._changingCol) {
-                                    e.currentTarget.selectionStart = e.currentTarget.selectionEnd = node._remCursorPos;
+                                if (col === grid._changingCol) {
+                                    e.currentTarget.selectionStart = e.currentTarget.selectionEnd = grid._remCursorPos;
                                 }
                             }}
                         >
@@ -228,9 +226,9 @@ export class GridINUClass extends GridINUBaseClass {
                             noClear ? <></>
                                 :
                                 <button
-                                    key={`gridlookupclear_${node.id}_${col.id}_`}
+                                    key={`gridlookupclear_${grid.id}_${col.id}_`}
                                     className={'grid-cell-button'}
-                                    onClick={(e) => node.clearField(e, col, row)}
+                                    onClick={(e) => grid.clearField(e, col, row)}
                                 >
                                     {'×'}
                                 </button>
@@ -241,7 +239,7 @@ export class GridINUClass extends GridINUBaseClass {
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     addButtons() {
-        const node = this;
+        const grid = this;
 
         //if (node._buttonsAdded) return;
 
@@ -258,64 +256,64 @@ export class GridINUClass extends GridINUBaseClass {
         //    img: node.images.edit
         //});
 
-        node.buttons.push({
-            id: node.buttons.length,
+        grid.buttons.push({
+            id: grid.buttons.length,
             name: 'commit',
-            title: node.translate('Commit changes'),
-            label: node.images.commit ? '' : node.translate('Commit changes'),
-            img: node.images.commit,
-            click: (e) => node.commitChanges(e),
-            getDisabled: (e) => node.commitChangesDisabled(e),
+            title: grid.translate('Commit changes'),
+            label: grid.images.commit ? '' : grid.translate('Commit changes'),
+            img: grid.images.commit,
+            click: (e) => grid.commitChanges(e),
+            getDisabled: (e) => grid.commitChangesDisabled(e),
         });
 
-        node.buttons.push({
-            id: node.buttons.length,
+        grid.buttons.push({
+            id: grid.buttons.length,
             name: 'rollback',
-            title: node.translate('Rollback changes'),
-            label: node.images.rollback ? '' : node.translate('Rollback changes'),
-            img: node.images.rollback,
-            click: (e) => node.rollbackChanges(e),
-            getDisabled: (e) => node.rollbackChangesDisabled(e),
+            title: grid.translate('Rollback changes'),
+            label: grid.images.rollback ? '' : grid.translate('Rollback changes'),
+            img: grid.images.rollback,
+            click: (e) => grid.rollbackChanges(e),
+            getDisabled: (e) => grid.rollbackChangesDisabled(e),
         });
 
-        node.buttons.push({
-            id: node.buttons.length,
+        grid.buttons.push({
+            id: grid.buttons.length,
             name: 'add',
-            title: node.translate('Add new record'),
-            label: node.images.addRecord ? '' : node.translate('Add new record'),
-            img: node.images.addRecord,
-            click: (e) => node.addRecord(e),
-            getDisabled: (e) => node.addRecordDisabled(e),
+            title: grid.translate('Add new record'),
+            label: grid.images.addRecord ? '' : grid.translate('Add new record'),
+            img: grid.images.addRecord,
+            click: (e) => grid.addRecord(e),
+            getDisabled: (e) => grid.addRecordDisabled(e),
         });
 
-        node.buttons.push({
-            id: node.buttons.length,
+        grid.buttons.push({
+            id: grid.buttons.length,
             name: 'copy',
-            title: node.translate('Copy record'),
-            label: node.images.copyRecord ? '' : node.translate('Copy record'),
-            img: node.images.copyRecord,
-            click: (e) => node.copyRecord(e),
-            getDisabled: (e) => node.copyRecordDisabled(e),
+            title: grid.translate('Copy record'),
+            label: grid.images.copyRecord ? '' : grid.translate('Copy record'),
+            img: grid.images.copyRecord,
+            click: (e) => grid.copyRecord(e),
+            getDisabled: (e) => grid.copyRecordDisabled(e),
         });
 
-        node.buttons.push({
-            id: node.buttons.length,
+        grid.buttons.push({
+            id: grid.buttons.length,
             name: 'delete',
-            title: node.translate('Delete record'),
-            label: node.images.deleteRecord ? '' : node.translate('Delete record'),
-            img: node.images.deleteRecord,
-            click: (e) => node.deleteRecord(e),
-            getDisabled: (e) => node.deleteRecordDisabled(e),
+            title: grid.translate('Delete record'),
+            label: grid.images.deleteRecord ? '' : grid.translate('Delete record'),
+            img: grid.images.deleteRecord,
+            click: (e) => grid.deleteRecord(e),
+            getDisabled: (e) => grid.deleteRecordDisabled(e),
         });
 
-        node.buttons.push({
-            id: node.buttons.length,
+        grid.buttons.push({
+            id: grid.buttons.length,
             name: 'view',
-            title: node.translate('View record'),
-            label: node.images.viewRecord ? '' : node.translate('View record'),
-            img: node.images.viewRecord,
-            click: (e) => node.viewRecord(e),
-            getDisabled: (e) => node.viewRecordDisabled(e),
+            title: grid.translate('View record'),
+            label: grid.images.viewRecord ? '' : grid.translate('View record'),
+            img: grid.images.viewRecord,
+            click: (e) => grid.viewRecord(e),
+            getDisabled: (e) => grid.viewRecordDisabled(e),
         });
 
         //node.buttons.push({
@@ -326,126 +324,126 @@ export class GridINUClass extends GridINUBaseClass {
         //    click: (e) => node.test(e)
         //});
 
-        node.buttons.push({
-            id: node.buttons.length,
+        grid.buttons.push({
+            id: grid.buttons.length,
             name: 'selectValue',
-            title: node.translate('Select'),
-            label: node.images.selectFilterValue ? '' : node.translate('Select value'),
-            click: (e) => node.onSelectValue(e),
-            img: node.images.selectFilterValue,
-            getVisible: () => { return node.isSelecting },
+            title: grid.translate('Select'),
+            label: grid.images.selectFilterValue ? '' : grid.translate('Select value'),
+            click: (e) => grid.onSelectValue(e),
+            img: grid.images.selectFilterValue,
+            getVisible: () => { return grid.isSelecting },
         });
 
-        node._buttonsDict = {};
-        for (let btn of node.buttons) {
-            node._buttonsDict[btn.name] = btn;
+        grid._buttonsDict = {};
+        for (let btn of grid.buttons) {
+            grid._buttonsDict[btn.name] = btn;
         }
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     onRowDblClick(e, row) {
-        const node = this;
+        const grid = this;
         super.onRowDblClick(e, row);
 
-        if (node.isSelecting && !node.multi && node.onSelectValue) {
-            node.onSelectValue(e);
+        if (grid.isSelecting && !grid.multi && grid.onSelectValue) {
+            grid.onSelectValue(e);
         }
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     commitChanges(e) {
-        const node = this;
+        const grid = this;
 
-        const row = node.selectedRow();
+        const row = grid.selectedRow();
 
-        node.saveRow({ row: row, changedRow: node.changedRow }).then(
+        grid.saveRow({ row: row, changedRow: grid.changedRow }).then(
             () => {
-                node.setEditing(false);
-                Object.assign(row, node.changedRow);
-                node.refreshState();
+                grid.setEditing(false);
+                Object.assign(row, grid.changedRow);
+                grid.refreshState();
             }
         ).catch((message) => {
-            Object.assign(node.changedRow, row);
-            node.refreshState();
+            Object.assign(grid.changedRow, row);
+            grid.refreshState();
             alert(message || 'Error!');
         });
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     commitChangesDisabled(e) {
-        const node = this;
-        return !node.isEditing();
+        const grid = this;
+        return !grid.isEditing();
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     rollbackChanges(e) {
-        const node = this;
+        const grid = this;
 
-        delete node.changedRow;
-        node.setEditing(false);
-        node.refreshState();
+        delete grid.changedRow;
+        grid.setEditing(false);
+        grid.refreshState();
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     rollbackChangesDisabled(e) {
-        const node = this;
-        return !node.isEditing();
+        const grid = this;
+        return !grid.isEditing();
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     addRecord(e) {
-        const node = this;
+        const grid = this;
 
-        node.cardPos = node.cardPos || { x: 110, y: 110, w: 800, h: 600 };
+        grid.cardPos = grid.cardPos || { x: 110, y: 110, w: 800, h: 600 };
 
-        node.cardRow = {};
-        node.isNewRecord = true;
-        node.cardIsShowing = true;
-        node.refreshState();
+        grid.cardRow = {};
+        grid.isNewRecord = true;
+        grid.cardIsShowing = true;
+        grid.refreshState();
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     addRecordDisabled(e) {
-        const node = this;
-        return node.isEditing();
+        const grid = this;
+        return grid.isEditing();
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     copyRecord(e) {
-        const node = this;
+        const grid = this;
 
-        node.cardPos = node.cardPos || { x: 110, y: 110, w: 800, h: 600 };
+        grid.cardPos = grid.cardPos || { x: 110, y: 110, w: 800, h: 600 };
 
-        node.cardRow = {};
-        Object.assign(node.cardRow, node.selectedRow());
-        node.isNewRecord = true;
-        node.cardIsShowing = true;
-        node.refreshState();
+        grid.cardRow = {};
+        Object.assign(grid.cardRow, grid.selectedRow());
+        grid.isNewRecord = true;
+        grid.cardIsShowing = true;
+        grid.refreshState();
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     copyRecordDisabled(e) {
-        const node = this;
-        return node.isEditing() || node.selectedRowIndex === undefined || node.selectedRowIndex < 0 || !node.rows || node.rows.length <= 0;
+        const grid = this;
+        return grid.isEditing() || grid.selectedRowIndex === undefined || grid.selectedRowIndex < 0 || !grid.rows || grid.rows.length <= 0;
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     deleteRecord(e) {
-        const node = this;
+        const grid = this;
 
         if (window.confirm('Delete  record?')) {
-            node.deleteRow(e).then(() => node.refresh());
+            grid.deleteRow(e).then(() => grid.refresh());
         }
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     deleteRecordDisabled(e) {
-        const node = this;
-        return node.isEditing() || node.selectedRowIndex === undefined || node.selectedRowIndex < 0 || !node.rows || node.rows.length <= 0;
+        const grid = this;
+        return grid.isEditing() || grid.selectedRowIndex === undefined || grid.selectedRowIndex < 0 || !grid.rows || grid.rows.length <= 0;
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     viewRecord(e) {
-        const node = this;
+        const grid = this;
 
-        node.cardPos = node.cardPos || { x: 110, y: 110, w: 800, h: 600 };
+        grid.cardPos = grid.cardPos || { x: 110, y: 110, w: 800, h: 600 };
 
-        node.cardRow = node.selectedRow();
-        node.cardIsShowing = true;
-        node.refreshState();
+        grid.cardRow = grid.selectedRow();
+        grid.cardIsShowing = true;
+        grid.refreshState();
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     viewRecordDisabled(e) {
-        const node = this;
-        return node.isEditing() || node.selectedRowIndex === undefined || node.selectedRowIndex < 0 || !node.rows || node.rows.length <= 0;
+        const grid = this;
+        return grid.isEditing() || grid.selectedRowIndex === undefined || grid.selectedRowIndex < 0 || !grid.rows || grid.rows.length <= 0;
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     //isRowSelected(row, rowInd) {
@@ -454,22 +452,22 @@ export class GridINUClass extends GridINUBaseClass {
     //}
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     onSelectedRowChanged(e) {
-        const node = this;
+        const grid = this;
         super.onSelectedRowChanged(e);
 
-        if (node.allowEditGrid) {
-            node.refreshState();
+        if (grid.allowEditGrid) {
+            grid.refreshState();
         }
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     getSelectedRowIndex() {
-        const node = this;
-        if (node.value === undefined || node.value === '') return;
+        const grid = this;
+        if (grid.value === undefined || grid.value === '') return;
 
         let i = 0;
-        for (let row of node.rows) {
-            if (row[node.keyField] === node.value) {
-                node.selectedRowIndex = i;
+        for (let row of grid.rows) {
+            if (row[grid.keyField] === grid.value) {
+                grid.selectedRowIndex = i;
                 break;
             }
             i++;
@@ -477,7 +475,7 @@ export class GridINUClass extends GridINUBaseClass {
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     async canLeaveRow(rowIndex) {
-        const node = this;
+        const grid = this;
         let res;
 
         //if (node.detailNodeChangesSaved) {
@@ -485,22 +483,22 @@ export class GridINUClass extends GridINUBaseClass {
         //    if (!res) return false;
         //}
 
-        res = await node.detailNodesChangesSaved();
+        res = await grid.detailNodesChangesSaved();
         if (!res) return false;
 
-        if (!node.allowEditGrid || !node.isEditing()) return true;
-        const row = node.rows[rowIndex];
+        if (!grid.allowEditGrid || !grid.isEditing()) return true;
+        const row = grid.rows[rowIndex];
 
-        await node.saveRow({ row: row, changedRow: node.changedRow }).then(
+        await grid.saveRow({ row: row, changedRow: grid.changedRow }).then(
             () => {
-                node.setEditing(false);
-                Object.assign(row, node.changedRow);
-                node.refreshState();
+                grid.setEditing(false);
+                Object.assign(row, grid.changedRow);
+                grid.refreshState();
                 res = true;
             }
         ).catch((message) => {
-            Object.assign(node.changedRow, row);
-            node.refreshState();
+            Object.assign(grid.changedRow, row);
+            grid.refreshState();
             res = false;
             alert(message || 'Error!');
         });
@@ -509,11 +507,11 @@ export class GridINUClass extends GridINUBaseClass {
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     async detailNodesChangesSaved() {
-        const node = this;
-        const graph = node.graph;
-        if (!graph || !node.children || node.children.length <= 0) return true;
+        const grid = this;
+        const graph = grid.graph;
+        if (!graph || !grid.children || grid.children.length <= 0) return true;
 
-        for (let cuid of node.children) {
+        for (let cuid of grid.children) {
             let child = graph.nodesDict[cuid];
 
             if (!child.visible || !child.allowEditGrid || !child.isEditing() || !child.rows || child.rows.length <= 0) continue;
@@ -543,11 +541,11 @@ export class GridINUClass extends GridINUBaseClass {
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     hasParentGrids() {
-        const node = this;
-        if (!node.graph) return false;
+        const grid = this;
+        if (!grid.graph) return false;
 
-        for (let puid of node.parents) {
-            let pnode = node.graph.nodesDict[puid];
+        for (let puid of grid.parents) {
+            let pnode = grid.graph.nodesDict[puid];
             if (pnode.visible !== false && pnode.status === NodeStatus.grid) return true;
         }
 
@@ -555,20 +553,34 @@ export class GridINUClass extends GridINUBaseClass {
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     test(e) {
-        const node = this;
+        const grid = this;
 
-        node.saveColumnsConfig(e);
+        grid.saveColumnsConfig(e);
+    }
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
+    resetColumnsOrderToDefault() {
+        super.resetColumnsOrderToDefault();
+
+        const grid = this;
+        grid.saveColumnsConfig();
+    }
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
+    resetColumnsWidthsToDefault() {
+        super.resetColumnsWidthsToDefault();
+
+        const grid = this;
+        grid.saveColumnsConfig();
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     closeCard(e) {
-        const node = this;
-        node.cardIsShowing = false;
-        if (node.isNewRecord) {
-            node.isNewRecord = false;
-            node.refresh();
+        const grid = this;
+        grid.cardIsShowing = false;
+        if (grid.isNewRecord) {
+            grid.isNewRecord = false;
+            grid.refresh();
         }
         else {
-            node.refreshState();
+            grid.refreshState();
         }
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------

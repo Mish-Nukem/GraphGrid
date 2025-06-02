@@ -139,35 +139,35 @@ export class GraphComponentClass extends BaseComponent {
 
         return (
             <>
-                <div key={`graphall_${gc.id}_${gc.stateind}_`}>
-                    <div className="graph-filter-line" key={`filterstop_${gc.id}_$${gc.stateind}_`}>
+                <div key={`graphall_${gc.id}_`}>
+                    <div className="graph-filter-line" key={`filterstop_${gc.id}_`}>
                         {
                             topFilters.map((node) => { return gc.renderFilter(node, true) })
                         }
                     </div>
-                    <div className="graph-tabcontrol-buttons" key={`tabsstop_${gc.id}_$${gc.stateind}_`}>
+                    <div className="graph-tabcontrol-buttons" key={`tabsstop_${gc.id}_`}>
                         {
                             topGrids.map((node) => { return gc.renderGridTab(node, true) })
                         }
                     </div>
-                    <div className="graph-grid" key={`gridstop_${gc.id}_$${gc.stateind}_`}>
+                    <div className="graph-grid" key={`gridstop_${gc.id}_`}>
                         {
                             gc.renderGrid(gc.graph.nodesDict[gc.activeMaster], true)
 
                             /*nodes.map((node) => { return gc.renderGrid(node, true) })*/
                         }
                     </div>
-                    <div className="graph-filter-line" key={`filterslow_${gc.id}_$${gc.stateind}_`}>
+                    <div className="graph-filter-line" key={`filterslow_${gc.id}_`}>
                         {
                             lowFilters.map((node) => { return gc.renderFilter(node, false) })
                         }
                     </div>
-                    <div className="graph-tabcontrol-buttons" key={`tabsslow_${gc.id}_$${gc.stateind}_`}>
+                    <div className="graph-tabcontrol-buttons" key={`tabsslow_${gc.id}_`}>
                         {
                             lowGrids.map((node) => { return gc.renderGridTab(node, false) })
                         }
                     </div>
-                    <div className="graph-grid" key={`gridslow_${gc.id}_$${gc.stateind}_`}>
+                    <div className="graph-grid" key={`gridslow_${gc.id}_`}>
                         {
                             gc.renderGrid(gc.graph.nodesDict[gc.activeDetail], false)
 
@@ -235,10 +235,10 @@ export class GraphComponentClass extends BaseComponent {
         return (
             <div
                 className="graph-filter"
-                key={`fltrdiv_${node.id}_${gc.id}_${gc.stateind}_`}
+                key={`fltrdiv_${node.id}_${gc.id}_`}
             >
                 <span
-                    key={`fltrttl_${node.id}_${gc.id}_${gc.stateind}_`}
+                    key={`fltrttl_${node.id}_${gc.id}_`}
                     style={{ gridColumn: 'span 3', width: 'calc(100% - 4px)' }}
                     className='graph-filter-title'
                 >
@@ -262,7 +262,7 @@ export class GraphComponentClass extends BaseComponent {
                         </Select>
                         :
                         <input
-                            key={`fltrinp_${node.id}_${gc.id}_${gc.stateind}_`}
+                            key={`fltrinp_${node.id}_${gc.id}_`}
                             style={{ width: 'calc(100% - 4px)', padding: '0 2px', boxSizing: 'border-box', height: '2.3em' }}
                             value={
                                 node.filterType !== FilterType.date ?
@@ -278,7 +278,7 @@ export class GraphComponentClass extends BaseComponent {
                     node.filterType !== FilterType.input ?
                         <button
                             className={node.opt.filterButtonClass || 'graph-filter-button'}
-                            key={`fltrsel_${node.id}_${gc.id}_${gc.stateind}_`}
+                            key={`fltrsel_${node.id}_${gc.id}_`}
                             onClick={(e) => gc.openFilterGrid(e, node)}
                             disabled={gc.isEditing() ? 'disabled' : ''}
                         >
@@ -287,7 +287,7 @@ export class GraphComponentClass extends BaseComponent {
                         : <></>
                 }
                 <button
-                    key={`fltrclr_${node.id}_${gc.id}_${gc.stateind}_`}
+                    key={`fltrclr_${node.id}_${gc.id}_`}
                     className={node.opt.filterButtonClass || 'graph-filter-button'}
                     disabled={gc.isEditing() || node.value === undefined || node.value === '' ? 'disabled' : ''}
                     onClick={(e) => gc.clearFilter(e, node)}
@@ -307,7 +307,7 @@ export class GraphComponentClass extends BaseComponent {
         const isActive = top && node.uid === gc.activeMaster || !top && node.uid === gc.activeDetail;
         return (
             <button
-                key={`tabctrl_${node.id}_${gc.id}_${gc.stateind}_`}
+                key={`tabctrl_${node.id}_${gc.id}_`}
                 disabled={isActive || gc.isEditing() ? 'disabled' : ''}
                 className={node.opt.filterButtonClass || ''}
                 onClick={(e) => gc.selectActiveTab(node, top)}
@@ -578,12 +578,12 @@ export class GraphComponentClass extends BaseComponent {
     //    return master && master.isEditing && master.isEditing() || detail && detail.isEditing && detail.isEditing();
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
-    setEditing(grid, value) {
+    setEditing(node, value) {
         const gc = this;
-        if (grid.uid === gc.activeMaster) {
+        if (node.uid === gc.activeMaster) {
             gc._masterIsEditing = value;
         }
-        else if (grid.uid === gc.activeDetail) {
+        else if (node.uid === gc.activeDetail) {
             gc._detailIsEditing = value;
         }
         gc.refreshState();

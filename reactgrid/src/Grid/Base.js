@@ -37,7 +37,7 @@ export class BaseComponent {
             this.Prepare();
 
             grid.translate = this.theme.translate;
-            this.theme.setupPagerButtons(grid, this.images);
+            this.theme.setupGridPagerButtons(grid, this.images);
 
             grid.images = this.images;
 

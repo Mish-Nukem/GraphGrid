@@ -74,6 +74,8 @@ export class GridDBClass extends GridInGraphClass {
         grid.opt.pagerClass = props.pagerClass;
         grid.setupPagerButtons();
 
+        grid.sortColumns = [];
+
         BaseComponent.ThemeObj.Apply(grid);
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -100,6 +102,11 @@ export class GridDBClass extends GridInGraphClass {
         grid.pageNumber = 1;
 
         super.visitByWave(e);
+    }
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
+    keyAdd() {
+        const grid = this;
+        return `${grid.pageSize}_${grid.pageNumber}_`;
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     render() {
@@ -253,9 +260,6 @@ export class GridDBClass extends GridInGraphClass {
         grid.pagerButtonsDict = {};
 
         grid.images = {};
-        if (grid.theme) {
-            grid.theme.prepareImages(grid);
-        }
 
         const refresh = {
             id: 0,
@@ -484,11 +488,11 @@ export class GridDBClass extends GridInGraphClass {
                 <span
                     className={'grid-header-title'}
                     style={{ cursor: col.sortable && !grid.isEditing() ? 'pointer' : '', gridColumn: !sortDir ? 'span 2' : '' }}
-                    onClick={(e) => grid.changeColumnSortOrder(col)}
+                    onClick={(e) => grid.changeColumnSortOrder(col, e)}
                 >
                     {title}
                 </span>
-                {sortDir ? <span className={'grid-header-sort-sign'}>{decodedString}</span> : ''}
+                {sortDir ? <span className={'grid-header-sort-sign'}>{decodedString + (col.sortInd > 0 ? ` ${col.sortInd} ` : '')}</span> : ''}
             </>
         );
     }
@@ -497,7 +501,8 @@ export class GridDBClass extends GridInGraphClass {
         const grid = this;
         const res = [
             { id: 0, text: grid.translate('Reset columns order', 'grid-menu') },
-            { id: 1, text: grid.translate('Reset columns widths', 'grid-menu') }
+            { id: 1, text: grid.translate('Reset columns widths', 'grid-menu') },
+            { id: 2, text: grid.translate('Reset columns sort', 'grid-menu') },
         ];
 
         return res;
@@ -533,31 +538,75 @@ export class GridDBClass extends GridInGraphClass {
             case '1':
                 grid.resetColumnsWidthsToDefault();
                 break;
+            case '2':
+                grid.dropColumnsSort();
+                break;
             default:
         }
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
-    changeColumnSortOrder(column) {
+    dropColumnsSort() {
+        const grid = this;
+        for (let col of grid.columns) {
+            delete col.asc;
+            delete col.desc;
+            delete col.sortInd;
+        }
+        grid.refresh();
+    }
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
+    changeColumnSortOrder(column, e) {
         const grid = this;
 
         if (!column.sortable || grid.isEditing()) return;
 
+        let nextInd = 1;
+        if (e.shiftKey) {
+            for (let col of grid.columns) {
+                if (col.sortInd !== undefined) {
+                    nextInd++;
+                }
+                else if (col.asc || col.desc) {
+                    col.sortInd = nextInd++;
+                }
+            }
+        }
+
         if (column.asc) {
             delete column.asc;
             column.desc = true;
+            if (!e.shiftKey) {
+                delete column.sortInd;
+            }
         }
         else if (column.desc) {
+            const prevInd = column.sortInd;
             delete column.desc;
+            delete column.sortInd;
+            if (e.shiftKey) {
+                for (let col of grid.columns) {
+                    if (col.sortInd > prevInd) col.sortInd--;
+                }
+            }
         }
         else {
             column.asc = true;
+            if (e.shiftKey) {
+                column.sortInd = nextInd;
+            }
+            else {
+                delete column.sortInd;
+            }
         }
 
-        for (let col of grid.columns) {
-            if (col === column) continue;
+        if (!e.shiftKey) {
+            for (let col of grid.columns) {
+                if (col === column) continue;
 
-            delete col.asc;
-            delete col.desc;
+                delete col.asc;
+                delete col.desc;
+                delete col.sortInd;
+            }
         }
 
         grid.selectedRowIndex = 0;

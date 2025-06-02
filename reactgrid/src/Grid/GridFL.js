@@ -111,7 +111,7 @@ export class GridFLClass extends GridDBClass {
             <>
                 {super.renderHeaderCell(col, context)}
 
-                {col.filtrable && context !== 'fake' ? //key={`colfilter_${grid.id}_${col.id}_${grid.stateind}_`}  onFocus={(e) => { grid.onAutocompleteFocus(col, e) }}
+                {col.filtrable && context !== 'fake' ?
                     <>
                         <input
                             key={`colfilter_${grid.id}_${col.id}_`}
@@ -376,7 +376,7 @@ export class GridFLClass extends GridDBClass {
         const res = super.getGridSettingsList();
 
         const grid = this;
-        res.push({ id: 2, text: grid.translate('Clear all filters', 'grid-menu') });
+        res.push({ id: 3, text: grid.translate('Clear all filters', 'grid-menu') });
 
         return res;
     }
@@ -386,7 +386,7 @@ export class GridFLClass extends GridDBClass {
         const grid = this;
 
         switch (String(itemId)) {
-            case '2':
+            case '3':
                 grid.clearAllColumnFilters();
                 break;
             default:

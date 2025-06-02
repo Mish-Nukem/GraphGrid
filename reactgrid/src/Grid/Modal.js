@@ -123,7 +123,7 @@ export class ModalClass extends BaseComponent {
             <>
                 <div
                     id={`window_${wnd.id}_`}
-                    key={`window_${wnd.id}_${wnd.stateind}_`}
+                    key={`window_${wnd.id}_`}
                     style={
                         {
                             width: wnd.opt.pos.w,
@@ -141,7 +141,7 @@ export class ModalClass extends BaseComponent {
                 >
                     {wnd.opt.noHeader ? <></> : wnd.renderHeader()}
                     <div
-                        key={`window_${wnd.id}_${wnd.stateind}_body_`}
+                        key={`window_${wnd.id}_body_`}
                         wnd-body={1}
                         className={wnd.opt.bodyClass}
                         style={{ padding: wnd.opt.noPadding ? '0' : '' }}
@@ -159,7 +159,7 @@ export class ModalClass extends BaseComponent {
         const wnd = this;
         return (
             <div
-                key={`window_${wnd.id}_${wnd.stateind}_header_`}
+                key={`window_${wnd.id}_header_`}
                 wnd-header={1}
                 className={wnd.opt.headerClass}
                 onMouseDown={(e) => wnd.mouseDownDrag(e)}
@@ -176,7 +176,7 @@ export class ModalClass extends BaseComponent {
         const wnd = this;
         return (
             <div
-                key={`window_${wnd.id}_${wnd.stateind}_footer_`}
+                key={`window_${wnd.id}_footer_`}
                 wnd-footer={1}
                 className={wnd.opt.footerClass}
                 onMouseDown={(e) => wnd.mouseDownDrag(e)}
@@ -191,7 +191,7 @@ export class ModalClass extends BaseComponent {
                 {wnd.buttons.map((btn, ind) => {
                     return (
                         <button
-                            key={`window_${wnd.id}_${btn._ind}_${wnd.stateind}_button_`}
+                            key={`window_${wnd.id}_${btn._ind}_${ind}_button_`}
                             wnd-btn={`button_${wnd.id}_${btn._ind}_`}
                             className={wnd.opt.footerButtonClass}
                             title={btn.title}
@@ -212,7 +212,7 @@ export class ModalClass extends BaseComponent {
         return (
             <>
                 <div wnd-rsz-y={wnd.id}
-                    key={`wnd-rsz-y_${wnd.id}_${wnd.stateind}_`}
+                    key={`wnd-rsz-y_${wnd.id}_`}
                     style={
                         {
                             position: "absolute",
@@ -228,7 +228,7 @@ export class ModalClass extends BaseComponent {
                 >
                 </div>
                 <div wnd-rsz-x={wnd.id}
-                    key={`wnd-rsz-x_${wnd.id}_${wnd.stateind}_`}
+                    key={`wnd-rsz-x_${wnd.id}_`}
                     style={
                         {
                             position: "absolute",
@@ -244,7 +244,7 @@ export class ModalClass extends BaseComponent {
                 >
                 </div>
                 <div wnd-rsz-xy={wnd.id}
-                    key={`wnd-rsz-xy_${wnd.id}_${wnd.stateind}_`}
+                    key={`wnd-rsz-xy_${wnd.id}_`}
                     style={
                         {
                             position: "absolute",

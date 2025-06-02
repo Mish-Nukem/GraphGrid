@@ -19,10 +19,10 @@ export class BootstrapTheme {
 
         grid.opt.filterButtonClass = 'btn btn-primary';
 
-        this.setupPagerButtons(grid);
+        this.setupGridPagerButtons(grid);
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
-    setupPagerButtons(grid) {
+    setupGridPagerButtons(grid) {
         if (!grid.pagerButtonsDict) return;
 
         for (let id in grid.pagerButtonsDict) {

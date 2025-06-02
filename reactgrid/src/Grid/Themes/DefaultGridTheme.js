@@ -150,12 +150,12 @@
     applyTheme(grid, images) {
         this.prepareImages(images);
 
-        this.setupPagerButtons(grid, images);
+        this.setupGridPagerButtons(grid, images);
 
         grid.translate = this.translate;
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
-    setupPagerButtons(grid, images) {
+    setupGridPagerButtons(grid, images) {
         if (!grid.pagerButtonsDict) return;
 
         let button;
@@ -230,6 +230,7 @@
             'PREV': 'Предыдущая',
             'REFRESH': 'Обновить',
             'RESET COLUMNS ORDER': 'Сбросить порядок колонок',
+            'RESET COLUMNS SORT': 'Сбросить сортировку колонок',
             'RESET COLUMNS WIDTHS': 'Сбросить ширину колонок',
             'ROLLBACK': 'Откатить',
             'ROLLBACK CHANGES': 'Откатить изменения',

@@ -74,8 +74,8 @@ export class OverlayClass extends BaseComponent {
         return (
             <>
                 <div
-                    id={`overlay_${ovl.id}_`}
-                    key={`overlay_${ovl.id}_${ovl.stateind}_`}
+                    //id={`overlay_${ovl.id}_`} key={`overlay_${ovl.id}_${ovl.stateind}_`}
+                    key={`overlay_${ovl.id}_`}
                     onClick={(e) => ovl.onClick(e)}
                     style={
                         {

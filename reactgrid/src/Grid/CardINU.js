@@ -1,8 +1,5 @@
 import { GridINU, GridINUClass } from './GridINU';
 import { useState, useEffect } from 'react';
-import { GridClass } from './Grid.js';
-import { Modal } from './Modal';
-import { GridFLClass } from './GridFL.js';
 import { GridINUBaseClass } from './GridINUBase.js';
 // =================================================================================================================================================================
 export function CardINU(props) {
