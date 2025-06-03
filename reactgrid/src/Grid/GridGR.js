@@ -1,8 +1,8 @@
 ﻿import { useState, useEffect } from 'react';
 import { GridClass } from './Grid.js';
-import { GraphClass/*, WaveType*/ } from './Graph.js';
+import { GraphClass } from './Graph.js';
 // ==================================================================================================================================================================
-export function GridInGraph(props) {
+export function GridGR(props) {
     let grid = null;
 
     const [gridState, setState] = useState({ grid: grid, ind: 0 });
@@ -13,7 +13,7 @@ export function GridInGraph(props) {
         if (props.findGrid) {
             grid = props.findGrid(props);
         }
-        grid = grid || new GridInGraphClass(props);
+        grid = grid || new GridGRClass(props);
         needGetRows = !props.noAutoRefresh && !props.parentGrids;
     }
 
@@ -41,7 +41,7 @@ export function GridInGraph(props) {
 
         if (grid.columns.length <= 0 && grid.getColumns) {
             grid.columns = grid.getColumns();
-            grid.prepareColumns(grid.columns);
+            grid.prepareColumns();
         }
 
         return () => {
@@ -52,7 +52,7 @@ export function GridInGraph(props) {
     return (grid.render());
 }
 // -------------------------------------------------------------------------------------------------------------------------------------------------------------
-export class GridInGraphClass extends GridClass {
+export class GridGRClass extends GridClass {
 
     constructor(props) {
         super(props);

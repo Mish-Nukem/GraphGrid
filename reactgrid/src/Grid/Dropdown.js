@@ -1,5 +1,5 @@
 ﻿import { useState, useEffect } from 'react';
-import { BaseComponent, log } from './Base';
+import { BaseComponent } from './Base';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { Modal } from './Modal';
 // ==================================================================================================================================================================

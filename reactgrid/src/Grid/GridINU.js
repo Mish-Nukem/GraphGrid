@@ -3,6 +3,7 @@ import { GridINUBaseClass } from './GridINUBase.js';
 import { NodeStatus } from './Base';
 import { CardINU } from './CardINU';
 import { Modal } from './Modal';
+import { Select } from './OuterComponents/Select';
 // ==================================================================================================================================================================
 export function GridINU(props) {
     let grid = null;
@@ -43,7 +44,7 @@ export function GridINU(props) {
 
         if (grid.columns.length <= 0 && grid.getColumns) {
             grid.columns = grid.getColumns();
-            grid.prepareColumns(grid.columns);
+            grid.prepareColumns();
         }
 
         return () => {
@@ -68,16 +69,12 @@ export class GridINUClass extends GridINUBaseClass {
 
         if (grid.columns.length <= 0 && grid.entity && !props.getColumns) {
             grid.getColumns = () => {
-                grid.getColumnsFromEntity().then((columns) => {
-                    grid.columns = columns;
-                    grid.prepareColumns(grid.columns);
-                    grid.refreshState();
-                });
-                return grid.columns;
+                const res = grid.getEntityInfo();
+                return res.columns;
             };
         }
 
-        grid.addButtons();
+        grid.addToolbarButtons();
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     isVisible() {
@@ -145,6 +142,7 @@ export class GridINUClass extends GridINUBaseClass {
                         delete grid.activeRow;
                     }
                     lookupGrid.isSelecting = true;
+                    lookupGrid._entityInfo = info;
                     grid.lookupGrid = lookupGrid;
                 }}
             >
@@ -166,14 +164,31 @@ export class GridINUClass extends GridINUBaseClass {
 
         switch (col.type.toLowerCase()) {
             case 'lookup':
-                return (
-                    <div style={{ border: 'none' }} className='grid-cell-lookup' key={`gridlookupdiv_${grid.id}_${col.id}_`}>
+                const keyFieldValue = !grid.isEditing() ? row[col.keyField] : grid.changedRow && grid.changedRow[col.keyField] !== undefined ? grid.changedRow[col.keyField] : row[col.keyField];
+                /*
                         <span
                             key={`gridlookuptitle_${grid.id}_${col.id}_`}
                             style={{ width: 'calc(100% - 4px)', gridColumn: noClear ? 'span 2' : '', overflowX: 'hidden' }}
                         >
                             {value}
                         </span>
+                */
+                return (
+                    <div style={{ border: 'none' }} className='grid-cell-lookup' key={`gridlookupdiv_${grid.id}_${col.id}_`}>
+
+                        <Select
+                            key={`gridlookupselect_${grid.id}_${col.id}_`}
+                            value={{ value: keyFieldValue, label: value }}
+                            getOptions={(filter, pageNum) => grid.getLookupValues(col, filter, pageNum)}
+                            style={{ width: 'calc(100% - 4px)', gridColumn: noClear ? 'span 2' : '', overflowX: 'hidden' }}
+                            onChange={(e) => {
+                                grid.changedRow[col.keyField] = e.value;
+                                grid.changedRow[col.name] = e.label;
+                                grid.refreshState();
+                            }}
+                        >
+                        </Select>
+
                         <button
                             key={`gridlookupbtn_${grid.id}_${col.id}_`}
                             className={'grid-cell-button'}
@@ -238,7 +253,7 @@ export class GridINUClass extends GridINUBaseClass {
         }
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
-    addButtons() {
+    addToolbarButtons() {
         const grid = this;
 
         //if (node._buttonsAdded) return;

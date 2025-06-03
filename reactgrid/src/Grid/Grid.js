@@ -1,9 +1,6 @@
 ﻿import { useState, useEffect } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { BaseComponent, log } from './Base';
-import { DefaultGridTheme as Theme } from './Themes/DefaultGridTheme';
-//import { BootstrapTheme as NewTheme } from './Themes/BootstrapGridTheme';
-import { DefaultGridTheme as NewTheme } from './Themes/DefaultGridTheme';
 // ==================================================================================================================================================================
 export function Grid(props) {
     let grid = null;
@@ -47,7 +44,7 @@ export function Grid(props) {
 
         if (grid.columns.length <= 0 && grid.getColumns) {
             grid.columns = grid.getColumns();
-            grid.prepareColumns(grid.columns);
+            grid.prepareColumns();
         }
 
         return () => {
@@ -106,9 +103,7 @@ export class GridClass extends BaseComponent {
 
         if (grid.columns.length <= 0) {
             grid.columns = grid.getColumns();
-            grid.prepareColumns(grid.columns);
-
-            //grid.log(' 1.1 prepareColumns(). columns = ' + grid.columns.length);
+            grid.prepareColumns();
         }
         grid.calculatePagesCount();
         grid.getSelectedRowIndex();
@@ -346,9 +341,8 @@ export class GridClass extends BaseComponent {
         return { name: name };
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
-    prepareColumns(columns) {
+    prepareColumns() {
         const grid = this;
-        grid.columns = columns || grid.columns || [];
         grid.colDict = grid.colDict || {};
         grid.columnsDefaultOrder = [];
 

@@ -3,7 +3,6 @@ import { useState, useEffect } from 'react';
 import { BaseComponent, NodeStatus, FilterType, log } from './Base';
 import { GraphClass } from './Graph';
 import { GridINU, GridINUClass } from './GridINU';
-import { GridClass } from './Grid';
 import { Modal } from './Modal';
 import { Select } from './OuterComponents/Select';
 import { DatePicker } from './OuterComponents/DatePicker';
@@ -708,7 +707,7 @@ export class GraphComponentClass extends BaseComponent {
         grid.getColumns = obr.getColumns || grid.getColumns;
 
         if (grid.columns && grid.columns.length > 0) {
-            grid.prepareColumns(grid.columns);
+            grid.prepareColumns();
         }
 
         grid.connectedToParents = true;

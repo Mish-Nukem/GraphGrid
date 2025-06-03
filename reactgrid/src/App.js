@@ -5,7 +5,7 @@ import { Grid } from './Grid/Grid';
 import { Overlay } from './Grid/Overlay';
 import { Modal } from './Grid/Modal';
 import { Dropdown } from './Grid/Dropdown';
-import { GridInGraph } from './Grid/GridInGraph';
+import { GridGR } from './Grid/GridGR';
 import { GridDB } from './Grid/GridDB';
 import { GridFL } from './Grid/GridFL';
 import { GridINU } from './Grid/GridINU';
@@ -190,7 +190,7 @@ function App() {
             case 3:
                 return (
                     <>
-                        <Modal uid="m01" isModal={true} renderContent={() => { return drawGridInModal() }} closeWhenEscape={true} pos={{ x: 100, y: 100, w: 300, h: 250 }} title='Modal Grid'></Modal>
+                        <Modal uid="m01" isModal={true} renderContent={() => { return drawGridInModal() }} closeWhenEscape={true} pos={{ x: 100, y: 100, w: 600, h: 450 }} title='Modal Grid'></Modal>
                     </>
                 )
             case 4:
@@ -206,10 +206,10 @@ function App() {
                             {drawClearConsole()}
                         </div>
                         <div className="div-with-grid">
-                            <GridInGraph uid="people" getRows={GetFamily}></GridInGraph>
+                            <GridGR uid="people" getRows={GetFamily}></GridGR>
                         </div>
                         <div className="div-with-grid">
-                            <GridInGraph parentGrids="people" getRows={GetCities} getColumns={GetCityColumns}></GridInGraph>
+                            <GridGR uid="cities" parentGrids="people" getRows={GetCities} getColumns={GetCityColumns}></GridGR>
                         </div>
                     </>
                 );

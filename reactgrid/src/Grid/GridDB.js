@@ -1,10 +1,10 @@
 ﻿/* eslint-disable no-mixed-operators */
 import { useState, useEffect } from 'react';
-import { GridInGraphClass } from './GridInGraph.js';
+import { GridGRClass } from './GridGR.js';
 import { Dropdown } from './Dropdown.js';
 import { WaveType } from './Graph.js';
 import { NodeStatus } from './Base';
-import { BaseComponent, log } from './Base';
+import { BaseComponent } from './Base';
 // ==================================================================================================================================================================
 export function GridDB(props) {
     let grid = null;
@@ -45,7 +45,7 @@ export function GridDB(props) {
 
         if (grid.columns.length <= 0 && grid.getColumns) {
             grid.columns = grid.getColumns();
-            grid.prepareColumns(grid.columns);
+            grid.prepareColumns();
         }
 
         return () => {
@@ -56,7 +56,7 @@ export function GridDB(props) {
     return (grid.render());
 }
 // ==================================================================================================================================================================
-export class GridDBClass extends GridInGraphClass {
+export class GridDBClass extends GridGRClass {
 
     constructor(props) {
         super(props);

@@ -1,6 +1,7 @@
-import { GridINU, GridINUClass } from './GridINU';
+import { GridINU } from './GridINU';
 import { useState, useEffect } from 'react';
 import { GridINUBaseClass } from './GridINUBase.js';
+import { Select } from './OuterComponents/Select';
 // =================================================================================================================================================================
 export function CardINU(props) {
     let card = null;
@@ -41,7 +42,7 @@ export function CardINU(props) {
 
         if (card.columns.length <= 0 && card.getColumns) {
             card.columns = card.getColumns();
-            card.prepareColumns(card.columns);
+            card.prepareColumns();
         }
 
         return () => {
@@ -105,6 +106,15 @@ export class CardINUClass extends GridINUBaseClass {
         }
         switch (col.type.toLowerCase()) {
             case 'lookup': 
+            /*
+                        <input
+                            key={`cardlookupinput_${card.id}_${col.id}_`}
+                            value={value}
+                            style={{ width: 'calc(100% - 4px)', padding: '0 2px', boxSizing: 'border-box', height: '2.3em', gridColumn: col.required || col.readonly ? 'span 2' : '' }}
+                            disabled='disabled'
+                        ></input>
+
+            */
                 return (
                     <div className="graph-card-field"
                         key={`cardlookupdiv_${card.id}_${col.id}_`}
@@ -115,12 +125,20 @@ export class CardINUClass extends GridINUBaseClass {
                         >
                             {col.title || col.name}
                         </span>
-                        <input
-                            key={`cardlookupinput_${card.id}_${col.id}_`}
-                            value={value}
+
+                        <Select
+                            key={`cardlookupselect_${card.id}_${col.id}_`}
+                            value={{ value: card.changedRow[col.keyField], label: value }}
+                            getOptions={(filter, pageNum) => card.getLookupValues(col, filter, pageNum)}
                             style={{ width: 'calc(100% - 4px)', padding: '0 2px', boxSizing: 'border-box', height: '2.3em', gridColumn: col.required || col.readonly ? 'span 2' : '' }}
-                            disabled='disabled'
-                        ></input>
+                            onChange={(e) => {
+                                card.changedRow[col.keyField] = e.value;
+                                card.changedRow[col.name] = e.label;
+                                card.refreshState();
+                            }}
+                        >
+                        </Select>
+
                         <button
                             key={`cardlookupbtn_${card.id}_${col.id}_`}
                             className={'graph-card-button'}

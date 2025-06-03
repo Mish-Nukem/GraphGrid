@@ -41,7 +41,7 @@ export function GridFL(props) {
 
         if (grid.columns.length <= 0 && grid.getColumns) {
             grid.columns = grid.getColumns();
-            grid.prepareColumns(grid.columns);
+            grid.prepareColumns();
         }
 
         return () => {
@@ -398,20 +398,20 @@ export class GridFLClass extends GridDBClass {
 
         super.setupPagerButtons();
 
-        if (!grid.columns && grid.opt.getColumns) {
-            grid.columns = grid.opt.getColumns();
-            grid.prepareColumns(grid.columns);
+        //if (!grid.columns && grid.opt.getColumns) {
+        //    grid.columns = grid.opt.getColumns();
+        //    grid.prepareColumns();
 
-            let hasFiltrable = false;
-            for (let col of grid.columns) {
-                if (col.filtrable) {
-                    hasFiltrable = true;
-                    break;
-                }
-            }
+        //    let hasFiltrable = false;
+        //    for (let col of grid.columns) {
+        //        if (col.filtrable) {
+        //            hasFiltrable = true;
+        //            break;
+        //        }
+        //    }
 
-            if (!hasFiltrable) return;
-        }
+        //    if (!hasFiltrable) return;
+        //}
 
         const clear = {
             id: 10,

@@ -10,7 +10,6 @@ export class DataGetter {
 
 		return new Promise(function (resolve, reject) {
 
-
 			fetch(dg.APIurl + e.url, {
 				mode: 'cors',
 				method: 'post',

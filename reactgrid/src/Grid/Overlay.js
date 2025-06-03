@@ -1,5 +1,5 @@
 ﻿import { useState, useEffect } from 'react';
-import { BaseComponent/*, log*/ } from './Base';
+import { BaseComponent } from './Base';
 // ==================================================================================================================================================================
 export function Overlay(props) {
     let ovl = null;
@@ -20,11 +20,9 @@ export function Overlay(props) {
         props.init(ovl);
     }
 
-    //if (!ovl.refreshState) {
-        ovl.refreshState = function () {
-            setState({ ovl: ovl, ind: ovl.stateind++ });
-        }
-    //}
+    ovl.refreshState = function () {
+        setState({ ovl: ovl, ind: ovl.stateind++ });
+    }
 
     useEffect(() => {
         ovl.setupEvents();
@@ -74,7 +72,6 @@ export class OverlayClass extends BaseComponent {
         return (
             <>
                 <div
-                    //id={`overlay_${ovl.id}_`} key={`overlay_${ovl.id}_${ovl.stateind}_`}
                     key={`overlay_${ovl.id}_`}
                     onClick={(e) => ovl.onClick(e)}
                     style={
