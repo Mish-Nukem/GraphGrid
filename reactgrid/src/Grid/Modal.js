@@ -1,6 +1,7 @@
 ﻿import { useState, useEffect } from 'react';
 import { BaseComponent, log } from './Base';
 import { Overlay } from './Overlay';
+import { renderToStaticMarkup } from 'react-dom/server';
 // ==================================================================================================================================================================
 export function Modal(props) {
     let wnd = null;
@@ -11,13 +12,11 @@ export function Modal(props) {
 
     wnd = oldWnd && oldWnd.uid === props.uid ? oldWnd : new ModalClass(props);
 
-
     if (props.init) {
         props.init(wnd);
     }
 
-    wnd.refreshState = function (clear) {
-        //log('refreshState ' + wnd.stateind);
+    wnd.refreshState = function () {
         setState({ wnd: wnd, ind: wnd.stateind++ });
     }
 
@@ -76,6 +75,8 @@ export class ModalClass extends BaseComponent {
 
         wnd.onClose = props.onClose;
 
+        wnd.opt.dimensionsByContent = props.dimensionsByContent;
+
         wnd.renderContent = props.renderContent || function () { return null };
 
         wnd.buttons = [];
@@ -94,10 +95,19 @@ export class ModalClass extends BaseComponent {
         wnd.stateind = 0;
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
+    static _isFake = false;
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     render() {
         const wnd = this;
         if (!wnd.visible) {
             return <></>;
+        }
+
+        if (wnd.opt.dimensionsByContent) {
+            //const rect = ModalClass.getDimensionsByContent(wnd);
+            const rect = wnd.getDimensionsByContent();
+            wnd.opt.pos.w = rect.w || wnd.opt.pos.w;
+            wnd.opt.pos.h = rect.h || wnd.opt.pos.h;
         }
 
         if (wnd.opt.isModal || wnd.opt.closeWhenMiss) {
@@ -271,11 +281,64 @@ export class ModalClass extends BaseComponent {
             wnd.onClose();
         }
 
-        wnd.refreshState(true);
+        wnd.refreshState();
+    }
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
+    show(e) {
+        const wnd = this;
+        wnd.visible = true;
+
+        if (e) {
+            wnd.opt.pos.x = e.clientX;
+            wnd.opt.pos.y = e.clientY;
+        }
+
+        wnd.refreshState();
+    }
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
+    getDimensionsByContent() {
+        const wnd = this;
+        const renderFake = function () {
+            return (
+                <div>
+                    {wnd.opt.noHeader ? <></> : wnd.renderHeader()}
+                    <div
+                        key={`window_${wnd.id}_body_`}
+                        wnd-body={1}
+                        className={wnd.opt.bodyClass}
+                        style={{ padding: wnd.opt.noPadding ? '0' : '' }}
+                    >
+                        {wnd.renderContent(wnd, 'fake')}
+                    </div>
+                    {wnd.opt.noFooter ? <></> : wnd.renderFooter()}
+                    {!wnd.opt.resizable ? <></> : wnd.renderResizables()}
+                </div>
+            )
+        }
+
+        const res = { w: 0, h: 0 };
+
+        ModalClass._isFake = true;
+
+        const fakeDiv = document.createElement('div');
+        fakeDiv.style.opacity = 0;
+        fakeDiv.style.position = 'fixed';
+        fakeDiv.style.height = 'auto';
+        fakeDiv.innerHTML = renderToStaticMarkup(renderFake());
+        document.body.append(fakeDiv);
+        const rect = getComputedStyle(fakeDiv);
+        res.w = parseInt(rect.width) + 2;
+        res.h = parseInt(rect.height) + 2;
+        fakeDiv.remove();
+
+        ModalClass._isFake = false;
+
+        return res;
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     setupEvents() {
         const wnd = this;
+
         function onKeyDown(e) {
             const key = e && e.key ? e.key.toLowerCase() : '';
 
@@ -283,6 +346,7 @@ export class ModalClass extends BaseComponent {
                 wnd.close();
             }
         }
+
         document.addEventListener('keydown', onKeyDown);
 
         wnd.clearEvents = function () {

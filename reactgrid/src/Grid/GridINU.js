@@ -165,30 +165,30 @@ export class GridINUClass extends GridINUBaseClass {
         switch (col.type.toLowerCase()) {
             case 'lookup':
                 const keyFieldValue = !grid.isEditing() ? row[col.keyField] : grid.changedRow && grid.changedRow[col.keyField] !== undefined ? grid.changedRow[col.keyField] : row[col.keyField];
-                /*
-                        <span
-                            key={`gridlookuptitle_${grid.id}_${col.id}_`}
-                            style={{ width: 'calc(100% - 4px)', gridColumn: noClear ? 'span 2' : '', overflowX: 'hidden' }}
-                        >
-                            {value}
-                        </span>
-                */
                 return (
                     <div style={{ border: 'none' }} className='grid-cell-lookup' key={`gridlookupdiv_${grid.id}_${col.id}_`}>
-
-                        <Select
-                            key={`gridlookupselect_${grid.id}_${col.id}_`}
-                            value={{ value: keyFieldValue, label: value }}
-                            getOptions={(filter, pageNum) => grid.getLookupValues(col, filter, pageNum)}
-                            style={{ width: 'calc(100% - 4px)', gridColumn: noClear ? 'span 2' : '', overflowX: 'hidden' }}
-                            onChange={(e) => {
-                                grid.changedRow[col.keyField] = e.value;
-                                grid.changedRow[col.name] = e.label;
-                                grid.refreshState();
-                            }}
-                        >
-                        </Select>
-
+                        {
+                            !col.allowCombobox ?
+                                <span
+                                    key={`gridlookuptitle_${grid.id}_${col.id}_`}
+                                    style={{ width: 'calc(100% - 4px)', gridColumn: noClear ? 'span 2' : '', overflowX: 'hidden' }}
+                                >
+                                    {value}
+                                </span>
+                                :
+                                <Select
+                                    key={`gridlookupselect_${grid.id}_${col.id}_`}
+                                    value={{ value: keyFieldValue, label: value }}
+                                    getOptions={(filter, pageNum) => grid.getLookupValues(col, filter, pageNum)}
+                                    style={{ width: 'calc(100% - 4px)', gridColumn: noClear ? 'span 2' : '', overflowX: 'hidden' }}
+                                    onChange={(e) => {
+                                        grid.changedRow[col.keyField] = e.value;
+                                        grid.changedRow[col.name] = e.label;
+                                        grid.refreshState();
+                                    }}
+                                >
+                                </Select>
+                        }
                         <button
                             key={`gridlookupbtn_${grid.id}_${col.id}_`}
                             className={'grid-cell-button'}

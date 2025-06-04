@@ -1,7 +1,5 @@
 ﻿import { useState, useEffect } from 'react';
-import { BaseComponent } from './Base';
-import { renderToStaticMarkup } from 'react-dom/server';
-import { Modal } from './Modal';
+import { ModalClass } from './Modal';
 // ==================================================================================================================================================================
 export function Dropdown(props) {
     let dd = null;
@@ -15,12 +13,11 @@ export function Dropdown(props) {
         dd = new DropdownClass(props);
     }
 
-    if (props.init) {
+    if (props.init && !ModalClass._isFake) {
         props.init(dd);
     }
 
     dd.refreshState = function () {
-        //log('refreshState ' + dd.stateind);
         setState({ dd: dd, ind: dd.stateind++ });
     }
 
@@ -28,8 +25,6 @@ export function Dropdown(props) {
         dd.setupEvents();
 
         return () => {
-            //log(' 0.11 Clear DropdownEvents');
-
             dd.clearEvents();
         }
     }, [dd])
@@ -37,33 +32,46 @@ export function Dropdown(props) {
     return (dd.render());
 }
 // -------------------------------------------------------------------------------------------------------------------------------------------------------------
-export class DropdownClass extends BaseComponent {
+export class DropdownClass extends ModalClass {
     constructor(props) {
         super(props);
 
-        this.opt = {};
+        const dd = this;
 
-        this.getItems = props.getItems || function ({ filter }) { return new Promise(function (resolve, reject) { resolve([]) }); };
+        dd.getItems = props.getItems || function ({ filter }) { return new Promise(function (resolve, reject) { resolve([]) }); };
 
         window._dropdownSeq = window._dropdownSeq || 0;
 
-        this.id = window._dropdownSeq++;
+        dd.id = window._dropdownSeq++;
 
-        this.pageNumber = 1;
-        this.pageSize = props.pageSize || 20;
-        this.items = [];
+        dd.pageNumber = 1;
+        dd.pageSize = props.pageSize || 20;
+        dd.items = [];
 
-        this.menuItemClass = '';
-        this.menuClass = '';
+        dd.menuItemClass = '';
+        dd.menuClass = '';
 
-        this.stateind = 0;
+        dd.stateind = 0;
 
-        this.opt.onItemClick = props.onItemClick;
-        this.opt.onClose = props.onClose;
+        dd.opt.onItemClick = props.onItemClick;
+        dd.opt.onClose = props.onClose;
 
-        this.maxW = props.maxW;
+        dd.opt.parentRect = props.parentRect;
 
-        this.visible = false;
+        dd.maxW = props.maxW;
+
+        dd.opt.closeWhenEscape = true;
+        dd.opt.closeWhenMiss = true;
+        dd.opt.noHeader = true;
+        dd.opt.noFooter = true;
+        dd.opt.resizable = false;
+        dd.opt.noPadding = true;
+        dd.opt.hiddenOverlay = true;
+        dd.opt.isModal = true;
+
+        dd.renderContent = dd.renderDropdownContent;
+
+        dd.visible = false;
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     appendItems() {
@@ -80,7 +88,7 @@ export class DropdownClass extends BaseComponent {
         );
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
-    renderSelf() {
+    renderDropdownContent() {
         const dd = this;
 
         return (
@@ -129,34 +137,8 @@ export class DropdownClass extends BaseComponent {
         );
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
-    render(noModal) {
-        const dd = this;
-
-        return (
-            dd.visible && dd.items.length > 0 ? <Modal
-                init={(wnd) => {
-                    wnd.visible = dd.visible;
-                    wnd.opt.pos = dd.pos;
-                }}
-                isModal={!noModal}
-                renderContent={() => { return dd.renderSelf() }}
-                closeWhenEscape={true}
-                pos={dd.pos}
-                closeWhenMiss={true}
-                noHeader={true}
-                noFooter={true}
-                resizable={false}
-                noPadding={true}
-                hiddenOverlay={true}
-                onClose={() => {
-                    dd.visible = false;
-                    if (dd.opt.onClose) {
-                        dd.opt.onClose();
-                    }
-                }}
-            >
-            </Modal> : <></>
-        );
+    render() {
+        return super.render();
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     popup(e) {
@@ -171,38 +153,21 @@ export class DropdownClass extends BaseComponent {
 
             dd.visible = dd.items.length > 0;
 
-            const renderFake = function () {
-                return (
-                    <div>
-                        {dd.renderSelf(true)}
-                    </div>
-                )
-            }
-
-            const fakeDiv = document.createElement('div');
-            fakeDiv.style.opacity = 0;
-            fakeDiv.style.position = 'fixed';
-            fakeDiv.style.height = 'auto';
-            fakeDiv.innerHTML = renderToStaticMarkup(renderFake());
-            document.body.append(fakeDiv);
-            const rect = getComputedStyle(fakeDiv);
-            const w = parseInt(rect.width) + 2;
-            const h = parseInt(rect.height) + 2;
-            fakeDiv.remove();
+            const rect = dd.getDimensionsByContent();
 
             if (dd.items.length <= 0 && !dd.opt.allowUserFilter) return;
 
-            const parentRect = dd.opt.parentRect ? dd.opt.parentRect : /*dd.opt.parentElem ? dd.opt.parentElem.getBoundingClientRect() :*/ { x: e.clientX, y: e.clientY, width: e.width || 0, height: e.height || 0 };
+            const parentRect = dd.opt.parentRect ? dd.opt.parentRect : { x: e.clientX, y: e.clientY, width: e.width || 0, height: e.height || 0 };
 
-            dd.pos = {
+            dd.opt.pos = {
                 x: parentRect.x,
                 y: parentRect.y + parseInt(parentRect.height),
-                w: Math.max(w, parentRect.width),
-                h: h
+                w: Math.max(rect.w, parentRect.width),
+                h: rect.h
             };
 
             if (dd.maxW !== undefined) {
-                dd.pos.w = Math.min(dd.pos.w, dd.maxW);
+                dd.opt.pos.w = Math.min(dd.opt.pos.w, dd.maxW);
             }
             //log(' DropdownPos w = ' + dd.pos.w + ', h = ' + dd.pos.h);
 
@@ -223,16 +188,12 @@ export class DropdownClass extends BaseComponent {
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     close() {
         const dd = this;
-        dd.visible = false;
-        //if (dd.opt.onClose) {
-        //    dd.opt.onClose();
-        //}
 
         dd.items = [];
         delete dd.activeItem;
         delete dd.lastPageNumber;
 
-        dd.refreshState();
+        super.close();
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     onItemClick(e, itemId) {
@@ -251,22 +212,23 @@ export class DropdownClass extends BaseComponent {
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     setupEvents() {
         const dd = this;
+
+        super.setupEvents();
+
         function onKeyDown(e) {
             const key = e && e.key ? e.key.toLowerCase() : '';
 
             let ind;
 
             switch (key) {
-                case 'esc', 'escape':
-                    dd.close();
-                    break;
                 case 'enter':
                     if (!dd.activeItem) return;
 
                     dd.opt.onItemClick({ owner: dd.opt.owner, itemId: dd.activeItem.id, dropdown: dd });
                     dd.close();
                     break;
-                case 'down', 'arrowdown':
+                case 'down':
+                case 'arrowdown':
                     if (dd.activeItem) {
                         ind = dd.items.indexOf(dd.activeItem);
 
@@ -280,7 +242,8 @@ export class DropdownClass extends BaseComponent {
 
                     dd.refreshState();
                     break;
-                case 'up', 'arrowup':
+                case 'up':
+                case 'arrowup':
                     if (dd.activeItem) {
                         ind = dd.items.indexOf(dd.activeItem);
 
@@ -304,7 +267,9 @@ export class DropdownClass extends BaseComponent {
 
         document.addEventListener('keydown', onKeyDown);
 
+        const remClearEvents = dd.clearEvents;
         dd.clearEvents = function () {
+            remClearEvents();
             document.removeEventListener('keydown', onKeyDown);
         }
     }

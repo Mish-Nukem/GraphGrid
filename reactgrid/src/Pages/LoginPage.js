@@ -52,7 +52,7 @@ export class loginFormClass extends BaseComponent {
         const loginForm = this;
 
         //const pref = appSettings.APIurl;
-        if (loginForm.login === 'test' /*|| true*/) {
+        if (loginForm.login === 'test' || true) {
             loginForm.afterLogin('test;test');
             return;
         }

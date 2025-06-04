@@ -132,15 +132,15 @@ function App() {
             <>
                 <div className="div-on-menu">
                     <button onClick={() => { console.clear() }} className="modal-window-footer-button">Clear console</button>
-                    <button onClick={(e) => { window.ddComponent.popup(e); }} className="modal-window-footer-button">Show Dropdown</button>
+                    <button onClick={(e) => { wnd.ddComponent.popup(e); }} className="modal-window-footer-button">Show Dropdown</button>
                 </div>
                 <div>
                     {
-                        window.ddComponent && window.ddComponent.clickedItem ? <span>{'Item Clicked : ' + window.ddComponent.clickedItem}</span> : <></>
+                        wnd.ddComponent && wnd.ddComponent.clickedItem ? <span>{'Item Clicked : ' + wnd.ddComponent.clickedItem}</span> : <></>
                     }
                 </div>
-                <Dropdown init={(dd) => { window.ddComponent = dd; }} getItems={GetPopupItems}
-                    onItemClick={(e) => { /*console.log('Item clicked: ' + e.itemId); */window.ddComponent.clickedItem = e.itemId; wnd.refreshState(); }}
+                <Dropdown init={(dd) => { wnd.ddComponent = dd; }} getItems={GetPopupItems}
+                    onItemClick={(e) => { /*console.log('Item clicked: ' + e.itemId); */e.dropdown.clickedItem = e.itemId; wnd.refreshState(); }}
                 >
                 </Dropdown>
             </>
@@ -190,13 +190,16 @@ function App() {
             case 3:
                 return (
                     <>
-                        <Modal uid="m01" isModal={true} renderContent={() => { return drawGridInModal() }} closeWhenEscape={true} pos={{ x: 100, y: 100, w: 600, h: 450 }} title='Modal Grid'></Modal>
+                        <Modal uid="m01" isModal={true} renderContent={() => { return drawGridInModal() }} closeWhenEscape={true}
+                            pos={{ x: 100, y: 100, w: 600, h: 450 }} title='Modal Grid'></Modal>
                     </>
                 )
             case 4:
                 return (
                     <>
-                        <Modal uid="m02" isModal={true} renderContent={(wnd) => { return drawDropdownInModal(wnd) }} closeWhenEscape={true} pos={{ x: 100, y: 100, w: 300, h: 250 }}></Modal>
+                        <Modal uid="m02" isModal={true} renderContent={(wnd) => { return drawDropdownInModal(wnd) }} closeWhenEscape={true}
+                            dimensionsByContent={true}
+                            pos={{ x: 100, y: 100, w: 300, h: 250 }}></Modal>
                     </>
                 )
             case 5:

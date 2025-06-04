@@ -60,7 +60,7 @@ export class GridFLClass extends GridDBClass {
 
         const grid = this;
 
-        grid.opt.filterInputClass = props.filterInputClass;
+        grid.opt.filterInputClass = props.filterInputClass || grid.opt.filterInputClass;
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     render() {

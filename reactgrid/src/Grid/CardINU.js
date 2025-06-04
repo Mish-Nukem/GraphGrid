@@ -105,16 +105,7 @@ export class CardINUClass extends GridINUBaseClass {
             col.type = '';
         }
         switch (col.type.toLowerCase()) {
-            case 'lookup': 
-            /*
-                        <input
-                            key={`cardlookupinput_${card.id}_${col.id}_`}
-                            value={value}
-                            style={{ width: 'calc(100% - 4px)', padding: '0 2px', boxSizing: 'border-box', height: '2.3em', gridColumn: col.required || col.readonly ? 'span 2' : '' }}
-                            disabled='disabled'
-                        ></input>
-
-            */
+            case 'lookup':
                 return (
                     <div className="graph-card-field"
                         key={`cardlookupdiv_${card.id}_${col.id}_`}
@@ -125,20 +116,28 @@ export class CardINUClass extends GridINUBaseClass {
                         >
                             {col.title || col.name}
                         </span>
-
-                        <Select
-                            key={`cardlookupselect_${card.id}_${col.id}_`}
-                            value={{ value: card.changedRow[col.keyField], label: value }}
-                            getOptions={(filter, pageNum) => card.getLookupValues(col, filter, pageNum)}
-                            style={{ width: 'calc(100% - 4px)', padding: '0 2px', boxSizing: 'border-box', height: '2.3em', gridColumn: col.required || col.readonly ? 'span 2' : '' }}
-                            onChange={(e) => {
-                                card.changedRow[col.keyField] = e.value;
-                                card.changedRow[col.name] = e.label;
-                                card.refreshState();
-                            }}
-                        >
-                        </Select>
-
+                        {
+                            !col.allowCombobox ?
+                                <input
+                                    key={`cardlookupinput_${card.id}_${col.id}_`}
+                                    value={value}
+                                    style={{ width: 'calc(100% - 4px)', padding: '0 2px', boxSizing: 'border-box', height: '2.3em', gridColumn: col.required || col.readonly ? 'span 2' : '' }}
+                                    disabled='disabled'
+                                ></input>
+                                :
+                                <Select
+                                    key={`cardlookupselect_${card.id}_${col.id}_`}
+                                    value={{ value: card.changedRow[col.keyField], label: value }}
+                                    getOptions={(filter, pageNum) => card.getLookupValues(col, filter, pageNum)}
+                                    style={{ width: 'calc(100% - 4px)', padding: '0 2px', boxSizing: 'border-box', height: '2.3em', gridColumn: col.required || col.readonly ? 'span 2' : '' }}
+                                    onChange={(e) => {
+                                        card.changedRow[col.keyField] = e.value;
+                                        card.changedRow[col.name] = e.label;
+                                        card.refreshState();
+                                    }}
+                                >
+                                </Select>
+                        }
                         <button
                             key={`cardlookupbtn_${card.id}_${col.id}_`}
                             className={'graph-card-button'}
@@ -172,7 +171,7 @@ export class CardINUClass extends GridINUBaseClass {
                         </span>
                         <textarea
                             key={`cardlookuptextarea_${card.id}_${col.id}_`}
-                            
+
                             value={card.changedRow[col.name] !== undefined ? card.changedRow[col.name] : ''}
                             style={{ width: 'calc(100% - 4px)', height: col.maxW !== undefined && +col.maxW >= 200 ? '5em' : '2.3em', padding: '0 2px', boxSizing: 'border-box', gridColumn: col.required || col.readonly ? 'span 3' : 'span 2', resize: 'vertical' }}
                             onChange={(e) => card.changeField(e, col, card.changedRow)}
@@ -184,7 +183,7 @@ export class CardINUClass extends GridINUBaseClass {
                                 }
                             }}
                         >
-                            
+
                         </textarea>
                         <button
                             key={`cardfieldclear_${card.id}_${col.id}_`}
