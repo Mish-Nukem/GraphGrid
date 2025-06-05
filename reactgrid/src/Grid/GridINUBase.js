@@ -42,8 +42,8 @@ export function GridINUBase(props) {
         }
 
         if (grid.columns.length <= 0 && grid.getColumns) {
-            grid.columns = grid.getColumns();
-            grid.prepareColumns();
+            //grid.columns = grid.getColumns();
+            grid.prepareColumns().then(() => grid.refreshState());;
         }
 
         return () => {
@@ -290,42 +290,42 @@ export class GridINUBaseClass extends GridFLClass {
         return { name: name, sortable: true, filtrable: true };
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
-    prepareColumns() {
+    async prepareColumns() {
         const grid = this;
-        super.prepareColumns();
-
-        for (let col of grid.columns) {
-            if (col._readonly !== undefined) {
-                col.readonly = col._readonly;
-                delete col._readonly;
+        await super.prepareColumns().then(() => {
+            for (let col of grid.columns) {
+                if (col._readonly !== undefined) {
+                    col.readonly = col._readonly;
+                    delete col._readonly;
+                }
             }
-        }
 
-        if (grid._savedConfigApplied || !grid._entityInfo) return;
+            if (grid._savedConfigApplied || !grid._entityInfo) return;
 
-        grid._savedConfigApplied = true;
+            grid._savedConfigApplied = true;
 
-        const newColumns = [];
-        for (let col of grid._entityInfo.columns) {
-            let obrCol = grid.colDict[col.name];
-            if (!obrCol) continue;
+            const newColumns = [];
+            for (let col of grid._entityInfo.Columns) {
+                let obrCol = grid.colDict[col.name];
+                if (!obrCol) continue;
 
-            obrCol._movedFromConfig = true;
-            obrCol.w = col.w > 0 ? col.w : obrCol.w;
-            obrCol.asc = col.asc;
-            obrCol.desc = col.desc;
-            obrCol.sortInd = col.sortInd;
-            newColumns.push(obrCol);
-        }
+                obrCol._movedFromConfig = true;
+                obrCol.w = col.w > 0 ? col.w : obrCol.w;
+                obrCol.asc = col.asc;
+                obrCol.desc = col.desc;
+                obrCol.sortInd = col.sortInd;
+                newColumns.push(obrCol);
+            }
 
-        for (let id in grid.colDict) {
-            let obrCol = grid.colDict[id];
-            if (obrCol._movedFromConfig) continue;
+            for (let id in grid.colDict) {
+                let obrCol = grid.colDict[id];
+                if (obrCol._movedFromConfig) continue;
 
-            newColumns.push(obrCol);
-        }
+                newColumns.push(obrCol);
+            }
 
-        grid.columns = newColumns;
+            grid.columns = newColumns;
+        });
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     getRows(e) {
@@ -507,20 +507,34 @@ export class GridINUBaseClass extends GridFLClass {
         );
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
-    async getLookupValues(col, filter, pageNum) {
+    getLookupValues(col, filter, pageNum) {
         const grid = this;
 
-        const params = [
-            { key: 'atoken', value: grid.dataGetter.atoken },
-            { key: 'rtoken', value: grid.dataGetter.rtoken },
-            { key: 'filter', value: filter },
-            { key: 'pageNumber', value: pageNum },
-            { key: 'entity', value: col.entity },
-            { key: 'columns', value: col.name },
-        ];
+        return new Promise((resolve) => {
+            const params = [
+                { key: 'atoken', value: grid.dataGetter.atoken },
+                { key: 'rtoken', value: grid.dataGetter.rtoken },
+                { key: 'filter', value: filter },
+                { key: 'pageNumber', value: pageNum },
+                { key: 'entity', value: grid.entity },
+                { key: 'columns', value: col.name },
+            ];
 
-        const res = await grid.dataGetter.get({ url: 'system/getLookupValues', params: params });
-        return res;
+            grid.dataGetter.get({ url: 'system/getLookupValues', params: params }).then(
+                (res) => {
+
+                    const result = {
+                        options: res,
+                        hasMore: false,
+                        additional: {
+                            page: pageNum + 1,
+                            node: grid
+                        },
+                    };
+
+                    resolve(result);
+                });
+        });
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     afterSortColumn(column) {

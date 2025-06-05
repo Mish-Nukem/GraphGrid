@@ -44,8 +44,8 @@ export function GridDB(props) {
         }
 
         if (grid.columns.length <= 0 && grid.getColumns) {
-            grid.columns = grid.getColumns();
-            grid.prepareColumns();
+            //grid.columns = grid.getColumns();
+            grid.prepareColumns().then(() => grid.refreshState());;
         }
 
         return () => {
@@ -106,7 +106,7 @@ export class GridDBClass extends GridGRClass {
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     keyAdd() {
         const grid = this;
-        return `${grid.pageSize}_${grid.pageNumber}_`;
+        return `${super.keyAdd()}_${grid.pageSize}_${grid.pageNumber}_`;
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     render() {

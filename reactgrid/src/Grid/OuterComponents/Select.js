@@ -51,6 +51,11 @@ export function Select(props) {
             ...provided,
             height: height,
         }),
+        option: (provided, state) => ({
+            ...provided,
+            backgroundColor: state.isFocused ? '#3699FF' : null,
+            color: state.isFocused ? 'white' : null,
+        }),
     };
 
     return (

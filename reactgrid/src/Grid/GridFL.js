@@ -40,8 +40,8 @@ export function GridFL(props) {
         }
 
         if (grid.columns.length <= 0 && grid.getColumns) {
-            grid.columns = grid.getColumns();
-            grid.prepareColumns();
+            //grid.columns = grid.getColumns();
+            grid.prepareColumns().then(() => grid.refreshState());;
         }
 
         return () => {

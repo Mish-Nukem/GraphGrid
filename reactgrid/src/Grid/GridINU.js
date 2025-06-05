@@ -43,8 +43,8 @@ export function GridINU(props) {
         }
 
         if (grid.columns.length <= 0 && grid.getColumns) {
-            grid.columns = grid.getColumns();
-            grid.prepareColumns();
+            //grid.columns = grid.getColumns();
+            grid.prepareColumns().then(() => grid.refreshState());;
         }
 
         return () => {
@@ -68,9 +68,9 @@ export class GridINUClass extends GridINUBaseClass {
         grid.allowEditGrid = props.allowEditGrid;
 
         if (grid.columns.length <= 0 && grid.entity && !props.getColumns) {
-            grid.getColumns = () => {
-                const res = grid.getEntityInfo();
-                return res.columns;
+            grid.getColumns = async () => {
+                const res = await grid.getEntityInfo();
+                return res.Columns;
             };
         }
 
@@ -175,15 +175,18 @@ export class GridINUClass extends GridINUBaseClass {
                                 >
                                     {value}
                                 </span>
-                                :
+                                : 
                                 <Select
                                     key={`gridlookupselect_${grid.id}_${col.id}_`}
                                     value={{ value: keyFieldValue, label: value }}
                                     getOptions={(filter, pageNum) => grid.getLookupValues(col, filter, pageNum)}
                                     style={{ width: 'calc(100% - 4px)', gridColumn: noClear ? 'span 2' : '', overflowX: 'hidden' }}
+                                    height={'1.5em'}
                                     onChange={(e) => {
+                                        grid.changedRow = grid.changedRow || {};
                                         grid.changedRow[col.keyField] = e.value;
                                         grid.changedRow[col.name] = e.label;
+                                        grid.setEditing(true);
                                         grid.refreshState();
                                     }}
                                 >

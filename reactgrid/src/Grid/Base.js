@@ -1,6 +1,6 @@
 import { DefaultGridTheme as Theme } from './Themes/DefaultGridTheme';
-import { BootstrapTheme as NewTheme } from './Themes/BootstrapGridTheme';
-//import { DefaultGridTheme as NewTheme } from './Themes/DefaultGridTheme';
+//import { BootstrapTheme as NewTheme } from './Themes/BootstrapGridTheme';
+import { DefaultGridTheme as NewTheme } from './Themes/DefaultGridTheme';
 export class BaseComponent {
 
     constructor(props) {

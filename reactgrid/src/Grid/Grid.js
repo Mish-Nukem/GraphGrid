@@ -43,8 +43,8 @@ export function Grid(props) {
         }
 
         if (grid.columns.length <= 0 && grid.getColumns) {
-            grid.columns = grid.getColumns();
-            grid.prepareColumns();
+            //grid.columns = grid.getColumns();
+            grid.prepareColumns().then(() => grid.refreshState());
         }
 
         return () => {
@@ -102,8 +102,8 @@ export class GridClass extends BaseComponent {
         grid.log('getRows(). rows = ' + grid.rows.length + '. state = ' + grid.stateind);
 
         if (grid.columns.length <= 0) {
-            grid.columns = grid.getColumns();
-            grid.prepareColumns();
+            //grid.columns = grid.getColumns();
+            grid.prepareColumns().then(() => grid.refreshState());;
         }
         grid.calculatePagesCount();
         grid.getSelectedRowIndex();
@@ -275,7 +275,7 @@ export class GridClass extends BaseComponent {
                     grid.rows.map((row, rind) => {
                         return (
                             <tr
-                                key={`gridrow_${grid.id}_${rind}_${grid.keyAdd()}_`}
+                                key={`gridrow_${grid.id}_${rind}_${grid.keyAdd()}_${row[grid.keyField]}_${grid.stateind}_`}
                                 className={grid.isRowSelected(row, rind) ? `grid-selected-row ${grid.opt.selectedRowClass || ''}` : ''}
                                 onMouseDown={(e) => { e.detail === 2 ? grid.onRowDblClick(e, row) : grid.onSelectGridRow(e) }}
                             >
@@ -302,7 +302,7 @@ export class GridClass extends BaseComponent {
                     grid.columns.map((col, cind) => {
                         return (
                             <td
-                                key={`gridcell_${grid.id}_${rowInd}_${cind}_${grid.keyAdd()}_`}
+                                key={`gridcell_${grid.id}_${rowInd}_${cind}_${grid.keyAdd()}_${row[grid.keyField]}_${grid.stateind}_`}
                             >
                                 {grid.renderCell(col, row)}
                             </td>
@@ -315,7 +315,7 @@ export class GridClass extends BaseComponent {
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     renderCell(col, row) {
         const val = row[col.name];
-        return val !== undefined ? val : '';
+        return (<span className='grid-cell'>{val !== undefined ? val : ''}</span>);
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     getColumns() {
@@ -341,22 +341,34 @@ export class GridClass extends BaseComponent {
         return { name: name };
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
-    prepareColumns() {
+    async prepareColumns() {
         const grid = this;
-        grid.colDict = grid.colDict || {};
-        grid.columnsDefaultOrder = [];
 
-        let id = 0;
-        for (let col of grid.columns) {
-            col.id = id++;
-            col.title = col.title || col.name;
-            col.w = col.initW = col.w || 100;
-            col.minW = col.minW || 30;
-            col.grid = grid;
-            grid.colDict[col.id] = grid.colDict[col.name] = col;
+        function afterGetColumns() {
+            grid.columns = grid.columns || [];
+            grid.colDict = grid.colDict || {};
+            grid.columnsDefaultOrder = [];
+
+            let id = 0;
+            for (let col of grid.columns) {
+                col.id = id++;
+                col.title = col.title || col.name;
+                col.w = col.initW = col.w || 100;
+                col.minW = col.minW || 30;
+                col.grid = grid;
+                grid.colDict[col.id] = grid.colDict[col.name] = col;
+            }
+
+            Object.assign(grid.columnsDefaultOrder, grid.columns);
         }
 
-        Object.assign(grid.columnsDefaultOrder, grid.columns);
+        if (grid.getColumns && (!grid.columns || grid.columns.length <= 0)) {
+            grid.columns = await grid.getColumns();
+            afterGetColumns();
+        }
+        else {
+            afterGetColumns();
+        }
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     resetColumnsOrderToDefault() {
