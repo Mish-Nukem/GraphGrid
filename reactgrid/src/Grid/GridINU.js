@@ -155,7 +155,8 @@ export class GridINUClass extends GridINUBaseClass {
 
         if (!grid.allowEditGrid || col.readonly || row !== grid.selectedRow()) return super.renderCell(col, row);
 
-        const value = !grid.isEditing() ? row[col.name] : grid.changedRow && grid.changedRow[col.name] !== undefined ? grid.changedRow[col.name] : row[col.name];
+        let value = !grid.isEditing() ? row[col.name] : grid.changedRow && grid.changedRow[col.name] !== undefined ? grid.changedRow[col.name] : row[col.name];
+        value = value !== undefined ? value : '';
         if (col.type === undefined || col.type === null) {
             col.type = '';
         }
@@ -165,6 +166,10 @@ export class GridINUClass extends GridINUBaseClass {
         switch (col.type.toLowerCase()) {
             case 'lookup':
                 const keyFieldValue = !grid.isEditing() ? row[col.keyField] : grid.changedRow && grid.changedRow[col.keyField] !== undefined ? grid.changedRow[col.keyField] : row[col.keyField];
+                //col._selectedLookupOption = { value: keyFieldValue, label: value };
+                if (col.setComboboxValue) {
+                    col.setComboboxValue({ value: keyFieldValue, label: value });
+                }
                 return (
                     <div style={{ border: 'none' }} className='grid-cell-lookup' key={`gridlookupdiv_${grid.id}_${col.id}_`}>
                         {
@@ -180,15 +185,21 @@ export class GridINUClass extends GridINUBaseClass {
                                     key={`gridlookupselect_${grid.id}_${col.id}_`}
                                     value={{ value: keyFieldValue, label: value }}
                                     getOptions={(filter, pageNum) => grid.getLookupValues(col, filter, pageNum)}
-                                    style={{ width: 'calc(100% - 4px)', gridColumn: noClear ? 'span 2' : '', overflowX: 'hidden' }}
                                     height={'1.5em'}
+                                    gridColumn={noClear ? 'span 2' : ''}
                                     onChange={(e) => {
                                         grid.changedRow = grid.changedRow || {};
                                         grid.changedRow[col.keyField] = e.value;
                                         grid.changedRow[col.name] = e.label;
+
+                                        //col._selectedLookupOption = { value: keyFieldValue, label: value };
+                                        //col._selectedLookupOption.value = e.value;
+                                        //col._selectedLookupOption.label = e.label;
+
                                         grid.setEditing(true);
                                         grid.refreshState();
                                     }}
+                                    init={(e) => { col.setComboboxValue = e.setComboboxValue; }}
                                 >
                                 </Select>
                         }
@@ -574,6 +585,11 @@ export class GridINUClass extends GridINUBaseClass {
         const grid = this;
 
         grid.saveColumnsConfig(e);
+    }
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
+    keyCellAdd(selected) {
+        const grid = this;
+        return selected ? '1' : grid.stateind;
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     resetColumnsOrderToDefault() {

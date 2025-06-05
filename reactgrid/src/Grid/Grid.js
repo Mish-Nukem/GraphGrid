@@ -187,6 +187,11 @@ export class GridClass extends BaseComponent {
         return '';
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
+    keyCellAdd(selected) {
+        const grid = this;
+        return grid.stateind;
+    }
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     renderHeader(columns, context) {
         const grid = this;
         columns = columns || grid.columns;
@@ -272,11 +277,12 @@ export class GridClass extends BaseComponent {
         return (
             <tbody>
                 {
-                    grid.rows.map((row, rind) => {
+                    grid.rows.map((row, rind) => {//${grid.stateind}_
+                        let selected = grid.isRowSelected(row, rind);
                         return (
                             <tr
-                                key={`gridrow_${grid.id}_${rind}_${grid.keyAdd()}_${row[grid.keyField]}_${grid.stateind}_`}
-                                className={grid.isRowSelected(row, rind) ? `grid-selected-row ${grid.opt.selectedRowClass || ''}` : ''}
+                                key={`gridrow_${grid.id}_${rind}_${row[grid.keyField]}_${grid.keyAdd()}_${grid.keyCellAdd(selected)}_`}
+                                className={selected ? `grid-selected-row ${grid.opt.selectedRowClass || ''}` : ''}
                                 onMouseDown={(e) => { e.detail === 2 ? grid.onRowDblClick(e, row) : grid.onSelectGridRow(e) }}
                             >
                                 {grid.renderRow(row, rind)}
@@ -302,7 +308,7 @@ export class GridClass extends BaseComponent {
                     grid.columns.map((col, cind) => {
                         return (
                             <td
-                                key={`gridcell_${grid.id}_${rowInd}_${cind}_${grid.keyAdd()}_${row[grid.keyField]}_${grid.stateind}_`}
+                                key={`gridcell_${grid.id}_${rowInd}_${cind}_${grid.keyAdd()}_${row[grid.keyField]}_`}
                             >
                                 {grid.renderCell(col, row)}
                             </td>

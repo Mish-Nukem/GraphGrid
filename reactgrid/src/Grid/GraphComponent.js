@@ -172,7 +172,7 @@ export class GraphComponentClass extends BaseComponent {
                             <Modal
                                 title={gc.selectingNode.title}
                                 renderContent={() => { return gc.renderDatePicker() }}
-                                pos={gc.selectingNodePos}
+                                pos={gc.selectingDatePos}
                                 onClose={(e) => gc.closeFilterWnd(e)}
                                 init={(wnd) => { wnd.visible = gc.nodeSelectIsShowing; }}
                                 dimensionsByContent={true}
@@ -356,7 +356,15 @@ export class GraphComponentClass extends BaseComponent {
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     openFilterWnd(e, node) {
         const gc = this;
+
+        gc.selectingDatePos = gc.selectingDatePos || { x: e.clientX || 100, y: e.clientY || 100, w: 800, h: 600 }; 
         gc.selectingNodePos = gc.selectingNodePos || { x: e.clientX || 100, y: e.clientY || 100, w: 800, h: 600 };
+
+        gc.selectingNodePos.x = e.clientX || gc.selectingNodePos.x;
+        gc.selectingNodePos.y = e.clientY || gc.selectingNodePos.y;
+
+        gc.selectingDatePos.x = e.clientX || gc.selectingDatePos.x;
+        gc.selectingDatePos.y = e.clientY || gc.selectingDatePos.y;
 
         if (node.value) {
             node.activeRow = node.value;

@@ -6,7 +6,10 @@ export function Select(props) {
 
     if (props.init) {
         props.init({
-            setComboboxValue: function (value) {
+            setComboboxValue: function (newValue) {
+                onChange(newValue);
+            },
+            refreshState: function () {
                 onChange(value);
             }
         });
@@ -31,6 +34,7 @@ export function Select(props) {
             borderColor: '#9e9e9e',
             minHeight: height,
             height: height,
+            gridColumn: props.gridColumn,
             boxShadow: state.isFocused ? null : null,
         }),
 
@@ -61,6 +65,7 @@ export function Select(props) {
     return (
         <>
             <AsyncPaginate
+                key={value}
                 value={value}
                 isMulti={props.isMulti}
                 cacheOptions
@@ -72,6 +77,7 @@ export function Select(props) {
                 placeholder=""
                 styles={customStyles}
                 isDisabled={props.disabled ? true : false}
+                style={props.style}
             >
             </AsyncPaginate >
         </>

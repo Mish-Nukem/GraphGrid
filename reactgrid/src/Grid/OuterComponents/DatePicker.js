@@ -10,7 +10,7 @@ export function DatePicker(props) {
     let parsedDate = parse(date, dateFormat, new Date());
 
     if (!isValid(parsedDate)) {
-        parsedDate = parse(new Date(), dateFormat, new Date());
+        parsedDate = parse(Date(), dateFormat, new Date());
     }
 
     const [selectedDate, setSelected] = useState(parsedDate);
