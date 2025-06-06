@@ -166,7 +166,6 @@ export class GridINUClass extends GridINUBaseClass {
         switch (col.type.toLowerCase()) {
             case 'lookup':
                 const keyFieldValue = !grid.isEditing() ? row[col.keyField] : grid.changedRow && grid.changedRow[col.keyField] !== undefined ? grid.changedRow[col.keyField] : row[col.keyField];
-                //col._selectedLookupOption = { value: keyFieldValue, label: value };
                 if (col.setComboboxValue) {
                     col.setComboboxValue({ value: keyFieldValue, label: value });
                 }
@@ -191,10 +190,6 @@ export class GridINUClass extends GridINUBaseClass {
                                         grid.changedRow = grid.changedRow || {};
                                         grid.changedRow[col.keyField] = e.value;
                                         grid.changedRow[col.name] = e.label;
-
-                                        //col._selectedLookupOption = { value: keyFieldValue, label: value };
-                                        //col._selectedLookupOption.value = e.value;
-                                        //col._selectedLookupOption.label = e.label;
 
                                         grid.setEditing(true);
                                         grid.refreshState();

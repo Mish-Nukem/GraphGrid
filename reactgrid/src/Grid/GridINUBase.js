@@ -246,7 +246,7 @@ export class GridINUBaseClass extends GridFLClass {
             applyLink: function (link) {
                 const parent = link.parent;
 
-                if (!parent || (parent.visible === false && parent.status !== NodeStatus.hidden)) return '';
+                if (!parent || (!link.everLink && parent.visible === false && parent.status !== NodeStatus.hidden)) return '';
 
                 if (parent.status === NodeStatus.grid) {
                     if (!parent.rows || parent.rows.length <= 0) return '1=2'
@@ -277,11 +277,19 @@ export class GridINUBaseClass extends GridFLClass {
                         //}
                         break;
                     default:
+                        if (link.everLink) {
+                            activeValue = parent.value;
+                        }
+                        break;
                 }
 
                 if (!activeValue) return '';
 
-                return `${pref};${parent.uid};${scheme || ''} = ${activeValue}`;
+                if (link.condition) {
+                    return { type: parent.filterType === FilterType.date ? 'column' : 'graphLink', filter: link.condition.replace(/:id/gi, activeValue) }  ;
+                }
+
+                return `${pref};${parent.uid};${scheme} = ${activeValue}`;
             }
         };
     }
@@ -337,10 +345,13 @@ export class GridINUBaseClass extends GridFLClass {
             { key: 'rtoken', value: grid.dataGetter.rtoken },
             { key: 'pageSize', value: grid.pageSize },
             { key: 'pageNumber', value: grid.pageNumber },
+            { key: 'entity', value: grid.entity },
         ];
 
         const orderBy = [];
         for (let col of grid.columns) {
+            if (!col.asc && !col.desc) continue;
+
             orderBy.push({ sortInd: col.sortInd, str: col.asc ? col.name : col.desc ? col.name + ' desc' : '' });
         }
 
@@ -364,9 +375,14 @@ export class GridINUBaseClass extends GridFLClass {
             delete grid.activeRow;
         }
 
-        let i = 0;
+        let i = 0, j = 0;
         for (let cond of e.filters) {
-            params.push({ key: 'f' + i++, value: cond });
+            if (cond.type === 'column') {
+                params.push({ key: 'f' + i++, value: cond.filter });
+            }
+            else if (cond.type === 'graphLink') {
+                params.push({ key: 'c' + j++, value: cond.filter });
+            }
         }
 
         params.push({ key: 'reqInd', value: ++grid.reqInd });

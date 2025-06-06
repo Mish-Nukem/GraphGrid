@@ -21,9 +21,7 @@ function App() {
 
     window._logEnabled = true;
 
-    const dataGetter = new DataGetter(appSettings);
-    dataGetter.atoken = state.atoken;
-    dataGetter.rtoken = state.rtoken;
+    const dataGetter = new DataGetter(appSettings, state.atoken, state.rtoken);
 
     const GetFamily = function (e) {
         return new Promise(function (resolve, reject) {
@@ -273,16 +271,15 @@ function App() {
             <LoginPage
                 dataGetter={dataGetter}
                 afterLogin={(tokens) => {
-                    const arr = tokens.split(';');
-                    if (arr.length !== 2) return;
+                    if (!tokens) return;
 
-                    setState({ menuItem: -1, atoken: arr[0], rtoken: arr[1] });
+                    setState({ menuItem: -1, atoken: dataGetter.atoken, rtoken: dataGetter.rtoken });
                 }}>
             </LoginPage> :
             <div >
                 <select onChange={(e) => {
                     //console.log('this == ' + e);
-                    setState({ menuItem: e.target.selectedIndex, atoken: state.atoken, rtoken: state.rtoken });
+                    setState({ menuItem: e.target.selectedIndex, atoken: dataGetter.atoken, rtoken: dataGetter.rtoken });
                 }}>
                     <option>0. None</option>
                     <option>1. ReactGrid</option>

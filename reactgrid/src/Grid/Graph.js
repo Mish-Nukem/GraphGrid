@@ -33,7 +33,8 @@ export class GraphClass {
         if (e.waveType === graph.lastWaveType && e.waveInd < graph.lastWaveInd) return;
 
         while (e.list.length) {
-            let node = e.list.shift();
+            const nodeUid = e.list.shift();
+            let node = graph.nodesDict[nodeUid];
 
             if (node.skipOnWaveVisit && node.skipOnWaveVisit(e)) continue;
 
@@ -118,7 +119,7 @@ export class GraphClass {
                 node._waveNum = waveNum;
 
                 if (e.withStartNodes) {
-                    _cachedWave.push(node);
+                    _cachedWave.push(node.uid);
                 }
             }
 
@@ -179,12 +180,12 @@ export class GraphClass {
                     for (let i = currWaveNodes.length - 1; i >= 0; i--) {
                         let node = currWaveNodes[i];
                         if (e.moveType !== MoveType.fromChild && !graph.hasParentWithSameWave(node)) {
-                            _cachedWave.push(node);
+                            _cachedWave.push(node.uid);
                             currWaveNodes.splice(i, 1);
                             added = true;
                         }
                         else if (e.moveType !== MoveType.fromParent && !graph.hasChildWithSameWave(node)) {
-                            _cachedWave.push(node);
+                            _cachedWave.push(node.uid);
                             currWaveNodes.splice(i, 1);
                             added = true;
                         }
@@ -196,7 +197,7 @@ export class GraphClass {
                         // если не удалось добавить ни одного, то это означает, что все узлы-претенденты входят в циклы
                         // (у каждого был найден среди родительских узел из этого же номера волны) - добавляем их всех
                         if (!added && node.inCycle) {
-                            _cachedWave.push(node);
+                            _cachedWave.push(node.uid);
                         }
                         else {
                             node._waveNum = -1;

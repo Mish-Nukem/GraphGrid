@@ -1,6 +1,9 @@
 export class DataGetter {
-	constructor(settings) {
+	constructor(settings, atoken, rtoken) {
 		const dg = this;
+
+		dg.atoken = atoken;
+		dg.rtoken = rtoken;
 
 		dg.APIurl = settings.APIurl;
 	}

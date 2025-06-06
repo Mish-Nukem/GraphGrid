@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { BaseComponent, log } from '../Grid/Base';
+import { BaseComponent } from '../Grid/Base';
 //import { BootstrapTheme as Theme } from '../Grid/Themes/BootstrapGridTheme';
 export function LoginPage(props) {
     let loginForm = null;
@@ -51,21 +51,22 @@ export class loginFormClass extends BaseComponent {
     tryLogin() {
         const loginForm = this;
 
-        //const pref = appSettings.APIurl;
         if (loginForm.login === 'test') {
             loginForm.afterLogin('test;test');
             return;
         }
 
-        //const guid = 'asdfasdf';
         const params = [{ key: 'login', value: loginForm.login }, { key: 'password', value: loginForm.password }];
-
-        //const params = { login: loginForm.login, password: loginForm.password };
 
         loginForm.dataGetter.get({ url: 'system/login', params: params, type: 'text' }).then(
             (tokens) => {
                 if (tokens) {
-                    //const obj = JSON.parse(guid);
+                    const arr = tokens.split(';');
+                    if (arr.length !== 2) return;
+
+                    loginForm.dataGetter.atoken = arr[0];
+                    loginForm.dataGetter.rtoken = arr[1];
+
                     loginForm.afterLogin(tokens);
                 }
             }

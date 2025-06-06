@@ -61,6 +61,8 @@ export class GridFLClass extends GridDBClass {
         const grid = this;
 
         grid.opt.filterInputClass = props.filterInputClass || grid.opt.filterInputClass;
+
+        grid.beforeOpen = props.beforeOpen;
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     render() {
@@ -167,14 +169,27 @@ export class GridFLClass extends GridDBClass {
     collectFilters(noSaveFilterStr) {
         const grid = this;
         const filters = super.collectFilters();
+        const filterList = [];
+        let fo;
 
         for (let col of grid.columns) {
             if (!col.filtrable || col.filter === undefined || col.filter === '') continue;
-            filters.push(col.name + ' = ' + col.filter);
+
+            fo = { type: 'column', filter: `${col.name} = ${col.filter}` };
+            filters.push(fo);
+
+            if (!noSaveFilterStr) {
+                filterList.push(fo.filter);
+            }
+        }
+
+        if (grid.beforeOpen !== undefined && grid.beforeOpen !== '') {
+            fo = { type: 'graphLink', filter: grid.beforeOpen };
+            filters.push(fo);
         }
 
         if (!noSaveFilterStr) {
-            grid._lastFilters = filters.join('&+&');
+            grid._lastFilters = filterList.join('&+&');
         }
         return filters;
     }

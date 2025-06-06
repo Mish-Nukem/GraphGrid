@@ -278,12 +278,28 @@ export class GraphComponentClass extends BaseComponent {
                             style={{ width: 'calc(100% - 4px)', padding: '0 2px', boxSizing: 'border-box', height: '2.3em' }}
                             value={
                                 node.filterType !== FilterType.date ?
-                                    (node.value !== undefined && node.selectedText ? node.selectedText() : '')
+                                    node.filterType !== FilterType.input ?
+                                        (node.value !== undefined && node.selectedText ? node.selectedText() : '')
+                                        :
+                                        node.value
                                     :
                                     (node.value !== undefined ? node.value : '')
                             }
-                            readOnly={true}
+                            readOnly={node.filterType !== FilterType.input}
                             disabled={gc.isEditing() ? 'disabled' : ''}
+                            onChange={(e) => {
+                                const prevValue = e.target.value;
+                                node.value = e.target.value;
+                                gc.refreshState();
+
+                                setTimeout(() => {
+                                    if (prevValue === e.target.value) {
+
+                                        gc.graph.triggerWave({ nodes: [node], withStartNodes: false });
+                                    }
+                                }, 150);
+
+                            }}
                         ></input>
                 }
                 {
@@ -389,7 +405,7 @@ export class GraphComponentClass extends BaseComponent {
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     clearFilter(e, node) {
         const gc = this;
-        delete node.value;
+        node.value = '';
         node._selectedOptions = [];
         if (node.setComboboxValue) {
             node.setComboboxValue([]);
@@ -666,6 +682,8 @@ export class GraphComponentClass extends BaseComponent {
 
         grid.allowEditGrid = obr.allowEditGrid;
 
+        grid.beforeOpen = obr.beforeOpen;
+
         grid.multi = obr.multi;
 
         if (obr.status !== undefined) {
@@ -748,10 +766,6 @@ export class GraphComponentClass extends BaseComponent {
 
         gc.graph.nodeCount = 0;
 
-        //    gc.graph = new GraphClass();
-
-        //    gc.graph.nodesDict = obrGraph.nodesDict || gc.graph.nodesDict;
-        //    gc.graph.linksDict = obrGraph.linksDict || gc.graph.linksDict;
         gc.graph.checkNeedTriggerWave = (node) => { return gc.checkNeedTriggerWave(node) };
 
         for (let uid in gc.graph.nodesDict) {
@@ -762,7 +776,7 @@ export class GraphComponentClass extends BaseComponent {
 
             node.opt = node.opt || {};
 
-            node.translate = node.translate || (text => { return text; });
+            node.translate = node.translate || ((text) => { return text; });
 
             if (node._readonly !== undefined) {
                 node.readonly = node._readonly;
@@ -786,6 +800,10 @@ export class GraphComponentClass extends BaseComponent {
 
             if (node.status === NodeStatus.filter && node.filterType === FilterType.combobox) {
                 node.multi = true;
+            }
+
+            if (node.status === NodeStatus.filter && !node.entity && node.filterType === FilterType.combobox) {
+                node.status = NodeStatus.hidden;
             }
         }
 
