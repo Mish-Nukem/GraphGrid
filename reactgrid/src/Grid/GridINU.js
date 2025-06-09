@@ -179,7 +179,7 @@ export class GridINUClass extends GridINUBaseClass {
                                 >
                                     {value}
                                 </span>
-                                : 
+                                :
                                 <Select
                                     key={`gridlookupselect_${grid.id}_${col.id}_`}
                                     value={{ value: keyFieldValue, label: value }}
@@ -222,30 +222,56 @@ export class GridINUClass extends GridINUBaseClass {
                 return (
                     <div
                         style={{ border: 'none' }}
-                        className='grid-cell-edit'
+                        className={col.type === 'date' ? 'grid-cell-lookup' : 'grid-cell-edit'}
                         key={`grideditdiv_${grid.id}_${col.id}_`}
                     >
-                        <textarea
-                            key={`gridedittextarea_${grid.id}_${col.id}_`}
-                            value={value}
-                            style={{
-                                width: '100%',
-                                height: '1.7em',
-                                padding: '0',
-                                boxSizing: 'border-box',
-                                gridColumn: noClear ? 'span 2' : '',
-                                resize: 'vertical',
-                                overflowX: 'hidden',
-                            }}
-                            onChange={(e) => grid.changeField(e, col, row)}
-                            autoFocus={col === grid._changingCol && grid.isEditing()}
-                            onFocus={e => {
-                                if (col === grid._changingCol) {
-                                    e.currentTarget.selectionStart = e.currentTarget.selectionEnd = grid._remCursorPos;
-                                }
-                            }}
-                        >
-                        </textarea>
+                        {
+                            col.type === 'date' ?
+                                <>
+                                    <span
+                                        style={{
+                                            width: '100%',
+                                            height: '1.7em',
+                                            padding: '0',
+                                            boxSizing: 'border-box',
+                                            gridColumn: noClear ? 'span 2' : '',
+                                            overflowX: 'hidden',
+                                        }}
+
+                                    >
+                                        {value}
+                                    </span>
+                                    <button
+                                        key={`griddatepickerbtn_${grid.id}_${col.id}_`}
+                                        className={'grid-cell-button'}
+                                        onClick={(e) => grid.openDatePickerWnd(e, col, value)}
+                                    >
+                                        {'...'}
+                                    </button>
+                                </>
+                                :
+                                <textarea
+                                    key={`gridedittextarea_${grid.id}_${col.id}_`}
+                                    value={value}
+                                    style={{
+                                        width: '100%',
+                                        height: '1.7em',
+                                        padding: '0',
+                                        boxSizing: 'border-box',
+                                        gridColumn: noClear ? 'span 2' : '',
+                                        resize: 'vertical',
+                                        overflowX: 'hidden',
+                                    }}
+                                    onChange={(e) => grid.changeField(e, col, row)}
+                                    autoFocus={col === grid._changingCol && grid.isEditing()}
+                                    onFocus={e => {
+                                        if (col === grid._changingCol) {
+                                            e.currentTarget.selectionStart = e.currentTarget.selectionEnd = grid._remCursorPos;
+                                        }
+                                    }}
+                                >
+                                </textarea>
+                        }
                         {
                             noClear ? <></>
                                 :
@@ -596,6 +622,13 @@ export class GridINUClass extends GridINUBaseClass {
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     resetColumnsWidthsToDefault() {
         super.resetColumnsWidthsToDefault();
+
+        const grid = this;
+        grid.saveColumnsConfig();
+    }
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
+    resetColumnsSort() {
+        super.resetColumnsSort();
 
         const grid = this;
         grid.saveColumnsConfig();

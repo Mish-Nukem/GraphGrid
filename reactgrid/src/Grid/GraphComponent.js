@@ -147,7 +147,7 @@ export class GraphComponentClass extends BaseComponent {
                     </div>
                     <div className="graph-grid" key={`gridstop_${gc.id}_`}>
                         {
-                            gc.renderGrid(gc.graph.nodesDict[gc.activeMaster], true)
+                            gc.renderGridInGraph(gc.graph.nodesDict[gc.activeMaster], true)
                         }
                     </div>
                     <div className="graph-filter-line" key={`filterslow_${gc.id}_`}>
@@ -162,7 +162,7 @@ export class GraphComponentClass extends BaseComponent {
                     </div>
                     <div className="graph-grid" key={`gridslow_${gc.id}_`}>
                         {
-                            gc.renderGrid(gc.graph.nodesDict[gc.activeDetail], false)
+                            gc.renderGridInGraph(gc.graph.nodesDict[gc.activeDetail], false)
                         }
                     </div>
                 </div>
@@ -182,12 +182,13 @@ export class GraphComponentClass extends BaseComponent {
                                 noFooter={true}
                                 noPadding={true}
                                 resizable={false}
+                                margin={'1em'}
                             >
                             </Modal>
                             :
                             <Modal
                                 title={gc.selectingNode.title}
-                                renderContent={() => { return gc.renderFilterGrid() }}
+                                renderContent={() => { return gc.renderFilterGrid(gc.selectingNode) }}
                                 pos={gc.selectingNodePos}
                                 onClose={(e) => gc.closeFilterWnd(e)}
                                 init={(wnd) => { wnd.visible = gc.nodeSelectIsShowing; }}
@@ -200,23 +201,25 @@ export class GraphComponentClass extends BaseComponent {
         )
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
-    renderFilterGrid() {
+    renderFilterGrid(node) {
         const gc = this;
-        return (
-            <GridINU
-                findGrid={(props) => gc.replaceGrid(props)}
-                graph={gc.graph}
-                uid={gc.selectingNode.uid || gc.selectingNode.id}
-                entity={gc.selectingNode.entity}
-                dataGetter={gc.dataGetter || gc.selectingNode.dataGetter}
-                init={(grid) => {
-                    grid.status = NodeStatus.filter;
-                    grid.visible = true;
-                    grid.title = gc.selectingNode.title;
-                }}
-            >
-            </GridINU>
-        );
+        return gc.renderGrid(node, NodeStatus.filter, true);
+
+    //    return (
+    //        <GridINU
+    //            findGrid={(props) => gc.replaceGrid(props)}
+    //            graph={gc.graph}
+    //            uid={node.uid || node.id}
+    //            entity={node.entity}
+    //            dataGetter={gc.dataGetter || node.dataGetter}
+    //            init={(grid) => {
+    //                grid.status = NodeStatus.filter;
+    //                grid.visible = true;
+    //                grid.title = node.title;
+    //            }}
+    //        >
+    //        </GridINU>
+    //    );
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     renderDatePicker() {
@@ -251,7 +254,7 @@ export class GraphComponentClass extends BaseComponent {
             >
                 <span
                     key={`fltrttl_${node.id}_${gc.id}_`}
-                    style={{ gridColumn: 'span 3', width: 'calc(100% - 4px)' }}
+                    style={{ gridColumn: 'span 3', width: '100%' }}
                     className='graph-filter-title'
                 >
                     {node.title}
@@ -275,7 +278,7 @@ export class GraphComponentClass extends BaseComponent {
                         :
                         <input
                             key={`fltrinp_${node.id}_${gc.id}_`}
-                            style={{ width: 'calc(100% - 4px)', padding: '0 2px', boxSizing: 'border-box', height: '2.3em' }}
+                            style={{ width: '100%', padding: '0 2px', boxSizing: 'border-box', height: '2.3em' }}
                             value={
                                 node.filterType !== FilterType.date ?
                                     node.filterType !== FilterType.input ?
@@ -345,13 +348,18 @@ export class GraphComponentClass extends BaseComponent {
         );
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
-    renderGrid(node, top) {
+    renderGridInGraph(node, top) {
         const gc = this;
 
         if (!node.visible || +node.status !== +NodeStatus.grid || gc.isTop(node) !== top) return <></>;
 
         if (!gc.isTop(node) && node.parents.indexOf(gc.activeMaster) < 0) return <></>;
 
+        return gc.renderGrid(node, NodeStatus.grid, top);
+    }
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
+    renderGrid(node, status, top) {
+        const gc = this;
         return (
             <GridINU
                 findGrid={(props) => gc.replaceGrid(props)}
@@ -360,7 +368,7 @@ export class GraphComponentClass extends BaseComponent {
                 entity={node.entity}
                 dataGetter={gc.dataGetter || node.dataGetter}
                 init={(grid) => {
-                    grid.status = NodeStatus.grid;
+                    grid.status = status;
                     grid.visible = true;
                     grid.isBottom = !top;
                     grid.title = node.title;

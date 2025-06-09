@@ -61,6 +61,9 @@ export class ModalClass extends BaseComponent {
         wnd.opt.noFooter = props.noFooter;
         wnd.opt.noPadding = props.noPadding;
 
+        wnd.opt.margin = props.margin;
+        wnd.opt.padding = props.padding;
+
         wnd.opt.bodyClass = props.bodyClass || 'modal-window-body';
         wnd.opt.headerClass = props.headerClass || 'modal-window-header';
         wnd.opt.footerClass = props.footerClass || 'modal-window-footer';
@@ -104,8 +107,7 @@ export class ModalClass extends BaseComponent {
         }
 
         if (wnd.opt.dimensionsByContent) {
-            //const rect = ModalClass.getDimensionsByContent(wnd);
-            const rect = wnd.getDimensionsByContent();
+            const rect = wnd.getDimensionsByContent(wnd.opt.margin, wnd.opt.padding);
             wnd.opt.pos.w = rect.w || wnd.opt.pos.w;
             wnd.opt.pos.h = rect.h || wnd.opt.pos.h;
         }
@@ -296,7 +298,7 @@ export class ModalClass extends BaseComponent {
         wnd.refreshState();
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
-    getDimensionsByContent() {
+    getDimensionsByContent(margin, padding) {
         const wnd = this;
         const renderFake = function () {
             return (
@@ -324,6 +326,8 @@ export class ModalClass extends BaseComponent {
         fakeDiv.style.opacity = 0;
         fakeDiv.style.position = 'fixed';
         fakeDiv.style.height = 'auto';
+        fakeDiv.style.margin = margin || '';
+        fakeDiv.style.padding = padding || '';
         fakeDiv.innerHTML = renderToStaticMarkup(renderFake());
         document.body.append(fakeDiv);
         const rect = getComputedStyle(fakeDiv);

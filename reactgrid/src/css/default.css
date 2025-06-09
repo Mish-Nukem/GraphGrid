@@ -348,8 +348,8 @@
 }
 
 .graph-filter-button {
-    margin: 5px 2px;
-    width: 2.5em;
+    margin: 5px 6px;
+    width: 2.6em;
 }
 
 .graph-card-button {
@@ -411,3 +411,7 @@
     .filter-select > div {
         width: 100%;
     }
+
+.datepicker-div {
+    margin: 1em;
+}

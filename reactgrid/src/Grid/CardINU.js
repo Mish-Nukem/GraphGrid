@@ -94,6 +94,7 @@ export class CardINUClass extends GridINUBaseClass {
                     }
                 </div>
                 {super.renderLookup()}
+                {super.renderDatePicker()}
             </>
         )
     }
@@ -104,6 +105,8 @@ export class CardINUClass extends GridINUBaseClass {
         if (col.type === undefined || col.type === null) {
             col.type = '';
         }
+        const noClear = col.required || value === undefined || value === '';
+
         switch (col.type.toLowerCase()) {
             case 'lookup':
                 return (
@@ -145,19 +148,64 @@ export class CardINUClass extends GridINUBaseClass {
                         >
                             {card.images.filterSelect ? card.images.filterSelect() : card.translate('Select', 'graph-filter-select')}
                         </button>
-                        <button
-                            key={`cardlookupclear_${card.id}_${col.id}_`}
-                            className={'graph-card-button'}
-                            disabled={value === undefined || value === '' ? 'disabled' : ''}
-                            onClick={(e) => card.clearField(e, col, card.changedRow)}
-                            style={{ display: !col.required && !col.readonly ? '' : 'none' }}
-                        >
-                            {card.images.filterClear ? card.images.filterClear() : card.translate('Clear', 'graph-filter-clear')}
-                        </button>
+                        {
+                            noClear ? <></>
+                                : <button
+                                    key={`cardlookupclear_${card.id}_${col.id}_`}
+                                    className={'graph-card-button'}
+                                    disabled={value === undefined || value === '' ? 'disabled' : ''}
+                                    onClick={(e) => card.clearField(e, col, card.changedRow)}
+                                    style={{ display: !col.required && !col.readonly ? '' : 'none' }}
+                                >
+                                    {card.images.filterClear ? card.images.filterClear() : card.translate('Clear', 'graph-filter-clear')}
+                                </button>
+                        }
                     </div>
                 )
-            //case 'date':
-            //    break;
+            case 'date':
+                return (
+                    <div className="graph-card-field"
+                        key={`carddatepickerdiv_${card.id}_${col.id}_`}
+                    >
+                        <span
+                            key={`cardfieldtitle_${card.id}_${col.id}_`}
+                            style={{ gridColumn: 'span 3', width: 'calc(100% - 4px)' }}
+                        >
+                            {col.title || col.name}
+                        </span>
+                        <input
+                            style={{
+                                width: '100%',
+                                height: '2.3em',
+                                padding: '0',
+                                boxSizing: 'border-box',
+                                gridColumn: noClear ? 'span 2' : '',
+                                overflowX: 'hidden',
+                            }}
+                            disabled={true}
+                            value={value}
+                        />
+                        <button
+                            key={`griddatepickerbtn_${card.id}_${col.id}_`}
+                            className={'graph-card-button'}
+                            onClick={(e) => card.openDatePickerWnd(e, col, value)}
+                        >
+                            {card.images.filterSelect ? card.images.filterSelect() : card.translate('Select', 'graph-filter-select')}
+                        </button>
+                        {
+                            noClear ? <></>
+                                : <button
+                                    key={`cardlookupclear_${card.id}_${col.id}_`}
+                                    className={'graph-card-button'}
+                                    disabled={value === undefined || value === '' ? 'disabled' : ''}
+                                    onClick={(e) => card.clearField(e, col, card.changedRow)}
+                                    style={{ display: !col.required && !col.readonly ? '' : 'none' }}
+                                >
+                                    {card.images.filterClear ? card.images.filterClear() : card.translate('Clear', 'graph-filter-clear')}
+                                </button>
+                        }
+                    </div>
+                );
             default:
                 return (
                     <div className="graph-card-field"
@@ -185,15 +233,18 @@ export class CardINUClass extends GridINUBaseClass {
                         >
 
                         </textarea>
-                        <button
-                            key={`cardfieldclear_${card.id}_${col.id}_`}
-                            className={'graph-card-button'}
-                            disabled={value === undefined || value === '' ? 'disabled' : ''}
-                            onClick={(e) => card.clearField(e, col, card.changedRow)}
-                            style={{ display: !col.required && !col.readonly ? '' : 'none' }}
-                        >
-                            {card.images.filterClear ? card.images.filterClear() : card.translate('Clear', 'graph-filter-clear')}
-                        </button>
+                        {
+                            noClear ? <></>
+                                : <button
+                                    key={`cardfieldclear_${card.id}_${col.id}_`}
+                                    className={'graph-card-button'}
+                                    disabled={value === undefined || value === '' ? 'disabled' : ''}
+                                    onClick={(e) => card.clearField(e, col, card.changedRow)}
+                                    style={{ display: !col.required && !col.readonly ? '' : 'none' }}
+                                >
+                                    {card.images.filterClear ? card.images.filterClear() : card.translate('Clear', 'graph-filter-clear')}
+                                </button>
+                        }
                     </div>
                 )
         }

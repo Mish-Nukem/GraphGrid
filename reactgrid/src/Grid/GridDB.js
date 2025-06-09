@@ -539,13 +539,13 @@ export class GridDBClass extends GridGRClass {
                 grid.resetColumnsWidthsToDefault();
                 break;
             case '2':
-                grid.dropColumnsSort();
+                grid.resetColumnsSort();
                 break;
             default:
         }
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
-    dropColumnsSort() {
+    resetColumnsSort() {
         const grid = this;
         for (let col of grid.columns) {
             delete col.asc;

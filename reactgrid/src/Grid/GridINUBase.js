@@ -3,6 +3,7 @@ import { GridFLClass } from './GridFL.js';
 import { FilterType, NodeStatus } from './Base';
 import { WaveType } from './Graph.js';
 import { Modal } from './Modal';
+import { DatePicker } from './OuterComponents/DatePicker';
 // ==================================================================================================================================================================
 export function GridINUBase(props) {
     let grid = null;
@@ -85,6 +86,7 @@ export class GridINUBaseClass extends GridFLClass {
             <>
                 {super.render()}
                 {grid.renderLookup()}
+                {grid.renderDatePicker()}
             </>
         )
     }
@@ -99,6 +101,43 @@ export class GridINUBaseClass extends GridFLClass {
                     pos={grid.lookupPos}
                     onClose={(e) => grid.closeLookup(e)}
                     init={(wnd) => { wnd.visible = grid.lookupIsShowing; }}
+                >
+                </Modal>
+                :
+                <></>
+        );
+    }
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
+    renderDatePicker() {
+        const grid = this;
+        return (
+            grid.datePickerIsShowing ?
+                <Modal
+                    title={grid.selectingDatePickerColumn.title}
+                    renderContent={() => {
+                        return (
+                            <DatePicker
+                                date={grid.selectingDatePickerValue}
+                                onSelect={(date) => {
+                                    grid.changedRow = grid.changedRow || {};
+                                    grid.changedRow[grid.selectingDatePickerColumn.name] = date;
+                                    grid.setEditing(true);
+                                    grid.closeDatePickerWnd();
+                                }}
+                            ></DatePicker>
+                        );
+                    }}
+                    pos={grid.selectingDatePos}
+                    onClose={(e) => grid.closeDatePickerWnd(e)}
+                    init={(wnd) => { wnd.visible = grid.datePickerIsShowing; }}
+                    dimensionsByContent={true}
+                    closeWhenMiss={true}
+                    closeWhenEscape={true}
+                    noHeader={true}
+                    noFooter={true}
+                    noPadding={true}
+                    resizable={false}
+                    margin={'1em'}
                 >
                 </Modal>
                 :
@@ -225,6 +264,30 @@ export class GridINUBaseClass extends GridFLClass {
         grid.refreshState();
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
+    openDatePickerWnd(e, col, value) {
+        const grid = this;
+
+        grid.selectingDatePos = grid.selectingDatePos || { x: e.clientX || 100, y: e.clientY || 100, w: 800, h: 600 }; 
+
+        grid.selectingDatePos.x = e.clientX || grid.selectingDatePos.x;
+        grid.selectingDatePos.y = e.clientY || grid.selectingDatePos.y;
+
+        grid.datePickerIsShowing = true;
+        grid.selectingDatePickerColumn = col;
+        grid.selectingDatePickerValue = value;
+        grid.refreshState();
+    }
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
+    closeDatePickerWnd(e) {
+        const grid = this;
+        grid.datePickerIsShowing = false;
+        if (grid.selectingDatePickerColumn) {
+            grid.selectingDatePickerColumn = null;
+            grid.selectingDatePickerValue = '';
+        }
+        grid.refreshState();
+    }
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     skipOnWaveVisit(e) {
         if (super.skipOnWaveVisit(e)) return true;
 
@@ -286,7 +349,7 @@ export class GridINUBaseClass extends GridFLClass {
                 if (!activeValue) return '';
 
                 if (link.condition) {
-                    return { type: parent.filterType === FilterType.date ? 'column' : 'graphLink', filter: link.condition.replace(/:id/gi, activeValue) }  ;
+                    return { type: parent.filterType === FilterType.date ? 'column' : 'graphLink', filter: link.condition.replace(/:id/gi, activeValue) };
                 }
 
                 return `${pref};${parent.uid};${scheme} = ${activeValue}`;
