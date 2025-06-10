@@ -1,6 +1,8 @@
 ﻿import { useState, useEffect } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { BaseComponent, log } from './Base';
+import Moment from 'moment';
+import { format, isValid, parse } from "date-fns";
 // ==================================================================================================================================================================
 export function Grid(props) {
     let grid = null;
@@ -83,6 +85,8 @@ export class GridClass extends BaseComponent {
             grid.multi = true;
             grid._allRowsOnPageSelected = false;
         }
+
+        grid.dateFormat = props.dateFormat || 'DD.MM.YYYY';
 
         grid.rows = [];
         grid.columns = [];
@@ -320,7 +324,15 @@ export class GridClass extends BaseComponent {
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     renderCell(col, row) {
-        const val = row[col.name];
+        const grid = this;
+        let val = row[col.name];
+
+        if (col.type === 'date' && val) {
+            //const parsedDate = parse(val, grid.dateFormat, new Date());
+            //val = format(parsedDate, grid.dateFormat);
+            val = Moment(val, grid.dateFormat).format(grid.dateFormat);
+        }
+
         return (<span className='grid-cell'>{val !== undefined ? val : ''}</span>);
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------

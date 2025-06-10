@@ -3,7 +3,9 @@ import { GridFLClass } from './GridFL.js';
 import { FilterType, NodeStatus } from './Base';
 import { WaveType } from './Graph.js';
 import { Modal } from './Modal';
-import { DatePicker } from './OuterComponents/DatePicker';
+//import { DatePicker } from './OuterComponents/DatePicker';
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
 // ==================================================================================================================================================================
 export function GridINUBase(props) {
     let grid = null;
@@ -64,6 +66,8 @@ export class GridINUBaseClass extends GridFLClass {
         grid.entity = props.entity;
         grid.entityAdd = props.entityAdd;
         grid.dataGetter = props.dataGetter;
+
+        grid.datePickerDateFormat = props.datePickerDateFormat || 'dd.MM.yyyy';
 
         grid.visible = true;
 
@@ -190,6 +194,10 @@ export class GridINUBaseClass extends GridFLClass {
         if (col.type === 'lookup') {
             grid.changedRow[col.keyField] = '';
             grid.changedRow[col.name] = '';
+
+            if (grid.setComboboxValue) {
+                grid.setComboboxValue('');
+            }
         }
         else {
             grid.changedRow[col.name] = '';
@@ -217,8 +225,6 @@ export class GridINUBaseClass extends GridFLClass {
         }
         else {
             const params = [
-                { key: 'atoken', value: grid.dataGetter.atoken },
-                { key: 'rtoken', value: grid.dataGetter.rtoken },
                 { key: 'entity', value: col.entity },
                 { key: 'configUid', value: col.entity + '_' },
             ];
@@ -237,8 +243,6 @@ export class GridINUBaseClass extends GridFLClass {
         if (grid._entityInfo) return grid._entityInfo;
 
         const params = [
-            { key: 'atoken', value: grid.dataGetter.atoken },
-            { key: 'rtoken', value: grid.dataGetter.rtoken },
             { key: 'entity', value: grid.entity },
             { key: 'configUid', value: grid.getConfigUid() },
         ];
@@ -404,8 +408,6 @@ export class GridINUBaseClass extends GridFLClass {
         e = e || { filters: [] };
 
         const params = [
-            { key: 'atoken', value: grid.dataGetter.atoken },
-            { key: 'rtoken', value: grid.dataGetter.rtoken },
             { key: 'pageSize', value: grid.pageSize },
             { key: 'pageNumber', value: grid.pageNumber },
             { key: 'entity', value: grid.entity },
@@ -477,8 +479,6 @@ export class GridINUBaseClass extends GridFLClass {
         const grid = this;
 
         const params = [
-            { key: 'atoken', value: grid.dataGetter.atoken },
-            { key: 'rtoken', value: grid.dataGetter.rtoken },
             { key: 'id', value: grid.selectedValue() || grid.selectedRow()[grid.keyField] },
         ];
 
@@ -514,8 +514,6 @@ export class GridINUBaseClass extends GridFLClass {
         if (!grid.isRowChanged(e.row)) return new Promise(function (resolve, reject) { resolve(true); });
 
         const params = [
-            { key: 'atoken', value: grid.dataGetter.atoken },
-            { key: 'rtoken', value: grid.dataGetter.rtoken },
             { key: 'row', value: e.row },
             { key: 'upd', value: e.changedRow },
             { key: 'columns', value: grid.keyField },
@@ -574,8 +572,6 @@ export class GridINUBaseClass extends GridFLClass {
         if (savingColumns.length <= 0) return;
 
         const params = [
-            { key: 'atoken', value: grid.dataGetter.atoken },
-            { key: 'rtoken', value: grid.dataGetter.rtoken },
             { key: 'configUid', value: grid.getConfigUid() },
             { key: 'columns', value: savingColumns },
         ];
@@ -591,8 +587,6 @@ export class GridINUBaseClass extends GridFLClass {
 
         return new Promise((resolve) => {
             const params = [
-                { key: 'atoken', value: grid.dataGetter.atoken },
-                { key: 'rtoken', value: grid.dataGetter.rtoken },
                 { key: 'filter', value: filter },
                 { key: 'pageNumber', value: pageNum },
                 { key: 'entity', value: grid.entity },

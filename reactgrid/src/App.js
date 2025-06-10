@@ -15,6 +15,8 @@ import { LoginPage } from './Pages/LoginPage';
 import appSettings from './AppSettings';
 import { DataGetter } from './Utils/DataGetter';
 
+import { format, formatDate, isValid, parse } from "date-fns";
+import Moment from 'moment';
 
 function App() {
     const [state, setState] = useState({ menuItem: - 2, atoken: '', rtoken: '' });
@@ -150,6 +152,31 @@ function App() {
             <button onClick={() => { console.clear() }} className="modal-window-footer-button">Clear console</button>
         );
     }
+
+    const TEST = function () {
+        let value;
+
+        Moment.locale('ru');
+
+        const d = '10.03.2011 0:00:00';
+        const d2 = '19.03.2011 0:00:00';
+
+        let date = new Date(d);
+        let formattedDate = date.toDateString()
+
+        date = new Date(d2);
+        formattedDate = date.toDateString()
+
+        date = Moment(d);
+        date = date.format('DD.MM.YYYY')
+        date = Moment(d2, 'DD.MM.YYYY');
+        date = date.format('DD.MM.YYYY')
+
+        value = format(d, "dd.MMM.yyyy HH:mm:ss");
+        value = formatDate(d, "dd.MMM.yyyy");
+        value = formatDate(d2, "dd.MMM.yyyy");
+        value = format(d2, "dd.MMM.yyyy HH:mm:ss");
+    }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     const getTestApp = () => {
         console.log('state == ' + state.menuItem);
@@ -260,6 +287,12 @@ function App() {
                         </div>
                     </>
                 );
+            case 11:
+                return (
+                    <>
+                        <button onClick={() => { TEST() }} className="modal-window-footer-button">TEST</button>
+                    </>
+                );
             default:
                 return null;
         }
@@ -292,6 +325,7 @@ function App() {
                     <option>8. Two Grids (INU)</option>
                     <option>9. Graph (INU, handmade)</option>
                     <option>10. Graph (INU, Remarks_scheme)</option>
+                    <option>11. TEST</option>
                 </select>
                 <div className="div-on-menu">
                     {getTestApp()}

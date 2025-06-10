@@ -2,6 +2,9 @@ import { GridINU } from './GridINU';
 import { useState, useEffect } from 'react';
 import { GridINUBaseClass } from './GridINUBase.js';
 import { Select } from './OuterComponents/Select';
+import DatePicker from "react-datepicker";
+import Moment from 'moment';
+import "react-datepicker/dist/react-datepicker.css";
 // =================================================================================================================================================================
 export function CardINU(props) {
     let card = null;
@@ -101,14 +104,23 @@ export class CardINUClass extends GridINUBaseClass {
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     renderField(col) {
         const card = this;
-        const value = card.changedRow[col.name];
+        let value = card.changedRow[col.name];
         if (col.type === undefined || col.type === null) {
             col.type = '';
         }
+        let parsedDate;
+        if (col.type === 'date' && value) {
+            parsedDate = Moment(value, card.dateFormat);
+            value = parsedDate.format(card.dateFormat);
+        }
         const noClear = col.required || value === undefined || value === '';
-
+        const old = false;
         switch (col.type.toLowerCase()) {
             case 'lookup':
+                const keyFieldValue = card.changedRow[col.keyField];
+                if (col.setComboboxValue) {
+                    col.setComboboxValue({ value: keyFieldValue, label: value });
+                }
                 return (
                     <div className="graph-card-field"
                         key={`cardlookupdiv_${card.id}_${col.id}_`}
@@ -124,20 +136,23 @@ export class CardINUClass extends GridINUBaseClass {
                                 <input
                                     key={`cardlookupinput_${card.id}_${col.id}_`}
                                     value={value}
-                                    style={{ width: 'calc(100% - 4px)', padding: '0 2px', boxSizing: 'border-box', height: '2.3em', gridColumn: col.required || col.readonly ? 'span 2' : '' }}
+                                    style={{ width: 'calc(100% - 4px)', padding: '0 2px', boxSizing: 'border-box', height: '2.3em', gridColumn: col.required || col.readonly || noClear ? 'span 2' : '' }}
                                     disabled='disabled'
                                 ></input>
                                 :
                                 <Select
-                                    key={`cardlookupselect_${card.id}_${col.id}_`}
-                                    value={{ value: card.changedRow[col.keyField], label: value }}
+                                    key={`cardlookupselect_${card.id}_${col.id}_${card.keyCellAdd(true)}_`}
+                                    value={{ value: keyFieldValue, label: value }}
                                     getOptions={(filter, pageNum) => card.getLookupValues(col, filter, pageNum)}
-                                    style={{ width: 'calc(100% - 4px)', padding: '0 2px', boxSizing: 'border-box', gridColumn: col.required || col.readonly ? 'span 2' : '' }}
+                                    style={{ width: 'calc(100% - 4px)', padding: '0 2px', boxSizing: 'border-box' }}
+                                    gridColumn={col.required || col.readonly || noClear ? 'span 2' : 'span 1'}
                                     onChange={(e) => {
                                         card.changedRow[col.keyField] = e.value;
                                         card.changedRow[col.name] = e.label;
+                                        card.setEditing(true);
                                         card.refreshState();
                                     }}
+                                    init={(e) => { col.setComboboxValue = e.setComboboxValue; }}
                                 >
                                 </Select>
                         }
@@ -173,25 +188,56 @@ export class CardINUClass extends GridINUBaseClass {
                         >
                             {col.title || col.name}
                         </span>
-                        <input
-                            style={{
-                                width: '100%',
-                                height: '2.3em',
-                                padding: '0',
-                                boxSizing: 'border-box',
-                                gridColumn: noClear ? 'span 2' : '',
-                                overflowX: 'hidden',
-                            }}
-                            disabled={true}
-                            value={value}
-                        />
-                        <button
-                            key={`griddatepickerbtn_${card.id}_${col.id}_`}
-                            className={'graph-card-button'}
-                            onClick={(e) => card.openDatePickerWnd(e, col, value)}
-                        >
-                            {card.images.filterSelect ? card.images.filterSelect() : card.translate('Select', 'graph-filter-select')}
-                        </button>
+                        {
+                            old ? <>
+                                <input
+                                    style={{
+                                        width: '100%',
+                                        height: '2.3em',
+                                        padding: '0',
+                                        boxSizing: 'border-box',
+                                        gridColumn: noClear ? 'span 2' : '',
+                                        overflowX: 'hidden',
+                                    }}
+                                    disabled={true}
+                                    value={value}
+                                />
+                                <button
+                                    key={`griddatepickerbtn_${card.id}_${col.id}_`}
+                                    className={'graph-card-button'}
+                                    onClick={(e) => card.openDatePickerWnd(e, col, value)}
+                                >
+                                    {card.images.filterSelect ? card.images.filterSelect() : card.translate('Select', 'graph-filter-select')}
+                                </button>
+                            </>
+                                :
+                                <div
+                                    style={{
+                                        width: '100%',
+                                        height: '1.7em',
+                                        minHeight: '1.7em',
+                                        padding: '0',
+                                        gridColumn: col.required || col.readonly || noClear ? 'span 3' : 'span 2',
+                                        overflowX: 'hidden',
+                                    }}
+                                    className="datepicker-input"
+                                >
+                                    <DatePicker
+                                        selected={parsedDate}
+                                        locale="ru"
+                                        dateFormat={card.datePickerDateFormat}
+                                        showMonthDropdown
+                                        showYearDropdown
+                                        onSelect={(date) => {
+                                            card.changedRow = card.changedRow || {};
+                                            card.changedRow[col.name] = Moment(date, card.dateFormat);
+                                            card.setEditing(true);
+                                            card.refreshState();
+                                        }}
+                                    ></DatePicker>
+                                </div>
+
+                        }
                         {
                             noClear ? <></>
                                 : <button
@@ -221,7 +267,7 @@ export class CardINUClass extends GridINUBaseClass {
                             key={`cardlookuptextarea_${card.id}_${col.id}_`}
 
                             value={card.changedRow[col.name] !== undefined ? card.changedRow[col.name] : ''}
-                            style={{ width: 'calc(100% - 4px)', height: col.maxW !== undefined && +col.maxW >= 200 ? '5em' : '2.3em', padding: '0 2px', boxSizing: 'border-box', gridColumn: col.required || col.readonly ? 'span 3' : 'span 2', resize: 'vertical' }}
+                            style={{ width: 'calc(100% - 4px)', height: col.maxW !== undefined && +col.maxW >= 200 ? '5em' : '2.3em', padding: '0 2px', boxSizing: 'border-box', gridColumn: col.required || col.readonly || noClear ? 'span 3' : 'span 2', resize: 'vertical' }}
                             onChange={(e) => card.changeField(e, col, card.changedRow)}
                             disabled={col.readonly ? 'disabled' : ''}
                             autoFocus={col === card._changingCol}
@@ -364,8 +410,6 @@ export class CardINUClass extends GridINUBaseClass {
         const card = this;
 
         const params = [
-            { key: 'atoken', value: card.dataGetter.atoken },
-            { key: 'rtoken', value: card.dataGetter.rtoken },
             { key: 'pageSize', value: 1 },
             { key: 'pageNumber', value: 1 },
         ];

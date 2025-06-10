@@ -5,7 +5,11 @@ import { GraphClass } from './Graph';
 import { GridINU, GridINUClass } from './GridINU';
 import { Modal } from './Modal';
 import { Select } from './OuterComponents/Select';
-import { DatePicker } from './OuterComponents/DatePicker';
+//import { DatePicker } from './OuterComponents/DatePicker';
+import DatePicker from "react-datepicker";
+import { format, isValid, parse } from "date-fns";
+import Moment from 'moment';
+import "react-datepicker/dist/react-datepicker.css";
 // ==================================================================================================================================================================
 export function Graph(props) {
     let gc = null;
@@ -205,21 +209,21 @@ export class GraphComponentClass extends BaseComponent {
         const gc = this;
         return gc.renderGrid(node, NodeStatus.filter, true);
 
-    //    return (
-    //        <GridINU
-    //            findGrid={(props) => gc.replaceGrid(props)}
-    //            graph={gc.graph}
-    //            uid={node.uid || node.id}
-    //            entity={node.entity}
-    //            dataGetter={gc.dataGetter || node.dataGetter}
-    //            init={(grid) => {
-    //                grid.status = NodeStatus.filter;
-    //                grid.visible = true;
-    //                grid.title = node.title;
-    //            }}
-    //        >
-    //        </GridINU>
-    //    );
+        //    return (
+        //        <GridINU
+        //            findGrid={(props) => gc.replaceGrid(props)}
+        //            graph={gc.graph}
+        //            uid={node.uid || node.id}
+        //            entity={node.entity}
+        //            dataGetter={gc.dataGetter || node.dataGetter}
+        //            init={(grid) => {
+        //                grid.status = NodeStatus.filter;
+        //                grid.visible = true;
+        //                grid.title = node.title;
+        //            }}
+        //        >
+        //        </GridINU>
+        //    );
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     renderDatePicker() {
@@ -241,11 +245,15 @@ export class GraphComponentClass extends BaseComponent {
 
         if (+node.status !== +NodeStatus.filter || gc.isTop(node) !== top) return <></>;
 
-        //if (node.filterType === FilterType.date) return <></>;
-
         if (!gc.isTop(node) && node.parents.indexOf(gc.activeMaster) < 0) return <></>;
 
         if (gc.isTop(node) && node.children.indexOf(gc.activeMaster) < 0) return <></>;
+
+        let parsedDate;
+        if (node.filterType === FilterType.date && node.value) {
+            //parsedDate = parse(node.value, node.dateFormat, new Date());
+            parsedDate = Moment(node.value, node.dateFormat);
+        }
 
         return (
             <div
@@ -276,37 +284,65 @@ export class GraphComponentClass extends BaseComponent {
                         >
                         </Select>
                         :
-                        <input
-                            key={`fltrinp_${node.id}_${gc.id}_`}
-                            style={{ width: '100%', padding: '0 2px', boxSizing: 'border-box', height: '2.3em' }}
-                            value={
-                                node.filterType !== FilterType.date ?
-                                    node.filterType !== FilterType.input ?
-                                        (node.value !== undefined && node.selectedText ? node.selectedText() : '')
-                                        :
-                                        node.value
-                                    :
-                                    (node.value !== undefined ? node.value : '')
-                            }
-                            readOnly={node.filterType !== FilterType.input}
-                            disabled={gc.isEditing() ? 'disabled' : ''}
-                            onChange={(e) => {
-                                const prevValue = e.target.value;
-                                node.value = e.target.value;
-                                gc.refreshState();
+                        node.filterType === FilterType.date ?
+                            <div
+                                style={{
+                                    width: '100%',
+                                    height: '2em',
+                                    minHeight: '2em',
+                                    padding: '0',
+                                    gridColumn: 'span 2',
+                                    overflowX: 'hidden',
+                                }}
+                                className="datepicker-filter"
+                            >
 
-                                setTimeout(() => {
-                                    if (prevValue === e.target.value) {
-
+                                <DatePicker
+                                    selected={parsedDate}
+                                    locale="ru"
+                                    dateFormat={node.datePickerDateFormat}
+                                    showMonthDropdown
+                                    showYearDropdown
+                                    onSelect={(date) => {
+                                        node.value = Moment(date, node.dateFormat).format(node.dateFormat);//format(date, node.dateFormat);
                                         gc.graph.triggerWave({ nodes: [node], withStartNodes: false });
-                                    }
-                                }, 150);
+                                        //gc.closeFilterWnd();
+                                        gc.refreshState();
+                                    }}
+                                ></DatePicker>
+                            </div>
+                            :
+                            <input
+                                key={`fltrinp_${node.id}_${gc.id}_`}
+                                style={{ width: '100%', padding: '0 2px', boxSizing: 'border-box', height: '2.3em', gridColumn: 'span 2', }}
+                                value={
+                                    node.filterType !== FilterType.date ?
+                                        node.filterType !== FilterType.input ?
+                                            (node.value !== undefined && node.selectedText ? node.selectedText() : '')
+                                            :
+                                            node.value
+                                        :
+                                        (node.value !== undefined ? node.value : '')
+                                }
+                                readOnly={node.filterType !== FilterType.input}
+                                disabled={gc.isEditing() ? 'disabled' : ''}
+                                onChange={(e) => {
+                                    const prevValue = e.target.value;
+                                    node.value = e.target.value;
+                                    gc.refreshState();
 
-                            }}
-                        ></input>
+                                    setTimeout(() => {
+                                        if (prevValue === e.target.value) {
+
+                                            gc.graph.triggerWave({ nodes: [node], withStartNodes: false });
+                                        }
+                                    }, 150);
+
+                                }}
+                            ></input>
                 }
                 {
-                    node.filterType !== FilterType.input ?
+                    node.filterType !== FilterType.input && node.filterType !== FilterType.date ?
                         <button
                             className={node.opt.filterButtonClass || 'graph-filter-button'}
                             key={`fltrsel_${node.id}_${gc.id}_`}
@@ -381,7 +417,7 @@ export class GraphComponentClass extends BaseComponent {
     openFilterWnd(e, node) {
         const gc = this;
 
-        gc.selectingDatePos = gc.selectingDatePos || { x: e.clientX || 100, y: e.clientY || 100, w: 800, h: 600 }; 
+        gc.selectingDatePos = gc.selectingDatePos || { x: e.clientX || 100, y: e.clientY || 100, w: 800, h: 600 };
         gc.selectingNodePos = gc.selectingNodePos || { x: e.clientX || 100, y: e.clientY || 100, w: 800, h: 600 };
 
         gc.selectingNodePos.x = e.clientX || gc.selectingNodePos.x;
@@ -492,8 +528,6 @@ export class GraphComponentClass extends BaseComponent {
         return new Promise(function (resolve, reject) {
 
             const params = [
-                { key: 'atoken', value: gc.dataGetter.atoken },
-                { key: 'rtoken', value: gc.dataGetter.rtoken },
                 { key: 'graphScheme', value: gc.schemeName }
             ];
 
@@ -518,8 +552,6 @@ export class GraphComponentClass extends BaseComponent {
             }
 
             const params = [
-                { key: 'atoken', value: gc.dataGetter.atoken },
-                { key: 'rtoken', value: gc.dataGetter.rtoken },
                 { key: 'configUid', value: gc.graph.uid }
             ];
 
@@ -558,8 +590,6 @@ export class GraphComponentClass extends BaseComponent {
         }
 
         const params = [
-            { key: 'atoken', value: gc.dataGetter.atoken },
-            { key: 'rtoken', value: gc.dataGetter.rtoken },
             { key: 'configUid', value: gc.graph.uid },
             { key: 'gdata', value: savingData },
         ];

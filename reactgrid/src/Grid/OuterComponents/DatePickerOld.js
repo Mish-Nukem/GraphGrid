@@ -1,9 +1,9 @@
 import { useId, useState } from "react";
-import DatePicker from "react-datepicker";
+import { DayPicker } from "react-day-picker";
 import { format, isValid, parse } from "date-fns";
 import { ru } from "react-day-picker/locale";
 import "react-day-picker/style.css";
-export function DatePickerNew(props) {
+export function DatePickerOld(props) {
     const date = props.date || new Date().toLocaleDateString();
 
     const inputId = useId();
@@ -54,25 +54,22 @@ export function DatePickerNew(props) {
     //        selectedDate? `Selected: ${selectedDate.toString()}` : "Pick a day."
     //}
 
-    //<div style={{ whiteSpace: 'nowrap' }}>
-    //    <label htmlFor={inputId}>
-    //        <strong>{translate('Date') + ': '}</strong>
-    //    </label>
-    //    <input
-    //        style={{ fontSize: "inherit" }}
-    //        id={inputId}
-    //        type="text"
-    //        value={inputValue}
-    //        placeholder={dateFormat}
-    //        onChange={handleInputChange}
-    //    />
-    //</div>
-
-
     return (
         <div className='datepicker-div'>
-
-            <DatePicker //onSelect={(date) => { setSelected(date); if (props.onSelect) props.onSelect(format(date, dateFormat)); }}
+            <div style={{ whiteSpace: 'nowrap' }}>
+                <label htmlFor={inputId}>
+                    <strong>{translate('Date') + ': '}</strong>
+                </label>
+                <input
+                    style={{ fontSize: "inherit" }}
+                    id={inputId}
+                    type="text"
+                    value={inputValue}
+                    placeholder={dateFormat}
+                    onChange={handleInputChange}
+                />
+            </div>
+            <DayPicker //onSelect={(date) => { setSelected(date); if (props.onSelect) props.onSelect(format(date, dateFormat)); }}
                 month={month}
                 onMonthChange={setMonth}
                 animate

@@ -19,7 +19,7 @@
     .modal-window-header > h4 {
         white-space: nowrap;
         overflow: hidden;
-        margin-left: 1.5em; 
+        margin-left: 1.5em;
     }
 
     .modal-window-header > button {
@@ -279,6 +279,7 @@
     height: 2em;
     margin: 2px;
 }
+
 .grid-cell-lookup {
     display: grid;
     grid-template-columns: calc(100% - 40px) 20px 20px;
@@ -383,9 +384,9 @@
     margin: 0 1em;
 }
 
-.graph-card-field > span {
-    font-weight: bold;
-}
+    .graph-card-field > span {
+        font-weight: bold;
+    }
 
 .login-form {
     display: grid;
@@ -414,4 +415,21 @@
 
 .datepicker-div {
     margin: 1em;
+}
+
+
+.datepicker-input,
+.datepicker-input > div.react-datepicker-wrapper,
+.datepicker-input > div > div.react-datepicker__input-container,
+.datepicker-input > div > div.react-datepicker__input-container input {
+    width: calc(100% - 3px);
+    height: 1.3em;
+}
+
+.datepicker-filter,
+.datepicker-filter > div.react-datepicker-wrapper,
+.datepicker-filter > div > div.react-datepicker__input-container,
+.datepicker-filter > div > div.react-datepicker__input-container input {
+    width: calc(100% - 3px);
+    height: 1.7em;
 }

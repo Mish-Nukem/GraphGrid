@@ -34,7 +34,6 @@ export function Select(props) {
             borderColor: '#9e9e9e',
             minHeight: height,
             height: height,
-            gridColumn: props.gridColumn,
             boxShadow: state.isFocused ? null : null,
         }),
 
@@ -63,7 +62,9 @@ export function Select(props) {
     };
 
     return (
-        <>
+        <div
+            style={{ gridColumn: props.gridColumn || '' }}
+        >
             <AsyncPaginate
                 key={value}
                 value={value}
@@ -80,6 +81,6 @@ export function Select(props) {
                 style={props.style}
             >
             </AsyncPaginate >
-        </>
+        </div>
     );
 };
