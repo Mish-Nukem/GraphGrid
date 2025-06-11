@@ -4,8 +4,8 @@ import { FilterType, NodeStatus } from './Base';
 import { WaveType } from './Graph.js';
 import { Modal } from './Modal';
 //import { DatePicker } from './OuterComponents/DatePicker';
-import DatePicker from "react-datepicker";
-import "react-datepicker/dist/react-datepicker.css";
+//import DatePicker from "react-datepicker";
+//import "react-datepicker/dist/react-datepicker.css";
 // ==================================================================================================================================================================
 export function GridINUBase(props) {
     let grid = null;
@@ -84,13 +84,12 @@ export class GridINUBaseClass extends GridFLClass {
         return this.visible;
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
-    render() {
+    render() { //{grid.renderDatePicker()}
         const grid = this;
         return (
             <>
                 {super.render()}
                 {grid.renderLookup()}
-                {grid.renderDatePicker()}
             </>
         )
     }
@@ -112,6 +111,7 @@ export class GridINUBaseClass extends GridFLClass {
         );
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
+    /*
     renderDatePicker() {
         const grid = this;
         return (
@@ -148,10 +148,28 @@ export class GridINUBaseClass extends GridFLClass {
                 <></>
         );
     }
+     */
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
+    onLookupGridInit(lookupGrid) {
+        const grid = this;
+        const info = grid._lookupEntityInfo[grid.lookupField.entity];
+
+        lookupGrid.visible = true;
+        lookupGrid.title = grid.lookupField.title;
+        if (grid.activeRow) {
+            lookupGrid.value = grid.activeRow;
+            lookupGrid.activeRow = grid.activeRow;
+            delete grid.activeRow;
+        }
+        lookupGrid.isSelecting = true;
+        lookupGrid._entityInfo = info;
+        grid.lookupGrid = lookupGrid;
+    };
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     renderLookupGrid(lookupField) {
         const grid = this;
         const info = grid._lookupEntityInfo[grid.lookupField.entity];
+
         return (
             <GridINUBase
                 entity={grid.lookupField.entity}
@@ -160,13 +178,7 @@ export class GridINUBaseClass extends GridFLClass {
                 nameField={grid.lookupField.refNameField}
                 onSelectValue={(e) => grid.selectLookupValue(e)}
                 getColumns={info.columns ? () => { return info.columns; } : null}
-                init={(grid) => {
-                    grid.visible = true;
-                    grid.title = grid.lookupField.title;
-                    grid.isSelecting = true;
-                    grid.uid = grid.uid + '_lookup_' + grid.entity + '_';
-                    grid.lookupGrid = grid;
-                }}
+                init={(lookupGrid) => grid.onLookupGridInit(lookupGrid)}
             >
             </GridINUBase>
         );
@@ -268,6 +280,7 @@ export class GridINUBaseClass extends GridFLClass {
         grid.refreshState();
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
+    /*
     openDatePickerWnd(e, col, value) {
         const grid = this;
 
@@ -291,6 +304,7 @@ export class GridINUBaseClass extends GridFLClass {
         }
         grid.refreshState();
     }
+    */
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     skipOnWaveVisit(e) {
         if (super.skipOnWaveVisit(e)) return true;
@@ -324,13 +338,13 @@ export class GridINUBaseClass extends GridFLClass {
                 }
 
                 const scheme = parent.graph && parent.graph.schemeName ? parent.graph.schemeName : '';
-                const keyField = parent.getKeyColumn ? parent.getKeyColumn() : parent.keyField;
+                const parentKeyField = parent.getKeyColumn ? parent.getKeyColumn() : parent.keyField;
 
                 let activeValue;
                 let pref = parent.entity;
                 switch (parent.status) {
                     case NodeStatus.grid:
-                        if (!keyField || !parent.entity) return '';
+                        if (!parentKeyField || !parent.entity) return '';
 
                         activeValue = parent.selectedValue();
                         break;
@@ -353,7 +367,19 @@ export class GridINUBaseClass extends GridFLClass {
                 if (!activeValue) return '';
 
                 if (link.condition) {
-                    return { type: parent.filterType === FilterType.date ? 'column' : 'graphLink', filter: link.condition.replace(/:id/gi, activeValue) };
+                    return link.condition.replace(/:id/gi, activeValue);//{ type: parent.filterType === FilterType.date ? 'column' : 'graphLink', filter: link.condition.replace(/:id/gi, activeValue) };
+                }
+
+                if (grid._entityInfo && parent._entityInfo && grid._entityInfo.tableName) {
+                    const refColumn = grid.columns.find(function (item, index, array) {
+                        return item.type == 'lookup' && String(item.entity) === String(parent.entity);
+                    });
+
+                    if (!refColumn) return '';
+
+                    const arr = grid._entityInfo.tableName.split('.');
+                    const tname = arr[arr.length - 1];
+                    return tname + '.' + refColumn.keyField + ' = ' + activeValue;
                 }
 
                 return `${pref};${parent.uid};${scheme} = ${activeValue}`;

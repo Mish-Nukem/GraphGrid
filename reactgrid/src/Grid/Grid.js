@@ -205,7 +205,7 @@ export class GridClass extends BaseComponent {
         return (
             <thead>
                 <tr>
-                    {grid.multi ? grid.renderSelectColumnHeader() : <></>}
+                    {grid.multi && context !== 'fake' ? grid.renderSelectColumnHeader() : <></>}
                     {columns.map((col, ind) => {
                         return (
                             <th

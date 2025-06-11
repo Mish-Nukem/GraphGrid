@@ -78,9 +78,10 @@ export class CardINUClass extends GridINUBaseClass {
     render() {
         const card = this;
 
-        //GridClass.applyTheme(card);
         card.addCardButtons();
         card.buttons = card.cardButtons;
+
+        //                {super.renderDatePicker()}
 
         return (
             <>
@@ -97,11 +98,35 @@ export class CardINUClass extends GridINUBaseClass {
                     }
                 </div>
                 {super.renderLookup()}
-                {super.renderDatePicker()}
             </>
         )
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
+    /*
+                            old ? <>
+                                <input
+                                    style={{
+                                        width: '100%',
+                                        height: '2.3em',
+                                        padding: '0',
+                                        boxSizing: 'border-box',
+                                        gridColumn: noClear ? 'span 2' : '',
+                                        overflowX: 'hidden',
+                                    }}
+                                    disabled={true}
+                                    value={value}
+                                />
+                                <button
+                                    key={`griddatepickerbtn_${card.id}_${col.id}_`}
+                                    className={'graph-card-button'}
+                                    onClick={(e) => card.openDatePickerWnd(e, col, value)}
+                                >
+                                    {card.images.filterSelect ? card.images.filterSelect() : card.translate('Select', 'graph-filter-select')}
+                                </button>
+                            </>
+                                :
+
+    */
     renderField(col) {
         const card = this;
         let value = card.changedRow[col.name];
@@ -189,54 +214,31 @@ export class CardINUClass extends GridINUBaseClass {
                             {col.title || col.name}
                         </span>
                         {
-                            old ? <>
-                                <input
-                                    style={{
-                                        width: '100%',
-                                        height: '2.3em',
-                                        padding: '0',
-                                        boxSizing: 'border-box',
-                                        gridColumn: noClear ? 'span 2' : '',
-                                        overflowX: 'hidden',
+                            <div
+                                style={{
+                                    width: '100%',
+                                    height: '1.7em',
+                                    minHeight: '1.7em',
+                                    padding: '0',
+                                    gridColumn: col.required || col.readonly || noClear ? 'span 3' : 'span 2',
+                                    overflowX: 'hidden',
+                                }}
+                                className="datepicker-input"
+                            >
+                                <DatePicker
+                                    selected={parsedDate}
+                                    locale="ru"
+                                    dateFormat={card.datePickerDateFormat}
+                                    showMonthDropdown
+                                    showYearDropdown
+                                    onSelect={(date) => {
+                                        card.changedRow = card.changedRow || {};
+                                        card.changedRow[col.name] = Moment(date, card.dateFormat);
+                                        card.setEditing(true);
+                                        card.refreshState();
                                     }}
-                                    disabled={true}
-                                    value={value}
-                                />
-                                <button
-                                    key={`griddatepickerbtn_${card.id}_${col.id}_`}
-                                    className={'graph-card-button'}
-                                    onClick={(e) => card.openDatePickerWnd(e, col, value)}
-                                >
-                                    {card.images.filterSelect ? card.images.filterSelect() : card.translate('Select', 'graph-filter-select')}
-                                </button>
-                            </>
-                                :
-                                <div
-                                    style={{
-                                        width: '100%',
-                                        height: '1.7em',
-                                        minHeight: '1.7em',
-                                        padding: '0',
-                                        gridColumn: col.required || col.readonly || noClear ? 'span 3' : 'span 2',
-                                        overflowX: 'hidden',
-                                    }}
-                                    className="datepicker-input"
-                                >
-                                    <DatePicker
-                                        selected={parsedDate}
-                                        locale="ru"
-                                        dateFormat={card.datePickerDateFormat}
-                                        showMonthDropdown
-                                        showYearDropdown
-                                        onSelect={(date) => {
-                                            card.changedRow = card.changedRow || {};
-                                            card.changedRow[col.name] = Moment(date, card.dateFormat);
-                                            card.setEditing(true);
-                                            card.refreshState();
-                                        }}
-                                    ></DatePicker>
-                                </div>
-
+                                ></DatePicker>
+                            </div>
                         }
                         {
                             noClear ? <></>

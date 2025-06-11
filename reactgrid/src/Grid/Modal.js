@@ -373,8 +373,8 @@ export class ModalClass extends BaseComponent {
         }
 
         const rect = elem.getBoundingClientRect();
-        const shiftX = e.clientX - rect.left;
-        const shiftY = e.clientY - rect.top;
+        const shiftX = e.pageX - rect.left;
+        const shiftY = e.pageY - rect.top;
 
         moveAt(e.pageX, e.pageY);
 

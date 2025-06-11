@@ -6,7 +6,7 @@ import { Modal } from './Modal';
 import { Select } from './OuterComponents/Select';
 import DatePicker, { registerLocale } from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
-import { format, isValid, parse } from "date-fns";
+//import { format, isValid, parse } from "date-fns";
 import ru from "date-fns/locale/ru";
 import Moment from 'moment';
 
@@ -132,6 +132,7 @@ export class GridINUClass extends GridINUBaseClass {
     renderLookupGrid(lookupField) {
         const grid = this;
         const info = grid._lookupEntityInfo[grid.lookupField.entity];
+
         return (
             <GridINU
                 entity={grid.lookupField.entity}
@@ -140,23 +141,39 @@ export class GridINUClass extends GridINUBaseClass {
                 nameField={grid.lookupField.refNameField}
                 onSelectValue={(e) => grid.selectLookupValue(e)}
                 getColumns={info.columns ? () => { return info.columns; } : null}
-                init={(lookupGrid) => {
-                    lookupGrid.visible = true;
-                    lookupGrid.title = grid.lookupField.title;
-                    if (grid.activeRow) {
-                        lookupGrid.value = grid.activeRow;
-                        lookupGrid.activeRow = grid.activeRow;
-                        delete grid.activeRow;
-                    }
-                    lookupGrid.isSelecting = true;
-                    lookupGrid._entityInfo = info;
-                    grid.lookupGrid = lookupGrid;
-                }}
+                init={(lookupGrid) => grid.onLookupGridInit(lookupGrid)}
             >
             </GridINU>
         );
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
+    /*
+                                old ?
+                                    <>
+                                        <span
+                                            style={{
+                                                width: '100%',
+                                                height: '1.7em',
+                                                padding: '0',
+                                                boxSizing: 'border-box',
+                                                gridColumn: noClear ? 'span 2' : '',
+                                                overflowX: 'hidden',
+                                            }}
+
+                                        >
+                                            {value}
+                                        </span>
+                                        <button
+                                            key={`griddatepickerbtn_${grid.id}_${col.id}_`}
+                                            className={'grid-cell-button'}
+                                            onClick={(e) => grid.openDatePickerWnd(e, col, value)}
+                                        >
+                                            {'...'}
+                                        </button>
+                                    </>
+                                    :
+
+    */
     renderCell(col, row) {
         const grid = this;
 
@@ -175,7 +192,7 @@ export class GridINUClass extends GridINUBaseClass {
         }
 
         const noClear = col.required || value === undefined || value === '';
-        const old = false;
+        //const old = false;
         switch (col.type.toLowerCase()) {
             case 'lookup':
                 const keyFieldValue = !grid.isEditing() ? row[col.keyField] : grid.changedRow && grid.changedRow[col.keyField] !== undefined ? grid.changedRow[col.keyField] : row[col.keyField];
@@ -240,30 +257,6 @@ export class GridINUClass extends GridINUBaseClass {
                     >
                         {
                             col.type === 'date' ?
-                                old ?
-                                    <>
-                                        <span
-                                            style={{
-                                                width: '100%',
-                                                height: '1.7em',
-                                                padding: '0',
-                                                boxSizing: 'border-box',
-                                                gridColumn: noClear ? 'span 2' : '',
-                                                overflowX: 'hidden',
-                                            }}
-
-                                        >
-                                            {value}
-                                        </span>
-                                        <button
-                                            key={`griddatepickerbtn_${grid.id}_${col.id}_`}
-                                            className={'grid-cell-button'}
-                                            onClick={(e) => grid.openDatePickerWnd(e, col, value)}
-                                        >
-                                            {'...'}
-                                        </button>
-                                    </>
-                                    :
                                     <div
                                         style={{
                                             width: '100%',
@@ -286,7 +279,7 @@ export class GridINUClass extends GridINUBaseClass {
                                                 grid.changedRow[col.name] = Moment(date, grid.dateFormat);
                                                 grid.setEditing(true);
                                                 grid.refreshState();
-                                            }}
+                                        }}
                                         ></DatePicker>
                                     </div>
                                 :

@@ -220,7 +220,10 @@ export class GridGRClass extends GridClass {
                 let filter = link.content.applyLink(link);
                 if (filter === undefined || filter === '') continue;
 
-                filters.push(filter);
+                let fo = { type: 'graphLink', filter: filter };
+                filters.push(fo);
+
+                //filters.push(filter);
             }
         }
 

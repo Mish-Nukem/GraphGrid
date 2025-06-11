@@ -369,7 +369,7 @@ export class GridDBClass extends GridGRClass {
                         className={'grid-pager-of'}
                         key={`pager_${bottom ? 'bottom' : 'top'}_${grid.id}_${button.id}_`}
                     >
-                        {` ${grid.translate('of', 'pager-button')} ${grid.pagesCount >= 0 ? grid.pagesCount : ''}`}
+                        {` ${grid.translate('of', 'pager-button')} ${grid.pagesCount >= 0 ? grid.pagesCount : '0'}`}
                     </span>
                 );
             }
@@ -465,7 +465,7 @@ export class GridDBClass extends GridGRClass {
                     <span
                         className={'grid-pager-total'}
                         key={`pager_${bottom ? 'bottom' : 'top'}_${grid.id}_${button.id}_`}>
-                        {`${grid.translate('total rows', 'pager-button')} ${grid.totalRows >= 0 ? grid.totalRows : ''}`}
+                        {`${grid.translate('total rows', 'pager-button')} ${grid.totalRows >= 0 ? grid.totalRows : '0'}`}
                     </span>
                 );
             }
@@ -563,7 +563,7 @@ export class GridDBClass extends GridGRClass {
         let nextInd = 1;
         if (e.shiftKey) {
             for (let col of grid.columns) {
-                if (col.sortInd !== undefined) {
+                if (col.sortInd !== undefined && col.sortInd !== null) {
                     nextInd++;
                 }
                 else if (col.asc || col.desc) {

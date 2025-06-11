@@ -7,7 +7,7 @@ import { Modal } from './Modal';
 import { Select } from './OuterComponents/Select';
 //import { DatePicker } from './OuterComponents/DatePicker';
 import DatePicker from "react-datepicker";
-import { format, isValid, parse } from "date-fns";
+//import { format, isValid, parse } from "date-fns";
 import Moment from 'moment';
 import "react-datepicker/dist/react-datepicker.css";
 // ==================================================================================================================================================================
@@ -92,6 +92,27 @@ export class GraphComponentClass extends BaseComponent {
         }
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
+    /*
+                        gc.selectingNode.filterType === FilterType.date ?
+                            <Modal
+                                title={gc.selectingNode.title}
+                                renderContent={() => { return gc.renderDatePicker() }}
+                                pos={gc.selectingDatePos}
+                                onClose={(e) => gc.closeFilterWnd(e)}
+                                init={(wnd) => { wnd.visible = gc.nodeSelectIsShowing; }}
+                                dimensionsByContent={true}
+                                closeWhenMiss={true}
+                                closeWhenEscape={true}
+                                noHeader={true}
+                                noFooter={true}
+                                noPadding={true}
+                                resizable={false}
+                                margin={'1em'}
+                            >
+                            </Modal>
+                            :
+
+    */
     render() {
         const gc = this;
 
@@ -172,32 +193,14 @@ export class GraphComponentClass extends BaseComponent {
                 </div>
                 {
                     gc.nodeSelectIsShowing ?
-                        gc.selectingNode.filterType === FilterType.date ?
-                            <Modal
-                                title={gc.selectingNode.title}
-                                renderContent={() => { return gc.renderDatePicker() }}
-                                pos={gc.selectingDatePos}
-                                onClose={(e) => gc.closeFilterWnd(e)}
-                                init={(wnd) => { wnd.visible = gc.nodeSelectIsShowing; }}
-                                dimensionsByContent={true}
-                                closeWhenMiss={true}
-                                closeWhenEscape={true}
-                                noHeader={true}
-                                noFooter={true}
-                                noPadding={true}
-                                resizable={false}
-                                margin={'1em'}
-                            >
-                            </Modal>
-                            :
-                            <Modal
-                                title={gc.selectingNode.title}
-                                renderContent={() => { return gc.renderFilterGrid(gc.selectingNode) }}
-                                pos={gc.selectingNodePos}
-                                onClose={(e) => gc.closeFilterWnd(e)}
-                                init={(wnd) => { wnd.visible = gc.nodeSelectIsShowing; }}
-                            >
-                            </Modal>
+                        <Modal
+                            title={gc.selectingNode.title}
+                            renderContent={() => { return gc.renderFilterGrid(gc.selectingNode) }}
+                            pos={gc.selectingNodePos}
+                            onClose={(e) => gc.closeFilterWnd(e)}
+                            init={(wnd) => { wnd.visible = gc.nodeSelectIsShowing; }}
+                        >
+                        </Modal>
                         :
                         <></>
                 }
@@ -226,6 +229,7 @@ export class GraphComponentClass extends BaseComponent {
         //    );
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
+    /*
     renderDatePicker() {
         const gc = this;
         return (
@@ -239,6 +243,7 @@ export class GraphComponentClass extends BaseComponent {
             ></DatePicker>
         );
     }
+    */
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     renderFilter(node, top) {
         const gc = this;
@@ -306,15 +311,15 @@ export class GraphComponentClass extends BaseComponent {
                                     onSelect={(date) => {
                                         node.value = Moment(date, node.dateFormat).format(node.dateFormat);//format(date, node.dateFormat);
                                         gc.graph.triggerWave({ nodes: [node], withStartNodes: false });
-                                        //gc.closeFilterWnd();
                                         gc.refreshState();
                                     }}
+                                    disabled={gc.isEditing()}
                                 ></DatePicker>
                             </div>
                             :
                             <input
                                 key={`fltrinp_${node.id}_${gc.id}_`}
-                                style={{ width: '100%', padding: '0 2px', boxSizing: 'border-box', height: '2.3em', gridColumn: 'span 2', }}
+                                style={{ width: '100%', padding: '0 2px', boxSizing: 'border-box', height: '2.3em', gridColumn: node.filterType === FilterType.input ? 'span 2' : '' }}
                                 value={
                                     node.filterType !== FilterType.date ?
                                         node.filterType !== FilterType.input ?
@@ -394,8 +399,16 @@ export class GraphComponentClass extends BaseComponent {
         return gc.renderGrid(node, NodeStatus.grid, top);
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
+    onGridInit(grid, title, status, top) {
+        grid.status = status;
+        grid.visible = true;
+        grid.isBottom = !top;
+        grid.title = title;
+    };
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     renderGrid(node, status, top) {
         const gc = this;
+
         return (
             <GridINU
                 findGrid={(props) => gc.replaceGrid(props)}
@@ -403,12 +416,7 @@ export class GraphComponentClass extends BaseComponent {
                 uid={node.uid !== undefined ? node.uid : node.id}
                 entity={node.entity}
                 dataGetter={gc.dataGetter || node.dataGetter}
-                init={(grid) => {
-                    grid.status = status;
-                    grid.visible = true;
-                    grid.isBottom = !top;
-                    grid.title = node.title;
-                }}
+                init={(grid) => gc.onGridInit(grid, node.title, status, top)}
             >
             </GridINU>
         );

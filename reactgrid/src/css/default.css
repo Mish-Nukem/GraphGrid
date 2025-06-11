@@ -433,3 +433,7 @@
     width: calc(100% - 3px);
     height: 1.7em;
 }
+
+    .datepicker-filter > div.react-datepicker-wrapper {
+        margin-top: 1px;
+    }

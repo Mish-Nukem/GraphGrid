@@ -134,7 +134,8 @@ export default class TestData {
             if (!this.passRow(e.grid, row, e.autocompleteColumn)) continue;
 
             if (e.filters && e.filters.length) {
-                const filter = e.filters[0];
+                let filter = e.filters[0];
+                filter = filter.filter ? filter.filter : filter;
                 if (!row['ParentId'] || row['ParentId'].indexOf(+filter) < 0) continue;
             }
 
