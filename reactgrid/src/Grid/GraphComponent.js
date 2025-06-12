@@ -2,13 +2,13 @@
 import { useState, useEffect } from 'react';
 import { BaseComponent, NodeStatus, FilterType, log } from './Base';
 import { GraphClass } from './Graph';
-import { GridINU, GridINUClass } from './GridINU';
+import { GridINU } from './GridINU';
+import { CreateGridClass } from '../Pages/EntityGrids/GridClassCreator'
 import { Modal } from './Modal';
 import { Select } from './OuterComponents/Select';
-//import { DatePicker } from './OuterComponents/DatePicker';
 import DatePicker from "react-datepicker";
-//import { format, isValid, parse } from "date-fns";
 import Moment from 'moment';
+import { FadeLoader } from 'react-spinners';
 import "react-datepicker/dist/react-datepicker.css";
 // ==================================================================================================================================================================
 export function Graph(props) {
@@ -71,6 +71,9 @@ export class GraphComponentClass extends BaseComponent {
         gc.uid = props.uid || gc.id;
         gc.dataGetter = props.dataGetter;
 
+        gc.selectingNodeUid = props.selectingNodeUid;
+        gc.onSelectFilterValue = props.onSelectFilterValue;
+
         if (props.graph) {
             gc.prepareGraph(props.graph);
         }
@@ -116,8 +119,12 @@ export class GraphComponentClass extends BaseComponent {
     render() {
         const gc = this;
 
-        if (!gc.visible || !gc.graph) {
+        if (!gc.visible) {
             return <></>;
+        }
+
+        if (!gc.graph) {
+            return <div className='grid-loader'><FadeLoader /></div>;
         }
 
         for (let uid in gc.graph.nodesDict) {
@@ -195,7 +202,7 @@ export class GraphComponentClass extends BaseComponent {
                     gc.nodeSelectIsShowing ?
                         <Modal
                             title={gc.selectingNode.title}
-                            renderContent={() => { return gc.renderFilterGrid(gc.selectingNode) }}
+                            renderContent={() => { return gc.renderSelectingFilterGrid(gc.selectingNode) }}
                             pos={gc.selectingNodePos}
                             onClose={(e) => gc.closeFilterWnd(e)}
                             init={(wnd) => { wnd.visible = gc.nodeSelectIsShowing; }}
@@ -208,9 +215,9 @@ export class GraphComponentClass extends BaseComponent {
         )
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
-    renderFilterGrid(node) {
+    renderSelectingFilterGrid(node) {
         const gc = this;
-        return gc.renderGrid(node, NodeStatus.filter, true);
+        return !node.schemeName ? gc.renderGrid(node, NodeStatus.filter, true) : gc.renderSelectingGraph(node);
 
         //    return (
         //        <GridINU
@@ -227,6 +234,18 @@ export class GraphComponentClass extends BaseComponent {
         //        >
         //        </GridINU>
         //    );
+    }
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
+    renderSelectingGraph(selectingNode) {
+        const gc = this;
+        return <Graph
+            uid={`${gc.uid}_select_${selectingNode.uid}_`}
+            schemeName={selectingNode.schemeName}
+            selectingNodeUid={selectingNode.inSchemeUid}
+            dataGetter={gc.dataGetter}
+            onSelectFilterValue={(e) => gc.selectFilterValue(e)}
+        >
+        </Graph >;
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     /*
@@ -473,17 +492,21 @@ export class GraphComponentClass extends BaseComponent {
         const gc = this;
         if (!gc.selectingNode) return;
 
-        gc.selectingNode.value = gc.selectingNode.selectedValue();
+        gc.selectingNode.value = e.selectedValue || gc.selectingNode.selectedValue();
+        const selectedText = e.selectedText || gc.selectingNode.selectedText();
+        const selectedValues = e.selectedValues || gc.selectingNode.selectedValues();
+
         if (gc.selectingNode.setComboboxValue) {
             if (gc.selectingNode.multi) {
-                gc.selectingNode.setComboboxValue(gc.selectingNode.selectedValues());
+                gc.selectingNode.setComboboxValue(selectedValues);
             }
             else {
-                gc.selectingNode.setComboboxValue([{ value: gc.selectingNode.value, label: gc.selectingNode.selectedText() }]);
+                gc.selectingNode.setComboboxValue([{ value: gc.selectingNode.value, label: selectedText }]);
             }
         }
         else {
-            gc.selectingNode._selectedOptions = gc.selectingNode.selectedValues();
+            gc.selectingNode._selectedOptions = selectedValues;
+            gc.selectingNode._selectedText = selectedText;
         }
 
         gc.selectingNode.isSelecting = false;
@@ -709,7 +732,8 @@ export class GraphComponentClass extends BaseComponent {
 
         if (grid && grid._replaced) return grid;
 
-        grid = new GridINUClass(props);
+        // TODO: сделать создание разных форм, в зависимости от контекста
+        grid = CreateGridClass(props, graph, props.uid, props.entity);  //new GridINUClass(props);
 
         delete grid.refreshState;
 
@@ -720,9 +744,9 @@ export class GraphComponentClass extends BaseComponent {
         grid.id = obr.id !== undefined ? obr.id : grid.id;
 
         grid.uid = obr.uid;
-        grid.title = obr.title;
-        grid.nameField = obr.nameField;
-        grid.keyField = obr.keyField;
+        grid.title = obr.title || grid.title;
+        grid.nameField = obr.nameField || grid.nameField;
+        grid.keyField = obr.keyField || grid.keyField;
 
         graph.nodesDict[grid.uid] = grid;
 
@@ -731,6 +755,19 @@ export class GraphComponentClass extends BaseComponent {
         grid.beforeOpen = obr.beforeOpen;
 
         grid.multi = obr.multi;
+
+        grid.schemeName = obr.schemeName;
+        grid.inSchemeUid = obr.inSchemeUid;
+
+        if (gc.selectingNodeUid === grid.uid) {
+            grid.isSelecting = true;
+            grid.onSelectValue = () => {
+                gc.onSelectFilterValue({ selectedValue: grid.selectedValue(), selectedText: grid.selectedText(), selectedValues: grid.selectedValues() });
+            };
+        }
+        else {
+            grid.onSelectValue = (e) => gc.selectFilterValue(e);
+        }
 
         if (obr.status !== undefined) {
             grid.status = obr.status;
@@ -789,7 +826,6 @@ export class GraphComponentClass extends BaseComponent {
             }
         }
 
-        grid.onSelectValue = (e) => gc.selectFilterValue(e);
         grid.onRowDblClick = (e, row) => gc.onGridRowDblClick(e, grid, row);
 
         grid.remSetEditing = grid.setEditing;
@@ -877,7 +913,7 @@ export class GraphComponentClass extends BaseComponent {
             }
 
             if (node.value && obr.t) {
-                node._restoredText = obr.t;
+                node._selectedText = obr.t;
             }
         }
     }

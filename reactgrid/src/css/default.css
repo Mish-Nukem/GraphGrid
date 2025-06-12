@@ -226,6 +226,12 @@
         cursor: pointer;
     }
 
+.grid-loader {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
 .dropdown-wnd {
     background: white;
     border: 1px solid;

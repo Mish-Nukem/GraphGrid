@@ -2,7 +2,7 @@
 import { renderToStaticMarkup } from 'react-dom/server';
 import { BaseComponent, log } from './Base';
 import Moment from 'moment';
-import { format, isValid, parse } from "date-fns";
+import { FadeLoader } from 'react-spinners';
 // ==================================================================================================================================================================
 export function Grid(props) {
     let grid = null;
@@ -276,7 +276,9 @@ export class GridClass extends BaseComponent {
     renderBody() {
         const grid = this;
 
-        if (!grid.columns || !grid.rows) return;
+        if (!grid.columns || !grid.rows) {
+            return <div className='grid-loader'><FadeLoader /></div>;
+        }
 
         return (
             <tbody>

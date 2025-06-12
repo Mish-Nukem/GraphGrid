@@ -74,9 +74,13 @@ export class GridINUClass extends GridINUBaseClass {
 
         grid.allowEditGrid = props.allowEditGrid;
 
+        grid.schemeName = props.schemeName;
+        grid.inSchemeUid = props.inSchemeUid;
+
         if (grid.columns.length <= 0 && grid.entity && !props.getColumns) {
             grid.getColumns = async () => {
                 const res = await grid.getEntityInfo();
+                grid.refresh();
                 return res.Columns;
             };
         }
@@ -686,7 +690,7 @@ export class GridINUClass extends GridINUBaseClass {
 
         if (res !== undefined && res !== '') return res;
 
-        if (grid.status === NodeStatus.filter && grid.value !== undefined && grid.value !== '' && grid._restoredText !== undefined && grid._restoredText !== '') return grid._restoredText;
+        if (grid.status === NodeStatus.filter && grid.value !== undefined && grid.value !== '' && grid._selectedText !== undefined && grid._selectedText !== '') return grid._selectedText;
 
         return res;
     }

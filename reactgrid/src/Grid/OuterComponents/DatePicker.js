@@ -1,4 +1,4 @@
-import { useId, useState } from "react";
+import { useState } from "react";
 import DatePicker from "react-datepicker";
 import { format, isValid, parse } from "date-fns";
 import { ru } from "react-day-picker/locale";
@@ -6,13 +6,13 @@ import "react-day-picker/style.css";
 export function DatePickerNew(props) {
     const date = props.date || new Date().toLocaleDateString();
 
-    const inputId = useId();
+    //const inputId = useId();
 
     const dateFormat = props.dateFormat || 'dd.MM.yyyy';
 
     let parsedDate = parse(date, dateFormat, new Date());
 
-    let translate = props.translate || ((text) => { return text; });
+    //let translate = props.translate || ((text) => { return text; });
 
     if (!isValid(parsedDate)) {
         parsedDate = parse(new Date().toLocaleDateString(), dateFormat, new Date());
@@ -20,7 +20,7 @@ export function DatePickerNew(props) {
 
     const [month, setMonth] = useState(new Date());
     const [selectedDate, setSelectedDate] = useState(parsedDate);
-    const [inputValue, setInputValue] = useState(format(parsedDate, dateFormat));
+    //const [inputValue, setInputValue] = useState(format(parsedDate, dateFormat));
 
     const handleDayPickerSelect = (date) => {
         if (!date) {
@@ -34,18 +34,18 @@ export function DatePickerNew(props) {
         }
     };
 
-    const handleInputChange = (e) => {
-        setInputValue(e.target.value); // Keep the input value in sync
+    //const handleInputChange = (e) => {
+    //    setInputValue(e.target.value); // Keep the input value in sync
 
-        const parsedDate = parse(e.target.value, dateFormat, new Date());
+    //    const parsedDate = parse(e.target.value, dateFormat, new Date());
 
-        if (isValid(parsedDate)) {
-            setSelectedDate(parsedDate);
-            setMonth(parsedDate);
-        } else {
-            setSelectedDate(undefined);
-        }
-    };
+    //    if (isValid(parsedDate)) {
+    //        setSelectedDate(parsedDate);
+    //        setMonth(parsedDate);
+    //    } else {
+    //        setSelectedDate(undefined);
+    //    }
+    //};
     //const parsedDate = parse(e.target.value, dateFormat, new Date());
     //if (isValid(parsedDate)) {
 

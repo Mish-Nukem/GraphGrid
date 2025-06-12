@@ -123,6 +123,8 @@ export class GridGRClass extends GridClass {
         const graph = grid.graph;
 
         grid.connectedToParents = true;
+        graph.waveCache = {};
+        if (!grid.parentGrids) return;
 
         const parentUids = ',' + grid.parentGrids + ',';
         for (let uid in graph.nodesDict) {
@@ -138,8 +140,6 @@ export class GridGRClass extends GridClass {
             grid.parents.push(parentGrid.uid);
             parentGrid.children.push(grid.uid);
         }
-
-        graph.waveCache = {};
 
         if (!noDetectCycles) {
             graph.markCycles();
@@ -198,6 +198,14 @@ export class GridGRClass extends GridClass {
             let node = graph.nodesDict[uid];
             if (!node.connectedToParents) {
                 node.connectToParents();
+            }
+        }
+
+        let link;
+        for (let lkey in graph.linksDict) {
+            link = graph.linksDict[lkey];
+            if (!link || !graph.nodesDict[link.parent.uid] || !graph.nodesDict[link.child.uid]) {
+                delete graph.linksDict[lkey];
             }
         }
     }

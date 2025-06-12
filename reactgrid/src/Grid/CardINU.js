@@ -139,7 +139,7 @@ export class CardINUClass extends GridINUBaseClass {
             value = parsedDate.format(card.dateFormat);
         }
         const noClear = col.required || value === undefined || value === '';
-        const old = false;
+        //const old = false;
         switch (col.type.toLowerCase()) {
             case 'lookup':
                 const keyFieldValue = card.changedRow[col.keyField];

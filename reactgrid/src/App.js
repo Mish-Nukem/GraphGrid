@@ -15,8 +15,8 @@ import { LoginPage } from './Pages/LoginPage';
 import appSettings from './AppSettings';
 import { DataGetter } from './Utils/DataGetter';
 
-import { format, formatDate, isValid, parse } from "date-fns";
-import Moment from 'moment';
+//import { format, formatDate, isValid, parse } from "date-fns";
+//import Moment from 'moment';
 
 function App() {
     const [state, setState] = useState({ menuItem: - 2, atoken: '', rtoken: '' });
@@ -154,6 +154,7 @@ function App() {
     }
 
     const TEST = function () {
+        /*
         let value;
 
         Moment.locale('ru');
@@ -176,6 +177,7 @@ function App() {
         value = formatDate(d, "dd.MMM.yyyy");
         value = formatDate(d2, "dd.MMM.yyyy");
         value = format(d2, "dd.MMM.yyyy HH:mm:ss");
+        */
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     const getTestApp = () => {

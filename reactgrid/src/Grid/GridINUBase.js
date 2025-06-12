@@ -372,7 +372,7 @@ export class GridINUBaseClass extends GridFLClass {
 
                 if (grid._entityInfo && parent._entityInfo && grid._entityInfo.tableName) {
                     const refColumn = grid.columns.find(function (item, index, array) {
-                        return item.type == 'lookup' && String(item.entity) === String(parent.entity);
+                        return item.type === 'lookup' && String(item.entity) === String(parent.entity);
                     });
 
                     if (!refColumn) return '';

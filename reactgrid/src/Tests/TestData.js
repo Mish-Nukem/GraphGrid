@@ -227,10 +227,12 @@ export default class TestData {
         const authorNode = { id: 4, entity: 'SrRExecutiveEntity', title: 'Автор задания', status: NodeStatus.filter, keyField: 'ID_SR_R_EXECUTIVE_SREX', nameField: 'FIO_SREX' };
         const datefromNode = { id: 5, title: 'Дата создания От', status: NodeStatus.filter, filterType: FilterType.date };
         const datetoNode = { id: 6, title: 'Дата создания По', status: NodeStatus.filter, filterType: FilterType.date };
-        const remarkNode = { id: 7, parentGrids: '0,1,2,3,4,5,6', entity: 'SrRemarkEntity', title: 'Задания', status: NodeStatus.grid, keyField: 'ID_SR_REMARK_SRRM' };
+        const remarkNode = { id: 7, parentGrids: '0,1,2,3,4,5,6,11', entity: 'SrRemarkEntity', title: 'Задания', status: NodeStatus.grid, keyField: 'ID_SR_REMARK_SRRM' };
         //const favoriteNode = { id: '8', entity: 'SrRemarkEntity', title: 'Избранное', status: NodeStatus.grid, keyField: 'ID_SR_REMARK_SRRM' };
         const detailsNode = { id: 9, parentGrids: '7', entity: 'SrDetailRemarkEntity', title: 'Детализация задания', status: NodeStatus.grid, keyField: 'ID_SR_DETAIL_REMARK_SRDR', isBottom: true };
         const addNode = { id: 10, parentGrids: '7', entity: 'DdObjectEntity', title: 'Дополнительные данные', status: NodeStatus.grid, keyField: 'ID_DD_OBJECT_DDOB', isBottom: true };
+
+        const parentRemarkNode = { id: 11, /*parentGrids: '0,1,2,3,4,5,6',*/ entity: 'SrRemarkEntity', title: 'Родительское задание', status: NodeStatus.filter, keyField: 'ID_SR_REMARK_SRRM', schemeName: 'Remarks_scheme', inSchemeUid: '05' };
 
         graph.nodesDict[projectNode.id] = projectNode;
         graph.nodesDict[promptNode.id] = promptNode;
@@ -243,6 +245,7 @@ export default class TestData {
         //graph.nodesDict[favoriteNode.id] = favoriteNode;
         graph.nodesDict[detailsNode.id] = detailsNode;
         graph.nodesDict[addNode.id] = addNode;
+        graph.nodesDict[parentRemarkNode.id] = parentRemarkNode; 
 
         /*
         //graph.nodeCount = 10;
@@ -798,6 +801,10 @@ export default class TestData {
             node.uid = uid;
             node.children = node.children || [];
             node.parents = node.parents || [];
+        }
+
+        for (let uid in graph.nodesDict) {
+            let node = graph.nodesDict[uid];
 
             if (!node.parentGrids) continue;
 
@@ -812,6 +819,19 @@ export default class TestData {
                 connect(node, pnode);
             }
         }
+
+        graph.linksDict['7_11'].condition = 'SR_REMARK_SRRM.PARENT_REMARK_SRRM in (:id)';
+
+        graph.linksDict['7_0'].condition = 'SR_REMARK_SRRM.ID_SR_R_PROJECT_SRRM in (:id)';
+        graph.linksDict['7_1'].condition = 'SR_REMARK_SRRM.ID_SR_R_PROMPTNESS_SRRM in (:id)';
+        graph.linksDict['7_2'].condition = 'SR_REMARK_SRRM.ID_SR_R_STATUS_SRRM in (:id)';
+        graph.linksDict['7_3'].condition = 'SR_REMARK_SRRM.ID_WHOM_SRRM in (:id)';
+        graph.linksDict['7_4'].condition = 'SR_REMARK_SRRM.ID_FROM_WHOM_SRRM in (:id)';
+        graph.linksDict['7_5'].condition = 'SR_REMARK_SRRM.DATE_CREATE_SRRM >= :id';
+        graph.linksDict['7_6'].condition = 'SR_REMARK_SRRM.DATE_CREATE_SRRM <= :id';
+
+        graph.linksDict['9_7'].condition = 'SR_DETAIL_REMARK_SRDR.ID_SR_REMARK_SRDR in (:id)';
+        graph.linksDict['10_7'].condition = 'DD_OBJECT_DDOB.ID_OBJECT_DDOB in (:id)';
 
         //connect(remarkNode, projectNode);
         //connect(remarkNode, promptNode);
