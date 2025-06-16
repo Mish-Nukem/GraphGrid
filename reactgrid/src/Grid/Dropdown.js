@@ -204,7 +204,7 @@ export class DropdownClass extends ModalClass {
         }
         else {
             if (dd.opt.onItemClick) {
-                dd.opt.onItemClick({ owner: dd.opt.owner, itemId: itemId, dropdown: dd });
+                dd.opt.onItemClick({ owner: dd.opt.owner, itemId: itemId, dropdown: dd, clientX: e.clientX, clientY: e.clientY });
             }
 
             const clickedItem = dd.items.find(function (item) {

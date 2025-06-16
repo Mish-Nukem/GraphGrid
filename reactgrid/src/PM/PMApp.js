@@ -27,7 +27,7 @@ function PMApp() {
         { id: 3, text: 'Graph PM, handmade', parent: 1 },
         { id: 4, text: 'Graph PM, Remarks_scheme', parent: 1 },
         { id: 5, text: 'TEST' },
-        //{ id: 6, text: '' }
+        { id: 6, text: 'Submenu test', parent: 4 }
     ];
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     const getTestApp = () => {

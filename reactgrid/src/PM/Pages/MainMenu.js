@@ -49,7 +49,7 @@ export class MainMenuClass extends BaseComponent {
         menu.dataGetter = props.dataGetter;
         menu.onMenuItemClick = props.onMenuItemClick;
 
-        menu.translate = props.translate || ((text) => { return text; });
+        //menu.translate = props.translate || ((text) => { return text; });
         menu.prepareMenu();
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -82,6 +82,7 @@ export class MainMenuClass extends BaseComponent {
 
                 parentItem.items = parentItem.items || [];
                 parentItem.items.push(item);
+                parentItem.noClose = true;
                 item.level = parentItem.level + 1;
             }
         }

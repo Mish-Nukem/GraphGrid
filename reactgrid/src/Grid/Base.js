@@ -1,6 +1,7 @@
 import { DefaultGridTheme as Theme } from './Themes/DefaultGridTheme';
 //import { BootstrapTheme as NewTheme } from './Themes/BootstrapGridTheme';
 import { DefaultGridTheme as NewTheme } from './Themes/DefaultGridTheme';
+import { Translate } from './Themes/Translate';
 export class BaseComponent {
 
     constructor(props) {
@@ -12,7 +13,7 @@ export class BaseComponent {
     }
 
     translate(text, context) {
-        return text;
+        return Translate.translate(text, context);
     }
 
     static ThemeObj = {
@@ -36,7 +37,7 @@ export class BaseComponent {
             grid.themeApplied = true;
             this.Prepare();
 
-            grid.translate = this.theme.translate;
+            //grid.translate = this.theme.translate;
             this.theme.setupGridPagerButtons(grid, this.images);
 
             grid.images = this.images;
