@@ -2,8 +2,7 @@
 import { useState, useEffect } from 'react';
 import { BaseComponent, NodeStatus, FilterType, log } from './Base';
 import { GraphClass } from './Graph';
-import { GridINU } from './GridINU';
-import { CreateGridClass } from '../Pages/EntityGrids/GridClassCreator'
+import { GridINU, GridINUClass } from './GridINU';
 import { Modal } from './Modal';
 import { Select } from './OuterComponents/Select';
 import DatePicker from "react-datepicker";
@@ -70,6 +69,12 @@ export class GraphComponentClass extends BaseComponent {
         gc.id = window._graphSeq++;
         gc.uid = props.uid || gc.id;
         gc.dataGetter = props.dataGetter;
+
+        gc.gridCreator = props.gridCreator || {
+            CreateGridClass: (props) => {
+                return new GridINUClass(props);
+            }
+        };
 
         gc.selectingNodeUid = props.selectingNodeUid;
         gc.onSelectFilterValue = props.onSelectFilterValue;
@@ -733,7 +738,7 @@ export class GraphComponentClass extends BaseComponent {
         if (grid && grid._replaced) return grid;
 
         // TODO: сделать создание разных форм, в зависимости от контекста
-        grid = CreateGridClass(props, graph, props.uid, props.entity);  //new GridINUClass(props);
+        grid = gc.gridCreator.CreateGridClass(props);  //new GridINUClass(props);
 
         delete grid.refreshState;
 
@@ -751,6 +756,10 @@ export class GraphComponentClass extends BaseComponent {
         graph.nodesDict[grid.uid] = grid;
 
         grid.allowEditGrid = obr.allowEditGrid;
+        grid.allowAdd = obr.allowAdd; 
+        grid.allowCopy = obr.allowCopy; 
+        grid.allowDelete = obr.allowDelete; 
+        grid.allowView = obr.allowView; 
 
         grid.beforeOpen = obr.beforeOpen;
 

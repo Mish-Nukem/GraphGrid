@@ -486,7 +486,7 @@ export class GridINUClass extends GridINUBaseClass {
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     addRecordDisabled(e) {
         const grid = this;
-        return grid.isEditing();
+        return !grid.allowAdd || grid.isEditing();
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     copyRecord(e) {
@@ -503,7 +503,7 @@ export class GridINUClass extends GridINUBaseClass {
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     copyRecordDisabled(e) {
         const grid = this;
-        return grid.isEditing() || grid.selectedRowIndex === undefined || grid.selectedRowIndex < 0 || !grid.rows || grid.rows.length <= 0;
+        return !grid.allowCopy || grid.isEditing() || grid.selectedRowIndex === undefined || grid.selectedRowIndex < 0 || !grid.rows || grid.rows.length <= 0;
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     deleteRecord(e) {
@@ -516,7 +516,7 @@ export class GridINUClass extends GridINUBaseClass {
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     deleteRecordDisabled(e) {
         const grid = this;
-        return grid.isEditing() || grid.selectedRowIndex === undefined || grid.selectedRowIndex < 0 || !grid.rows || grid.rows.length <= 0;
+        return !grid.allowDelete || grid.isEditing() || grid.selectedRowIndex === undefined || grid.selectedRowIndex < 0 || !grid.rows || grid.rows.length <= 0;
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     viewRecord(e) {
@@ -531,7 +531,7 @@ export class GridINUClass extends GridINUBaseClass {
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     viewRecordDisabled(e) {
         const grid = this;
-        return grid.isEditing() || grid.selectedRowIndex === undefined || grid.selectedRowIndex < 0 || !grid.rows || grid.rows.length <= 0;
+        return !grid.allowView || grid.isEditing() || grid.selectedRowIndex === undefined || grid.selectedRowIndex < 0 || !grid.rows || grid.rows.length <= 0;
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     //isRowSelected(row, rowInd) {

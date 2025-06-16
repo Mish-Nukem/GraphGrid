@@ -46,7 +46,7 @@ export class DropdownClass extends ModalClass {
 
         dd.pageNumber = 1;
         dd.pageSize = props.pageSize || 20;
-        dd.items = [];
+        dd.items = props.items || [];
 
         dd.menuItemClass = '';
         dd.menuClass = '';
@@ -71,7 +71,7 @@ export class DropdownClass extends ModalClass {
 
         dd.renderContent = dd.renderDropdownContent;
 
-        dd.visible = false;
+        dd.visible = dd.items.length > 0;
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     appendItems() {
@@ -206,7 +206,14 @@ export class DropdownClass extends ModalClass {
             if (dd.opt.onItemClick) {
                 dd.opt.onItemClick({ owner: dd.opt.owner, itemId: itemId, dropdown: dd });
             }
-            dd.close();
+
+            const clickedItem = dd.items.find(function (item) {
+                return item.id === itemId;
+            });
+
+            if (!clickedItem || !clickedItem.noClose) {
+                dd.close();
+            }
         }
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------

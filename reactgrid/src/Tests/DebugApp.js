@@ -1,29 +1,25 @@
-import './css/default.css';
+import '../Grid/css/default.css';
 import { useState } from 'react';
-import TestData from './Tests/TestData';
-import { Grid } from './Grid/Grid';
-import { Overlay } from './Grid/Overlay';
-import { Modal } from './Grid/Modal';
-import { Dropdown } from './Grid/Dropdown';
-import { GridGR } from './Grid/GridGR';
-import { GridDB } from './Grid/GridDB';
-import { GridFL } from './Grid/GridFL';
-import { GridINU } from './Grid/GridINU';
-import { Graph } from './Grid/GraphComponent'; 
-//import { BootstrapGrid } from './Grid/BootstrapGrid'; 
-import { LoginPage } from './Pages/LoginPage';
-import appSettings from './AppSettings';
-import { DataGetter } from './Utils/DataGetter';
+import TestData from '../Tests/TestData';
+import { Grid } from '../Grid/Grid';
+import { Overlay } from '../Grid/Overlay';
+import { Modal } from '../Grid/Modal';
+import { Dropdown } from '../Grid/Dropdown';
+import { GridGR } from '../Grid/GridGR';
+import { GridDB } from '../Grid/GridDB';
+import { GridFL } from '../Grid/GridFL';
+import { GridINU } from '../Grid/GridINU';
+import { Graph } from '../Grid/GraphComponent';
+import { LoginPage } from './LoginPage';
+import appSettings from '../AppSettings';
+import { DataGetter } from '../Grid/Utils/DataGetter';
 
-//import { format, formatDate, isValid, parse } from "date-fns";
-//import Moment from 'moment';
-
-function App() {
-    const [state, setState] = useState({ menuItem: - 2, atoken: '', rtoken: '' });
+function DebugApp() {
+    const [state, setState] = useState({ menuItem: - 2, dataGetter: null });
 
     window._logEnabled = true;
 
-    const dataGetter = new DataGetter(appSettings, state.atoken, state.rtoken);
+    const dataGetter = state.dataGetter || new DataGetter(appSettings/*, state.atoken, state.rtoken*/);
 
     const GetFamily = function (e) {
         return new Promise(function (resolve, reject) {
@@ -184,9 +180,12 @@ function App() {
         console.log('state == ' + state.menuItem);
         switch (state.menuItem) {
             case -1:
-                return (
-                    <></>
-                )
+                setState({ menuItem: -2, dataGetter: null });
+
+                //    return (
+                //        <></>
+                //    )
+                break;
             case 0:
                 return <></>
             case 1:
@@ -308,14 +307,15 @@ function App() {
                 afterLogin={(tokens) => {
                     if (!tokens) return;
 
-                    setState({ menuItem: -1, atoken: dataGetter.atoken, rtoken: dataGetter.rtoken });
+                    setState({ menuItem: 0, dataGetter: dataGetter/*atoken: dataGetter.atoken, rtoken: dataGetter.rtoken*/ });
                 }}>
             </LoginPage> :
             <div >
                 <select onChange={(e) => {
                     //console.log('this == ' + e);
-                    setState({ menuItem: e.target.selectedIndex, atoken: dataGetter.atoken, rtoken: dataGetter.rtoken });
+                    setState({ menuItem: e.target.selectedIndex - 1, dataGetter: dataGetter/*, atoken: dataGetter.atoken, rtoken: dataGetter.rtoken*/ });
                 }}>
+                    <option>Logout</option>
                     <option>0. None</option>
                     <option>1. ReactGrid</option>
                     <option>2. Overlay</option>
@@ -336,4 +336,4 @@ function App() {
     );
 }
 
-export default App;
+export default DebugApp;

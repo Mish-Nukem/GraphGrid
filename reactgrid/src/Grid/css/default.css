@@ -369,6 +369,7 @@
     position: sticky;
     top: 0;
     background-color: white;
+    z-index: 100;
 }
 
 .graph-card-div {
@@ -443,3 +444,7 @@
     .datepicker-filter > div.react-datepicker-wrapper {
         margin-top: 1px;
     }
+
+.main-menu-div {
+
+}

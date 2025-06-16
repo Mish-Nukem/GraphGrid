@@ -214,6 +214,7 @@
         const dict = {
             'ADD': 'Добавить',
             'ADD NEW RECORD': 'Добавить новую строку',
+            'COLLAPSE' : 'Свернуть',
             'COPY': 'Копировать',
             'COPY RECORD': 'Копировать строку',
             'CLEAR ALL FILTERS': 'Очистить все фильтры',
@@ -221,6 +222,7 @@
             'COMMIT CHANGES': 'Сохранить изменения',
             'DELETE': 'Удалить',
             'DELETE RECORD': 'Удалить строку',
+            'EXPAND' : 'Развернуть',
             'FIRST': 'К началу',
             'LAST': 'В конец',
             'LOAD MORE RECORDS': 'Загрузить еще строк',

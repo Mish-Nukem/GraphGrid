@@ -1,14 +1,24 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import './index.css';
-import App from './App';
+import PMApp from './PM/PMApp';
+import DebugApp from './Tests/DebugApp';
 import reportWebVitals from './reportWebVitals';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
+//const currentProject = 'Debug';
+const currentProject = 'PM';
 root.render(
-  <>
-    <App />
-  </>
+    <>
+        {currentProject === 'Debug' ?
+            <DebugApp />
+            :
+            currentProject === 'PM' ?
+                <PMApp />
+                :
+                <DebugApp />
+        }
+    </>
 );
 
 // If you want to start measuring performance in your app, pass a function

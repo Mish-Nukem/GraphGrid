@@ -261,6 +261,13 @@ export class GridINUBaseClass extends GridFLClass {
 
         grid._entityInfo = await grid.dataGetter.get({ url: 'system/entityInfo', params: params });
 
+        if (grid._entityInfo) {
+            grid.allowEditGrid = grid.allowEditGrid !== undefined ? grid.allowEditGrid : grid._entityInfo.allowEdit;
+            grid.allowView = grid._entityInfo.allowView;
+            grid.allowAdd = grid.allowCopy = grid._entityInfo.allowAdd;
+            grid.allowDelete = grid._entityInfo.allowDelete;
+        }
+
         return grid._entityInfo;
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
