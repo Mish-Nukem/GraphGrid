@@ -334,6 +334,7 @@ export class GraphComponentClass extends BaseComponent {
                                     showYearDropdown
                                     onSelect={(date) => {
                                         node.value = Moment(date, node.dateFormat).format(node.dateFormat);//format(date, node.dateFormat);
+                                        gc.saveGraphConfig();
                                         gc.graph.triggerWave({ nodes: [node], withStartNodes: false });
                                         gc.refreshState();
                                     }}
@@ -363,6 +364,7 @@ export class GraphComponentClass extends BaseComponent {
                                     setTimeout(() => {
                                         if (prevValue === e.target.value) {
 
+                                            gc.saveGraphConfig();
                                             gc.graph.triggerWave({ nodes: [node], withStartNodes: false });
                                         }
                                     }, 150);
@@ -797,7 +799,9 @@ export class GraphComponentClass extends BaseComponent {
         if (obr._selectedOptions) {
             grid._selectedOptions = obr._selectedOptions;
 
-            gc.getValueFromCombobox(grid, true);
+            if (grid.filterType === FilterType.combobox) {
+                gc.getValueFromCombobox(grid, true);
+            }
         }
 
         grid.columns = obr.columns || grid.columns;
