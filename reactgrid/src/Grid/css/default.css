@@ -242,13 +242,17 @@
     padding: 0;
     /*margin: 5px 0;*/
     margin: 0;
+    height: 100%;
 }
 
     .dropdown-ul > li {
         list-style-type: none;
         cursor: pointer;
         white-space: nowrap;
-        padding: 2px;
+        padding: 4px;
+        display: flex;
+        align-items: center;
+        flex-wrap: nowrap;
     }
 
         .dropdown-ul > li:hover {
@@ -446,5 +450,19 @@
     }
 
 .main-menu-div {
+    display: flex;
+    flex-wrap: nowrap;
+    align-content: center;
+}
 
+    .main-menu-div > button {
+        margin: 10px 2px;
+        font-size: medium;
+        font-weight: 300;
+    }
+
+.menu-item-selected {
+    background-color: lightgray;
+    border-width: 1px;
+    border-radius: 2px;
 }

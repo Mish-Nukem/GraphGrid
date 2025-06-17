@@ -259,8 +259,6 @@ export class GridDBClass extends GridGRClass {
         grid.pagerButtons = [];
         grid.pagerButtonsDict = {};
 
-        grid.images = {};
-
         const refresh = {
             id: 0,
             name: 'refresh',

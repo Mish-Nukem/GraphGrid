@@ -2,6 +2,7 @@ import { DefaultGridTheme as Theme } from './Themes/DefaultGridTheme';
 //import { BootstrapTheme as NewTheme } from './Themes/BootstrapGridTheme';
 import { DefaultGridTheme as NewTheme } from './Themes/DefaultGridTheme';
 import { Translate } from './Themes/Translate';
+import { Images } from './Themes/Images';
 export class BaseComponent {
 
     constructor(props) {
@@ -10,6 +11,7 @@ export class BaseComponent {
         window._wndZInd = window._wndZInd || 999;
 
         //window._logEnabled = true;
+        this.images = Images.getImages();
     }
 
     translate(text, context) {
@@ -18,33 +20,21 @@ export class BaseComponent {
 
     static ThemeObj = {
         prepared: false,
-        Prepare() {
-            if (this.prepared) return;
-
-            this.theme = new Theme();
-            this.prepared = true;
-            this.images = {};
-            this.theme.prepareImages(this.images);
-
-            if (NewTheme !== undefined) {
-                this.newtheme = new NewTheme();
-            }
-
-        },
         Apply(grid) {
             if (!grid || grid.themeApplied) return;
 
-            grid.themeApplied = true;
-            this.Prepare();
+            this.theme = this.theme || new Theme();
+            if (!this.newtheme && NewTheme !== undefined) {
+                this.newtheme = new NewTheme();
+            }
 
-            //grid.translate = this.theme.translate;
-            this.theme.setupGridPagerButtons(grid, this.images);
-
-            grid.images = this.images;
+            this.theme.setupGridPagerButtons(grid);
 
             if (this.newtheme) {
-                this.newtheme.applyTheme(grid, this.images);
+                this.newtheme.applyTheme(grid);
             }
+
+            grid.themeApplied = true;
         }
     }
 }

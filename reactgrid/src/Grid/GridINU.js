@@ -404,14 +404,6 @@ export class GridINUClass extends GridINUBaseClass {
             getDisabled: (e) => grid.viewRecordDisabled(e),
         });
 
-        //node.buttons.push({
-        //    id: node.buttons.length,
-        //    name: 'test',
-        //    title: node.translate('TEST'),
-        //    label: node.translate('Test'),
-        //    click: (e) => node.test(e)
-        //});
-
         grid.buttons.push({
             id: grid.buttons.length,
             name: 'selectValue',

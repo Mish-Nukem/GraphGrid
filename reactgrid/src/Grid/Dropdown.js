@@ -112,6 +112,7 @@ export class DropdownClass extends ModalClass {
                                     onClick={(e) => dd.onItemClick(e, item.id)}
                                 >
                                     {dd.translate(item.text)}
+                                    {item.items && item.items.length > 0 ? dd.images.caretRight() : ''}
                                 </li>
                             );
                         })
@@ -204,7 +205,7 @@ export class DropdownClass extends ModalClass {
         }
         else {
             if (dd.opt.onItemClick) {
-                dd.opt.onItemClick({ owner: dd.opt.owner, itemId: itemId, dropdown: dd, clientX: e.clientX, clientY: e.clientY });
+                dd.opt.onItemClick({ owner: dd.opt.owner, itemId: itemId, dropdown: dd, clientX: e.clientX, clientY: e.clientY, target: e.target });
             }
 
             const clickedItem = dd.items.find(function (item) {
