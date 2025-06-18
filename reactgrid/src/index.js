@@ -6,8 +6,9 @@ import DebugApp from './Tests/DebugApp';
 import reportWebVitals from './reportWebVitals';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
-//const currentProject = 'Debug';
-const currentProject = 'PM';
+let currentProject;
+currentProject = 'Debug';
+//currentProject = 'PM';
 root.render(
     <>
         {currentProject === 'Debug' ?

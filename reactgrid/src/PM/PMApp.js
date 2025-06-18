@@ -21,7 +21,7 @@ function PMApp() {
 
     const testMenuItems = [
         { id: -1, text: 'Logout' },
-        { id: 0, text: 'Empty' },
+        { id: 0, text: 'Import ETL' },
         { id: 1, text: 'PM Grids' },
         { id: 2, text: 'Two PM Grids', parent: 1 },
         { id: 3, text: 'Graph PM, handmade', parent: 1 },
@@ -29,6 +29,7 @@ function PMApp() {
         { id: 5, text: 'TEST' },
         { id: 6, text: 'Submenu test 1', parent: 5 },
         { id: 7, text: 'Submenu test', parent: 6 },
+        { id: 8, text: 'Tuning List', parent: 0 },
     ];
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     const getTestApp = () => {
@@ -74,6 +75,14 @@ function PMApp() {
                 return (
                     <>
                         <button onClick={() => { TEST() }} className="modal-window-footer-button">TEST</button>
+                    </>
+                );
+            case 8:
+                return (
+                    <>
+                        <div className="div-with-grid">
+                            <Graph uid="PM" schemeName="TuningListScheme" dataGetter={dataGetter} gridCreator={gridCreator}></Graph>
+                        </div>
                     </>
                 );
             default:

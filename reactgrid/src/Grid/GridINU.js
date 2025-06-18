@@ -2,7 +2,7 @@
 import { GridINUBaseClass } from './GridINUBase.js';
 import { NodeStatus } from './Base';
 import { CardINU } from './CardINU';
-import { Modal } from './Modal';
+//import { Modal } from './Modal';
 import { Select } from './OuterComponents/Select';
 import DatePicker, { registerLocale } from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
@@ -92,29 +92,40 @@ export class GridINUClass extends GridINUBaseClass {
         return this.visible;
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
-    render() {
-        const grid = this;
+    render() {//{grid.renderCard()}
+        //const grid = this;
         return (
             <>
                 {super.render()}
-                {
-                    grid.cardIsShowing ?
-                        <Modal
-                            title={grid.title}
-                            renderContent={() => { return grid.renderCard() }}
-                            pos={grid.cardPos}
-                            onClose={(e) => grid.closeCard(e)}
-                            init={(wnd) => { wnd.visible = grid.cardIsShowing; }}
-                        >
-                        </Modal>
-                        :
-                        <></>
-                }
             </>
         )
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
+    /*
     renderCard() {
+        const grid = this;
+        return (
+            grid.cardIsShowing ?
+                <Modal
+                    title={grid.title}
+                    renderContent={() => { return grid.renderCardContent() }}
+                    pos={grid.cardPos}
+                    onClose={(e) => grid.closeCard(e)}
+                    init={(wnd) => { wnd.visible = grid.cardIsShowing; }}
+                >
+                </Modal>
+                :
+                <></>
+        )
+    }
+    */
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
+    renderPopupContent() {
+        const grid = this;
+        return grid.cardIsShowing ? grid.renderCardContent() : super.renderPopupContent();
+    }
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
+    renderCardContent() {
         const grid = this;
         return (
             <CardINU
@@ -123,7 +134,7 @@ export class GridINUClass extends GridINUBaseClass {
                 uid={(grid.uid || grid.id) + '_card_'}
                 entity={grid.entity}
                 keyField={grid.keyField}
-                dataGetter={grid.dataGetter || grid.dataGetter}
+                dataGetter={grid.dataGetter}
                 init={(card) => {
                     card.visible = true;
                     card.columns = grid.columns;
@@ -133,7 +144,7 @@ export class GridINUClass extends GridINUBaseClass {
         );
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
-    renderLookupGrid(lookupField) {
+    renderLookupGrid() {
         const grid = this;
         const info = grid._lookupEntityInfo[grid.lookupField.entity];
 
@@ -151,33 +162,6 @@ export class GridINUClass extends GridINUBaseClass {
         );
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
-    /*
-                                old ?
-                                    <>
-                                        <span
-                                            style={{
-                                                width: '100%',
-                                                height: '1.7em',
-                                                padding: '0',
-                                                boxSizing: 'border-box',
-                                                gridColumn: noClear ? 'span 2' : '',
-                                                overflowX: 'hidden',
-                                            }}
-
-                                        >
-                                            {value}
-                                        </span>
-                                        <button
-                                            key={`griddatepickerbtn_${grid.id}_${col.id}_`}
-                                            className={'grid-cell-button'}
-                                            onClick={(e) => grid.openDatePickerWnd(e, col, value)}
-                                        >
-                                            {'...'}
-                                        </button>
-                                    </>
-                                    :
-
-    */
     renderCell(col, row) {
         const grid = this;
 
@@ -469,10 +453,15 @@ export class GridINUClass extends GridINUBaseClass {
         const grid = this;
 
         grid.cardPos = grid.cardPos || { x: 110, y: 110, w: 800, h: 600 };
+        grid.popupPos = grid.cardPos;
 
         grid.cardRow = {};
         grid.isNewRecord = true;
         grid.cardIsShowing = true;
+        grid.popupIsShowing = true;
+        grid.lookupTitle = grid.title;
+        grid.onClosePopup = grid.closeCard;
+
         grid.refreshState();
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -485,11 +474,16 @@ export class GridINUClass extends GridINUBaseClass {
         const grid = this;
 
         grid.cardPos = grid.cardPos || { x: 110, y: 110, w: 800, h: 600 };
+        grid.popupPos = grid.cardPos;
 
         grid.cardRow = {};
         Object.assign(grid.cardRow, grid.selectedRow());
         grid.isNewRecord = true;
         grid.cardIsShowing = true;
+        grid.popupIsShowing = true;
+        grid.lookupTitle = grid.title;
+        grid.onClosePopup = grid.closeCard;
+
         grid.refreshState();
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -632,7 +626,7 @@ export class GridINUClass extends GridINUBaseClass {
         return false;
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
-    test(e) {
+    showReport(e) {
         const grid = this;
 
         grid.saveColumnsConfig(e);
@@ -667,6 +661,7 @@ export class GridINUClass extends GridINUBaseClass {
     closeCard(e) {
         const grid = this;
         grid.cardIsShowing = false;
+
         if (grid.isNewRecord) {
             grid.isNewRecord = false;
             grid.refresh();

@@ -3,9 +3,6 @@ import { GridFLClass } from './GridFL.js';
 import { FilterType, NodeStatus } from './Base';
 import { WaveType } from './Graph.js';
 import { Modal } from './Modal';
-//import { DatePicker } from './OuterComponents/DatePicker';
-//import DatePicker from "react-datepicker";
-//import "react-datepicker/dist/react-datepicker.css";
 // ==================================================================================================================================================================
 export function GridINUBase(props) {
     let grid = null;
@@ -84,89 +81,48 @@ export class GridINUBaseClass extends GridFLClass {
         return this.visible;
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
-    render() { //{grid.renderDatePicker()}
+    render() { 
         const grid = this;
         return (
             <>
                 {super.render()}
-                {grid.renderLookup()}
+                {grid.renderPopup()}
             </>
         )
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
-    renderLookup() {
+    renderPopup() {
         const grid = this;
         return (
-            grid.lookupIsShowing ?
+            grid.popupIsShowing ?
                 <Modal
-                    title={grid.lookupField.title}
-                    renderContent={() => { return grid.renderLookupGrid(grid.lookupField) }}
-                    pos={grid.lookupPos}
-                    onClose={(e) => grid.closeLookup(e)}
-                    init={(wnd) => { wnd.visible = grid.lookupIsShowing; }}
-                >
-                </Modal>
-                :
-                <></>
-        );
-    }
-    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
-    /*
-    renderDatePicker() {
-        const grid = this;
-        return (
-            grid.datePickerIsShowing ?
-                <Modal
-                    title={grid.selectingDatePickerColumn.title}
-                    renderContent={() => {
-                        return (
-                            <DatePicker
-                                date={grid.selectingDatePickerValue}
-                                onSelect={(date) => {
-                                    grid.changedRow = grid.changedRow || {};
-                                    grid.changedRow[grid.selectingDatePickerColumn.name] = date;
-                                    grid.setEditing(true);
-                                    grid.closeDatePickerWnd();
-                                }}
-                            ></DatePicker>
-                        );
-                    }}
-                    pos={grid.selectingDatePos}
-                    onClose={(e) => grid.closeDatePickerWnd(e)}
-                    init={(wnd) => { wnd.visible = grid.datePickerIsShowing; }}
-                    dimensionsByContent={true}
-                    closeWhenMiss={true}
-                    closeWhenEscape={true}
-                    noHeader={true}
-                    noFooter={true}
-                    noPadding={true}
-                    resizable={false}
-                    margin={'1em'}
-                >
-                </Modal>
-                :
-                <></>
-        );
-    }
-     */
-    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
-    onLookupGridInit(lookupGrid) {
-        const grid = this;
-        const info = grid._lookupEntityInfo[grid.lookupField.entity];
+                    title={grid.lookupTitle}
+                    renderContent={() => { return grid.renderPopupContent() }}
+                    pos={grid.popupPos}
+                    onClose={(e) => {
+                        if (grid.onClosePopup) {
+                            grid.onClosePopup(e);
+                        }
+                        grid.popupIsShowing = false;
+                        grid.lookupTitle = '';
+                        delete grid.onClosePopup;
+                        delete grid.popupPos;
 
-        lookupGrid.visible = true;
-        lookupGrid.title = grid.lookupField.title;
-        if (grid.activeRow) {
-            lookupGrid.value = grid.activeRow;
-            lookupGrid.activeRow = grid.activeRow;
-            delete grid.activeRow;
-        }
-        lookupGrid.isSelecting = true;
-        lookupGrid._entityInfo = info;
-        grid.lookupGrid = lookupGrid;
-    };
+                        grid.refreshState();
+                    }}
+                >
+                </Modal>
+                :
+                <></>
+        );
+    }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
-    renderLookupGrid(lookupField) {
+    renderPopupContent() {
+        const grid = this;
+        return grid.lookupIsShowing ? grid.renderLookupGrid(grid.lookupField) : <></>;
+    }
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
+    renderLookupGrid() {
         const grid = this;
         const info = grid._lookupEntityInfo[grid.lookupField.entity];
 
@@ -183,6 +139,22 @@ export class GridINUBaseClass extends GridFLClass {
             </GridINUBase>
         );
     }
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
+    onLookupGridInit(lookupGrid) {
+        const grid = this;
+        const info = grid._lookupEntityInfo[grid.lookupField.entity];
+
+        lookupGrid.visible = true;
+        lookupGrid.title = grid.lookupField.title;
+        if (grid.activeRow) {
+            lookupGrid.value = grid.activeRow;
+            lookupGrid.activeRow = grid.activeRow;
+            delete grid.activeRow;
+        }
+        lookupGrid.isSelecting = true;
+        lookupGrid._entityInfo = info;
+        grid.lookupGrid = lookupGrid;
+    };
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     changeField(e, col, row) {
         const grid = this;
@@ -221,9 +193,15 @@ export class GridINUBaseClass extends GridFLClass {
     openLookupField(e, col, row) {
         const grid = this;
         grid.lookupPos = grid.lookupPos || { x: 100, y: 100, w: 800, h: 600 };
+        grid.popupPos = grid.lookupPos;
+
+        grid.popupIsShowing = true;
+        grid.lookupIsShowing = true;
 
         grid.lookupField = col;
-        grid.lookupIsShowing = true;
+        grid.lookupTitle = col.title;
+        grid.onClosePopup = grid.closeLookup;
+
         grid.changedRow = grid.changedRow || {};
 
         const currValue = grid.changedRow[col.keyField] !== undefined ? grid.changedRow[col.keyField] : row[col.keyField];
@@ -282,9 +260,9 @@ export class GridINUBaseClass extends GridFLClass {
     closeLookup(e) {
         const grid = this;
         grid.lookupIsShowing = false;
+
         delete grid.lookupField;
         delete grid.lookupGrid;
-        grid.refreshState();
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     /*

@@ -13,6 +13,8 @@ import { Graph } from '../Grid/GraphComponent';
 import { LoginPage } from './LoginPage';
 import appSettings from '../AppSettings';
 import { DataGetter } from '../Grid/Utils/DataGetter';
+import { Select } from '../Grid/OuterComponents/Select';
+import DatePicker from "react-datepicker";
 
 function DebugApp() {
     const [state, setState] = useState({ menuItem: - 2, dataGetter: null });
@@ -149,26 +151,96 @@ function DebugApp() {
         );
     }
 
+    const drawTest = function () {
+        const getOption = (filter, pageNum) => {
+
+            const res = [];
+            for (let i = 0; i < 10; i++) {
+                res.push({ value: i, label: 'option ' + i });
+            }
+            const result = {
+                options: res,
+                hasMore: false,
+                additional: {
+                    page: pageNum + 1,
+                },
+            };
+
+            return result;
+        };
+        //<button onClick={() => { TEST() }} className="modal-window-footer-button">TEST</button> style={{ overflowX: "auto" }}
+        return (
+            <>
+                <div  className="graph-filter-line">
+                    <Select
+                        getOptions={getOption}
+                        onChange={() => { }}
+                        isMulti={true}
+                        style={{ width: '200px' }}
+                    >
+                    </Select>
+                </div >
+
+                <div style={{ overflowX: "auto" }}>
+                    <table>
+                        <thead>
+                            <tr>
+                                <td style={{ width: '150px' }}>h1</td>
+                                <td style={{ width: '150px' }}>h2</td>
+                                <td style={{ width: '150px' }}>h3</td>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>c11</td>
+                                <td>
+                                    <Select
+                                        getOptions={getOption}
+                                        onChange={() => { }}
+                                        isMulti={true}
+                                    >
+                                    </Select>
+                                </td>
+                                <td>
+                                    <DatePicker
+                                        selected={new Date()}
+                                        locale="ru"
+                                        dateFormat={'dd.MM.yyyy'}
+                                        showMonthDropdown
+                                        showYearDropdown
+                                        onSelect={(date) => {
+                                        }}
+                                    ></DatePicker>
+
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div >
+            </>
+        );
+    }
+
     const TEST = function () {
         /*
         let value;
-
+    
         Moment.locale('ru');
-
+    
         const d = '10.03.2011 0:00:00';
         const d2 = '19.03.2011 0:00:00';
-
+    
         let date = new Date(d);
         let formattedDate = date.toDateString()
-
+    
         date = new Date(d2);
         formattedDate = date.toDateString()
-
+    
         date = Moment(d);
         date = date.format('DD.MM.YYYY')
         date = Moment(d2, 'DD.MM.YYYY');
         date = date.format('DD.MM.YYYY')
-
+    
         value = format(d, "dd.MMM.yyyy HH:mm:ss");
         value = formatDate(d, "dd.MMM.yyyy");
         value = formatDate(d2, "dd.MMM.yyyy");
@@ -291,7 +363,7 @@ function DebugApp() {
             case 11:
                 return (
                     <>
-                        <button onClick={() => { TEST() }} className="modal-window-footer-button">TEST</button>
+                        {drawTest()}
                     </>
                 );
             default:

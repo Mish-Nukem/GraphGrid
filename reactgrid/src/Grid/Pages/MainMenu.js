@@ -102,6 +102,7 @@ export class MainMenuClass extends BaseComponent {
                             key={`menucollapse_button_`}
                             onClick={(e) => { menu.collapsed = !menu.collapsed; menu.refreshState(); }}
                             title={!menu.collapsed ? menu.translate('Collapse') : menu.translate('Expand')}
+                            className='menu-collapse-button'
                         >
                             {menu.collapsed ? menu.images.caretDown() : menu.images.caretUp()}
                         </button>
@@ -114,7 +115,7 @@ export class MainMenuClass extends BaseComponent {
                                                 <button
                                                     key={`menurootitem_${menu.id}_${item.id}_${ind}_`}
                                                     title={menu.translate(item.title || item.text)}
-                                                    className={menu.menuItemClass + (menu.activeItems[item.id] ? ' menu-item-selected' : '')}
+                                                    className={(menu.menuItemClass || '') + (menu.activeItems[item.id] ? ' menu-item-selected' : ' menu-item')}
                                                     onClick={(e) => menu.onItemClick(e, item.id)}
                                                 >
                                                     {menu.translate(item.text)}

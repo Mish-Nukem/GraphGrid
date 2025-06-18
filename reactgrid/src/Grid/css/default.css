@@ -332,7 +332,7 @@
 
 .graph-filter-line {
     display: grid;
-    grid-template-columns: auto auto auto auto auto auto;
+    grid-template-columns: minmax(150px, 17%) minmax(150px, 17%) minmax(150px, 17%) minmax(150px, 17%) minmax(150px, 17%) minmax(150px, 17%);
     grid-template-rows: auto auto;
     grid-auto-flow: row;
     align-items: center;
@@ -453,6 +453,7 @@
     display: flex;
     flex-wrap: nowrap;
     align-content: center;
+    align-items: center;
 }
 
     .main-menu-div > button {
@@ -461,8 +462,25 @@
         font-weight: 300;
     }
 
+.menu-item {
+    border-width: 1px;
+    border-radius: 2px;
+    cursor: pointer;
+}
+
+    .menu-item:hover {
+        background-color: lightgray;
+    }
+
 .menu-item-selected {
     background-color: lightgray;
     border-width: 1px;
     border-radius: 2px;
+    cursor: pointer;
+}
+
+.menu-collapse-button {
+    height: 22px;
+    width: 22px;
+    padding: 0;
 }

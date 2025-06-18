@@ -17,14 +17,14 @@ export class PMGridClass extends GridINUClass {
             name: 'test',
             title: node.translate('TEST'),
             label: node.translate('Test'),
-            click: (e) => node.test(e)
+            click: (e) => node.showReport(e)
         };
 
         node.buttons.push(btn);
         node._buttonsDict[btn.name] = btn;
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
-    test() {
+    showReport() {
         alert('PMGridClass TEST!');
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------

@@ -81,8 +81,6 @@ export class CardINUClass extends GridINUBaseClass {
         card.addCardButtons();
         card.buttons = card.cardButtons;
 
-        //                {super.renderDatePicker()}
-
         return (
             <>
                 <div className='graph-card-toolbar'
@@ -97,36 +95,11 @@ export class CardINUClass extends GridINUBaseClass {
                         card.columns.map((col) => { return card.renderField(col) })
                     }
                 </div>
-                {super.renderLookup()}
+                {super.renderPopup()}
             </>
         )
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
-    /*
-                            old ? <>
-                                <input
-                                    style={{
-                                        width: '100%',
-                                        height: '2.3em',
-                                        padding: '0',
-                                        boxSizing: 'border-box',
-                                        gridColumn: noClear ? 'span 2' : '',
-                                        overflowX: 'hidden',
-                                    }}
-                                    disabled={true}
-                                    value={value}
-                                />
-                                <button
-                                    key={`griddatepickerbtn_${card.id}_${col.id}_`}
-                                    className={'graph-card-button'}
-                                    onClick={(e) => card.openDatePickerWnd(e, col, value)}
-                                >
-                                    {card.images.filterSelect ? card.images.filterSelect() : card.translate('Select', 'graph-filter-select')}
-                                </button>
-                            </>
-                                :
-
-    */
     renderField(col) {
         const card = this;
         let value = card.changedRow[col.name];
@@ -381,7 +354,7 @@ export class CardINUClass extends GridINUBaseClass {
         }
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
-    renderLookupGrid(lookupField) {
+    renderLookupGrid() {
         const card = this;
         const info = card._lookupEntityInfo[card.lookupField.entity];
         return (
