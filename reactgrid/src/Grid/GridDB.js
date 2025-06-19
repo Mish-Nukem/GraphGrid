@@ -63,11 +63,13 @@ export class GridDBClass extends GridGRClass {
 
         const grid = this;
         grid.pageNumber = 1;
-        grid.pageSize = props.pageSize || 10;
+        grid.pageSize = props.pageSize === 0 ? 0 : props.pageSize || 10;
 
         grid.pageSizes = [5, 10, 15, 20, 30, 40, 50, 100];
 
         grid.buttons = props.buttons || [];
+
+        grid.sortDisabled = props.sortDisabled;
 
         grid.opt.toolbarClass = props.toolbarClass;
         grid.opt.toolbarButtonsClass = props.toolbarButtonsClass;
@@ -170,8 +172,8 @@ export class GridDBClass extends GridGRClass {
                                     <button
                                         key={`toolbarbutton_${grid.id}_${button.id}_${ind}_`}
                                         grid-toolbar-button={`${grid.id}_${button.id}_`}
-                                        className={`grid-toolbar-button ${button.class || grid.opt.toolbarButtonsClass || ''}`}
-                                        style={{ width: button.img ? '2.5em' : '', display: button.getVisible && !button.getVisible() ? 'none' : '' }}
+                                        className={`${button.class || grid.opt.toolbarButtonsClass || 'grid-toolbar-button'}`}
+                                        style={{ width: button.img ? '2.5em' : 'auto', display: button.getVisible && !button.getVisible() ? 'none' : '' }}
                                         title={grid.translate(button.title, 'grid-toolbar-button')}
                                         disabled={button.getDisabled && button.getDisabled({ grid: grid }) || button.disabled ? 'disabled' : ''}
                                         onClick={button.click ? (e) => {
@@ -287,171 +289,174 @@ export class GridDBClass extends GridGRClass {
             grid.pagerButtonsDict[settings.id] = grid.pagerButtonsDict[settings.name] = settings;
         }
 
-        const first = {
-            id: 2,
-            name: 'first',
-            title: 'First',
-            label: 'First',
-            click: function (e) {
-                grid.gotoFirstPage();
-            },
-            getDisabled: function () {
-                return !grid.rows || grid.rows.length <= 0 || grid.pageNumber === 1;
-            },
-        }
+        if (grid.pageSize > 0) {
 
-        grid.pagerButtons.push(first);
-        grid.pagerButtonsDict[first.id] = grid.pagerButtonsDict[first.name] = first;
-
-        const prev = {
-            id: 3,
-            name: 'prev',
-            title: 'Prev',
-            label: 'Prev',
-            click: function (e) {
-                grid.gotoPrevPage();
-            },
-            getDisabled: function () {
-                return !grid.rows || grid.rows.length <= 0 || grid.pageNumber === 1;
-            },
-        }
-
-        grid.pagerButtons.push(prev);
-        grid.pagerButtonsDict[prev.id] = grid.pagerButtonsDict[prev.name] = prev;
-
-        const curr = {
-            id: 4,
-            name: 'curr',
-            title: 'Current Page',
-            label: 'Current Page',
-            click: function (e) {
-            },
-            getDisabled: function () {
-                return !grid.rows || grid.rows.length <= 1;
-            },
-            render: function (button, bottom) {
-                return (
-                    <input
-                        key={`pager_${bottom ? 'bottom' : 'top'}_${grid.id}_${button.id}_`}
-                        value={grid.pageNumber}
-                        grid-pager-item={`${grid.id}_${button.id}_`}
-                        className={`${button.class ? button.class : 'grid-pager-current'}`}
-                        style={{ width: '3em', display: 'inline-block' }}
-                        disabled={grid.isEditing() ? 'disabled' : ''}
-                        onChange={function (e) {
-                            const newPage = +e.target.value;
-
-                            if (grid.pageNumber !== newPage && newPage >= 1 && newPage <= grid.pagesCount) {
-                                grid.pageNumber = newPage;
-                                grid.selectedRowIndex = 0;
-                                grid.refresh();
-                            }
-                        }}
-                    >
-                    </input>
-                )
-            },
-        }
-
-        grid.pagerButtons.push(curr);
-        grid.pagerButtonsDict[curr.id] = grid.pagerButtonsDict[curr.name] = curr;
-
-        const pages = {
-            id: 5,
-            name: 'pages',
-            title: 'Total Pages',
-            label: 'Total Pages',
-            render: function (button, bottom) {
-                return (
-                    <span
-                        className={'grid-pager-of'}
-                        key={`pager_${bottom ? 'bottom' : 'top'}_${grid.id}_${button.id}_`}
-                    >
-                        {` ${grid.translate('of', 'pager-button')} ${grid.pagesCount >= 0 ? grid.pagesCount : '0'}`}
-                    </span>
-                );
+            const first = {
+                id: 2,
+                name: 'first',
+                title: 'First',
+                label: 'First',
+                click: function (e) {
+                    grid.gotoFirstPage();
+                },
+                getDisabled: function () {
+                    return !grid.rows || grid.rows.length <= 0 || grid.pageNumber === 1;
+                },
             }
-        }
 
-        grid.pagerButtons.push(pages);
-        grid.pagerButtonsDict[pages.id] = grid.pagerButtonsDict[pages.name] = pages;
+            grid.pagerButtons.push(first);
+            grid.pagerButtonsDict[first.id] = grid.pagerButtonsDict[first.name] = first;
 
-        const next = {
-            id: 6,
-            name: 'next',
-            title: 'Next',
-            label: 'Next',
-            click: function (e) {
-                grid.gotoNextPage();
-            },
-            getDisabled: function () {
-                return !grid.rows || grid.rows.length <= 0 || grid.pageNumber === grid.pagesCount;
-            },
-        }
+            const prev = {
+                id: 3,
+                name: 'prev',
+                title: 'Prev',
+                label: 'Prev',
+                click: function (e) {
+                    grid.gotoPrevPage();
+                },
+                getDisabled: function () {
+                    return !grid.rows || grid.rows.length <= 0 || grid.pageNumber === 1;
+                },
+            }
 
-        grid.pagerButtons.push(next);
-        grid.pagerButtonsDict[next.id] = grid.pagerButtonsDict[next.name] = next;
+            grid.pagerButtons.push(prev);
+            grid.pagerButtonsDict[prev.id] = grid.pagerButtonsDict[prev.name] = prev;
 
-        const last = {
-            id: 7,
-            name: 'last',
-            title: 'Last',
-            label: 'Last',
-            click: function (e) {
-                grid.gotoLastPage();
-            },
-            getDisabled: function () {
-                return !grid.rows || grid.rows.length <= 0 || grid.pageNumber === grid.pagesCount;
-            },
-        }
+            const curr = {
+                id: 4,
+                name: 'curr',
+                title: 'Current Page',
+                label: 'Current Page',
+                click: function (e) {
+                },
+                getDisabled: function () {
+                    return !grid.rows || grid.rows.length <= 1;
+                },
+                render: function (button, bottom) {
+                    return (
+                        <input
+                            key={`pager_${bottom ? 'bottom' : 'top'}_${grid.id}_${button.id}_`}
+                            value={grid.pageNumber}
+                            grid-pager-item={`${grid.id}_${button.id}_`}
+                            className={`${button.class ? button.class : 'grid-pager-current'}`}
+                            style={{ width: '3em', display: 'inline-block' }}
+                            disabled={grid.isEditing() ? 'disabled' : ''}
+                            onChange={function (e) {
+                                const newPage = +e.target.value;
 
-        grid.pagerButtons.push(last);
-        grid.pagerButtonsDict[last.id] = grid.pagerButtonsDict[last.name] = last;
+                                if (grid.pageNumber !== newPage && newPage >= 1 && newPage <= grid.pagesCount) {
+                                    grid.pageNumber = newPage;
+                                    grid.selectedRowIndex = 0;
+                                    grid.refresh();
+                                }
+                            }}
+                        >
+                        </input>
+                    )
+                },
+            }
 
-        const pgsize = {
-            id: 8,
-            name: 'pgsize',
-            title: 'Page Size',
-            label: 'Page Size',
-            render: function (button, bottom) {
-                return (
-                    <select
-                        key={`pager_${bottom ? 'bottom' : 'top'}_${grid.id}_${button.id}_`}
-                        grid-pager-item={`${grid.id}_${button.id}_`}
-                        className={`grid-pager-size ${button.class ? button.class : ''}`}
-                        style={{ width: '4.5em', display: 'inline-block' }}
-                        value={grid.pageSize}
-                        disabled={grid.isEditing() ? 'disabled' : ''}
-                        onChange={function (e) {
-                            const newSize = +e.target.value;
+            grid.pagerButtons.push(curr);
+            grid.pagerButtonsDict[curr.id] = grid.pagerButtonsDict[curr.name] = curr;
 
-                            if (grid.pageSize !== newSize) {
-                                grid.pageSize = newSize;
-                                grid.pageNumber = 1;
-                                grid.selectedRowIndex = 0;
-                                grid.refresh();
+            const pages = {
+                id: 5,
+                name: 'pages',
+                title: 'Total Pages',
+                label: 'Total Pages',
+                render: function (button, bottom) {
+                    return (
+                        <span
+                            className={'grid-pager-of'}
+                            key={`pager_${bottom ? 'bottom' : 'top'}_${grid.id}_${button.id}_`}
+                        >
+                            {` ${grid.translate('of', 'pager-button')} ${grid.pagesCount >= 0 ? grid.pagesCount : '0'}`}
+                        </span>
+                    );
+                }
+            }
+
+            grid.pagerButtons.push(pages);
+            grid.pagerButtonsDict[pages.id] = grid.pagerButtonsDict[pages.name] = pages;
+
+            const next = {
+                id: 6,
+                name: 'next',
+                title: 'Next',
+                label: 'Next',
+                click: function (e) {
+                    grid.gotoNextPage();
+                },
+                getDisabled: function () {
+                    return !grid.rows || grid.rows.length <= 0 || grid.pageNumber === grid.pagesCount;
+                },
+            }
+
+            grid.pagerButtons.push(next);
+            grid.pagerButtonsDict[next.id] = grid.pagerButtonsDict[next.name] = next;
+
+            const last = {
+                id: 7,
+                name: 'last',
+                title: 'Last',
+                label: 'Last',
+                click: function (e) {
+                    grid.gotoLastPage();
+                },
+                getDisabled: function () {
+                    return !grid.rows || grid.rows.length <= 0 || grid.pageNumber === grid.pagesCount;
+                },
+            }
+
+            grid.pagerButtons.push(last);
+            grid.pagerButtonsDict[last.id] = grid.pagerButtonsDict[last.name] = last;
+
+            const pgsize = {
+                id: 8,
+                name: 'pgsize',
+                title: 'Page Size',
+                label: 'Page Size',
+                render: function (button, bottom) {
+                    return (
+                        <select
+                            key={`pager_${bottom ? 'bottom' : 'top'}_${grid.id}_${button.id}_`}
+                            grid-pager-item={`${grid.id}_${button.id}_`}
+                            className={`grid-pager-size ${button.class ? button.class : ''}`}
+                            style={{ width: '4.5em', display: 'inline-block' }}
+                            value={grid.pageSize}
+                            disabled={grid.isEditing() ? 'disabled' : ''}
+                            onChange={function (e) {
+                                const newSize = +e.target.value;
+
+                                if (grid.pageSize !== newSize) {
+                                    grid.pageSize = newSize;
+                                    grid.pageNumber = 1;
+                                    grid.selectedRowIndex = 0;
+                                    grid.refresh();
+                                }
+                            }}
+                        >
+                            {
+                                grid.pageSizes.map((size, ind) => {
+                                    return (
+                                        <option
+                                            value={+size}
+                                            key={`pagesize_${grid.id}_${ind}_`}
+                                        >
+                                            {size}
+                                        </option>
+                                    );
+                                })
                             }
-                        }}
-                    >
-                        {
-                            grid.pageSizes.map((size, ind) => {
-                                return (
-                                    <option
-                                        value={+size}
-                                        key={`pagesize_${grid.id}_${ind}_`}
-                                    >
-                                        {size}
-                                    </option>
-                                );
-                            })
-                        }
-                    </select>
-                );
-            },
-        }
+                        </select>
+                    );
+                },
+            }
 
-        grid.pagerButtons.push(pgsize);
-        grid.pagerButtonsDict[pgsize.id] = grid.pagerButtonsDict[pgsize.name] = pgsize;
+            grid.pagerButtons.push(pgsize);
+            grid.pagerButtonsDict[pgsize.id] = grid.pagerButtonsDict[pgsize.name] = pgsize;
+        }
 
         const rows = {
             id: 9,
@@ -475,6 +480,10 @@ export class GridDBClass extends GridGRClass {
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     renderHeaderCell(col, context) {
         const grid = this;
+        if (grid.sortDisabled) {
+            return super.renderHeaderCell(col, context);
+        }
+
         const title = grid.translate(col.title || col.name) || '';
         const sortDir = !col.sortable ? '' : col.asc ? '&#11205;' : col.desc ? '&#11206;' : '';
 
@@ -500,8 +509,11 @@ export class GridDBClass extends GridGRClass {
         const res = [
             { id: 0, text: grid.translate('Reset columns order', 'grid-menu') },
             { id: 1, text: grid.translate('Reset columns widths', 'grid-menu') },
-            { id: 2, text: grid.translate('Reset columns sort', 'grid-menu') },
         ];
+
+        if (!grid.sortDisabled) {
+            res.push({ id: 2, text: grid.translate('Reset columns sort', 'grid-menu') });
+        }
 
         return res;
     }

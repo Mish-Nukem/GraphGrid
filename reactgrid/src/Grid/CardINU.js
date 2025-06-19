@@ -132,6 +132,7 @@ export class CardINUClass extends GridINUBaseClass {
                         {
                             !col.allowCombobox ?
                                 <input
+                                    className={`${card.opt.inputClass || ''}`}
                                     key={`cardlookupinput_${card.id}_${col.id}_`}
                                     value={value}
                                     style={{ width: 'calc(100% - 4px)', padding: '0 2px', boxSizing: 'border-box', height: '2.3em', gridColumn: col.required || col.readonly || noClear ? 'span 2' : '' }}
@@ -140,6 +141,7 @@ export class CardINUClass extends GridINUBaseClass {
                                 :
                                 <Select
                                     key={`cardlookupselect_${card.id}_${col.id}_${card.keyCellAdd(true)}_`}
+                                    inputClass={card.opt.inputClass || ''}
                                     value={{ value: keyFieldValue, label: value }}
                                     getOptions={(filter, pageNum) => card.getLookupValues(col, filter, pageNum)}
                                     style={{ width: 'calc(100% - 4px)', padding: '0 2px', boxSizing: 'border-box' }}
@@ -200,6 +202,7 @@ export class CardINUClass extends GridINUBaseClass {
                             >
                                 <DatePicker
                                     selected={parsedDate}
+                                    className={card.opt.inputClass || ''}
                                     locale="ru"
                                     dateFormat={card.datePickerDateFormat}
                                     showMonthDropdown
@@ -240,7 +243,7 @@ export class CardINUClass extends GridINUBaseClass {
                         </span>
                         <textarea
                             key={`cardlookuptextarea_${card.id}_${col.id}_`}
-
+                            className={`${card.opt.inputClass || ''}`}
                             value={card.changedRow[col.name] !== undefined ? card.changedRow[col.name] : ''}
                             style={{ width: 'calc(100% - 4px)', height: col.maxW !== undefined && +col.maxW >= 200 ? '5em' : '2.3em', padding: '0 2px', boxSizing: 'border-box', gridColumn: col.required || col.readonly || noClear ? 'span 3' : 'span 2', resize: 'vertical' }}
                             onChange={(e) => card.changeField(e, col, card.changedRow)}

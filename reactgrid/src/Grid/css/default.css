@@ -64,7 +64,7 @@
 
 .grid-default {
     border-collapse: collapse;
-    table-layout: fixed;
+    table-layout: fixed !important;
     /*border: solid 1px;*/
 }
 
@@ -158,10 +158,16 @@
 .grid-cell {
     overflow: hidden;
     display: block;
+    white-space: nowrap;
+    text-overflow: clip;
 }
 
 .grid-selected-row {
     background-color: lightgray;
+}
+
+tr.grid-selected-row > td {
+  padding: 0.01em;  
 }
 
 .grid-pager-default {
@@ -176,7 +182,7 @@
     }
 
 .grid-pager-button {
-    margin: 5px 2px;
+    /*margin: 5px 2px;*/
     /*height: 28px;
     width: 36px;*/
     height: 2em;
@@ -190,10 +196,15 @@
     align-items: center;
 }
 
+    .toolbar-default > button {
+        margin: 5px 2px;
+    }
+
 .grid-toolbar-button {
-    margin: 5px 2px;
-    height: 2em;
+    /*height: 2em;*/
     /*height: 28px;*/
+    height: 2em;
+    width: 2.5em;
 }
 
 .grid-pager-current {
@@ -292,15 +303,16 @@
 
 .grid-cell-lookup {
     display: grid;
-    grid-template-columns: calc(100% - 40px) 20px 20px;
+    grid-template-columns: calc(100% - 1.5em - 1.5em) 1.5em 1.5em;
     grid-template-rows: auto;
     align-items: center;
     align-content: center;
+    white-space: nowrap;
 }
 
 .grid-cell-edit {
     display: grid;
-    grid-template-columns: calc(100% - 20px) 20px;
+    grid-template-columns: calc(100% - 1.5em) 1.5em;
     grid-template-rows: auto;
     align-items: center;
     align-content: center;
@@ -310,14 +322,15 @@
     height: 1.5em;
     width: 1.5em;
     display: flex;
-    padding: 0;
-    margin: 0;
+    padding: 0 !important;
+    margin: 0 2px;
     border: 1px;
     align-items: center;
     justify-content: center;
     flex-wrap: nowrap;
     border-radius: 3px;
     border-style: solid;
+    font-size: small;
 }
 
 .graph-tabcontrol-buttons {
@@ -341,13 +354,17 @@
 
 .graph-filter {
     display: grid;
-    grid-template-columns: auto 2.5em 2.5em;
+    grid-template-columns: calc(100% - 5em) 2.5em 2.5em;
     grid-template-rows: auto auto;
     grid-auto-flow: row;
     align-items: center;
     margin: 0.5em 1em;
     min-width: 10em;
 }
+
+    .graph-filter > button {
+        margin: 5px 2px;
+    }
 
 .graph-filter-title {
     font-weight: bold;
@@ -434,7 +451,7 @@
 .datepicker-input > div > div.react-datepicker__input-container,
 .datepicker-input > div > div.react-datepicker__input-container input {
     width: calc(100% - 3px);
-    height: 1.3em;
+    height: 1.6em;
 }
 
 .datepicker-filter,

@@ -100,27 +100,6 @@ export class GraphComponentClass extends BaseComponent {
         }
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
-    /*
-                        gc.selectingNode.filterType === FilterType.date ?
-                            <Modal
-                                title={gc.selectingNode.title}
-                                renderContent={() => { return gc.renderDatePicker() }}
-                                pos={gc.selectingDatePos}
-                                onClose={(e) => gc.closeFilterWnd(e)}
-                                init={(wnd) => { wnd.visible = gc.nodeSelectIsShowing; }}
-                                dimensionsByContent={true}
-                                closeWhenMiss={true}
-                                closeWhenEscape={true}
-                                noHeader={true}
-                                noFooter={true}
-                                noPadding={true}
-                                resizable={false}
-                                margin={'1em'}
-                            >
-                            </Modal>
-                            :
-
-    */
     render() {
         const gc = this;
 
@@ -223,22 +202,6 @@ export class GraphComponentClass extends BaseComponent {
     renderSelectingFilterGrid(node) {
         const gc = this;
         return !node.schemeName ? gc.renderGrid(node, NodeStatus.filter, true) : gc.renderSelectingGraph(node);
-
-        //    return (
-        //        <GridINU
-        //            findGrid={(props) => gc.replaceGrid(props)}
-        //            graph={gc.graph}
-        //            uid={node.uid || node.id}
-        //            entity={node.entity}
-        //            dataGetter={gc.dataGetter || node.dataGetter}
-        //            init={(grid) => {
-        //                grid.status = NodeStatus.filter;
-        //                grid.visible = true;
-        //                grid.title = node.title;
-        //            }}
-        //        >
-        //        </GridINU>
-        //    );
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     renderSelectingGraph(selectingNode) {
@@ -252,22 +215,6 @@ export class GraphComponentClass extends BaseComponent {
         >
         </Graph >;
     }
-    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
-    /*
-    renderDatePicker() {
-        const gc = this;
-        return (
-            <DatePicker
-                date={gc.selectingNode.value}
-                onSelect={(date) => {
-                    gc.selectingNode.value = date;
-                    gc.graph.triggerWave({ nodes: [gc.selectingNode], withStartNodes: false });
-                    gc.closeFilterWnd();
-                }}
-            ></DatePicker>
-        );
-    }
-    */
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     renderFilter(node, top) {
         const gc = this;
@@ -300,6 +247,7 @@ export class GraphComponentClass extends BaseComponent {
                     node.filterType === FilterType.combobox ?
                         <Select
                             value={node._selectedOptions}
+                            inputClass={node.opt.inputClass || ''}
                             isMulti={node.multi}
                             getOptions={(filter, pageNum) => gc.promiseOptions(filter, node, pageNum)}
                             onChange={(e) => {
@@ -328,6 +276,7 @@ export class GraphComponentClass extends BaseComponent {
 
                                 <DatePicker
                                     selected={parsedDate}
+                                    className={node.opt.inputClass || ''}
                                     locale="ru"
                                     dateFormat={node.datePickerDateFormat}
                                     showMonthDropdown
@@ -344,6 +293,7 @@ export class GraphComponentClass extends BaseComponent {
                             :
                             <input
                                 key={`fltrinp_${node.id}_${gc.id}_`}
+                                className={`${node.opt.inputClass || ''}`}
                                 style={{ width: '100%', padding: '0 2px', boxSizing: 'border-box', height: '2.3em', gridColumn: node.filterType === FilterType.input ? 'span 2' : '' }}
                                 value={
                                     node.filterType !== FilterType.date ?
@@ -418,7 +368,7 @@ export class GraphComponentClass extends BaseComponent {
     renderGridInGraph(node, top) {
         const gc = this;
 
-        if (!node.visible || +node.status !== +NodeStatus.grid || gc.isTop(node) !== top) return <></>;
+        if (!node || !node.visible || +node.status !== +NodeStatus.grid || gc.isTop(node) !== top) return <></>;
 
         if (!gc.isTop(node) && node.parents.indexOf(gc.activeMaster) < 0) return <></>;
 
@@ -870,6 +820,8 @@ export class GraphComponentClass extends BaseComponent {
             gc.graph.nodeCount++;
 
             node.opt = node.opt || {};
+
+            BaseComponent.ThemeObj.Apply(node);
 
             node.translate = node.translate || ((text) => { return text; });
 

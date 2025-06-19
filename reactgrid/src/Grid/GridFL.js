@@ -40,7 +40,6 @@ export function GridFL(props) {
         }
 
         if (grid.columns.length <= 0 && grid.getColumns) {
-            //grid.columns = grid.getColumns();
             grid.prepareColumns().then(() => grid.refreshState());;
         }
 
@@ -60,8 +59,9 @@ export class GridFLClass extends GridDBClass {
 
         const grid = this;
 
-        grid.opt.filterInputClass = props.filterInputClass || grid.opt.filterInputClass;
+        grid.opt.inputClass = props.inputClass || grid.opt.inputClass;
 
+        grid.filtersDisabled = props.filtersDisabled;
         grid.beforeOpen = props.beforeOpen;
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -101,6 +101,9 @@ export class GridFLClass extends GridDBClass {
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     renderHeaderCell(col, context) {
         const grid = this;
+        if (grid.filtersDisabled) {
+            return super.renderHeaderCell(col, context);
+        }
 
         const hasFilter = col.filtrable && context !== 'fake' && col.filter !== undefined && col.filter !== '';
 
@@ -118,7 +121,7 @@ export class GridFLClass extends GridDBClass {
                         <input
                             key={`colfilter_${grid.id}_${col.id}_`}
                             id={`colfilter_${grid.id}_${col.id}_`}
-                            className={`grid-col-filter ${grid.opt.filterInputClass || ''}`}
+                            className={`grid-col-filter ${grid.opt.inputClass || ''}`}
                             value={col.filter !== undefined ? col.filter : ''}
                             title={col.filter !== undefined ? col.filter : ''}
                             style={{ gridColumn: !hasFilter ? 'span 2' : '', width: 'calc(100% - 4px)', padding: '0 2px', boxSizing: 'border-box' }}
@@ -391,7 +394,9 @@ export class GridFLClass extends GridDBClass {
         const res = super.getGridSettingsList();
 
         const grid = this;
-        res.push({ id: 3, text: grid.translate('Clear all filters', 'grid-menu') });
+        if (!grid.filtersDisabled) {
+            res.push({ id: 3, text: grid.translate('Clear all filters', 'grid-menu') });
+        }
 
         return res;
     }
@@ -412,21 +417,6 @@ export class GridFLClass extends GridDBClass {
         const grid = this;
 
         super.setupPagerButtons();
-
-        //if (!grid.columns && grid.opt.getColumns) {
-        //    grid.columns = grid.opt.getColumns();
-        //    grid.prepareColumns();
-
-        //    let hasFiltrable = false;
-        //    for (let col of grid.columns) {
-        //        if (col.filtrable) {
-        //            hasFiltrable = true;
-        //            break;
-        //        }
-        //    }
-
-        //    if (!hasFiltrable) return;
-        //}
 
         const clear = {
             id: 10,

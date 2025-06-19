@@ -4,20 +4,21 @@ export class BootstrapTheme {
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     applyTheme(grid) {
         //grid.toolbarButtonsClass = 'btn btn-sm btn-success';
-        grid.opt.toolbarButtonsClass = 'btn btn-primary';
+        grid.opt.toolbarButtonsClass = 'btn btn-primary btn-sm';
         grid.opt.pagerClass = 'mb-1 grid-pager-default';
 
         grid.opt.gridClass = 'table table-sm table-bordered';
         //grid.opt.headerDivClass = 'grid-header-div-default';
         grid.opt.headerDivClass = ' ';
         grid.opt.selectedRowClass = 'table-active';
-        grid.opt.filterInputClass = 'form-control form-control-sm';
+        grid.opt.inputClass = 'form-control form-control-sm';
 
         grid.opt.menuClass = 'list-group';
         grid.opt.menuItemClass = 'list-group-item list-group-item-action list-group-item-light';
         grid.opt.dropdownWndClass = 'none';
 
-        grid.opt.filterButtonClass = 'btn btn-primary';
+        grid.opt.filterButtonClass = 'btn btn-primary btn-sm';
+        grid.opt.clearButtonClass = 'btn btn-outline-secondary btn-sm';
 
         this.setupGridPagerButtons(grid);
     }

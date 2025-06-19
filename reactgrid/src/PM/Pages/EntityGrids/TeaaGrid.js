@@ -1,5 +1,6 @@
-import { GridINU, GridINUClass } from '../../../Grid/GridINU';
-// Настройка обмена
+п»їimport { GridINU, GridINUClass } from '../../../Grid/GridINU';
+import { GridDB } from '../../../Grid/GridDB.js';
+// РќР°СЃС‚СЂРѕР№РєР° РѕР±РјРµРЅР°
 export class TeaaGridClass extends GridINUClass {
 
     //constructor(props) {
@@ -16,8 +17,8 @@ export class TeaaGridClass extends GridINUClass {
         let btn = {
             id: node.buttons.length,
             name: 'report',
-            title: node.translate('Протокол экспорта'),
-            label: node.translate('Протокол экспорта'),
+            title: 'РџСЂРѕС‚РѕРєРѕР» СЌРєСЃРїРѕСЂС‚Р°', //node.translate('РџСЂРѕС‚РѕРєРѕР» СЌРєСЃРїРѕСЂС‚Р°'),
+            label: 'РџСЂРѕС‚РѕРєРѕР» СЌРєСЃРїРѕСЂС‚Р°', //node.translate('РџСЂРѕС‚РѕРєРѕР» СЌРєСЃРїРѕСЂС‚Р°'),
             click: (e) => node.showReport(e)
         };
 
@@ -35,18 +36,21 @@ export class TeaaGridClass extends GridINUClass {
         //keyField = { ''}
         //nameField = { ''}
         return (
-            <GridINU
-                getRows={
-                    new Promise(function (resolve, reject) {
+            <GridDB
+                pageSize={0}
+                filtersDisabled={true}
+                sortDisabled={true}
+                getRows={() => {
+                    return new Promise(function (resolve, reject) {
                         if (grid.reportRows != null) {
                             resolve(grid.reportRows);
                         } else {
                             reject(Error("Error getting rows"));
                         }
                     })
-                }
+                }}
             >
-            </GridINU>
+            </GridDB>
         );
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -78,7 +82,7 @@ export class TeaaGridClass extends GridINUClass {
 
         grid.reportPos = grid.reportPos || { x: 110, y: 110, w: 800, h: 600 };
         grid.popupPos = grid.reportPos;
-        grid.lookupTitle = 'Протокол экспорта';
+        grid.lookupTitle = 'РџСЂРѕС‚РѕРєРѕР» СЌРєСЃРїРѕСЂС‚Р°';
 
         grid.reportRows = data;
 

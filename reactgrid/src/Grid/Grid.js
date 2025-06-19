@@ -180,7 +180,7 @@ export class GridClass extends BaseComponent {
                 <table
                     key={`grid_${grid.id}_`}
                     className={grid.opt.gridClass || 'grid-default'}
-                    style={{ width: w + "px" }}
+                    style={{ width: w + "px", tableLayout: 'fixed' }}
                 >
                     {grid.renderHeader()}
                     {grid.renderBody()}

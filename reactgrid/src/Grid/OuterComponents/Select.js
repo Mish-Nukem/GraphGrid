@@ -1,19 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 //import AsyncSelect from 'react-select';
 import { AsyncPaginate } from 'react-select-async-paginate';
 export function Select(props) {
     const [value, onChange] = useState(props.value);
-
-    if (props.init) {
-        props.init({
-            setComboboxValue: function (newValue) {
-                onChange(newValue);
-            },
-            refreshState: function () {
-                onChange(value);
-            }
-        });
-    }
 
     const getOptions = props.getOptions;
 
@@ -35,6 +24,7 @@ export function Select(props) {
             minHeight: height,
             height: height,
             boxShadow: state.isFocused ? null : null,
+            /*className: props.inputClass || '',*/
         }),
 
         valueContainer: (base, state) => ({
@@ -46,14 +36,18 @@ export function Select(props) {
         input: (base, state) => ({
             ...base,
             margin: '0px',
+            /*className: props.inputClass || '',*/
         }),
+
         indicatorSeparator: state => ({
             display: 'none',
         }),
+
         indicatorsContainer: (base, state) => ({
             ...base,
             height: height,
         }),
+
         option: (base, state) => ({
             ...base,
             backgroundColor: state.isFocused ? '#3699FF' : null,
@@ -61,6 +55,23 @@ export function Select(props) {
         }),
         menuPortal: base => ({ ...base, zIndex: 9999 })
     };
+
+    useEffect(() => {
+        if (props.init) {
+            props.init({
+                setComboboxValue: function (newValue) {
+                    onChange(newValue);
+                },
+                refreshState: function () {
+                    onChange(value);
+                }
+            });
+        }
+
+
+        return () => {
+        }
+    }, [value, props])
 
     return (
         <div

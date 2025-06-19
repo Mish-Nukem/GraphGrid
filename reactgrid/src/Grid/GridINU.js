@@ -2,11 +2,9 @@
 import { GridINUBaseClass } from './GridINUBase.js';
 import { NodeStatus } from './Base';
 import { CardINU } from './CardINU';
-//import { Modal } from './Modal';
 import { Select } from './OuterComponents/Select';
 import DatePicker, { registerLocale } from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
-//import { format, isValid, parse } from "date-fns";
 import ru from "date-fns/locale/ru";
 import Moment from 'moment';
 
@@ -24,7 +22,7 @@ export function GridINU(props) {
             grid = props.findGrid(props);
         }
         grid = grid || new GridINUClass(props);
-        needGetRows = !props.noAutoRefresh && !grid.hasParentGrids();//props.parentGrids;
+        needGetRows = !props.noAutoRefresh && !grid.hasParentGrids();
     }
 
     if (props.init) {
@@ -50,7 +48,6 @@ export function GridINU(props) {
         }
 
         if (grid.columns.length <= 0 && grid.getColumns) {
-            //grid.columns = grid.getColumns();
             grid.prepareColumns().then(() => grid.refreshState());;
         }
 
@@ -92,33 +89,13 @@ export class GridINUClass extends GridINUBaseClass {
         return this.visible;
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
-    render() {//{grid.renderCard()}
-        //const grid = this;
+    render() {
         return (
             <>
                 {super.render()}
             </>
         )
     }
-    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
-    /*
-    renderCard() {
-        const grid = this;
-        return (
-            grid.cardIsShowing ?
-                <Modal
-                    title={grid.title}
-                    renderContent={() => { return grid.renderCardContent() }}
-                    pos={grid.cardPos}
-                    onClose={(e) => grid.closeCard(e)}
-                    init={(wnd) => { wnd.visible = grid.cardIsShowing; }}
-                >
-                </Modal>
-                :
-                <></>
-        )
-    }
-    */
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     renderPopupContent() {
         const grid = this;
@@ -180,15 +157,18 @@ export class GridINUClass extends GridINUBaseClass {
         }
 
         const noClear = col.required || value === undefined || value === '';
-        //const old = false;
         switch (col.type.toLowerCase()) {
             case 'lookup':
                 const keyFieldValue = !grid.isEditing() ? row[col.keyField] : grid.changedRow && grid.changedRow[col.keyField] !== undefined ? grid.changedRow[col.keyField] : row[col.keyField];
                 if (col.setComboboxValue) {
-                    col.setComboboxValue({ value: keyFieldValue, label: value });
+                    setTimeout(() => { col.setComboboxValue({ value: keyFieldValue, label: value }); }, 10);
                 }
                 return (
-                    <div style={{ border: 'none' }} className='grid-cell-lookup' key={`gridlookupdiv_${grid.id}_${col.id}_`}>
+                    <div
+                        key={`gridlookupdiv_${grid.id}_${col.id}_`}
+                        style={{ border: 'none', height: !grid.opt.inputClass ? '1.7em' : '2em' }}
+                        className='grid-cell-lookup'
+                    >
                         {
                             !col.allowCombobox ?
                                 <span
@@ -200,9 +180,10 @@ export class GridINUClass extends GridINUBaseClass {
                                 :
                                 <Select
                                     key={`gridlookupselect_${grid.id}_${col.id}_`}
+                                    inputClass={grid.opt.inputClass || ''}
                                     value={{ value: keyFieldValue, label: value }}
                                     getOptions={(filter, pageNum) => grid.getLookupValues(col, filter, pageNum)}
-                                    height={'1.5em'}
+                                    height={!grid.opt.inputClass ? '1.7em' : '2em'}
                                     gridColumn={noClear ? 'span 2' : 'span 1'}
                                     onChange={(e) => {
                                         grid.changedRow = grid.changedRow || {};
@@ -218,7 +199,7 @@ export class GridINUClass extends GridINUBaseClass {
                         }
                         <button
                             key={`gridlookupbtn_${grid.id}_${col.id}_`}
-                            className={'grid-cell-button'}
+                            className={`grid-cell-button ${grid.opt.clearButtonClass || ''}`}
                             onClick={(e) => grid.openLookupField(e, col, row)}
                         >
                             {'...'}
@@ -228,7 +209,7 @@ export class GridINUClass extends GridINUBaseClass {
                                 :
                                 <button
                                     key={`gridlookupclear_${grid.id}_${col.id}_`}
-                                    className={'grid-cell-button'}
+                                    className={`grid-cell-button ${grid.opt.clearButtonClass || ''}`}
                                     onClick={(e) => grid.clearField(e, col, row)}
                                 >
                                     {'×'}
@@ -245,39 +226,42 @@ export class GridINUClass extends GridINUBaseClass {
                     >
                         {
                             col.type === 'date' ?
-                                    <div
-                                        style={{
-                                            width: '100%',
-                                            height: '1.7em',
-                                            minHeight: '1.7em',
-                                            padding: '0',
-                                            gridColumn: noClear ? 'span 3' : 'span 2',
-                                            overflowX: 'hidden',
+                                <div
+                                    style={{
+                                        width: '100%',
+                                        height: !grid.opt.inputClass ? '1.7em' : '2em',
+                                        minHeight: !grid.opt.inputClass ? '1.7em' : '2em',
+                                        padding: '0',
+                                        gridColumn: noClear ? 'span 3' : 'span 2',
+                                        overflowX: 'hidden',
+                                    }}
+                                    className="datepicker-input"
+                                >
+                                    <DatePicker
+                                        selected={parsedDate}
+                                        className={grid.opt.inputClass || ''}
+                                        style={{ height: '2.1em' }}
+                                        locale="ru"
+                                        dateFormat={grid.datePickerDateFormat}
+                                        showMonthDropdown
+                                        showYearDropdown
+                                        onSelect={(date) => {
+                                            grid.changedRow = grid.changedRow || {};
+                                            grid.changedRow[col.name] = Moment(date, grid.dateFormat);
+                                            grid.setEditing(true);
+                                            grid.refreshState();
                                         }}
-                                        className="datepicker-input"
-                                    >
-                                        <DatePicker
-                                            selected={parsedDate}
-                                            locale="ru"
-                                            dateFormat={grid.datePickerDateFormat}
-                                            showMonthDropdown
-                                            showYearDropdown
-                                            onSelect={(date) => {
-                                                grid.changedRow = grid.changedRow || {};
-                                                grid.changedRow[col.name] = Moment(date, grid.dateFormat);
-                                                grid.setEditing(true);
-                                                grid.refreshState();
-                                        }}
-                                        ></DatePicker>
-                                    </div>
+                                    ></DatePicker>
+                                </div>
                                 :
                                 <textarea
                                     key={`gridedittextarea_${grid.id}_${col.id}_`}
+                                    className={`${grid.opt.inputClass || ''}`}
                                     value={value}
                                     style={{
                                         width: '100%',
-                                        height: '1.7em',
-                                        minHeight: '1.7em',
+                                        height: !grid.opt.inputClass ? '2.1em' : '2.2em',
+                                        minHeight: !grid.opt.inputClass ? '2.1em' : '2.2em',
                                         padding: '0',
                                         boxSizing: 'border-box',
                                         gridColumn: noClear ? 'span 2' : '',
@@ -299,7 +283,7 @@ export class GridINUClass extends GridINUBaseClass {
                                 :
                                 <button
                                     key={`gridlookupclear_${grid.id}_${col.id}_`}
-                                    className={'grid-cell-button'}
+                                    className={`grid-cell-button ${grid.opt.clearButtonClass || ''}`}
                                     onClick={(e) => grid.clearField(e, col, row)}
                                 >
                                     {'×'}
@@ -312,12 +296,6 @@ export class GridINUClass extends GridINUBaseClass {
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     addToolbarButtons() {
         const grid = this;
-
-        //if (node._buttonsAdded) return;
-
-        //GridClass.applyTheme(node);
-
-        //node._buttonsAdded = true;
 
         //node.buttons.push({
         //    id: node.buttons.length,
@@ -509,9 +487,14 @@ export class GridINUClass extends GridINUBaseClass {
         const grid = this;
 
         grid.cardPos = grid.cardPos || { x: 110, y: 110, w: 800, h: 600 };
+        grid.popupPos = grid.cardPos;
 
         grid.cardRow = grid.selectedRow();
         grid.cardIsShowing = true;
+        grid.popupIsShowing = true;
+        grid.lookupTitle = grid.title;
+        grid.onClosePopup = grid.closeCard;
+
         grid.refreshState();
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -551,11 +534,6 @@ export class GridINUClass extends GridINUBaseClass {
     async canLeaveRow(rowIndex) {
         const grid = this;
         let res;
-
-        //if (node.detailNodeChangesSaved) {
-        //    res = await node.detailNodeChangesSaved();
-        //    if (!res) return false;
-        //}
 
         res = await grid.detailNodesChangesSaved();
         if (!res) return false;
@@ -665,9 +643,6 @@ export class GridINUClass extends GridINUBaseClass {
         if (grid.isNewRecord) {
             grid.isNewRecord = false;
             grid.refresh();
-        }
-        else {
-            grid.refreshState();
         }
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+﻿import { useState, useEffect } from 'react';
 import { GridFLClass } from './GridFL.js';
 import { FilterType, NodeStatus } from './Base';
 import { WaveType } from './Graph.js';
@@ -42,7 +42,6 @@ export function GridINUBase(props) {
         }
 
         if (grid.columns.length <= 0 && grid.getColumns) {
-            //grid.columns = grid.getColumns();
             grid.prepareColumns().then(() => grid.refreshState());;
         }
 
@@ -265,32 +264,6 @@ export class GridINUBaseClass extends GridFLClass {
         delete grid.lookupGrid;
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
-    /*
-    openDatePickerWnd(e, col, value) {
-        const grid = this;
-
-        grid.selectingDatePos = grid.selectingDatePos || { x: e.clientX || 100, y: e.clientY || 100, w: 800, h: 600 }; 
-
-        grid.selectingDatePos.x = e.clientX || grid.selectingDatePos.x;
-        grid.selectingDatePos.y = e.clientY || grid.selectingDatePos.y;
-
-        grid.datePickerIsShowing = true;
-        grid.selectingDatePickerColumn = col;
-        grid.selectingDatePickerValue = value;
-        grid.refreshState();
-    }
-    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
-    closeDatePickerWnd(e) {
-        const grid = this;
-        grid.datePickerIsShowing = false;
-        if (grid.selectingDatePickerColumn) {
-            grid.selectingDatePickerColumn = null;
-            grid.selectingDatePickerValue = '';
-        }
-        grid.refreshState();
-    }
-    */
-    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     skipOnWaveVisit(e) {
         if (super.skipOnWaveVisit(e)) return true;
 
@@ -338,9 +311,6 @@ export class GridINUBaseClass extends GridFLClass {
                             pref = 'date';
                         }
                         activeValue = parent.value;
-                        //else {
-                        //    activeValue = parent.selectedValue();
-                        //}
                         break;
                     default:
                         if (link.everLink) {
@@ -352,7 +322,7 @@ export class GridINUBaseClass extends GridFLClass {
                 if (!activeValue) return '';
 
                 if (link.condition) {
-                    return link.condition.replace(/:id/gi, activeValue);//{ type: parent.filterType === FilterType.date ? 'column' : 'graphLink', filter: link.condition.replace(/:id/gi, activeValue) };
+                    return link.condition.replace(/:id/gi, activeValue);
                 }
 
                 if (grid._entityInfo && parent._entityInfo && grid._entityInfo.tableName) {
@@ -570,6 +540,7 @@ export class GridINUBaseClass extends GridFLClass {
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     saveColumnsConfig(e) {
         const grid = this;
+        if (!grid.dataGetter) return;
 
         let savingColumns = [];
         for (let col of grid.columns) {
