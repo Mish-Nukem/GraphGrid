@@ -1,6 +1,6 @@
-import { GridINUClass } from '../Grid/GridINU';
+﻿import { GridINUClass } from '../Grid/GridINU';
 import { PMGridClass } from './Pages/EntityGrids/PMGrid';
-import { TeaaGridClass } from './Pages/EntityGrids/TeaaGrid';
+import { TeaaGridClass } from '../ETL/Pages/EntityGrids/TeaaGrid';
 export function PMGridCreator() {
     return {
         CreateGridClass: (props) => {

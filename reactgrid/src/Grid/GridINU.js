@@ -1,4 +1,5 @@
-﻿import { useState, useEffect } from 'react';
+﻿/* eslint-disable no-mixed-operators */
+import { useState, useEffect } from 'react';
 import { GridINUBaseClass } from './GridINUBase.js';
 import { NodeStatus } from './Base';
 import { CardINU } from './CardINU';
@@ -22,7 +23,7 @@ export function GridINU(props) {
             grid = props.findGrid(props);
         }
         grid = grid || new GridINUClass(props);
-        needGetRows = !props.noAutoRefresh && !grid.hasParentGrids();
+        needGetRows = !props.noAutoRefresh && !grid.hasVisibleParentGrids();
     }
 
     if (props.init) {
@@ -36,7 +37,9 @@ export function GridINU(props) {
     useEffect(() => {
         grid.setupEvents();
 
-        if (needGetRows && (grid.rows.length <= 0 || grid.columns.length <= 0)) {
+        if (needGetRows && (grid.rows.length <= 0 || grid.columns.length <= 0) || grid._forceRefresh) {
+
+            grid._forceRefresh = false;
 
             grid.getRows({ filters: grid.collectFilters(), grid: grid }).then(
                 rows => {
@@ -592,13 +595,16 @@ export class GridINUClass extends GridINUBaseClass {
         return true;
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
-    hasParentGrids() {
+    hasVisibleParentGrids() {
         const grid = this;
         if (!grid.graph) return false;
 
         for (let puid of grid.parents) {
             let pnode = grid.graph.nodesDict[puid];
             if (pnode.visible !== false && pnode.status === NodeStatus.grid) return true;
+
+            let link = grid.graph.linksDict[grid.id + '_' + pnode.id];
+            if (link.everLink) return true;
         }
 
         return false;

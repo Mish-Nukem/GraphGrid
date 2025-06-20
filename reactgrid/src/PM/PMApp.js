@@ -1,4 +1,4 @@
-import '../Grid/css/default.css';
+﻿import '../Grid/css/default.css';
 import { useState } from 'react';
 import PMTest from './PMTest';
 import { GridINU } from '../Grid/GridINU';
@@ -81,7 +81,7 @@ function PMApp() {
                 return (
                     <>
                         <div className="div-with-grid">
-                            <Graph uid="PM" schemeName="TuningListScheme" dataGetter={dataGetter} gridCreator={gridCreator}></Graph>
+                            <Graph uid="TEAA" schemeName="TuningListScheme" dataGetter={dataGetter} gridCreator={gridCreator}></Graph>
                         </div>
                     </>
                 );

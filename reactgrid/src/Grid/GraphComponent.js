@@ -1,4 +1,4 @@
-/* eslint-disable no-mixed-operators */
+ï»¿/* eslint-disable no-mixed-operators */
 import { useState, useEffect } from 'react';
 import { BaseComponent, NodeStatus, FilterType, log } from './Base';
 import { GraphClass } from './Graph';
@@ -78,6 +78,7 @@ export class GraphComponentClass extends BaseComponent {
 
         gc.selectingNodeUid = props.selectingNodeUid;
         gc.onSelectFilterValue = props.onSelectFilterValue;
+        gc.nodeBeforeOpenCondition = props.nodeBeforeOpenCondition;
 
         if (props.graph) {
             gc.prepareGraph(props.graph);
@@ -143,7 +144,7 @@ export class GraphComponentClass extends BaseComponent {
                     topGrids.push(node);
                 }
                 else {
-                    if (node.parents.indexOf(gc.activeMaster) >= 0) lowGrids.push(node);
+                    if (node.parents.indexOf(gc.activeMaster) >= 0 || node.parents.indexOf(gc.activeDetail) >= 0 || node.uid === gc.activeDetail) lowGrids.push(node);
                 }
             }
         }
@@ -350,7 +351,7 @@ export class GraphComponentClass extends BaseComponent {
         const gc = this;
         if (+node.status !== +NodeStatus.grid || gc.isTop(node) !== top) return <></>;
 
-        if (!gc.isTop(node) && node.parents.indexOf(gc.activeMaster) < 0) return <></>;
+        if (!gc.isTop(node) && node.parents.indexOf(gc.activeMaster) < 0 && node.parents.indexOf(gc.activeDetail) < 0 && node.uid !== gc.activeDetail) return <></>;
 
         const isActive = top && node.uid === gc.activeMaster || !top && node.uid === gc.activeDetail;
         return (
@@ -370,7 +371,7 @@ export class GraphComponentClass extends BaseComponent {
 
         if (!node || !node.visible || +node.status !== +NodeStatus.grid || gc.isTop(node) !== top) return <></>;
 
-        if (!gc.isTop(node) && node.parents.indexOf(gc.activeMaster) < 0) return <></>;
+        if (!gc.isTop(node) && node.parents.indexOf(gc.activeMaster) < 0 && node.parents.indexOf(gc.activeMaster) < 0 && node.uid !== gc.activeDetail) return <></>;
 
         return gc.renderGrid(node, NodeStatus.grid, top);
     }
@@ -506,6 +507,10 @@ export class GraphComponentClass extends BaseComponent {
         }
 
         node.visible = true;
+        node._forceRefresh = true;
+        //if (!gc.isTop(node)) {
+        //    node.refresh();
+        //}
 
         gc.refreshState();
     }
@@ -689,7 +694,7 @@ export class GraphComponentClass extends BaseComponent {
 
         if (grid && grid._replaced) return grid;
 
-        // TODO: ñäåëàòü ñîçäàíèå ðàçíûõ ôîðì, â çàâèñèìîñòè îò êîíòåêñòà
+        // TODO: ÑÐ´ÐµÐ»Ð°Ñ‚ÑŒ ÑÐ¾Ð·Ð´Ð°Ð½Ð¸Ðµ Ñ€Ð°Ð·Ð½Ñ‹Ñ… Ñ„Ð¾Ñ€Ð¼, Ð² Ð·Ð°Ð²Ð¸ÑÐ¸Ð¼Ð¾ÑÑ‚Ð¸ Ð¾Ñ‚ ÐºÐ¾Ð½Ñ‚ÐµÐºÑÑ‚Ð°
         grid = gc.gridCreator.CreateGridClass(props);  //new GridINUClass(props);
 
         delete grid.refreshState;
@@ -708,12 +713,19 @@ export class GraphComponentClass extends BaseComponent {
         graph.nodesDict[grid.uid] = grid;
 
         grid.allowEditGrid = obr.allowEditGrid;
-        grid.allowAdd = obr.allowAdd; 
-        grid.allowCopy = obr.allowCopy; 
-        grid.allowDelete = obr.allowDelete; 
-        grid.allowView = obr.allowView; 
+        grid.allowAdd = obr.allowAdd;
+        grid.allowCopy = obr.allowCopy;
+        grid.allowDelete = obr.allowDelete;
+        grid.allowView = obr.allowView;
 
         grid.beforeOpen = obr.beforeOpen;
+
+        const beforeOpenFromProps = gc.nodeBeforeOpenCondition ? gc.nodeBeforeOpenCondition[grid.uid] : '';
+        if (beforeOpenFromProps) {
+            grid.beforeOpen = (grid.beforeOpen ? ' and ' : '') + beforeOpenFromProps;
+        }
+
+        grid._forceRefresh = obr._forceRefresh;
 
         grid.multi = obr.multi;
 
@@ -810,6 +822,8 @@ export class GraphComponentClass extends BaseComponent {
         }
 
         gc.graph.nodeCount = 0;
+
+        gc.graph.gridCreator = gc.gridCreator;
 
         gc.graph.checkNeedTriggerWave = (node) => { return gc.checkNeedTriggerWave(node) };
 

@@ -1,5 +1,8 @@
 ﻿import { GridINU, GridINUClass } from '../../../Grid/GridINU';
-import { GridDB } from '../../../Grid/GridDB.js';
+import { GridDB } from '../../../Grid/GridDB';
+import { Graph } from '../../../Grid/GraphComponent';
+import { DataExchangePage } from '../DataExchangePage';
+
 // Настройка обмена
 export class TeaaGridClass extends GridINUClass {
 
@@ -9,6 +12,45 @@ export class TeaaGridClass extends GridINUClass {
     //    const grid = this;
     //}
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
+    viewRecord(e) {
+        const grid = this;
+
+        grid.cardPos = grid.cardPos || { x: 110, y: 110, w: 800, h: 600 };
+        grid.popupPos = grid.cardPos;
+
+        grid.cardRow = grid.selectedRow();
+        grid.cardIsShowing = true;
+        grid.popupIsShowing = true;
+        grid.lookupTitle = grid.title;
+        grid.onClosePopup = grid.closeCard;
+
+        grid.refreshState();
+    }
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
+    render() {
+        const grid = this;
+        return (
+            <>
+                {super.render()}
+                {grid.renderDataExchangePage()}
+            </>
+        )
+    }
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
+    renderCardContent() {
+        const grid = this;
+        return (
+            <Graph
+                uid={`${grid.graph.uid}_select_${grid.uid}_`}
+                schemeName={'TuningCardScheme'}
+                nodeBeforeOpenCondition={{ '2': `ID_TUNING_EXCH_TEAA in (${grid.selectedValue()})` }}
+                dataGetter={grid.dataGetter}
+                gridCreator={grid.graph.gridCreator}
+            >
+            </Graph >
+        );
+    }
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     addToolbarButtons() {
         const node = this;
 
@@ -17,9 +59,9 @@ export class TeaaGridClass extends GridINUClass {
         let btn = {
             id: node.buttons.length,
             name: 'report',
-            title: 'Протокол экспорта', //node.translate('Протокол экспорта'),
-            label: 'Протокол экспорта', //node.translate('Протокол экспорта'),
-            click: (e) => node.showReport(e)
+            title: 'Вызов обмена данными для текущей настройки',
+            label: 'Обмен данными',
+            click: (e) => node.runDataExchange(e)
         };
 
         node.buttons.push(btn);
@@ -33,8 +75,6 @@ export class TeaaGridClass extends GridINUClass {
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     renderReportContent() {
         const grid = this;
-        //keyField = { ''}
-        //nameField = { ''}
         return (
             <GridDB
                 pageSize={0}
@@ -51,6 +91,33 @@ export class TeaaGridClass extends GridINUClass {
                 }}
             >
             </GridDB>
+        );
+    }
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
+    runDataExchange() {
+        const grid = this;
+        grid._dataExchangePageVisible = true;
+        grid.refreshState();
+    }
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
+    renderDataExchangePage() {
+        const grid = this;
+        const row = grid.selectedRow();
+
+        if (!grid._dataExchangePageVisible || !row) return <></>;
+
+        grid.exchPos = grid.exchPos || { x: 210, y: 210 };
+
+        return (
+            <DataExchangePage
+                pos={grid.exchPos}
+                edId={row['ID_TUNING_EXCH_TEAA']}
+                edType={row['ID_TUNING_EXCH_TYPE_TEAA']}
+                nameExchange={row['ID_TUNING_DATASF_TEAA_NAME']}
+                visible={grid._dataExchangePageVisible}
+                init={(de) => { de.visible = grid._dataExchangePageVisible; }}
+                onClose={() => { grid._dataExchangePageVisible = false; }}
+            ></DataExchangePage>
         );
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
