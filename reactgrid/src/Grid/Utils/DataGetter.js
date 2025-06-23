@@ -1,4 +1,4 @@
-export class DataGetter {
+﻿export class DataGetter {
     constructor(settings, atoken, rtoken) {
         const dg = this;
 
@@ -55,23 +55,32 @@ export class DataGetter {
             function doRequest() {
                 return new Promise(function (resolveRequest, rejectRequest) {
                     try {
-                        const item = e.params.find(function (item, index, array) {
-                            return String(item.key) === 'atoken';
-                        });
+                        if (e.params) {
+                            const item = e.params.find(function (item, index, array) {
+                                return String(item.key) === 'atoken';
+                            });
 
-                        if (item) {
-                            item.value = dg.atoken;
-                        }
-                        else {
-                            e.params.push({ key: 'atoken', value: dg.atoken });
+                            if (item) {
+                                item.value = dg.atoken;
+                            }
+                            else {
+                                e.params.push({ key: 'atoken', value: dg.atoken });
+                            }
                         }
 
-                        fetch(dg.APIurl + e.url, {
+                        const fetchParams = {
                             mode: 'cors',
-                            method: 'post',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify(e.params)
-                        })
+                            method: e.method || 'post',
+                            headers: {},
+                            /*headers: { 'Content-Type': e.contentType || 'application/json' },*/
+                            body: e.params ? JSON.stringify(e.params) : e.data || null
+                        };
+
+                        if (e.contentType !== null) {
+                            fetchParams.headers['Content-Type'] = e.contentType || 'application/json';
+                        }
+
+                        fetch(dg.APIurl + e.url, fetchParams)
                             .then((response) => {
                                 if (response.status === 500 || !response.ok) {
                                     if (!refresh) {

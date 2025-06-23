@@ -176,7 +176,7 @@ export class GridClass extends BaseComponent {
         log(' -------------------------------------------------------------------------------------------------------------------------------------- ');
 
         return (
-            <div style={{ overflowX: 'auto' }}>
+            <div style={{ overflowX: 'auto', overflowY: 'hidden' }}>
                 <table
                     key={`grid_${grid.id}_`}
                     className={grid.opt.gridClass || 'grid-default'}

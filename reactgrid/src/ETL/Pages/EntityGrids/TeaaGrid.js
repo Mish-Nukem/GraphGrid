@@ -70,7 +70,7 @@ export class TeaaGridClass extends GridINUClass {
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     renderPopupContent() {
         const grid = this;
-        return grid.reportIsShowing ? grid.renderReportContent() : super.renderPopupContent();
+        return grid.protocolIsShowing ? grid.renderReportContent() : super.renderPopupContent();
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     renderReportContent() {
@@ -115,37 +115,41 @@ export class TeaaGridClass extends GridINUClass {
                 edType={row['ID_TUNING_EXCH_TYPE_TEAA']}
                 nameExchange={row['ID_TUNING_DATASF_TEAA_NAME']}
                 visible={grid._dataExchangePageVisible}
-                init={(de) => { de.visible = grid._dataExchangePageVisible; }}
+                init={(de) => {
+                    de.visible = grid._dataExchangePageVisible;
+                    de.showProtocol = (rows) => { grid.showExportProtocol(rows); };
+                }}
                 onClose={() => { grid._dataExchangePageVisible = false; }}
+                dataGetter={grid.dataGetter}
             ></DataExchangePage>
         );
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
-    showReport() {
-        const grid = this;
-        const row = grid.selectedRow();
-        if (!row) return;
+    //showReport() {
+    //    const grid = this;
+    //    const row = grid.selectedRow();
+    //    if (!row) return;
 
-        const params = [
-            { key: 'ID_teaa', value: row['ID_TUNING_EXCH_TEAA'] },
-        ];
+    //    const params = [
+    //        { key: 'ID_teaa', value: row['ID_TUNING_EXCH_TEAA'] },
+    //    ];
 
-        grid.dataGetter.get({ url: 'TinuTuningExchTeaaEntity/test1', params: params }).then(
-            (data) => {
-                if (data && data.length) {
-                    grid.showExportResult(data);
-                }
-            }
-        );
+    //    grid.dataGetter.get({ url: 'TinuTuningExchTeaaEntity/test1', params: params }).then(
+    //        (data) => {
+    //            if (data && data.length) {
+    //                grid.showExportProtocol(data);
+    //            }
+    //        }
+    //    );
 
 
         //alert('TeaaGridClass Showing report!');
-    }
+    //}
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
-    showExportResult(data) {
+    showExportProtocol(data) {
         const grid = this;
         grid.popupIsShowing = true;
-        grid.reportIsShowing = true;
+        grid.protocolIsShowing = true;
 
         grid.reportPos = grid.reportPos || { x: 110, y: 110, w: 800, h: 600 };
         grid.popupPos = grid.reportPos;
@@ -154,7 +158,7 @@ export class TeaaGridClass extends GridINUClass {
         grid.reportRows = data;
 
         grid.onClosePopup = () => {
-            grid.reportIsShowing = false;
+            grid.protocolIsShowing = false;
             grid.reportRows = [];
         };
 
