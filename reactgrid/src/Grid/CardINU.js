@@ -1,4 +1,4 @@
-import { GridINU } from './GridINU';
+﻿import { GridINU } from './GridINU';
 import { useState, useEffect } from 'react';
 import { GridINUBaseClass } from './GridINUBase.js';
 import { Select } from './OuterComponents/Select';
@@ -13,7 +13,7 @@ export function CardINU(props) {
 
     card = gridState.grid;
     let needGetRows = false;
-    if (!card) {
+    if (!card || card.uid !== props.uid) {
         if (props.findGrid) {
             card = props.findGrid(props);
         }

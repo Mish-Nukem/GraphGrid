@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import { BaseComponent, NodeStatus, FilterType, log } from './Base';
 import { GraphClass } from './Graph';
+import { GridFL, GridFLClass } from './GridFL.js';
 import { GridINU, GridINUClass } from './GridINU';
 import { Modal } from './Modal';
 import { Select } from './OuterComponents/Select';
@@ -10,7 +11,7 @@ import Moment from 'moment';
 import { FadeLoader } from 'react-spinners';
 import "react-datepicker/dist/react-datepicker.css";
 // ==================================================================================================================================================================
-export function Graph(props) {
+export function GraphComponent(props) {
     let gc = null;
 
     const [graphState, setState] = useState({ graphComponent: gc, ind: 0 });
@@ -38,7 +39,7 @@ export function Graph(props) {
                 }
             );
         }
-        else {
+        else if (gc.dataGetter) {
             gc.getGraphInfo().then(
                 (gInfo) => {
                     gc.applyRestoredParams(gInfo);
@@ -72,7 +73,12 @@ export class GraphComponentClass extends BaseComponent {
 
         gc.gridCreator = props.gridCreator || {
             CreateGridClass: (props) => {
-                return new GridINUClass(props);
+                if (props.entity) {
+                    return new GridINUClass(props);
+                }
+                else {
+                    return new GridFLClass(props);
+                }
             }
         };
 
@@ -207,14 +213,14 @@ export class GraphComponentClass extends BaseComponent {
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     renderSelectingGraph(selectingNode) {
         const gc = this;
-        return <Graph
+        return <GraphComponent
             uid={`${gc.uid}_select_${selectingNode.uid}_`}
             schemeName={selectingNode.schemeName}
             selectingNodeUid={selectingNode.inSchemeUid}
             dataGetter={gc.dataGetter}
             onSelectFilterValue={(e) => gc.selectFilterValue(e)}
         >
-        </Graph >;
+        </GraphComponent >;
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     renderFilter(node, top) {
@@ -387,15 +393,25 @@ export class GraphComponentClass extends BaseComponent {
         const gc = this;
 
         return (
-            <GridINU
-                findGrid={(props) => gc.replaceGrid(props)}
-                graph={gc.graph}
-                uid={node.uid !== undefined ? node.uid : node.id}
-                entity={node.entity}
-                dataGetter={gc.dataGetter || node.dataGetter}
-                init={(grid) => gc.onGridInit(grid, node.title, status, top)}
-            >
-            </GridINU>
+            node.entity ?
+                <GridINU
+                    findGrid={(props) => gc.replaceGrid(props)}
+                    graph={gc.graph}
+                    uid={node.uid !== undefined ? node.uid : node.id}
+                    entity={node.entity}
+                    dataGetter={gc.dataGetter || node.dataGetter}
+                    init={(grid) => gc.onGridInit(grid, node.title, status, top)}
+                >
+                </GridINU>
+                :
+                <GridFL
+                    findGrid={(props) => gc.replaceGrid(props)}
+                    graph={gc.graph}
+                    uid={node.uid !== undefined ? node.uid : node.id}
+                    dataGetter={gc.dataGetter || node.dataGetter}
+                    init={(grid) => gc.onGridInit(grid, node.title, status, top)}
+                >
+                </GridFL>
         );
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -694,8 +710,7 @@ export class GraphComponentClass extends BaseComponent {
 
         if (grid && grid._replaced) return grid;
 
-        // TODO: сделать создание разных форм, в зависимости от контекста
-        grid = gc.gridCreator.CreateGridClass(props);  //new GridINUClass(props);
+        grid = gc.gridCreator.CreateGridClass(props);
 
         delete grid.refreshState;
 
@@ -709,6 +724,8 @@ export class GraphComponentClass extends BaseComponent {
         grid.title = obr.title || grid.title;
         grid.nameField = obr.nameField || grid.nameField;
         grid.keyField = obr.keyField || grid.keyField;
+
+        grid.pageSize = obr.pageSize !== undefined ? obr.pageSize : grid.pageSize;
 
         graph.nodesDict[grid.uid] = grid;
 
@@ -772,6 +789,8 @@ export class GraphComponentClass extends BaseComponent {
         if (grid.columns && grid.columns.length > 0) {
             grid.prepareColumns();
         }
+
+        grid.getRows = obr.getRows || grid.getRows;
 
         grid.connectedToParents = true;
         grid.parents = obr.parents;

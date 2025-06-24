@@ -1,6 +1,8 @@
-﻿import { GridINU, GridINUClass } from '../../../Grid/GridINU';
-import { GridDB } from '../../../Grid/GridDB';
-import { Graph } from '../../../Grid/GraphComponent';
+﻿import { NodeStatus } from '../../../Grid/Base';
+import { GridINUClass } from '../../../Grid/GridINU';
+//import { GridDB } from '../../../Grid/GridDB';
+import { GraphClass } from '../../../Grid/Graph';
+import { GraphComponent } from '../../../Grid/GraphComponent';
 import { DataExchangePage } from '../DataExchangePage';
 
 // Настройка обмена
@@ -40,14 +42,14 @@ export class TeaaGridClass extends GridINUClass {
     renderCardContent() {
         const grid = this;
         return (
-            <Graph
+            <GraphComponent
                 uid={`${grid.graph.uid}_select_${grid.uid}_`}
                 schemeName={'TuningCardScheme'}
                 nodeBeforeOpenCondition={{ '2': `ID_TUNING_EXCH_TEAA in (${grid.selectedValue()})` }}
                 dataGetter={grid.dataGetter}
                 gridCreator={grid.graph.gridCreator}
             >
-            </Graph >
+            </GraphComponent >
         );
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -60,8 +62,9 @@ export class TeaaGridClass extends GridINUClass {
             id: node.buttons.length,
             name: 'report',
             title: 'Вызов обмена данными для текущей настройки',
-            label: 'Обмен данными',
-            click: (e) => node.runDataExchange(e)
+            //label: 'Обмен данными',
+            click: (e) => node.runDataExchange(e),
+            img: node.images.rightLeft,
         };
 
         node.buttons.push(btn);
@@ -70,27 +73,17 @@ export class TeaaGridClass extends GridINUClass {
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     renderPopupContent() {
         const grid = this;
-        return grid.protocolIsShowing ? grid.renderReportContent() : super.renderPopupContent();
+        return grid.protocolIsShowing ? grid.renderExportProtocolContent() : super.renderPopupContent();
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
-    renderReportContent() {
+    renderExportProtocolContent() {
         const grid = this;
         return (
-            <GridDB
-                pageSize={0}
-                filtersDisabled={true}
-                sortDisabled={true}
-                getRows={() => {
-                    return new Promise(function (resolve, reject) {
-                        if (grid.reportRows != null) {
-                            resolve(grid.reportRows);
-                        } else {
-                            reject(Error("Error getting rows"));
-                        }
-                    })
-                }}
+            <GraphComponent
+                uid={`${grid.graph.uid}_exportProtocol_${grid.uid}_`}
+                graph={grid.exportProtocolGraph}
             >
-            </GridDB>
+            </GraphComponent>
         );
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -143,19 +136,39 @@ export class TeaaGridClass extends GridINUClass {
     //    );
 
 
-        //alert('TeaaGridClass Showing report!');
+    //alert('TeaaGridClass Showing report!');
     //}
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     showExportProtocol(data) {
         const grid = this;
         grid.popupIsShowing = true;
         grid.protocolIsShowing = true;
+        grid._dataExchangePageVisible = false;
 
         grid.reportPos = grid.reportPos || { x: 110, y: 110, w: 800, h: 600 };
         grid.popupPos = grid.reportPos;
         grid.lookupTitle = 'Протокол экспорта';
 
-        grid.reportRows = data;
+        grid.exportProtocolGraph = new GraphClass();
+
+        //graph.noCachWave = true;
+        grid.exportProtocolGraph.uid = 'ExportProtocolGraph';
+
+        let i = 0;
+        for (let item of data.innerList) {
+
+            let node = {
+                id: i, uid: i, title: item.entityNameRu, status: NodeStatus.grid, columns: [], pageSize: 0,
+                getRows: () => { return new Promise(function (resolve, reject) { resolve(item.rows); }) }, parents: [], children: [],
+            };
+
+            for (let name in item.headersColumns) {
+                node.columns.push({ name: name, title: item.headersColumns[name], filtrable: false, sortable: false });
+            }
+
+            grid.exportProtocolGraph.nodesDict[node.id] = node;
+            i++;
+        }
 
         grid.onClosePopup = () => {
             grid.protocolIsShowing = false;

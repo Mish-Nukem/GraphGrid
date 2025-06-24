@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+﻿import { useState, useEffect } from 'react';
 import { BaseComponent } from '../Base';
 import { Dropdown } from '../Dropdown';
 export function MainMenu(props) {
@@ -62,7 +62,7 @@ export class MainMenuClass extends BaseComponent {
         menu.activeItems = {};
 
         for (let item of menu.menuItems) {
-            if (!item.parent) {
+            if (item.parent === undefined) {
                 item.level = 1;
                 menu.rootLevel.push(item);
             }

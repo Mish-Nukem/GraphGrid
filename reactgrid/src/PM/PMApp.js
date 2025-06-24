@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import PMTest from './PMTest';
 import { GridINU } from '../Grid/GridINU';
-import { Graph } from '../Grid/GraphComponent';
+import { GraphComponent } from '../Grid/GraphComponent';
 import { LoginPage } from '../PM/Pages/LoginPage';
 import appSettings from '../PM/PMSettings';
 import { DataGetter } from '../Grid/Utils/DataGetter';
@@ -59,7 +59,7 @@ function PMApp() {
                 return (
                     <>
                         <div className="div-with-grid">
-                            <Graph uid="testGraph" graph={new PMTest().getTestGraph()} dataGetter={dataGetter}></Graph>
+                            <GraphComponent uid="testGraph" graph={new PMTest().getTestGraph()} dataGetter={dataGetter}></GraphComponent>
                         </div>
                     </>
                 );
@@ -67,7 +67,7 @@ function PMApp() {
                 return (
                     <>
                         <div className="div-with-grid">
-                            <Graph uid="PM" schemeName="Remarks_scheme" dataGetter={dataGetter} gridCreator={gridCreator}></Graph>
+                            <GraphComponent uid="PM" schemeName="Remarks_scheme" dataGetter={dataGetter} gridCreator={gridCreator}></GraphComponent>
                         </div>
                     </>
                 );
@@ -81,7 +81,7 @@ function PMApp() {
                 return (
                     <>
                         <div className="div-with-grid">
-                            <Graph uid="TEAA" schemeName="TuningListScheme" dataGetter={dataGetter} gridCreator={gridCreator}></Graph>
+                            <GraphComponent uid="TEAA" schemeName="TuningListScheme" dataGetter={dataGetter} gridCreator={gridCreator}></GraphComponent>
                         </div>
                     </>
                 );

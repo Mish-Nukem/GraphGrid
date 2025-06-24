@@ -1,4 +1,5 @@
 ﻿import { GridINUClass } from '../Grid/GridINU';
+import { GridFLClass } from '../Grid/GridFL.js';
 import { PMGridClass } from './Pages/EntityGrids/PMGrid';
 import { TeaaGridClass } from '../ETL/Pages/EntityGrids/TeaaGrid';
 export function PMGridCreator() {
@@ -13,7 +14,12 @@ export function PMGridCreator() {
                 return new TeaaGridClass(props);
             }
 
-            return new GridINUClass(props);
+            if (props.entity) {
+                return new GridINUClass(props);
+            }
+            else {
+                return new GridFLClass(props);
+            }
         }
     }
 }

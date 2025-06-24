@@ -1,4 +1,4 @@
-import { GridINUClass } from '../../../Grid/GridINU';
+﻿import { GridINUClass } from '../../../Grid/GridINU';
 export class PMGridClass extends GridINUClass {
 
     //constructor(props) {
@@ -16,8 +16,10 @@ export class PMGridClass extends GridINUClass {
             id: node.buttons.length,
             name: 'test',
             title: node.translate('TEST'),
-            label: node.translate('Test'),
-            click: (e) => node.showReport(e)
+            //label: node.translate('Test'),
+            click: (e) => node.showReport(e),
+            img: node.images.test,
+            padding: '1px 0',
         };
 
         node.buttons.push(btn);

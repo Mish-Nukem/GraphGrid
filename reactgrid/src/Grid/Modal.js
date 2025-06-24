@@ -208,6 +208,7 @@ export class ModalClass extends BaseComponent {
                             className={wnd.opt.footerButtonClass}
                             title={btn.title}
                             onClick={btn.onclick ? (e) => btn.onclick(e) : null}
+                            disabled={btn.getDisabled ? btn.getDisabled() : false}
                         >
                             <i className={btn.imageClass}></i>
                             {btn.title}

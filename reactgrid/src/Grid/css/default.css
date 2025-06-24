@@ -205,6 +205,10 @@ tr.grid-selected-row > td {
     /*height: 28px;*/
     height: 2em;
     width: 2.5em;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    /*padding: 1px 0px;*/
 }
 
 .grid-pager-current {

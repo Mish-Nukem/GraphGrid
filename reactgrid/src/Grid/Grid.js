@@ -11,7 +11,7 @@ export function Grid(props) {
 
     grid = gridState.grid;
     let needGetRows = false;
-    if (!grid) {
+    if (!grid || grid.uid !== props.uid) {
         if (props.findGrid) {
             grid = props.findGrid(props);
         }
@@ -104,6 +104,10 @@ export class GridClass extends BaseComponent {
     afterGetRows() {
         const grid = this;
         grid.log('getRows(). rows = ' + grid.rows.length + '. state = ' + grid.stateind);
+
+        if (grid.totalRows === undefined && grid.pageSize <= 0) {
+            grid.totalRows = grid.rows && grid.rows.length ? grid.rows.length : 0;
+        }
 
         if (grid.columns.length <= 0) {
             //grid.columns = grid.getColumns();

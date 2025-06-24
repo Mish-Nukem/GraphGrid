@@ -1,4 +1,4 @@
-import '../Grid/css/default.css';
+﻿import '../Grid/css/default.css';
 import { useState } from 'react';
 import TestData from '../Tests/TestData';
 import { Grid } from '../Grid/Grid';
@@ -9,7 +9,7 @@ import { GridGR } from '../Grid/GridGR';
 import { GridDB } from '../Grid/GridDB';
 import { GridFL } from '../Grid/GridFL';
 import { GridINU } from '../Grid/GridINU';
-import { Graph } from '../Grid/GraphComponent';
+import { GraphComponent } from '../Grid/GraphComponent';
 import { LoginPage } from './LoginPage';
 import appSettings from '../AppSettings';
 import { DataGetter } from '../Grid/Utils/DataGetter';
@@ -348,7 +348,7 @@ function DebugApp() {
                 return (
                     <>
                         <div className="div-with-grid">
-                            <Graph uid="testGraph" graph={new TestData().getTestGraph()} dataGetter={dataGetter}></Graph>
+                            <GraphComponent uid="testGraph" graph={new TestData().getTestGraph()} dataGetter={dataGetter}></GraphComponent>
                         </div>
                     </>
                 );
@@ -356,7 +356,7 @@ function DebugApp() {
                 return (
                     <>
                         <div className="div-with-grid">
-                            <Graph uid="PM" schemeName="Remarks_scheme" dataGetter={dataGetter}></Graph>
+                            <GraphComponent uid="PM" schemeName="Remarks_scheme" dataGetter={dataGetter}></GraphComponent>
                         </div>
                     </>
                 );

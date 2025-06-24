@@ -12,7 +12,7 @@ export function GridINUBase(props) {
     grid = gridState.grid;
     let needGetRows = false;
     if (!grid) {
-        if (props.findGrid) {
+        if (props.findGrid || grid.uid !== props.uid) {
             grid = props.findGrid(props);
         }
         grid = grid || new GridINUBaseClass(props);

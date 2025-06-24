@@ -14,7 +14,7 @@ export function GridDB(props) {
     grid = gridState.grid;
     let needGetRows = false;
     if (!grid) {
-        if (props.findGrid) {
+        if (props.findGrid || grid.uid !== props.uid) {
             grid = props.findGrid(props);
         }
         grid = grid || new GridDBClass(props);
@@ -74,11 +74,8 @@ export class GridDBClass extends GridGRClass {
         grid.opt.toolbarClass = props.toolbarClass;
         grid.opt.toolbarButtonsClass = props.toolbarButtonsClass;
         grid.opt.pagerClass = props.pagerClass;
-        grid.setupPagerButtons();
 
         grid.sortColumns = [];
-
-        BaseComponent.ThemeObj.Apply(grid);
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     skipOnWaveVisit(e) {
@@ -113,6 +110,11 @@ export class GridDBClass extends GridGRClass {
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     render() {
         const grid = this;
+        grid.setupPagerButtons();
+
+        if (!grid.themeApplied) {
+            BaseComponent.ThemeObj.Apply(grid);
+        }
 
         return (
             <>
@@ -173,7 +175,11 @@ export class GridDBClass extends GridGRClass {
                                         key={`toolbarbutton_${grid.id}_${button.id}_${ind}_`}
                                         grid-toolbar-button={`${grid.id}_${button.id}_`}
                                         className={`${button.class || grid.opt.toolbarButtonsClass || 'grid-toolbar-button'}`}
-                                        style={{ width: button.img ? '2.5em' : 'auto', display: button.getVisible && !button.getVisible() ? 'none' : '' }}
+                                        style={{
+                                            width: button.w ? button.w : button.img ? '2.5em' : 'auto',
+                                            display: button.getVisible && !button.getVisible() ? 'none' : '',
+                                            padding: button.padding ? button.padding : '',
+                                        }}
                                         title={grid.translate(button.title, 'grid-toolbar-button')}
                                         disabled={button.getDisabled && button.getDisabled({ grid: grid }) || button.disabled ? 'disabled' : ''}
                                         onClick={button.click ? (e) => {
@@ -258,6 +264,8 @@ export class GridDBClass extends GridGRClass {
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     setupPagerButtons() {
         const grid = this;
+        if (grid.pagerButtons && grid.pagerButtons.length > 0) return;
+
         grid.pagerButtons = [];
         grid.pagerButtonsDict = {};
 

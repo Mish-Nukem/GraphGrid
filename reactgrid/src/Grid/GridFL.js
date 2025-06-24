@@ -9,7 +9,7 @@ export function GridFL(props) {
 
     grid = gridState.grid;
     let needGetRows = false;
-    if (!grid) {
+    if (!grid || grid.uid !== props.uid) {
         if (props.findGrid) {
             grid = props.findGrid(props);
         }
@@ -415,6 +415,7 @@ export class GridFLClass extends GridDBClass {
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     setupPagerButtons() {
         const grid = this;
+        if (grid.pagerButtons && grid.pagerButtons.length > 0) return;
 
         super.setupPagerButtons();
 

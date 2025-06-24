@@ -56,6 +56,8 @@ export class DataExchangePageClass extends ModalClass {
         de.dataGetter = props.dataGetter;
 
         de.percent = '0%';
+        de.continue = ' ';
+        de.enableRun = false;
 
         de.buttons = de.getButtons();
     }
@@ -73,12 +75,14 @@ export class DataExchangePageClass extends ModalClass {
                                 className="form-control-file"
                                 type="file"
                                 style={{ width: "440px" }}
-                                onChange={(e) => { de.fileName = e.target.value; }}
+                                onChange={(e) => { de.fileName = e.target.value; de.enableRun = true; de.refreshState(); }}
                                 disabled={de.isRunning ? true : false}
                                 ref={de.inputRef}
                             />
                             <div id="progress0" className="upload-percent" style={{ marginTop: "5px" }}>
-                                <>{"Передача файла на сервер: "}</><span className="percent">{de.percent}</span>
+                                <span>{"Передача файла на сервер: "}</span><span className="percent">{de.percent}</span>
+                                <br></br>
+                                <div className="percent" style={{ height: "22px" }}>{de.continue}</div>
                             </div>
                             {
                                 de.isRunning ?
@@ -95,10 +99,10 @@ export class DataExchangePageClass extends ModalClass {
                         // экспорт
                         <div id="SetExportFile"> <h5>{"Сохранить файл экспорта как: "}</h5>
                             <input
-                                class="form-control-file"
+                                className="form-control-file"
                                 type="text"
                                 style={{ width: "440px" }}
-                                onChange={(e) => { de.fileName = e.target.value; }}
+                                onChange={(e) => { de.fileName = e.target.value; de.enableRun = true; de.refreshState(); }}
                                 disabled={de.isRunning ? true : false}
                             />
                         </div>
@@ -110,6 +114,10 @@ export class DataExchangePageClass extends ModalClass {
     close() {
         const de = this;
         de.fileImport = '';
+        de.percent = '0%';
+        de.continue = ' ';
+        de.fileName = '';
+        de.enableRun = false;
 
         super.close();
     }
@@ -120,6 +128,7 @@ export class DataExchangePageClass extends ModalClass {
             {
                 title: 'Продолжить',
                 onclick: (e) => de.runExchange(e),
+                getDisabled: () => { return !de.enableRun; },
             },
             {
                 title: 'Отменить',
@@ -138,6 +147,7 @@ export class DataExchangePageClass extends ModalClass {
         }
 
         de.percent = '0%';
+        de.continue = ' ';
         de.isRunning = true;
         de.refreshState();
 
@@ -165,7 +175,8 @@ export class DataExchangePageClass extends ModalClass {
             de.dataGetter.get({ url: 'system/DataExchange/UploadFile?SetUniqueTempFileName=true', data: de.formData, contentType: null, type: 'text' }).then(
                 (data) => {
                     if (data) {
-                        de.percent = 'Успешно. Для запуска импорта нажмите кнопку "Продолжить"';
+                        de.percent = 'Успешно.';
+                        de.continue = 'Для запуска импорта нажмите кнопку "Продолжить"';
                         de.isRunning = false;
                         de.fileImport = data;
                         de.refreshState();
@@ -180,6 +191,8 @@ export class DataExchangePageClass extends ModalClass {
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     continueDataExchange(e) {
         const de = this;
+        de.enableRun = false;
+
         setTimeout(function () {
             const params = [];
 
@@ -207,7 +220,7 @@ export class DataExchangePageClass extends ModalClass {
                     }
                     else if (+de.edType === 2) { //импорт, протокол
                         if (data.protokolImp) {
-                            de.showProtokol(data.protokolImp);
+                            de.showProtocol(data.protokolImp);
                         }
                         else if (data.protokol) {//импорт завершился аварийно, полноценного протокола нет, просто сообщение об ошибке
                             alert(data.protokol);
