@@ -1,7 +1,7 @@
 ﻿import { useState, useEffect } from 'react';
-import { GridFLClass } from './GridFL.js';
+import { GridFLClass } from './GridFL';
 import { FilterType, NodeStatus } from './Base';
-import { WaveType } from './Graph.js';
+import { WaveType } from './Graph';
 import { Modal } from './Modal';
 // ==================================================================================================================================================================
 export function GridINUBase(props) {
@@ -162,9 +162,9 @@ export class GridINUBaseClass extends GridFLClass {
 
         grid.changedRow[col.name] = e.target.value;
         grid.setEditing(true);
-        grid._changingCol = col;
+        //grid._changingCol = col;
 
-        grid._remCursorPos = e.currentTarget.selectionEnd;
+        //grid._remCursorPos = e.currentTarget.selectionEnd;
 
         grid.refreshState();
     }

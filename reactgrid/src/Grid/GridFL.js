@@ -1,6 +1,8 @@
 ﻿import { useState, useEffect } from 'react';
-import { GridDBClass } from './GridDB.js';
-import { Dropdown } from './Dropdown.js';
+import { BaseComponent } from './Base';
+import { Images } from './Themes/Images';
+import { GridDBClass } from './GridDB';
+import { Dropdown } from './Dropdown';
 // ==================================================================================================================================================================
 export function GridFL(props) {
     let grid = null;
@@ -58,8 +60,6 @@ export class GridFLClass extends GridDBClass {
         super(props);
 
         const grid = this;
-
-        grid.opt.inputClass = props.inputClass || grid.opt.inputClass;
 
         grid.filtersDisabled = props.filtersDisabled;
         grid.beforeOpen = props.beforeOpen;
@@ -419,17 +419,21 @@ export class GridFLClass extends GridDBClass {
 
         super.setupPagerButtons();
 
+        const images = Images.getImages() || {};
+
         const clear = {
             id: 10,
             name: 'clear',
             title: 'Clear all filters',
-            label: 'Clear',
+            label: images.clear ? '' : 'Clear',
             click: (e) => {
                 grid.clearAllColumnFilters();
             },
             getDisabled: () => {
                 return !grid.isFiltered();
             },
+            img: images.clear,
+            class: grid.opt.toolbarButtonsClass,
         }
 
         grid.pagerButtons.unshift(clear);

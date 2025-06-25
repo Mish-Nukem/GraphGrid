@@ -501,7 +501,20 @@ tr.grid-selected-row > td {
 }
 
 .menu-collapse-button {
+    display: flex;
+    border: none;
     height: 22px;
     width: 22px;
     padding: 0;
+}
+    .menu-collapse-button:hover {
+        background-color: lightgray;
+    }
+
+
+.progress {
+}
+
+.progress-bar {
+    background-color: lightgray;
 }

@@ -1,5 +1,6 @@
 ﻿import { NodeStatus } from '../../../Grid/Base';
 import { GridINUClass } from '../../../Grid/GridINU';
+import { Images } from '../../../Grid/Themes/Images';
 //import { GridDB } from '../../../Grid/GridDB';
 import { GraphClass } from '../../../Grid/Graph';
 import { GraphComponent } from '../../../Grid/GraphComponent';
@@ -57,6 +58,7 @@ export class TeaaGridClass extends GridINUClass {
         const node = this;
 
         super.addToolbarButtons();
+        const images = Images.getImages() || {};
 
         let btn = {
             id: node.buttons.length,
@@ -64,7 +66,7 @@ export class TeaaGridClass extends GridINUClass {
             title: 'Вызов обмена данными для текущей настройки',
             //label: 'Обмен данными',
             click: (e) => node.runDataExchange(e),
-            img: node.images.rightLeft,
+            img: images.rightLeft,
         };
 
         node.buttons.push(btn);

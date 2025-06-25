@@ -64,11 +64,11 @@ export class ModalClass extends BaseComponent {
         wnd.opt.margin = props.margin;
         wnd.opt.padding = props.padding;
 
-        wnd.opt.bodyClass = props.bodyClass || 'modal-window-body';
-        wnd.opt.headerClass = props.headerClass || 'modal-window-header';
-        wnd.opt.footerClass = props.footerClass || 'modal-window-footer';
-        wnd.opt.footerButtonClass = props.footerButtonClass || 'modal-window-footer-button'
-        wnd.opt.titleClass = props.titleClass || 'modal-window-header-title';
+        wnd.opt.bodyClass = props.bodyClass || BaseComponent.theme.modalBodyClass || 'modal-window-body';
+        wnd.opt.headerClass = props.headerClass || BaseComponent.theme.modalHeaderClass || 'modal-window-header';
+        wnd.opt.footerClass = props.footerClass || BaseComponent.theme.modalFooterClass || 'modal-window-footer';
+        wnd.opt.footerButtonClass = props.footerButtonClass || BaseComponent.theme.modalFooterButtonClass || 'modal-window-footer-button'
+        wnd.opt.titleClass = props.titleClass || BaseComponent.theme.modalTitleClass || 'modal-window-header-title';
         wnd.opt.title = props.title;
 
         wnd.opt.pos.x = !isNaN(wnd.opt.pos.x) ? wnd.opt.pos.x + 'px' : wnd.opt.pos.x;

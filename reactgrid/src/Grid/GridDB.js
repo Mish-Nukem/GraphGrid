@@ -1,8 +1,9 @@
 ﻿/* eslint-disable no-mixed-operators */
 import { useState, useEffect } from 'react';
-import { GridGRClass } from './GridGR.js';
-import { Dropdown } from './Dropdown.js';
-import { WaveType } from './Graph.js';
+import { Images } from './Themes/Images';
+import { GridGRClass } from './GridGR';
+import { Dropdown } from './Dropdown';
+import { WaveType } from './Graph';
 import { NodeStatus } from './Base';
 import { BaseComponent } from './Base';
 // ==================================================================================================================================================================
@@ -71,9 +72,10 @@ export class GridDBClass extends GridGRClass {
 
         grid.sortDisabled = props.sortDisabled;
 
-        grid.opt.toolbarClass = props.toolbarClass;
-        grid.opt.toolbarButtonsClass = props.toolbarButtonsClass;
-        grid.opt.pagerClass = props.pagerClass;
+        grid.opt.toolbarClass = props.toolbarClass || BaseComponent.theme.toolbarClass;
+        grid.opt.toolbarButtonsClass = props.toolbarButtonsClass || BaseComponent.theme.toolbarButtonsClass;
+        grid.opt.pagerClass = props.pagerClass || BaseComponent.theme.pagerClass;
+        grid.opt.inputClass = props.inputClass || BaseComponent.theme.inputClass;
 
         grid.sortColumns = [];
     }
@@ -112,9 +114,9 @@ export class GridDBClass extends GridGRClass {
         const grid = this;
         grid.setupPagerButtons();
 
-        if (!grid.themeApplied) {
-            BaseComponent.ThemeObj.Apply(grid);
-        }
+        //if (!grid.themeApplied) {
+        //    BaseComponent.theme.Apply(grid);
+        //}
 
         return (
             <>
@@ -269,14 +271,18 @@ export class GridDBClass extends GridGRClass {
         grid.pagerButtons = [];
         grid.pagerButtonsDict = {};
 
+        const images = Images.getImages() || {};
+
         const refresh = {
             id: 0,
             name: 'refresh',
             title: 'Refresh',
-            label: 'Refresh',
+            label: images.refresh ? '' : 'Refresh',
             click: function (e) {
                 grid.refresh();
             },
+            img: images.refresh,
+            class: grid.opt.toolbarButtonsClass,
         }
 
         grid.pagerButtons.push(refresh);
@@ -287,10 +293,12 @@ export class GridDBClass extends GridGRClass {
                 id: 1,
                 name: 'settings',
                 title: 'Settings',
-                label: 'Settings',
+                label: images.settings ? '' : 'Settings',
                 click: function (e) {
                     grid.showGridSettings(e);
                 },
+                img: images.settings,
+                class: grid.opt.toolbarButtonsClass,
             }
 
             grid.pagerButtons.push(settings);
@@ -303,13 +311,15 @@ export class GridDBClass extends GridGRClass {
                 id: 2,
                 name: 'first',
                 title: 'First',
-                label: 'First',
+                label: images.first ? '' : 'First',
                 click: function (e) {
                     grid.gotoFirstPage();
                 },
                 getDisabled: function () {
                     return !grid.rows || grid.rows.length <= 0 || grid.pageNumber === 1;
                 },
+                img: images.first,
+                class: grid.opt.toolbarButtonsClass,
             }
 
             grid.pagerButtons.push(first);
@@ -319,13 +329,15 @@ export class GridDBClass extends GridGRClass {
                 id: 3,
                 name: 'prev',
                 title: 'Prev',
-                label: 'Prev',
+                label: images.prev ? '' : 'Prev',
                 click: function (e) {
                     grid.gotoPrevPage();
                 },
                 getDisabled: function () {
                     return !grid.rows || grid.rows.length <= 0 || grid.pageNumber === 1;
                 },
+                img: images.prev,
+                class: grid.opt.toolbarButtonsClass,
             }
 
             grid.pagerButtons.push(prev);
@@ -345,9 +357,10 @@ export class GridDBClass extends GridGRClass {
                     return (
                         <input
                             key={`pager_${bottom ? 'bottom' : 'top'}_${grid.id}_${button.id}_`}
+                            title={grid.translate(button.title, 'grid-pager-button')}
                             value={grid.pageNumber}
                             grid-pager-item={`${grid.id}_${button.id}_`}
-                            className={`${button.class ? button.class : 'grid-pager-current'}`}
+                            className={`${button.class ? button.class : grid.opt.inputClass || 'grid-pager-current'}`}
                             style={{ width: '3em', display: 'inline-block' }}
                             disabled={grid.isEditing() ? 'disabled' : ''}
                             onChange={function (e) {
@@ -376,8 +389,9 @@ export class GridDBClass extends GridGRClass {
                 render: function (button, bottom) {
                     return (
                         <span
-                            className={'grid-pager-of'}
                             key={`pager_${bottom ? 'bottom' : 'top'}_${grid.id}_${button.id}_`}
+                            className={'grid-pager-of'}
+                            title={grid.translate(button.title, 'grid-pager-button')}
                         >
                             {` ${grid.translate('of', 'pager-button')} ${grid.pagesCount >= 0 ? grid.pagesCount : '0'}`}
                         </span>
@@ -392,13 +406,15 @@ export class GridDBClass extends GridGRClass {
                 id: 6,
                 name: 'next',
                 title: 'Next',
-                label: 'Next',
+                label: images.next ? '' : 'Next',
                 click: function (e) {
                     grid.gotoNextPage();
                 },
                 getDisabled: function () {
                     return !grid.rows || grid.rows.length <= 0 || grid.pageNumber === grid.pagesCount;
                 },
+                img: images.next,
+                class: grid.opt.toolbarButtonsClass,
             }
 
             grid.pagerButtons.push(next);
@@ -408,13 +424,15 @@ export class GridDBClass extends GridGRClass {
                 id: 7,
                 name: 'last',
                 title: 'Last',
-                label: 'Last',
+                label: images.last ? '' : 'Last',
                 click: function (e) {
                     grid.gotoLastPage();
                 },
                 getDisabled: function () {
                     return !grid.rows || grid.rows.length <= 0 || grid.pageNumber === grid.pagesCount;
                 },
+                img: images.last,
+                class: grid.opt.toolbarButtonsClass,
             }
 
             grid.pagerButtons.push(last);
@@ -429,8 +447,9 @@ export class GridDBClass extends GridGRClass {
                     return (
                         <select
                             key={`pager_${bottom ? 'bottom' : 'top'}_${grid.id}_${button.id}_`}
+                            title={grid.translate(button.title, 'grid-pager-button')}
                             grid-pager-item={`${grid.id}_${button.id}_`}
-                            className={`grid-pager-size ${button.class ? button.class : ''}`}
+                            className={`grid-pager-size ${button.class ? button.class : grid.opt.inputClass || ''}`}
                             style={{ width: '4.5em', display: 'inline-block' }}
                             value={grid.pageSize}
                             disabled={grid.isEditing() ? 'disabled' : ''}
@@ -475,7 +494,9 @@ export class GridDBClass extends GridGRClass {
                 return (
                     <span
                         className={'grid-pager-total'}
-                        key={`pager_${bottom ? 'bottom' : 'top'}_${grid.id}_${button.id}_`}>
+                        title={grid.translate(button.title, 'grid-pager-button')}
+                        key={`pager_${bottom ? 'bottom' : 'top'}_${grid.id}_${button.id}_`}
+                    >
                         {`${grid.translate('total rows', 'pager-button')} ${grid.totalRows >= 0 ? grid.totalRows : '0'}`}
                     </span>
                 );

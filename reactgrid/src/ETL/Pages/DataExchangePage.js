@@ -1,7 +1,7 @@
 ﻿import { useState, useEffect, useRef } from 'react';
 //import { BaseComponent } from '../../Grid/Base';
 import { ModalClass } from '../../Grid/Modal';
-import { FileManager } from '../../Grid/Utils/FileManager'; 
+import { FileManager } from '../../Grid/Utils/FileManager';
 // режим пока один ImportRegims.InsertUpdate "Вставка с заменой"
 // ==================================================================================================================================================================
 export function DataExchangePage(props) {
@@ -84,16 +84,9 @@ export class DataExchangePageClass extends ModalClass {
                                 <br></br>
                                 <div className="percent" style={{ height: "22px" }}>{de.continue}</div>
                             </div>
-                            {
-                                de.isRunning ?
-                                    <>
-                                        <div id="progress1" className="progress" hidden style={{ marginTop: "5px", width: "525px" }}>
-                                            <div className="progress-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style={{ width: de.percent }}></div>
-                                        </div>
-                                    </>
-                                    :
-                                    <></>
-                            }
+                            <div className="progress" style={{ marginTop: "5px", width: "525px", height: '22px' }}>
+                                <div className="progress-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style={{ width: de.percent, height: '22px' }}></div>
+                            </div>
                         </>
                         :
                         // экспорт
@@ -149,6 +142,7 @@ export class DataExchangePageClass extends ModalClass {
         de.percent = '0%';
         de.continue = ' ';
         de.isRunning = true;
+        de.enableRun = false;
         de.refreshState();
 
         if (+de.edType === 2 && !de.fileImport) {
@@ -156,33 +150,59 @@ export class DataExchangePageClass extends ModalClass {
             de.formData = new FormData();
             de.formData.append("ImpotrFile", ImpotrFile0);
 
-            /*
-            xhr: function () {
-                var xhr = new XMLHttpRequest();
-                xhr.upload.addEventListener("progress", function (evt) {
-                    if (evt.lengthComputable) {
-                        let percentComplete = evt.loaded / evt.total;
-                        percentComplete = parseInt(percentComplete * 100);
-                        de.percent = percentComplete + '%';
-                        de.refreshState();
-                    }
-                }, false);
+            // 1. Создаём новый XMLHttpRequest-объект
+            let xhr = new XMLHttpRequest();
 
-                return xhr;
-            },
-            */
+            // отслеживаем процесс отправки
+            xhr.upload.onprogress = function (evt) {
+                if (evt.lengthComputable) {
+                    let percentComplete = evt.loaded / evt.total;
+                    percentComplete = parseInt(percentComplete * 100);
+                    de.percent = percentComplete + '%';
+                    de.refreshState();
+                }
+            };
 
-            de.dataGetter.get({ url: 'system/DataExchange/UploadFile?SetUniqueTempFileName=true', data: de.formData, contentType: null, type: 'text' }).then(
-                (data) => {
+            // Ждём завершения: неважно, успешного или нет
+            xhr.onloadend = function (data) {
+                if (xhr.status === 200) {
                     if (data) {
                         de.percent = 'Успешно.';
                         de.continue = 'Для запуска импорта нажмите кнопку "Продолжить"';
                         de.isRunning = false;
-                        de.fileImport = data;
+                        de.fileImport = data.target.responseText;
+                        de.enableRun = true;
                         de.refreshState();
                     }
+                } else {
+                    console.log("Ошибка " + this.status);
+                    de.isRunning = false;
+                    de.continue = "Ошибка " + this.status;
+                    de.refreshState();
                 }
-            ).catch();
+            };
+
+            // 2. Настраиваем его: POST-запрос по URL
+            xhr.open('POST', de.dataGetter.APIurl + 'system/DataExchange/UploadFile?SetUniqueTempFileName=true');
+
+            // 3. Отсылаем запрос
+            xhr.send(de.formData);
+
+            xhr.onerror = function () {
+                alert("Запрос не удался");
+            };
+
+            //de.dataGetter.get({ url: 'system/DataExchange/UploadFile?SetUniqueTempFileName=true', data: de.formData, contentType: null, type: 'text' }).then(
+            //    (data) => {
+            //        if (data) {
+            //            de.percent = 'Успешно.';
+            //            de.continue = 'Для запуска импорта нажмите кнопку "Продолжить"';
+            //            de.isRunning = false;
+            //            de.fileImport = data;
+            //            de.refreshState();
+            //        }
+            //    }
+            //).catch();
             return;
         }
 

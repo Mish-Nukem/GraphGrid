@@ -21,7 +21,7 @@ function DebugApp() {
 
     window._logEnabled = true;
 
-    const dataGetter = state.dataGetter || new DataGetter(appSettings/*, state.atoken, state.rtoken*/);
+    const dataGetter = state.dataGetter || new DataGetter(appSettings, () => setState({ menuItem: -2, dataGetter: null }));
 
     const GetFamily = function (e) {
         return new Promise(function (resolve, reject) {

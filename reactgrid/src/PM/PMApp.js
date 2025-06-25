@@ -13,7 +13,7 @@ function PMApp() {
 
     window._logEnabled = true;
 
-    const dataGetter = state.dataGetter || new DataGetter(appSettings);
+    const dataGetter = state.dataGetter || new DataGetter(appSettings, () => setState({ menuItem: -2, dataGetter: null, gridCreator: null }));
     const gridCreator = state.gridCreator || new PMGridCreator();
 
     const TEST = function () {

@@ -1,9 +1,10 @@
 ﻿export class DataGetter {
-    constructor(settings, atoken, rtoken) {
+    constructor(settings, /*atoken, rtoken, */onError) {
         const dg = this;
 
-        dg.atoken = atoken;
-        dg.rtoken = rtoken;
+        //dg.atoken = atoken;
+        //dg.rtoken = rtoken;
+        dg.onError = onError;
 
         dg.APIurl = settings.APIurl;
     }
@@ -89,6 +90,9 @@
                                             doRequest().then((res) => resolve(res));
                                         }).catch(error => {
                                             reject(error);
+                                            if (dg.onError) {
+                                                dg.onError(error);
+                                            }
                                         });
                                     }
                                     else {

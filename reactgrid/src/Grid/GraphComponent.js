@@ -1,6 +1,7 @@
 ﻿/* eslint-disable no-mixed-operators */
 import { useState, useEffect } from 'react';
 import { BaseComponent, NodeStatus, FilterType, log } from './Base';
+import { Images } from './Themes/Images';
 import { GraphClass } from './Graph';
 import { GridFL, GridFLClass } from './GridFL.js';
 import { GridINU, GridINUClass } from './GridINU';
@@ -85,6 +86,8 @@ export class GraphComponentClass extends BaseComponent {
         gc.selectingNodeUid = props.selectingNodeUid;
         gc.onSelectFilterValue = props.onSelectFilterValue;
         gc.nodeBeforeOpenCondition = props.nodeBeforeOpenCondition;
+
+        gc.filterButtonClass = props.filterButtonClass || BaseComponent.theme.filterButtonClass;
 
         if (props.graph) {
             gc.prepareGraph(props.graph);
@@ -238,6 +241,8 @@ export class GraphComponentClass extends BaseComponent {
             parsedDate = Moment(node.value, node.dateFormat);
         }
 
+        const images = Images.getImages();
+
         return (
             <div
                 className="graph-filter"
@@ -332,22 +337,22 @@ export class GraphComponentClass extends BaseComponent {
                 {
                     node.filterType !== FilterType.input && node.filterType !== FilterType.date ?
                         <button
-                            className={node.opt.filterButtonClass || 'graph-filter-button'}
+                            className={gc.filterButtonClass || 'graph-filter-button'}
                             key={`fltrsel_${node.id}_${gc.id}_`}
                             onClick={(e) => gc.openFilterWnd(e, node)}
                             disabled={gc.isEditing() ? 'disabled' : ''}
                         >
-                            {node.images.filterSelect ? node.images.filterSelect() : node.translate('Select', 'graph-filter-select')}
+                            {images.filterSelect ? images.filterSelect() : node.translate('Select', 'graph-filter-select')}
                         </button>
                         : <></>
                 }
                 <button
                     key={`fltrclr_${node.id}_${gc.id}_`}
-                    className={node.opt.filterButtonClass || 'graph-filter-button'}
+                    className={gc.filterButtonClass || 'graph-filter-button'}
                     disabled={gc.isEditing() || node.value === undefined || node.value === '' ? 'disabled' : ''}
                     onClick={(e) => gc.clearFilter(e, node)}
                 >
-                    {node.images.filterClear ? node.images.filterClear() : node.translate('Clear', 'graph-filter-clear')}
+                    {images.filterClear ? images.filterClear() : node.translate('Clear', 'graph-filter-clear')}
                 </button>
             </div>
         );
@@ -364,7 +369,7 @@ export class GraphComponentClass extends BaseComponent {
             <button
                 key={`tabctrl_${node.id}_${gc.id}_`}
                 disabled={isActive || gc.isEditing() ? 'disabled' : ''}
-                className={node.opt.filterButtonClass || ''}
+                className={gc.filterButtonClass || ''}
                 onClick={(e) => gc.selectActiveTab(node, top)}
             >
                 {node.title}
@@ -854,7 +859,7 @@ export class GraphComponentClass extends BaseComponent {
 
             node.opt = node.opt || {};
 
-            BaseComponent.ThemeObj.Apply(node);
+            //BaseComponent.theme.Apply(node);
 
             node.translate = node.translate || ((text) => { return text; });
 

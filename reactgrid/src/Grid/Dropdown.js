@@ -1,4 +1,6 @@
 ﻿import { useState, useEffect } from 'react';
+import { BaseComponent } from './Base';
+import { Images } from './Themes/Images';
 import { ModalClass } from './Modal';
 // ==================================================================================================================================================================
 export function Dropdown(props) {
@@ -48,8 +50,8 @@ export class DropdownClass extends ModalClass {
         dd.pageSize = props.pageSize || 20;
         dd.items = props.items || [];
 
-        dd.menuItemClass = '';
-        dd.menuClass = '';
+        dd.menuItemClass = props.menuItemClass || BaseComponent.theme.menuItemClass;
+        dd.menuClass = props.menuClass || BaseComponent.theme.menuClass;
 
         dd.stateind = 0;
 
@@ -90,6 +92,7 @@ export class DropdownClass extends ModalClass {
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     renderDropdownContent() {
         const dd = this;
+        const images = Images.getImages();
 
         return (
             <>
@@ -112,7 +115,7 @@ export class DropdownClass extends ModalClass {
                                     onClick={(e) => dd.onItemClick(e, item.id)}
                                 >
                                     {dd.translate(item.text)}
-                                    {item.items && item.items.length > 0 ? dd.images.caretRight() : ''}
+                                    {item.items && item.items.length > 0 ? images.caretRight() : ''}
                                 </li>
                             );
                         })

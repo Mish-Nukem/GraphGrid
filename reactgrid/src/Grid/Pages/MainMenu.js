@@ -1,4 +1,5 @@
 ﻿import { useState, useEffect } from 'react';
+import { Images } from '../Themes/Images';
 import { BaseComponent } from '../Base';
 import { Dropdown } from '../Dropdown';
 export function MainMenu(props) {
@@ -49,6 +50,8 @@ export class MainMenuClass extends BaseComponent {
         menu.dataGetter = props.dataGetter;
         menu.onMenuItemClick = props.onMenuItemClick;
 
+        menu.mainMenuItemClass = props.mainMenuItemClass || BaseComponent.theme.mainMenuItemClass;
+
         //menu.translate = props.translate || ((text) => { return text; });
         menu.prepareMenu();
     }
@@ -91,6 +94,8 @@ export class MainMenuClass extends BaseComponent {
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     render() {
         const menu = this;
+        const images = Images.getImages() || {};
+
         return (
             menu.menuItems && menu.menuItems.length > 0 ?
                 <>
@@ -104,7 +109,7 @@ export class MainMenuClass extends BaseComponent {
                             title={!menu.collapsed ? menu.translate('Collapse') : menu.translate('Expand')}
                             className='menu-collapse-button'
                         >
-                            {menu.collapsed ? menu.images.caretDown() : menu.images.caretUp()}
+                            {menu.collapsed ? images.caretDown() : images.caretUp()}
                         </button>
                         {
                             !menu.collapsed ?
@@ -115,7 +120,7 @@ export class MainMenuClass extends BaseComponent {
                                                 <button
                                                     key={`menurootitem_${menu.id}_${item.id}_${ind}_`}
                                                     title={menu.translate(item.title || item.text)}
-                                                    className={(menu.menuItemClass || '') + (menu.activeItems[item.id] ? ' menu-item-selected' : ' menu-item')}
+                                                    className={(menu.mainMenuItemClass || '') + (menu.activeItems[item.id] ? ' menu-item-selected' : ' menu-item')}
                                                     onClick={(e) => menu.onItemClick(e, item.id)}
                                                 >
                                                     {menu.translate(item.text)}

@@ -1,4 +1,5 @@
 ﻿import { GridINUClass } from '../../../Grid/GridINU';
+import { Images } from '../../../Grid/Themes/Images';
 export class PMGridClass extends GridINUClass {
 
     //constructor(props) {
@@ -12,14 +13,15 @@ export class PMGridClass extends GridINUClass {
 
         super.addToolbarButtons();
 
+        const images = Images.getImages() || {};
         let btn = {
             id: node.buttons.length,
             name: 'test',
             title: node.translate('TEST'),
             //label: node.translate('Test'),
             click: (e) => node.showReport(e),
-            img: node.images.test,
-            padding: '1px 0',
+            img: images.test,
+            /*padding: '1px 0',*/
         };
 
         node.buttons.push(btn);

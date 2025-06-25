@@ -1,6 +1,6 @@
 ﻿import { useState, useEffect } from 'react';
-import { GridClass } from './Grid.js';
-import { GraphClass } from './Graph.js';
+import { GridClass } from './Grid';
+import { GraphClass } from './Graph';
 // ==================================================================================================================================================================
 export function GridGR(props) {
     let grid = null;

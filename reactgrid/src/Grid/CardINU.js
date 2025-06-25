@@ -1,6 +1,7 @@
 ﻿import { GridINU } from './GridINU';
 import { useState, useEffect } from 'react';
-import { GridINUBaseClass } from './GridINUBase.js';
+import { Images } from './Themes/Images';
+import { GridINUBaseClass } from './GridINUBase';
 import { Select } from './OuterComponents/Select';
 import DatePicker from "react-datepicker";
 import Moment from 'moment';
@@ -112,6 +113,9 @@ export class CardINUClass extends GridINUBaseClass {
             value = parsedDate.format(card.dateFormat);
         }
         const noClear = col.required || value === undefined || value === '';
+
+        const images = Images.getImages();
+
         //const old = false;
         switch (col.type.toLowerCase()) {
             case 'lookup':
@@ -161,7 +165,7 @@ export class CardINUClass extends GridINUBaseClass {
                             className={'graph-card-button'}
                             onClick={(e) => card.openLookupField(e, col, card.changedRow)}
                         >
-                            {card.images.filterSelect ? card.images.filterSelect() : card.translate('Select', 'graph-filter-select')}
+                            {images.filterSelect ? images.filterSelect() : card.translate('Select', 'graph-filter-select')}
                         </button>
                         {
                             noClear ? <></>
@@ -172,7 +176,7 @@ export class CardINUClass extends GridINUBaseClass {
                                     onClick={(e) => card.clearField(e, col, card.changedRow)}
                                     style={{ display: !col.required && !col.readonly ? '' : 'none' }}
                                 >
-                                    {card.images.filterClear ? card.images.filterClear() : card.translate('Clear', 'graph-filter-clear')}
+                                    {images.filterClear ? images.filterClear() : card.translate('Clear', 'graph-filter-clear')}
                                 </button>
                         }
                     </div>
@@ -225,12 +229,20 @@ export class CardINUClass extends GridINUBaseClass {
                                     onClick={(e) => card.clearField(e, col, card.changedRow)}
                                     style={{ display: !col.required && !col.readonly ? '' : 'none' }}
                                 >
-                                    {card.images.filterClear ? card.images.filterClear() : card.translate('Clear', 'graph-filter-clear')}
+                                    {images.filterClear ? images.filterClear() : card.translate('Clear', 'graph-filter-clear')}
                                 </button>
                         }
                     </div>
                 );
             default:
+                /*
+                            onFocus={e => {
+                                if (col === card._changingCol) {
+                                    e.currentTarget.selectionStart = e.currentTarget.selectionEnd = card._remCursorPos;
+                                }
+                            }}
+                            autoFocus={col === card._changingCol}
+                */
                 return (
                     <div className="graph-card-field"
                         key={`cardfielddiv_${card.id}_${col.id}_`}
@@ -248,12 +260,6 @@ export class CardINUClass extends GridINUBaseClass {
                             style={{ width: 'calc(100% - 4px)', height: col.maxW !== undefined && +col.maxW >= 200 ? '5em' : '2.3em', padding: '0 2px', boxSizing: 'border-box', gridColumn: col.required || col.readonly || noClear ? 'span 3' : 'span 2', resize: 'vertical' }}
                             onChange={(e) => card.changeField(e, col, card.changedRow)}
                             disabled={col.readonly ? 'disabled' : ''}
-                            autoFocus={col === card._changingCol}
-                            onFocus={e => {
-                                if (col === card._changingCol) {
-                                    e.currentTarget.selectionStart = e.currentTarget.selectionEnd = card._remCursorPos;
-                                }
-                            }}
                         >
 
                         </textarea>
@@ -266,7 +272,7 @@ export class CardINUClass extends GridINUBaseClass {
                                     onClick={(e) => card.clearField(e, col, card.changedRow)}
                                     style={{ display: !col.required && !col.readonly ? '' : 'none' }}
                                 >
-                                    {card.images.filterClear ? card.images.filterClear() : card.translate('Clear', 'graph-filter-clear')}
+                                    {images.filterClear ? images.filterClear() : card.translate('Clear', 'graph-filter-clear')}
                                 </button>
                         }
                     </div>
@@ -281,21 +287,23 @@ export class CardINUClass extends GridINUBaseClass {
 
         card._cardButtonsAdded = true;
 
+        const images = Images.getImages();
+
         //card.cardButtons.push({
         //    id: card.cardButtons.length,
         //    name: 'edit',
         //    title: card.translate('Start edit'),
-        //    label: card.images.edit ? '' : card.translate('Start edit'),
+        //    label: images.edit ? '' : card.translate('Start edit'),
         //    click: (e) => card.startEditNode(e),
-        //    img: card.images.edit
+        //    img: images.edit
         //});
 
         card.cardButtons.push({
             id: card.cardButtons.length,
             name: 'commit',
             title: card.translate('Commit changes'),
-            label: card.images.commit ? '' : card.translate('Commit changes'),
-            img: card.images.commit,
+            label: images.commit ? '' : card.translate('Commit changes'),
+            img: images.commit,
             click: (e) => card.commitChangesNode(e),
             getDisabled: (e) => card.commitChangesNodeDisabled(e),
         });
@@ -304,8 +312,8 @@ export class CardINUClass extends GridINUBaseClass {
             id: card.cardButtons.length,
             name: 'rollback',
             title: card.translate('Rollback changes'),
-            label: card.images.rollback ? '' : card.translate('Rollback changes'),
-            img: card.images.rollback,
+            label: images.rollback ? '' : card.translate('Rollback changes'),
+            img: images.rollback,
             click: (e) => card.rollbackChangesNode(e),
             getDisabled: (e) => card.rollbackChangesNodeDisabled(e),
         });

@@ -1,6 +1,7 @@
 ﻿/* eslint-disable no-mixed-operators */
 import { useState, useEffect } from 'react';
-import { GridINUBaseClass } from './GridINUBase.js';
+import { GridINUBaseClass } from './GridINUBase';
+import { Images } from './Themes/Images';
 import { NodeStatus } from './Base';
 import { CardINU } from './CardINU';
 import { Select } from './OuterComponents/Select';
@@ -221,6 +222,15 @@ export class GridINUClass extends GridINUBaseClass {
                     </div>
                 );
             default:
+                /*
+                                    autoFocus={col === grid._changingCol && grid.isEditing()}
+                                    onFocus={e => {
+                                        if (col === grid._changingCol) {
+                                            e.currentTarget.selectionStart = e.currentTarget.selectionEnd = grid._remCursorPos;
+                                        }
+                                    }}
+                
+                */
                 return (
                     <div
                         style={{ border: 'none' }}
@@ -272,12 +282,6 @@ export class GridINUClass extends GridINUBaseClass {
                                         overflowX: 'hidden',
                                     }}
                                     onChange={(e) => grid.changeField(e, col, row)}
-                                    autoFocus={col === grid._changingCol && grid.isEditing()}
-                                    onFocus={e => {
-                                        if (col === grid._changingCol) {
-                                            e.currentTarget.selectionStart = e.currentTarget.selectionEnd = grid._remCursorPos;
-                                        }
-                                    }}
                                 >
                                 </textarea>
                         }
@@ -300,6 +304,8 @@ export class GridINUClass extends GridINUBaseClass {
     addToolbarButtons() {
         const grid = this;
 
+        const images = Images.getImages();
+
         //node.buttons.push({
         //    id: node.buttons.length,
         //    name: 'edit',
@@ -313,8 +319,8 @@ export class GridINUClass extends GridINUBaseClass {
             id: grid.buttons.length,
             name: 'commit',
             title: grid.translate('Commit changes'),
-            label: grid.images.commit ? '' : grid.translate('Commit changes'),
-            img: grid.images.commit,
+            label: images.commit ? '' : grid.translate('Commit changes'),
+            img: images.commit,
             click: (e) => grid.commitChanges(e),
             getDisabled: (e) => grid.commitChangesDisabled(e),
         });
@@ -323,8 +329,8 @@ export class GridINUClass extends GridINUBaseClass {
             id: grid.buttons.length,
             name: 'rollback',
             title: grid.translate('Rollback changes'),
-            label: grid.images.rollback ? '' : grid.translate('Rollback changes'),
-            img: grid.images.rollback,
+            label: images.rollback ? '' : grid.translate('Rollback changes'),
+            img: images.rollback,
             click: (e) => grid.rollbackChanges(e),
             getDisabled: (e) => grid.rollbackChangesDisabled(e),
         });
@@ -333,8 +339,8 @@ export class GridINUClass extends GridINUBaseClass {
             id: grid.buttons.length,
             name: 'add',
             title: grid.translate('Add new record'),
-            label: grid.images.addRecord ? '' : grid.translate('Add new record'),
-            img: grid.images.addRecord,
+            label: images.addRecord ? '' : grid.translate('Add new record'),
+            img: images.addRecord,
             click: (e) => grid.addRecord(e),
             getDisabled: (e) => grid.addRecordDisabled(e),
         });
@@ -343,8 +349,8 @@ export class GridINUClass extends GridINUBaseClass {
             id: grid.buttons.length,
             name: 'copy',
             title: grid.translate('Copy record'),
-            label: grid.images.copyRecord ? '' : grid.translate('Copy record'),
-            img: grid.images.copyRecord,
+            label: images.copyRecord ? '' : grid.translate('Copy record'),
+            img: images.copyRecord,
             click: (e) => grid.copyRecord(e),
             getDisabled: (e) => grid.copyRecordDisabled(e),
         });
@@ -353,8 +359,8 @@ export class GridINUClass extends GridINUBaseClass {
             id: grid.buttons.length,
             name: 'delete',
             title: grid.translate('Delete record'),
-            label: grid.images.deleteRecord ? '' : grid.translate('Delete record'),
-            img: grid.images.deleteRecord,
+            label: images.deleteRecord ? '' : grid.translate('Delete record'),
+            img: images.deleteRecord,
             click: (e) => grid.deleteRecord(e),
             getDisabled: (e) => grid.deleteRecordDisabled(e),
         });
@@ -363,8 +369,8 @@ export class GridINUClass extends GridINUBaseClass {
             id: grid.buttons.length,
             name: 'view',
             title: grid.translate('View record'),
-            label: grid.images.viewRecord ? '' : grid.translate('View record'),
-            img: grid.images.viewRecord,
+            label: images.viewRecord ? '' : grid.translate('View record'),
+            img: images.viewRecord,
             click: (e) => grid.viewRecord(e),
             getDisabled: (e) => grid.viewRecordDisabled(e),
         });
@@ -373,9 +379,9 @@ export class GridINUClass extends GridINUBaseClass {
             id: grid.buttons.length,
             name: 'selectValue',
             title: grid.translate('Select'),
-            label: grid.images.selectFilterValue ? '' : grid.translate('Select value'),
+            label: images.selectFilterValue ? '' : grid.translate('Select value'),
             click: (e) => grid.onSelectValue(e),
-            img: grid.images.selectFilterValue,
+            img: images.selectFilterValue,
             getVisible: () => { return grid.isSelecting },
         });
 
