@@ -180,10 +180,13 @@ export class GridClass extends BaseComponent {
         log(' -------------------------------------------------------------------------------------------------------------------------------------- ');
 
         return (
-            <div style={{ overflowX: 'auto', overflowY: 'hidden' }}>
+            <div
+                key={`griddiv_${grid.id}_`}
+                style={{ overflowX: 'auto', overflowY: 'hidden' }}
+            >
                 <table
                     key={`grid_${grid.id}_`}
-                    className={grid.opt.gridClass || 'grid-default'}
+                    className={grid.opt.gridClass || BaseComponent.theme.gridClass || 'grid-default'}
                     style={{ width: w + "px", tableLayout: 'fixed' }}
                 >
                     {grid.renderHeader()}
@@ -283,10 +286,11 @@ export class GridClass extends BaseComponent {
         const grid = this;
 
         if (!grid.columns || !grid.rows) {
-            return <div className='grid-loader'><FadeLoader /></div>;
+            return <div key={`gridloader_${grid.id}_`}
+                className='grid-loader'><FadeLoader /></div>;
         }
 
-        return (
+        return (//onMouseDown={(e) => { e.detail === 2 ? grid.onRowDblClick(e, row) : grid.onSelectGridRow(e) }}
             <tbody>
                 {
                     grid.rows.map((row, rind) => {//${grid.stateind}_
@@ -295,7 +299,15 @@ export class GridClass extends BaseComponent {
                             <tr
                                 key={`gridrow_${grid.id}_${rind}_${row[grid.keyField]}_${grid.keyAdd()}_${grid.keyCellAdd(selected)}_`}
                                 className={selected ? `grid-selected-row ${grid.opt.selectedRowClass || ''}` : ''}
-                                onMouseDown={(e) => { e.detail === 2 ? grid.onRowDblClick(e, row) : grid.onSelectGridRow(e) }}
+
+                                onDoubleClick={(e) => {
+                                    if (!grid._clicksDisabled) grid.onRowDblClick(e, row);
+                                    e.stopPropagation();
+                                }}
+                                onClick={(e) => {
+                                    if (!grid._clicksDisabled) grid.onSelectGridRow(e);
+                                    e.stopPropagation();
+                                }}
                             >
                                 {grid.renderRow(row, rind)}
                             </tr>
@@ -490,7 +502,7 @@ export class GridClass extends BaseComponent {
         const rect = th.getBoundingClientRect();
         const fakeGrid = document.createElement('table');
 
-        fakeGrid.className = grid.opt.gridClass || 'grid-default';
+        fakeGrid.className = grid.opt.gridClass || BaseComponent.theme.gridClass || 'grid-default';
         fakeGrid.style = grid.opt.style || '';
         fakeGrid.style.zIndex = ++window._wndZInd || 1000;
         fakeGrid.style.position = 'fixed';
@@ -545,6 +557,8 @@ export class GridClass extends BaseComponent {
         const grid = this;
 
         const gridElement = e.target.closest('TABLE');
+        if (!gridElement) return;
+
         const rows = gridElement.tBodies[0].rows;
         const clickedRow = e.target.closest('TR');
 
@@ -642,8 +656,9 @@ export class GridClass extends BaseComponent {
         return grid._selectedRows || {};
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
-    selectedValues() {
+    selectedValues(texts) {
         const grid = this;
+        texts = texts || [];
 
         const keyColumn = grid.getKeyColumn();
         if (!grid.multi) {
@@ -655,7 +670,9 @@ export class GridClass extends BaseComponent {
             const res = [];
             for (let id in grid._selectedRows) {
                 let row = grid._selectedRows[id];
-                res.push({ value: row[keyColumn], label: row[grid.nameField] });
+                let text = row[grid.nameField];
+                texts.push(text);
+                res.push({ value: row[keyColumn], label: text });
             }
             return res;
         }

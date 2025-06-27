@@ -121,7 +121,7 @@ export class GridFLClass extends GridDBClass {
                         <input
                             key={`colfilter_${grid.id}_${col.id}_`}
                             id={`colfilter_${grid.id}_${col.id}_`}
-                            className={`grid-col-filter ${grid.opt.inputClass || ''}`}
+                            className={`grid-col-filter ${grid.opt.inputClass || BaseComponent.theme.inputClass || ''}`}
                             value={col.filter !== undefined ? col.filter : ''}
                             title={col.filter !== undefined ? col.filter : ''}
                             style={{ gridColumn: !hasFilter ? 'span 2' : '', width: 'calc(100% - 4px)', padding: '0 2px', boxSizing: 'border-box' }}
@@ -433,7 +433,7 @@ export class GridFLClass extends GridDBClass {
                 return !grid.isFiltered();
             },
             img: images.clear,
-            class: grid.opt.toolbarButtonsClass,
+            class: grid.pagerButtonsClass,
         }
 
         grid.pagerButtons.unshift(clear);

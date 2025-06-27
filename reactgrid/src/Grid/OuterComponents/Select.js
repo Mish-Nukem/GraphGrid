@@ -1,8 +1,17 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect, useCallback } from 'react';
 //import AsyncSelect from 'react-select';
 import { AsyncPaginate } from 'react-select-async-paginate';
 export function Select(props) {
-    const [value, onChange] = useState(props.value);
+    const [value, setValue] = useState(props.value);
+
+    //let value = props.value;
+    //const onChange = useCallback((newValue) => {
+    //    value = newValue;
+    //}, []);
+
+    //    function (newValue) {
+    //    value = newValue;
+    //}
 
     const getOptions = props.getOptions;
 
@@ -56,22 +65,35 @@ export function Select(props) {
         menuPortal: base => ({ ...base, zIndex: 9999 })
     };
 
-    useEffect(() => {
-        if (props.init) {
-            props.init({
-                setComboboxValue: function (newValue) {
-                    onChange(newValue);
-                },
-                refreshState: function () {
-                    onChange(value);
-                }
-            });
-        }
+    if (props.init) {
+        props.init({
+            setComboboxValue: function (newValue) {
+                //value = newValue;
+                setValue(newValue);
+            },
+            refreshState: function () {
+                setValue(value);
+            }
+        });
+    }
+
+    //useEffect(() => {
+    //    if (props.init) {
+    //        props.init({
+    //            setComboboxValue: function (newValue) {
+    //                value = newValue;
+    //                //onChange(newValue);
+    //            },
+    //            refreshState: function () {
+    //                //onChange(value);
+    //            }
+    //        });
+    //    }
 
 
-        return () => {
-        }
-    }, [value, props])
+    //    return () => {
+    //    }
+    //}, [value, props/*, onChange*/])
 
     return (
         <div
@@ -79,14 +101,14 @@ export function Select(props) {
         >
             <AsyncPaginate
                 key={value}
-                value={value}
+                value={!props.isMulti ? value : value && value.length > 0 ? value : ''}
                 isMulti={props.isMulti}
                 cacheOptions
                 loadOptions={loadOptions}
                 additional={{
                     page: 1,
                 }}
-                onChange={(e) => { props.onChange(e); onChange(e); }}
+                onChange={(e) => { props.onChange(e); setValue(e); }}
                 placeholder=""
                 styles={customStyles}
                 isDisabled={props.disabled ? true : false}

@@ -4,13 +4,7 @@ import { GridINUBaseClass } from './GridINUBase';
 import { Images } from './Themes/Images';
 import { NodeStatus } from './Base';
 import { CardINU } from './CardINU';
-import { Select } from './OuterComponents/Select';
-import DatePicker, { registerLocale } from "react-datepicker";
-import "react-datepicker/dist/react-datepicker.css";
-import ru from "date-fns/locale/ru";
-import Moment from 'moment';
-
-registerLocale("ru", ru);
+import { FieldEdit } from './FieldEdit';
 // ==================================================================================================================================================================
 export function GridINU(props) {
     let grid = null;
@@ -119,27 +113,17 @@ export class GridINUClass extends GridINUBaseClass {
                 init={(card) => {
                     card.visible = true;
                     card.columns = grid.columns;
+                    for (let col of card.columns) {
+                        delete col._fieldEditObj;
+                    }
+                    grid.onClosePopup = () => {
+                        for (let col of card.columns) {
+                            delete col._fieldEditObj;
+                        }
+                    };
                 }}
             >
             </CardINU>
-        );
-    }
-    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
-    renderLookupGrid() {
-        const grid = this;
-        const info = grid._lookupEntityInfo[grid.lookupField.entity];
-
-        return (
-            <GridINU
-                entity={grid.lookupField.entity}
-                dataGetter={grid.dataGetter}
-                keyField={grid.lookupField.refKeyField}
-                nameField={grid.lookupField.refNameField}
-                onSelectValue={(e) => grid.selectLookupValue(e)}
-                getColumns={info.columns ? () => { return info.columns; } : null}
-                init={(lookupGrid) => grid.onLookupGridInit(lookupGrid)}
-            >
-            </GridINU>
         );
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -148,157 +132,55 @@ export class GridINUClass extends GridINUBaseClass {
 
         if (!grid.allowEditGrid || col.readonly || row !== grid.selectedRow()) return super.renderCell(col, row);
 
-        let value = !grid.isEditing() ? row[col.name] : grid.changedRow && grid.changedRow[col.name] !== undefined ? grid.changedRow[col.name] : row[col.name];
-        value = value !== undefined ? value : '';
-        if (col.type === undefined || col.type === null) {
-            col.type = '';
-        }
+        row = !grid.isEditing() || !grid.changedRow ? row : grid.changedRow;
 
-        let parsedDate;
-        if (col.type === 'date' && value) {
-            parsedDate = Moment(value, grid.dateFormat);
-            value = parsedDate.format(grid.dateFormat);
-        }
+        return <FieldEdit
+            keyPref={grid.id}
+            column={col}
+            entity={grid.entity}
+            dataGetter={grid.dataGetter}
+            value={col.type === 'lookup' ? row[col.keyField] : row[col.name]}
+            text={row[col.name]}
+            findFieldEdit={() => { return col._fieldEditObj; }}
+            init={
+                (fe) => {
+                    if (grid.isEditing() && !grid.changedRow) {
+                        grid.changedRow = {};
+                        Object.assign(grid.changedRow, grid.selectedRow());
+                    }
 
-        const noClear = col.required || value === undefined || value === '';
-        switch (col.type.toLowerCase()) {
-            case 'lookup':
-                const keyFieldValue = !grid.isEditing() ? row[col.keyField] : grid.changedRow && grid.changedRow[col.keyField] !== undefined ? grid.changedRow[col.keyField] : row[col.keyField];
-                if (col.setComboboxValue) {
-                    setTimeout(() => { col.setComboboxValue({ value: keyFieldValue, label: value }); }, 10);
+                    const lrow = !grid.isEditing() ? grid.selectedRow() : grid.changedRow;
+
+                    col._fieldEditObj = fe;
+                    fe.value = col.type === 'lookup' ? lrow[col.keyField] : lrow[col.name];
+                    fe.text = lrow[col.name];
                 }
-                return (
-                    <div
-                        key={`gridlookupdiv_${grid.id}_${col.id}_`}
-                        style={{ border: 'none', height: !grid.opt.inputClass ? '1.7em' : '2em' }}
-                        className='grid-cell-lookup'
-                    >
-                        {
-                            !col.allowCombobox ?
-                                <span
-                                    key={`gridlookuptitle_${grid.id}_${col.id}_`}
-                                    style={{ width: 'calc(100% - 4px)', gridColumn: noClear ? 'span 2' : '', overflowX: 'hidden' }}
-                                >
-                                    {value}
-                                </span>
-                                :
-                                <Select
-                                    key={`gridlookupselect_${grid.id}_${col.id}_`}
-                                    inputClass={grid.opt.inputClass || ''}
-                                    value={{ value: keyFieldValue, label: value }}
-                                    getOptions={(filter, pageNum) => grid.getLookupValues(col, filter, pageNum)}
-                                    height={!grid.opt.inputClass ? '1.7em' : '2em'}
-                                    gridColumn={noClear ? 'span 2' : 'span 1'}
-                                    onChange={(e) => {
-                                        grid.changedRow = grid.changedRow || {};
-                                        grid.changedRow[col.keyField] = e.value;
-                                        grid.changedRow[col.name] = e.label;
+            }
+            onChange={(e) => {
+                if (!grid.changedRow) {
+                    grid.changedRow = {};
+                    Object.assign(grid.changedRow, grid.selectedRow());
+                }
 
-                                        grid.setEditing(true);
-                                        grid.refreshState();
-                                    }}
-                                    init={(e) => { col.setComboboxValue = e.setComboboxValue; }}
-                                >
-                                </Select>
-                        }
-                        <button
-                            key={`gridlookupbtn_${grid.id}_${col.id}_`}
-                            className={`grid-cell-button ${grid.opt.clearButtonClass || ''}`}
-                            onClick={(e) => grid.openLookupField(e, col, row)}
-                        >
-                            {'...'}
-                        </button>
-                        {
-                            noClear ? <></>
-                                :
-                                <button
-                                    key={`gridlookupclear_${grid.id}_${col.id}_`}
-                                    className={`grid-cell-button ${grid.opt.clearButtonClass || ''}`}
-                                    onClick={(e) => grid.clearField(e, col, row)}
-                                >
-                                    {'×'}
-                                </button>
-                        }
-                    </div>
-                );
-            default:
-                /*
-                                    autoFocus={col === grid._changingCol && grid.isEditing()}
-                                    onFocus={e => {
-                                        if (col === grid._changingCol) {
-                                            e.currentTarget.selectionStart = e.currentTarget.selectionEnd = grid._remCursorPos;
-                                        }
-                                    }}
-                
-                */
-                return (
-                    <div
-                        style={{ border: 'none' }}
-                        className={col.type === 'date' ? 'grid-cell-lookup' : 'grid-cell-edit'}
-                        key={`grideditdiv_${grid.id}_${col.id}_`}
-                    >
-                        {
-                            col.type === 'date' ?
-                                <div
-                                    style={{
-                                        width: '100%',
-                                        height: !grid.opt.inputClass ? '1.7em' : '2em',
-                                        minHeight: !grid.opt.inputClass ? '1.7em' : '2em',
-                                        padding: '0',
-                                        gridColumn: noClear ? 'span 3' : 'span 2',
-                                        overflowX: 'hidden',
-                                    }}
-                                    className="datepicker-input"
-                                >
-                                    <DatePicker
-                                        selected={parsedDate}
-                                        className={grid.opt.inputClass || ''}
-                                        style={{ height: '2.1em' }}
-                                        locale="ru"
-                                        dateFormat={grid.datePickerDateFormat}
-                                        showMonthDropdown
-                                        showYearDropdown
-                                        onSelect={(date) => {
-                                            grid.changedRow = grid.changedRow || {};
-                                            grid.changedRow[col.name] = Moment(date, grid.dateFormat);
-                                            grid.setEditing(true);
-                                            grid.refreshState();
-                                        }}
-                                    ></DatePicker>
-                                </div>
-                                :
-                                <textarea
-                                    key={`gridedittextarea_${grid.id}_${col.id}_`}
-                                    className={`${grid.opt.inputClass || ''}`}
-                                    value={value}
-                                    style={{
-                                        width: '100%',
-                                        height: !grid.opt.inputClass ? '2.1em' : '2.2em',
-                                        minHeight: !grid.opt.inputClass ? '2.1em' : '2.2em',
-                                        padding: '0',
-                                        boxSizing: 'border-box',
-                                        gridColumn: noClear ? 'span 2' : '',
-                                        resize: 'vertical',
-                                        overflowX: 'hidden',
-                                    }}
-                                    onChange={(e) => grid.changeField(e, col, row)}
-                                >
-                                </textarea>
-                        }
-                        {
-                            noClear ? <></>
-                                :
-                                <button
-                                    key={`gridlookupclear_${grid.id}_${col.id}_`}
-                                    className={`grid-cell-button ${grid.opt.clearButtonClass || ''}`}
-                                    onClick={(e) => grid.clearField(e, col, row)}
-                                >
-                                    {'×'}
-                                </button>
-                        }
-                    </div>
-                );
-        }
+                if (col.type === 'lookup') {
+                    grid.changedRow[col.keyField] = e.value;
+                    grid.changedRow[col.name] = e.text;
+                    if (col.setComboboxValue) {
+                        col.setComboboxValue({ value: e.value, label: e.text });
+                    }
+                    if (!grid.isEditing()) {
+                        grid.setEditing(true);
+                        grid.refreshState();
+                    }
+                }
+                else {
+                    grid.changedRow[col.name] = e.value;
+                    grid.setEditing(true);
+                    grid.refreshState();
+                }
+            }}
+        >
+        </FieldEdit>;
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     addToolbarButtons() {
@@ -380,7 +262,20 @@ export class GridINUClass extends GridINUBaseClass {
             name: 'selectValue',
             title: grid.translate('Select'),
             label: images.selectFilterValue ? '' : grid.translate('Select value'),
-            click: (e) => grid.onSelectValue(e),
+            click: (e) => {
+                if (!grid.multi) {
+                    const row = grid.selectedRow();
+                    e.value = row[grid.keyField];
+                    e.text = row[grid.nameField];
+                }
+                else {
+                    const texts = [];
+                    e.value = grid.selectedValues(texts);
+                    e.text = texts.join(', ');
+                }
+
+                grid.onSelectValue(e);
+            },
             img: images.selectFilterValue,
             getVisible: () => { return grid.isSelecting },
         });
@@ -396,6 +291,9 @@ export class GridINUClass extends GridINUBaseClass {
         super.onRowDblClick(e, row);
 
         if (grid.isSelecting && !grid.multi && grid.onSelectValue) {
+            const row = grid.selectedRow();
+            e.value = row[grid.keyField];
+            e.text = row[grid.nameField];
             grid.onSelectValue(e);
         }
     }
@@ -446,7 +344,7 @@ export class GridINUClass extends GridINUBaseClass {
         grid.isNewRecord = true;
         grid.cardIsShowing = true;
         grid.popupIsShowing = true;
-        grid.lookupTitle = grid.title;
+        grid.popupTitle = grid.title;
         grid.onClosePopup = grid.closeCard;
 
         grid.refreshState();
@@ -468,7 +366,7 @@ export class GridINUClass extends GridINUBaseClass {
         grid.isNewRecord = true;
         grid.cardIsShowing = true;
         grid.popupIsShowing = true;
-        grid.lookupTitle = grid.title;
+        grid.popupTitle = grid.title;
         grid.onClosePopup = grid.closeCard;
 
         grid.refreshState();
@@ -501,7 +399,7 @@ export class GridINUClass extends GridINUBaseClass {
         grid.cardRow = grid.selectedRow();
         grid.cardIsShowing = true;
         grid.popupIsShowing = true;
-        grid.lookupTitle = grid.title;
+        grid.popupTitle = grid.title;
         grid.onClosePopup = grid.closeCard;
 
         grid.refreshState();
@@ -616,10 +514,10 @@ export class GridINUClass extends GridINUBaseClass {
         return false;
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
-    showReport(e) {
-        const grid = this;
+    TEST(e) {
+        //const grid = this;
 
-        grid.saveColumnsConfig(e);
+        //grid.saveColumnsConfig(e);
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     keyCellAdd(selected) {

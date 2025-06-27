@@ -12,13 +12,15 @@ export class DefaultGridTheme {
         //this.headerDivClass = 'grid-header-div-default';
         this.headerDivClass = ' ';
         this.selectedRowClass = 'table-active';
-        this.inputClass = '';
+        this.inputClass = 'input-default-class';
+
+        this.tabControlButtonClass = 'graph-tabcontrol-button';
 
         this.menuClass = '';
         this.menuItemClass = '';
         this.dropdownWndClass = 'none';
 
-        this.filterButtonClass = '';
+        this.filterButtonClass = 'graph-filter-button';
         this.clearButtonClass = '';
 
         this.modalBodyClass = 'modal-window-body';

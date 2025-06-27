@@ -1,11 +1,7 @@
-﻿import { GridINU } from './GridINU';
-import { useState, useEffect } from 'react';
+﻿import { useState, useEffect } from 'react';
 import { Images } from './Themes/Images';
 import { GridINUBaseClass } from './GridINUBase';
-import { Select } from './OuterComponents/Select';
-import DatePicker from "react-datepicker";
-import Moment from 'moment';
-import "react-datepicker/dist/react-datepicker.css";
+import { FieldEdit } from './FieldEdit';
 // =================================================================================================================================================================
 export function CardINU(props) {
     let card = null;
@@ -51,6 +47,10 @@ export function CardINU(props) {
 
         return () => {
             card.clearEvents();
+
+            if (card.graph && card.graph.nodeCount) {
+                card.graph.nodeCount--;
+            }
         }
     }, [card, needGetRows])
 
@@ -103,181 +103,76 @@ export class CardINUClass extends GridINUBaseClass {
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     renderField(col) {
         const card = this;
-        let value = card.changedRow[col.name];
+        let row = card.changedRow;
+        let value = col.type === 'lookup' ? row[col.keyField] : row[col.name];
+        value = value !== undefined ? value : '';
         if (col.type === undefined || col.type === null) {
             col.type = '';
         }
-        let parsedDate;
-        if (col.type === 'date' && value) {
-            parsedDate = Moment(value, card.dateFormat);
-            value = parsedDate.format(card.dateFormat);
-        }
-        const noClear = col.required || value === undefined || value === '';
 
-        const images = Images.getImages();
+        return (
+            <div className="graph-card-field"
+                key={`cardlookupdiv_${card.id}_${col.id}_`}
+            >
+                <span
+                    key={`cardlookuptitle_${card.id}_${col.id}_`}
+                    style={{ gridColumn: 'span 3', width: 'calc(100% - 4px)' }}
+                >
+                    {col.title || col.name}
+                </span>
+                <FieldEdit
+                    keyPref={card.id + '_card_'}
+                    column={col}
+                    entity={card.entity}
+                    dataGetter={card.dataGetter}
+                    value={value}
+                    text={row[col.name]}
+                    findFieldEdit={() => { return col._fieldEditObj; }}
+                    large={true}
+                    init={
+                        (fe) => {
+                            if (card.isEditing() && !card.changedRow) {
+                                card.changedRow = {};
+                                Object.assign(card.changedRow, card.selectedRow());
+                            }
 
-        //const old = false;
-        switch (col.type.toLowerCase()) {
-            case 'lookup':
-                const keyFieldValue = card.changedRow[col.keyField];
-                if (col.setComboboxValue) {
-                    col.setComboboxValue({ value: keyFieldValue, label: value });
-                }
-                return (
-                    <div className="graph-card-field"
-                        key={`cardlookupdiv_${card.id}_${col.id}_`}
-                    >
-                        <span
-                            key={`cardlookuptitle_${card.id}_${col.id}_`}
-                            style={{ gridColumn: 'span 3', width: 'calc(100% - 4px)' }}
-                        >
-                            {col.title || col.name}
-                        </span>
-                        {
-                            !col.allowCombobox ?
-                                <input
-                                    className={`${card.opt.inputClass || ''}`}
-                                    key={`cardlookupinput_${card.id}_${col.id}_`}
-                                    value={value}
-                                    style={{ width: 'calc(100% - 4px)', padding: '0 2px', boxSizing: 'border-box', height: '2.3em', gridColumn: col.required || col.readonly || noClear ? 'span 2' : '' }}
-                                    disabled='disabled'
-                                ></input>
-                                :
-                                <Select
-                                    key={`cardlookupselect_${card.id}_${col.id}_${card.keyCellAdd(true)}_`}
-                                    inputClass={card.opt.inputClass || ''}
-                                    value={{ value: keyFieldValue, label: value }}
-                                    getOptions={(filter, pageNum) => card.getLookupValues(col, filter, pageNum)}
-                                    style={{ width: 'calc(100% - 4px)', padding: '0 2px', boxSizing: 'border-box' }}
-                                    gridColumn={col.required || col.readonly || noClear ? 'span 2' : 'span 1'}
-                                    onChange={(e) => {
-                                        card.changedRow[col.keyField] = e.value;
-                                        card.changedRow[col.name] = e.label;
-                                        card.setEditing(true);
-                                        card.refreshState();
-                                    }}
-                                    init={(e) => { col.setComboboxValue = e.setComboboxValue; }}
-                                >
-                                </Select>
-                        }
-                        <button
-                            key={`cardlookupbtn_${card.id}_${col.id}_`}
-                            className={'graph-card-button'}
-                            onClick={(e) => card.openLookupField(e, col, card.changedRow)}
-                        >
-                            {images.filterSelect ? images.filterSelect() : card.translate('Select', 'graph-filter-select')}
-                        </button>
-                        {
-                            noClear ? <></>
-                                : <button
-                                    key={`cardlookupclear_${card.id}_${col.id}_`}
-                                    className={'graph-card-button'}
-                                    disabled={value === undefined || value === '' ? 'disabled' : ''}
-                                    onClick={(e) => card.clearField(e, col, card.changedRow)}
-                                    style={{ display: !col.required && !col.readonly ? '' : 'none' }}
-                                >
-                                    {images.filterClear ? images.filterClear() : card.translate('Clear', 'graph-filter-clear')}
-                                </button>
-                        }
-                    </div>
-                )
-            case 'date':
-                return (
-                    <div className="graph-card-field"
-                        key={`carddatepickerdiv_${card.id}_${col.id}_`}
-                    >
-                        <span
-                            key={`cardfieldtitle_${card.id}_${col.id}_`}
-                            style={{ gridColumn: 'span 3', width: 'calc(100% - 4px)' }}
-                        >
-                            {col.title || col.name}
-                        </span>
-                        {
-                            <div
-                                style={{
-                                    width: '100%',
-                                    height: '1.7em',
-                                    minHeight: '1.7em',
-                                    padding: '0',
-                                    gridColumn: col.required || col.readonly || noClear ? 'span 3' : 'span 2',
-                                    overflowX: 'hidden',
-                                }}
-                                className="datepicker-input"
-                            >
-                                <DatePicker
-                                    selected={parsedDate}
-                                    className={card.opt.inputClass || ''}
-                                    locale="ru"
-                                    dateFormat={card.datePickerDateFormat}
-                                    showMonthDropdown
-                                    showYearDropdown
-                                    onSelect={(date) => {
-                                        card.changedRow = card.changedRow || {};
-                                        card.changedRow[col.name] = Moment(date, card.dateFormat);
-                                        card.setEditing(true);
-                                        card.refreshState();
-                                    }}
-                                ></DatePicker>
-                            </div>
-                        }
-                        {
-                            noClear ? <></>
-                                : <button
-                                    key={`cardlookupclear_${card.id}_${col.id}_`}
-                                    className={'graph-card-button'}
-                                    disabled={value === undefined || value === '' ? 'disabled' : ''}
-                                    onClick={(e) => card.clearField(e, col, card.changedRow)}
-                                    style={{ display: !col.required && !col.readonly ? '' : 'none' }}
-                                >
-                                    {images.filterClear ? images.filterClear() : card.translate('Clear', 'graph-filter-clear')}
-                                </button>
-                        }
-                    </div>
-                );
-            default:
-                /*
-                            onFocus={e => {
-                                if (col === card._changingCol) {
-                                    e.currentTarget.selectionStart = e.currentTarget.selectionEnd = card._remCursorPos;
-                                }
-                            }}
-                            autoFocus={col === card._changingCol}
-                */
-                return (
-                    <div className="graph-card-field"
-                        key={`cardfielddiv_${card.id}_${col.id}_`}
-                    >
-                        <span
-                            key={`cardfieldtitle_${card.id}_${col.id}_`}
-                            style={{ gridColumn: 'span 3', width: 'calc(100% - 4px)' }}
-                        >
-                            {col.title || col.name}
-                        </span>
-                        <textarea
-                            key={`cardlookuptextarea_${card.id}_${col.id}_`}
-                            className={`${card.opt.inputClass || ''}`}
-                            value={card.changedRow[col.name] !== undefined ? card.changedRow[col.name] : ''}
-                            style={{ width: 'calc(100% - 4px)', height: col.maxW !== undefined && +col.maxW >= 200 ? '5em' : '2.3em', padding: '0 2px', boxSizing: 'border-box', gridColumn: col.required || col.readonly || noClear ? 'span 3' : 'span 2', resize: 'vertical' }}
-                            onChange={(e) => card.changeField(e, col, card.changedRow)}
-                            disabled={col.readonly ? 'disabled' : ''}
-                        >
+                            row = !card.isEditing() ? card.selectedRow() : card.changedRow;
 
-                        </textarea>
-                        {
-                            noClear ? <></>
-                                : <button
-                                    key={`cardfieldclear_${card.id}_${col.id}_`}
-                                    className={'graph-card-button'}
-                                    disabled={value === undefined || value === '' ? 'disabled' : ''}
-                                    onClick={(e) => card.clearField(e, col, card.changedRow)}
-                                    style={{ display: !col.required && !col.readonly ? '' : 'none' }}
-                                >
-                                    {images.filterClear ? images.filterClear() : card.translate('Clear', 'graph-filter-clear')}
-                                </button>
+                            col._fieldEditObj = fe;
+                            fe.value = col.type === 'lookup' ? row[col.keyField] : row[col.name];
+                            fe.value = fe.value !== undefined ? fe.value : '';
+
+                            fe.text = row[col.name];
                         }
-                    </div>
-                )
-        }
+                    }
+                    onChange={(e) => {
+                        if (!card.changedRow) {
+                            card.changedRow = {};
+                            Object.assign(card.changedRow, card.selectedRow());
+                        }
+
+                        if (col.type === 'lookup') {
+                            card.changedRow[col.keyField] = e.value;
+                            card.changedRow[col.name] = e.text;
+                            if (col.setComboboxValue) {
+                                col.setComboboxValue({ value: e.value, label: e.text });
+                            }
+                            if (!card.isEditing()) {
+                                card.setEditing(true);
+                                card.refreshState();
+                            }
+                        }
+                        else {
+                            card.changedRow[col.name] = e.value;
+                            card.setEditing(true);
+                            card.refreshState();
+                        }
+                    }}
+                >
+                </FieldEdit>
+            </div>
+        )
+
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     addCardButtons() {
@@ -346,7 +241,8 @@ export class CardINUClass extends GridINUBaseClass {
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     rollbackChangesNode(e) {
         const card = this;
-        if (card.isNewRecord) {
+        if (card.isNewRecord || !card.keyField) {
+            card.changedRow = {};
             Object.assign(card.changedRow, card.initialRow);
             card.setEditing(false);
             card.refreshState();
@@ -363,28 +259,6 @@ export class CardINUClass extends GridINUBaseClass {
                 }
             );
         }
-    }
-    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
-    renderLookupGrid() {
-        const card = this;
-        const info = card._lookupEntityInfo[card.lookupField.entity];
-        return (
-            <GridINU
-                entity={card.lookupField.entity}
-                dataGetter={card.dataGetter}
-                keyField={card.lookupField.refKeyField}
-                nameField={card.lookupField.refNameField}
-                onSelectValue={(e) => card.selectLookupValue(e)}
-                getColumns={info.columns ? () => { return info.columns; } : null}
-                init={(grid) => {
-                    grid.visible = true;
-                    grid.title = card.lookupField.title;
-                    grid.isSelecting = true;
-                    card.lookupGrid = grid;
-                }}
-            >
-            </GridINU>
-        );
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     selectedRow() {

@@ -6,17 +6,29 @@ import { GraphComponent } from '../Grid/GraphComponent';
 import { LoginPage } from '../PM/Pages/LoginPage';
 import appSettings from '../PM/PMSettings';
 import { DataGetter } from '../Grid/Utils/DataGetter';
+import { BaseComponent } from '../Grid/Base';
 import { PMGridCreator } from './PMGridClassCreator'
 import { MainMenu } from './Pages/MainMenu';
 function PMApp() {
-    const [state, setState] = useState({ menuItem: - 2, dataGetter: null, gridCreator: null });
+    const [state, setState] = useState({ menuObj: { id: - 2 }, dataGetter: null, gridCreator: null });
 
     window._logEnabled = true;
 
-    const dataGetter = state.dataGetter || new DataGetter(appSettings, () => setState({ menuItem: -2, dataGetter: null, gridCreator: null }));
+    const dataGetter = state.dataGetter || new DataGetter(appSettings, () => setState({ menuObj: { id: - 2 }, dataGetter: null, gridCreator: null }));
     const gridCreator = state.gridCreator || new PMGridCreator();
 
-    const TEST = function () {
+    dataGetter.menuId = state.menuObj.id;
+
+    const TEST = function (e) {
+
+        //BaseComponent.theme = null;
+        //BaseComponent.useBootstrap = !BaseComponent.useBootstrap;
+
+        BaseComponent.changeTheme();
+
+        e.skipActivate = true;
+
+        setState({ menuObj: { id: state.dataGetter.menuId/*state.menuObj.id*/ }, dataGetter: dataGetter, gridCreator: gridCreator });
     }
 
     const testMenuItems = [
@@ -26,17 +38,29 @@ function PMApp() {
         { id: 2, text: 'Two PM Grids', parent: 1 },
         { id: 3, text: 'Graph PM, handmade', parent: 1 },
         { id: 4, text: 'Graph PM, Remarks_scheme', parent: 1 },
-        { id: 5, text: 'TEST' },
-        { id: 6, text: 'Submenu test 1', parent: 5 },
-        { id: 7, text: 'Submenu test', parent: 6 },
+        {
+            id: 5, text: 'Change Theme', onClick: (e, item) => {
+                //BaseComponent.theme = null;
+                //BaseComponent.useBootstrap = !BaseComponent.useBootstrap;
+
+                e.skipActivate = true;
+
+                BaseComponent.changeTheme().then(() => {
+
+                    setState({ menuObj: { id: state.dataGetter.menuId/*menuObj.id*/ }, dataGetter: dataGetter, gridCreator: gridCreator });
+                });
+            }
+        },
+        //{ id: 6, text: 'Submenu test 1', parent: 5 },
+        //{ id: 7, text: 'Submenu test', parent: 6 },
         { id: 8, text: 'Tuning List', parent: 0 },
     ];
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     const getTestApp = () => {
-        console.log('state == ' + state.menuItem);
-        switch (state.menuItem) {
+        console.log('state == ' + state.menuObj.id);
+        switch (state.menuObj.id) {
             case -1:
-                setState({ menuItem: -2, dataGetter: null, gridCreator: null });
+                setState({ menuObj: { id: - 2 }, dataGetter: null, gridCreator: null });
 
                 //    return (
                 //        <></>
@@ -74,7 +98,7 @@ function PMApp() {
             case 5:
                 return (
                     <>
-                        <button onClick={() => { TEST() }} className="modal-window-footer-button">TEST</button>
+                        <button onClick={(e) => { TEST(e); }} className="modal-window-footer-button">TEST</button>
                     </>
                 );
             case 8:
@@ -105,20 +129,25 @@ function PMApp() {
 
     */
     return (
-        state.menuItem < -1 ?
+        state.menuObj.id < -1 ?
             <LoginPage
                 dataGetter={dataGetter}
                 afterLogin={(tokens) => {
                     if (!tokens) return;
 
-                    setState({ menuItem: 0, dataGetter: dataGetter, gridCreator: gridCreator });
+                    setState({ menuObj: { id: 0 }, dataGetter: dataGetter, gridCreator: gridCreator });
                 }}>
             </LoginPage> :
             <div >
                 <MainMenu
                     menuItems={testMenuItems}
                     onMenuItemClick={(e, item) => {
-                        setState({ menuItem: item.id, dataGetter: dataGetter, gridCreator: gridCreator });
+                        if (item.onClick) {
+                            item.onClick(e, item);
+                            return;
+                        }
+
+                        setState({ menuObj: { id: item.id }, dataGetter: dataGetter, gridCreator: gridCreator });
                     }}
                 >
                 </MainMenu>

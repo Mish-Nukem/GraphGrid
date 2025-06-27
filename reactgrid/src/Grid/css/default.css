@@ -29,11 +29,11 @@
         font-weight: 700;
         line-height: 1;
         opacity: 0.2;
-        cursor: pointer;
     }
 
-        .modal-window-header > button:hover {
+        .modal-window-header > button:hover:not(:disabled) {
             opacity: 1;
+            cursor: pointer;
         }
 
 .modal-window-body {
@@ -52,8 +52,12 @@
     margin: 5px;
     white-space: nowrap;
     overflow: hidden;
-    cursor: pointer;
 }
+
+    .modal-window-footer-button:hover:not(:disabled) {
+        background-color: lightgray;
+        cursor: pointer;
+    }
 
 .overlay-default {
     display: flex;
@@ -167,7 +171,7 @@
 }
 
 tr.grid-selected-row > td {
-  padding: 0.01em;  
+    padding: 0.01em;
 }
 
 .grid-pager-default {
@@ -187,7 +191,17 @@ tr.grid-selected-row > td {
     width: 36px;*/
     height: 2em;
     width: 2.5em;
+    border-radius: 3px;
+    border-width: 1px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
 }
+
+    .grid-pager-button:hover:not(:disabled) {
+        background-color: lightgray;
+        cursor: pointer;
+    }
 
 .toolbar-default {
     display: flex;
@@ -208,8 +222,15 @@ tr.grid-selected-row > td {
     display: flex;
     align-items: center;
     justify-content: space-between;
+    border-radius: 3px;
+    border-width: 1px;
     /*padding: 1px 0px;*/
 }
+
+    .grid-toolbar-button:hover:not(:disabled) {
+        cursor: pointer;
+        background-color: lightgray;
+    }
 
 .grid-pager-current {
     width: 3em;
@@ -307,7 +328,7 @@ tr.grid-selected-row > td {
 
 .grid-cell-lookup {
     display: grid;
-    grid-template-columns: calc(100% - 1.5em - 1.5em) 1.5em 1.5em;
+    grid-template-columns: calc(100% - 3em) 1.5em 1.5em;
     grid-template-rows: auto;
     align-items: center;
     align-content: center;
@@ -316,7 +337,7 @@ tr.grid-selected-row > td {
 
 .grid-cell-edit {
     display: grid;
-    grid-template-columns: calc(100% - 1.5em) 1.5em;
+    grid-template-columns: calc(100% - 3em) 1.5em 1.5em;
     grid-template-rows: auto;
     align-items: center;
     align-content: center;
@@ -337,14 +358,34 @@ tr.grid-selected-row > td {
     font-size: small;
 }
 
+    .grid-cell-button:hover:not(:disabled) {
+        cursor: pointer;
+        background-color: lightgray;
+    }
+
 .graph-tabcontrol-buttons {
     margin: 0 1em;
+    display: flex
 }
 
     .graph-tabcontrol-buttons > button {
         margin: 5px 2px 5px 2px;
-        height: 2.3em;
+        /*height: 2.3em;*/
         font-weight: bold;
+    }
+
+.graph-tabcontrol-button {
+    height: 1.8em;
+    border-radius: 3px;
+    border-width: 1px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+    .graph-tabcontrol-button:hover:not(:disabled) {
+        cursor: pointer;
+        background-color: lightgray;
     }
 
 .graph-filter-line {
@@ -358,7 +399,7 @@ tr.grid-selected-row > td {
 
 .graph-filter {
     display: grid;
-    grid-template-columns: calc(100% - 5em) 2.5em 2.5em;
+    grid-template-columns: auto; /*calc(100% - 5em) 2.5em 2.5em;*/
     grid-template-rows: auto auto;
     grid-auto-flow: row;
     align-items: center;
@@ -366,10 +407,19 @@ tr.grid-selected-row > td {
     min-width: 10em;
 }
 
-    .graph-filter > button {
+.field-edit {
+    display: grid;
+    grid-template-columns: calc(100% - 5em) 2.5em 2.5em;
+    grid-template-rows: auto auto;
+    grid-auto-flow: row;
+    align-items: center;
+    min-width: 10em;
+}
+
+/*    .graph-filter > button {
         margin: 5px 2px;
     }
-
+*/
 .graph-filter-title {
     font-weight: bold;
     white-space: nowrap;
@@ -381,13 +431,32 @@ tr.grid-selected-row > td {
 
 .graph-filter-button {
     margin: 5px 6px;
-    width: 2.6em;
+    /*    width: 2.1em;
+    height: 1.8em;
+*/
+    width: 2.5em;
+    height: 2.2em;
+    border-radius: 3px;
+    border-width: 1px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
 }
+
+    .graph-filter-button:hover:not(:disabled) {
+        cursor: pointer;
+        background-color: lightgray;
+    }
 
 .graph-card-button {
     margin: 5px 2px;
     width: 2.5em;
 }
+
+    .graph-card-button:hover:not(:disabled) {
+        cursor: pointer;
+        background-color: lightgray;
+    }
 
 .graph-card-toolbar {
     margin: 0 1em;
@@ -403,12 +472,13 @@ tr.grid-selected-row > td {
     align-items: center;
     align-content: center;
     margin: 0.5em;
-    overflow-y: auto;
+    /*overflow-y: auto;*/
 }
 
 .graph-card-field {
     display: grid;
-    grid-template-columns: auto 2.5em 2.5em;
+    /*grid-template-columns: auto 2.5em 2.5em;*/
+    grid-template-columns: 100%;
     grid-template-rows: auto auto;
     grid-auto-flow: row;
     align-items: center;
@@ -419,6 +489,12 @@ tr.grid-selected-row > td {
     .graph-card-field > span {
         font-weight: bold;
     }
+
+
+.input-default-class {
+    height: 1.8em;
+    box-sizing: border-box;
+}
 
 .login-form {
     display: grid;
@@ -455,7 +531,7 @@ tr.grid-selected-row > td {
 .datepicker-input > div > div.react-datepicker__input-container,
 .datepicker-input > div > div.react-datepicker__input-container input {
     width: calc(100% - 3px);
-    height: 1.6em;
+    /*height: 1.6em;*/
 }
 
 .datepicker-filter,
@@ -483,6 +559,11 @@ tr.grid-selected-row > td {
         font-weight: 300;
     }
 
+        .main-menu-div > button:hover:not(:disabled) {
+            cursor: pointer;
+            background-color: lightgray;
+        }
+
 .menu-item {
     border-width: 1px;
     border-radius: 2px;
@@ -507,10 +588,11 @@ tr.grid-selected-row > td {
     width: 22px;
     padding: 0;
 }
-    .menu-collapse-button:hover {
+
+    .menu-collapse-button:hover:not(:disabled) {
+        cursor: pointer;
         background-color: lightgray;
     }
-
 
 .progress {
 }

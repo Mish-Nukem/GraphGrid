@@ -71,7 +71,7 @@ export class GridINUBaseClass extends GridFLClass {
 
         grid.onSelectValue = props.onSelectValue || function () { };
 
-        grid._lookupEntityInfo = {};
+        grid.activeRow = props.activeRow || '';
 
         grid.reqInd = 0;
     }
@@ -95,7 +95,7 @@ export class GridINUBaseClass extends GridFLClass {
         return (
             grid.popupIsShowing ?
                 <Modal
-                    title={grid.lookupTitle}
+                    title={grid.popupTitle}
                     renderContent={() => { return grid.renderPopupContent() }}
                     pos={grid.popupPos}
                     onClose={(e) => {
@@ -103,7 +103,7 @@ export class GridINUBaseClass extends GridFLClass {
                             grid.onClosePopup(e);
                         }
                         grid.popupIsShowing = false;
-                        grid.lookupTitle = '';
+                        grid.popupTitle = '';
                         delete grid.onClosePopup;
                         delete grid.popupPos;
 
@@ -117,114 +117,7 @@ export class GridINUBaseClass extends GridFLClass {
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     renderPopupContent() {
-        const grid = this;
-        return grid.lookupIsShowing ? grid.renderLookupGrid(grid.lookupField) : <></>;
-    }
-    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
-    renderLookupGrid() {
-        const grid = this;
-        const info = grid._lookupEntityInfo[grid.lookupField.entity];
-
-        return (
-            <GridINUBase
-                entity={grid.lookupField.entity}
-                dataGetter={grid.dataGetter}
-                keyField={grid.lookupField.refKeyField}
-                nameField={grid.lookupField.refNameField}
-                onSelectValue={(e) => grid.selectLookupValue(e)}
-                getColumns={info.columns ? () => { return info.columns; } : null}
-                init={(lookupGrid) => grid.onLookupGridInit(lookupGrid)}
-            >
-            </GridINUBase>
-        );
-    }
-    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
-    onLookupGridInit(lookupGrid) {
-        const grid = this;
-        const info = grid._lookupEntityInfo[grid.lookupField.entity];
-
-        lookupGrid.visible = true;
-        lookupGrid.title = grid.lookupField.title;
-        if (grid.activeRow) {
-            lookupGrid.value = grid.activeRow;
-            lookupGrid.activeRow = grid.activeRow;
-            delete grid.activeRow;
-        }
-        lookupGrid.isSelecting = true;
-        lookupGrid._entityInfo = info;
-        grid.lookupGrid = lookupGrid;
-    };
-    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
-    changeField(e, col, row) {
-        const grid = this;
-
-        grid.changedRow = grid.changedRow || {};
-
-        grid.changedRow[col.name] = e.target.value;
-        grid.setEditing(true);
-        //grid._changingCol = col;
-
-        //grid._remCursorPos = e.currentTarget.selectionEnd;
-
-        grid.refreshState();
-    }
-    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
-    clearField(e, col, row) {
-        const grid = this;
-
-        grid.changedRow = grid.changedRow || {};
-
-        if (col.type === 'lookup') {
-            grid.changedRow[col.keyField] = '';
-            grid.changedRow[col.name] = '';
-
-            if (grid.setComboboxValue) {
-                grid.setComboboxValue('');
-            }
-        }
-        else {
-            grid.changedRow[col.name] = '';
-        }
-        grid.setEditing(true);
-        grid.refreshState();
-    }
-    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
-    openLookupField(e, col, row) {
-        const grid = this;
-        grid.lookupPos = grid.lookupPos || { x: 100, y: 100, w: 800, h: 600 };
-        grid.popupPos = grid.lookupPos;
-
-        grid.popupIsShowing = true;
-        grid.lookupIsShowing = true;
-
-        grid.lookupField = col;
-        grid.lookupTitle = col.title;
-        grid.onClosePopup = grid.closeLookup;
-
-        grid.changedRow = grid.changedRow || {};
-
-        const currValue = grid.changedRow[col.keyField] !== undefined ? grid.changedRow[col.keyField] : row[col.keyField];
-        if (currValue) {
-            grid.activeRow = currValue;
-        }
-
-        if (grid._lookupEntityInfo[col.entity]) {
-            grid.refreshState();
-            return;
-        }
-        else {
-            const params = [
-                { key: 'entity', value: col.entity },
-                { key: 'configUid', value: col.entity + '_' },
-            ];
-
-            grid.dataGetter.get({ url: 'system/entityInfo', params: params }).then(
-                (eInfo) => {
-                    grid._lookupEntityInfo[col.entity] = eInfo;
-                    grid.refreshState();
-                }
-            );
-        }
+        return <></>;
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     async getEntityInfo() {
@@ -246,22 +139,6 @@ export class GridINUBaseClass extends GridFLClass {
         }
 
         return grid._entityInfo;
-    }
-    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
-    selectLookupValue(e) {
-        const grid = this;
-        grid.changedRow[grid.lookupField.keyField] = grid.lookupGrid.selectedValue();
-        grid.changedRow[grid.lookupField.name] = grid.lookupGrid.selectedText();
-        grid.setEditing(true);
-        grid.closeLookup();
-    }
-    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
-    closeLookup(e) {
-        const grid = this;
-        grid.lookupIsShowing = false;
-
-        delete grid.lookupField;
-        delete grid.lookupGrid;
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     skipOnWaveVisit(e) {
@@ -562,34 +439,6 @@ export class GridINUBaseClass extends GridFLClass {
             (res) => {
             }
         );
-    }
-    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
-    getLookupValues(col, filter, pageNum) {
-        const grid = this;
-
-        return new Promise((resolve) => {
-            const params = [
-                { key: 'filter', value: filter },
-                { key: 'pageNumber', value: pageNum },
-                { key: 'entity', value: grid.entity },
-                { key: 'columns', value: col.name },
-            ];
-
-            grid.dataGetter.get({ url: 'system/getLookupValues', params: params }).then(
-                (res) => {
-
-                    const result = {
-                        options: res,
-                        hasMore: false,
-                        additional: {
-                            page: pageNum + 1,
-                            node: grid
-                        },
-                    };
-
-                    resolve(result);
-                });
-        });
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     afterSortColumn(column) {

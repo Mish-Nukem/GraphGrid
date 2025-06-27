@@ -1,4 +1,4 @@
-﻿import '../../../node_modules/bootstrap/dist/css/bootstrap.min.css';
+﻿import /*bootstrapCss from*/ '../../../node_modules/bootstrap/dist/css/bootstrap.min.css';
 // ==================================================================================================================================================================
 export class BootstrapTheme {
     constructor() {
@@ -13,15 +13,61 @@ export class BootstrapTheme {
         this.selectedRowClass = 'table-active';
         this.inputClass = 'form-control form-control-sm';
 
+        this.tabControlButtonClass = 'btn btn-primary btn-sm';
+
         this.menuClass = 'list-group';
         this.menuItemClass = 'list-group-item list-group-item-action list-group-item-light';
         this.mainMenuItemClass = 'btn btn-outline-secondary';
         this.dropdownWndClass = 'none';
 
-        this.filterButtonClass = 'btn btn-primary btn-sm';
+        this.filterButtonClass = 'graph-filter-button btn btn-primary btn-sm';
         this.clearButtonClass = 'btn btn-outline-secondary btn-sm';
 
-        this.modalFooterButtonClass = 'btn btn-primary btn-sm'
+        this.modalFooterButtonClass = 'btn btn-primary btn-sm';
+
+        //this.tableClass = 'table';
+
+        //document.adoptedStyleSheets = document.adoptedStyleSheets || [];
+        //document.adoptedStyleSheets.push(bootstrapCss);
+
+        //document.bootstrapStyleSheet = bootstrapCss;
+        //document.adoptedStyleSheet = bootstrapCss;
+
+        //for (let styleSheet of document.styleSheets) {
+        //    styleSheet.disabled = true;
+        //}
+        if (!document.BootstrapStyleSheets) {
+            document.BootstrapStyleSheets = [];
+            document.BootstrapRules = [];
+
+            let prevCount = 0;
+
+            for (let i = 0; i < document.styleSheets.length; i++) {
+                let ss = document.styleSheets[i];
+                for (let rule of ss.cssRules) {
+                    prevCount++;
+                }
+                //document.BootstrapStyleSheets.push(document.styleSheets[i]);
+            }
+
+            //document.styleSheets.length;
+
+            import('../../../node_modules/bootstrap/dist/css/bootstrap.min.css').then((e) => {
+                let ncount = 0;
+                for (let i = 0; i < document.styleSheets.length; i++) {
+                    let ss = document.styleSheets[i];
+                    for (let rule of ss.cssRules) {
+                        ncount++;
+
+                        if (ncount > prevCount) {
+                            document.BootstrapRules.push(rule);
+                        }
+                    }
+
+                    //document.BootstrapStyleSheets.push(document.styleSheets[i]);
+                }
+            });
+        }
     }
 
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------

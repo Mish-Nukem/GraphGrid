@@ -191,6 +191,8 @@ export class MainMenuClass extends BaseComponent {
             menu.showingItems = [];
             menu.refreshState();
 
+            if (e.skipActivate) return;
+
             menu.activeItems = {};
             while (item) {
                 menu.activeItems[item.id] = 1;

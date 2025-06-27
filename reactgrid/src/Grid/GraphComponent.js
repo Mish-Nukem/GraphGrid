@@ -1,16 +1,11 @@
 ﻿/* eslint-disable no-mixed-operators */
 import { useState, useEffect } from 'react';
 import { BaseComponent, NodeStatus, FilterType, log } from './Base';
-import { Images } from './Themes/Images';
 import { GraphClass } from './Graph';
 import { GridFL, GridFLClass } from './GridFL.js';
 import { GridINU, GridINUClass } from './GridINU';
-import { Modal } from './Modal';
-import { Select } from './OuterComponents/Select';
-import DatePicker from "react-datepicker";
-import Moment from 'moment';
 import { FadeLoader } from 'react-spinners';
-import "react-datepicker/dist/react-datepicker.css";
+import { FieldEdit } from './FieldEdit';
 // ==================================================================================================================================================================
 export function GraphComponent(props) {
     let gc = null;
@@ -87,7 +82,9 @@ export class GraphComponentClass extends BaseComponent {
         gc.onSelectFilterValue = props.onSelectFilterValue;
         gc.nodeBeforeOpenCondition = props.nodeBeforeOpenCondition;
 
-        gc.filterButtonClass = props.filterButtonClass || BaseComponent.theme.filterButtonClass;
+        gc.filterButtonClass = props.filterButtonClass;
+        gc.filterInputClass = props.filterInputClass;
+        gc.tabControlButtonClass = props.tabControlButtonClass;
 
         if (props.graph) {
             gc.prepareGraph(props.graph);
@@ -121,13 +118,6 @@ export class GraphComponentClass extends BaseComponent {
             return <div className='grid-loader'><FadeLoader /></div>;
         }
 
-        for (let uid in gc.graph.nodesDict) {
-            let node = gc.graph.nodesDict[uid];
-            if (node.status !== NodeStatus.filter || node._replaced) continue;
-
-            node = gc.replaceGrid({ graph: gc.graph, uid: node.uid, dataGetter: gc.dataGetter || node.dataGetter, entity: node.entity });
-        }
-
         const topFilters = [];
         const lowFilters = [];
         const topGrids = [];
@@ -136,11 +126,6 @@ export class GraphComponentClass extends BaseComponent {
             let node = gc.graph.nodesDict[uid];
 
             if (node.status === NodeStatus.filter) {
-                const comboValue = gc.getValueFromCombobox(node);
-                if (node.value !== comboValue) {
-                    node._selectedOptions = node.value !== undefined && node.value !== '' ? [{ value: node.value, label: node.selectedText() }] : [];
-                }
-
                 if (gc.isTop(node)) {
                     if (node.children.indexOf(gc.activeMaster) >= 0) topFilters.push(node);
                 }
@@ -192,26 +177,8 @@ export class GraphComponentClass extends BaseComponent {
                         }
                     </div>
                 </div>
-                {
-                    gc.nodeSelectIsShowing ?
-                        <Modal
-                            title={gc.selectingNode.title}
-                            renderContent={() => { return gc.renderSelectingFilterGrid(gc.selectingNode) }}
-                            pos={gc.selectingNodePos}
-                            onClose={(e) => gc.closeFilterWnd(e)}
-                            init={(wnd) => { wnd.visible = gc.nodeSelectIsShowing; }}
-                        >
-                        </Modal>
-                        :
-                        <></>
-                }
             </>
         )
-    }
-    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
-    renderSelectingFilterGrid(node) {
-        const gc = this;
-        return !node.schemeName ? gc.renderGrid(node, NodeStatus.filter, true) : gc.renderSelectingGraph(node);
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     renderSelectingGraph(selectingNode) {
@@ -221,7 +188,7 @@ export class GraphComponentClass extends BaseComponent {
             schemeName={selectingNode.schemeName}
             selectingNodeUid={selectingNode.inSchemeUid}
             dataGetter={gc.dataGetter}
-            onSelectFilterValue={(e) => gc.selectFilterValue(e)}
+            onSelectFilterValue={(e) => gc.selectFilterValue(e, selectingNode)}
         >
         </GraphComponent >;
     }
@@ -235,13 +202,24 @@ export class GraphComponentClass extends BaseComponent {
 
         if (gc.isTop(node) && node.children.indexOf(gc.activeMaster) < 0) return <></>;
 
-        let parsedDate;
-        if (node.filterType === FilterType.date && node.value) {
-            //parsedDate = parse(node.value, node.dateFormat, new Date());
-            parsedDate = Moment(node.value, node.dateFormat);
-        }
+        const isInput = node.filterType === FilterType.input;
+        const isDate = node.filterType === FilterType.date;
 
-        const images = Images.getImages();
+        if (!node.filterColumn) {
+            node.filterColumn = {
+                refKeyField: node.keyField,
+                refNameField: node.nameField,
+                entity: node.entity,
+                title: node.title,
+                type: isDate ? 'date' : isInput ? '' : 'lookup',
+                allowCombobox: true,
+                id: node.id,
+            };
+
+            if (node.schemeName) {
+                node.filterColumn.renderLookup = () => gc.renderSelectingGraph(node)
+            }
+        }
 
         return (
             <div
@@ -250,110 +228,52 @@ export class GraphComponentClass extends BaseComponent {
             >
                 <span
                     key={`fltrttl_${node.id}_${gc.id}_`}
-                    style={{ gridColumn: 'span 3', width: '100%' }}
+                    //style={{ gridColumn: 'span 3', width: '100%' }}
                     className='graph-filter-title'
                 >
                     {node.title}
                 </span>
-                {
-                    node.filterType === FilterType.combobox ?
-                        <Select
-                            value={node._selectedOptions}
-                            inputClass={node.opt.inputClass || ''}
-                            isMulti={node.multi}
-                            getOptions={(filter, pageNum) => gc.promiseOptions(filter, node, pageNum)}
-                            onChange={(e) => {
-                                node._selectedOptions = node.multi ? e : [e];
-                                gc.getValueFromCombobox(node, true, true);
-                                gc.graph.triggerWave({ nodes: [node], withStartNodes: false });
-                                gc.refreshState();
-                            }}
-                            init={(e) => { node.setComboboxValue = e.setComboboxValue; }}
-                            disabled={gc.isEditing()}
-                        >
-                        </Select>
-                        :
-                        node.filterType === FilterType.date ?
-                            <div
-                                style={{
-                                    width: '100%',
-                                    height: '2em',
-                                    minHeight: '2em',
-                                    padding: '0',
-                                    gridColumn: 'span 2',
-                                    overflowX: 'hidden',
-                                }}
-                                className="datepicker-filter"
-                            >
 
-                                <DatePicker
-                                    selected={parsedDate}
-                                    className={node.opt.inputClass || ''}
-                                    locale="ru"
-                                    dateFormat={node.datePickerDateFormat}
-                                    showMonthDropdown
-                                    showYearDropdown
-                                    onSelect={(date) => {
-                                        node.value = Moment(date, node.dateFormat).format(node.dateFormat);//format(date, node.dateFormat);
-                                        gc.saveGraphConfig();
-                                        gc.graph.triggerWave({ nodes: [node], withStartNodes: false });
-                                        gc.refreshState();
-                                    }}
-                                    disabled={gc.isEditing()}
-                                ></DatePicker>
-                            </div>
-                            :
-                            <input
-                                key={`fltrinp_${node.id}_${gc.id}_`}
-                                className={`${node.opt.inputClass || ''}`}
-                                style={{ width: '100%', padding: '0 2px', boxSizing: 'border-box', height: '2.3em', gridColumn: node.filterType === FilterType.input ? 'span 2' : '' }}
-                                value={
-                                    node.filterType !== FilterType.date ?
-                                        node.filterType !== FilterType.input ?
-                                            (node.value !== undefined && node.selectedText ? node.selectedText() : '')
-                                            :
-                                            node.value
-                                        :
-                                        (node.value !== undefined ? node.value : '')
-                                }
-                                readOnly={node.filterType !== FilterType.input}
-                                disabled={gc.isEditing() ? 'disabled' : ''}
-                                onChange={(e) => {
-                                    const prevValue = e.target.value;
-                                    node.value = e.target.value;
-                                    gc.refreshState();
+                <FieldEdit
+                    keyPref={node.id + '_filter_'}
+                    column={node.filterColumn}
+                    entity={node.entity}
+                    dataGetter={gc.dataGetter}
+                    value={node.multi ? node._selectedOptions : node.value}
+                    text={isInput || isDate ? node.value : node.value !== undefined && node.value !== '' && node.selectedText ? node.selectedText() : ''}
+                    findFieldEdit={() => { return node.filterColumn._fieldEditObj; }}
+                    large={true}
+                    multi={node.multi}
+                    init={
+                        (fe) => {
+                            node.filterColumn._fieldEditObj = fe;
 
-                                    setTimeout(() => {
-                                        if (prevValue === e.target.value) {
+                            if (node.multi) {
+                                fe._selectedOptions = node._selectedOptions;
+                                const texts = [];
+                                fe.value = fe.getValueFromCombobox(texts);
+                                fe.text = texts.join(', ');
+                            }
+                            else {
+                                fe.value = node.value;
+                                fe.text = node.selectedText ? node.selectedText() : node._selectedText;
+                            }
+                        }
+                    }
+                    onChange={(e) => {
+                        const fe = node.filterColumn._fieldEditObj;
+                        node.value = e.value;
+                        node.text = e.text;
+                        node._selectedOptions = fe._selectedOptions;
 
-                                            gc.saveGraphConfig();
-                                            gc.graph.triggerWave({ nodes: [node], withStartNodes: false });
-                                        }
-                                    }, 150);
+                        gc.saveGraphConfig();
 
-                                }}
-                            ></input>
-                }
-                {
-                    node.filterType !== FilterType.input && node.filterType !== FilterType.date ?
-                        <button
-                            className={gc.filterButtonClass || 'graph-filter-button'}
-                            key={`fltrsel_${node.id}_${gc.id}_`}
-                            onClick={(e) => gc.openFilterWnd(e, node)}
-                            disabled={gc.isEditing() ? 'disabled' : ''}
-                        >
-                            {images.filterSelect ? images.filterSelect() : node.translate('Select', 'graph-filter-select')}
-                        </button>
-                        : <></>
-                }
-                <button
-                    key={`fltrclr_${node.id}_${gc.id}_`}
-                    className={gc.filterButtonClass || 'graph-filter-button'}
-                    disabled={gc.isEditing() || node.value === undefined || node.value === '' ? 'disabled' : ''}
-                    onClick={(e) => gc.clearFilter(e, node)}
+                        gc.graph.triggerWave({ nodes: [node], withStartNodes: false });
+                        gc.refreshState();
+                    }}
+                    disabled={gc.isEditing()}
                 >
-                    {images.filterClear ? images.filterClear() : node.translate('Clear', 'graph-filter-clear')}
-                </button>
+                </FieldEdit>
             </div>
         );
     }
@@ -369,7 +289,7 @@ export class GraphComponentClass extends BaseComponent {
             <button
                 key={`tabctrl_${node.id}_${gc.id}_`}
                 disabled={isActive || gc.isEditing() ? 'disabled' : ''}
-                className={gc.filterButtonClass || ''}
+                className={gc.tabControlButtonClass || BaseComponent.theme.tabControlButtonClass || 'graph-tabcontrol-button'}
                 onClick={(e) => gc.selectActiveTab(node, top)}
             >
                 {node.title}
@@ -420,95 +340,64 @@ export class GraphComponentClass extends BaseComponent {
         );
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
-    openFilterWnd(e, node) {
+    selectFilterValue(e, node) {
         const gc = this;
+        if (!node) return;
 
-        gc.selectingDatePos = gc.selectingDatePos || { x: e.clientX || 100, y: e.clientY || 100, w: 800, h: 600 };
-        gc.selectingNodePos = gc.selectingNodePos || { x: e.clientX || 100, y: e.clientY || 100, w: 800, h: 600 };
+        node.value = e.selectedValue || node.selectedValue();
+        const selectedText = e.selectedText || node.selectedText();
+        const selectedValues = e.selectedValues || node.selectedValues();
 
-        gc.selectingNodePos.x = e.clientX || gc.selectingNodePos.x;
-        gc.selectingNodePos.y = e.clientY || gc.selectingNodePos.y;
+        const fe = node.filterColumn._fieldEditObj;
 
-        gc.selectingDatePos.x = e.clientX || gc.selectingDatePos.x;
-        gc.selectingDatePos.y = e.clientY || gc.selectingDatePos.y;
-
-        if (node.value) {
-            node.activeRow = node.value;
+        if (fe.setComboboxValue) {
+            if (node.multi) {
+                fe.setComboboxValue(selectedValues);
+            }
+            else {
+                fe.setComboboxValue([{ value: node.value, label: selectedText }]);
+            }
+        }
+        else {
+            node._selectedText = node.text = selectedText;
         }
 
-        gc.selectingNode = node;
-        gc.selectingNode.isSelecting = true;
+        node._selectedOptions = selectedValues;
 
-        gc.nodeSelectIsShowing = true;
-        gc.refreshState();
-    }
-    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
-    closeFilterWnd(e) {
-        const gc = this;
-        gc.nodeSelectIsShowing = false;
-        if (gc.selectingNode) {
-            gc.selectingNode.isSelecting = false;
-            gc.selectingNode = null;
+        if (node.multi) {
+            fe._selectedOptions = selectedValues;
+            const texts = [];
+            fe.value = fe.getValueFromCombobox(texts);
+            fe.text = texts.join(', ');
         }
-        gc.refreshState();
-    }
-    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
-    clearFilter(e, node) {
-        const gc = this;
-        node.value = '';
-        node._selectedOptions = [];
-        if (node.setComboboxValue) {
-            node.setComboboxValue([]);
+        else {
+            fe.value = node.value;
+            fe.text = node.selectedText ? node.selectedText() : node._selectedText;
         }
 
         gc.saveGraphConfig();
 
         gc.graph.triggerWave({ nodes: [node], withStartNodes: false });
+
+        fe.lookupIsShowing = false;
         gc.refreshState();
+        //gc.closeFilterWnd();
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
-    selectFilterValue(e) {
-        const gc = this;
-        if (!gc.selectingNode) return;
+    //onGridRowDblClick(e, node, row) {
+    //    const gc = this;
 
-        gc.selectingNode.value = e.selectedValue || gc.selectingNode.selectedValue();
-        const selectedText = e.selectedText || gc.selectingNode.selectedText();
-        const selectedValues = e.selectedValues || gc.selectingNode.selectedValues();
-
-        if (gc.selectingNode.setComboboxValue) {
-            if (gc.selectingNode.multi) {
-                gc.selectingNode.setComboboxValue(selectedValues);
-            }
-            else {
-                gc.selectingNode.setComboboxValue([{ value: gc.selectingNode.value, label: selectedText }]);
-            }
-        }
-        else {
-            gc.selectingNode._selectedOptions = selectedValues;
-            gc.selectingNode._selectedText = selectedText;
-        }
-
-        gc.selectingNode.isSelecting = false;
-        gc.saveGraphConfig();
-
-        gc.graph.triggerWave({ nodes: [gc.selectingNode], withStartNodes: false });
-        gc.closeFilterWnd();
-    }
-    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
-    onGridRowDblClick(e, node, row) {
-        const gc = this;
-
-        if (+node.status === +NodeStatus.filter) {
-            if (!node.multi) {
-                gc.selectFilterValue(e);
-            }
-        }
-        else if (+node.status === +NodeStatus.grid) {
-            if (!node.viewRecordDisabled(e)) {
-                node.viewRecord(e);
-            }
-        }
-    }
+    //    if (+node.status === +NodeStatus.filter) {
+    //        if (!node.multi) {
+    //            gc.selectFilterValue(e);
+    //        }
+    //    }
+    //    else if (+node.status === +NodeStatus.grid) {
+    //        if (!node.viewRecordDisabled(e)) {
+    //            node.viewRecord(e);
+    //        }
+    //    }
+    //}
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     selectActiveTab(node, top) {
         const gc = this;
@@ -542,12 +431,13 @@ export class GraphComponentClass extends BaseComponent {
         return new Promise(function (resolve, reject) {
 
             const params = [
-                { key: 'graphScheme', value: gc.schemeName }
+                { key: 'graphScheme', value: gc.schemeName },
+                { key: 'configUid', value: gc.uid }
             ];
 
             gc.dataGetter.get({ url: 'system/graphScheme', params: params }).then(
-                (schemeObj) => {
-                    gc.prepareGraph(schemeObj);
+                (obrGraph) => {
+                    gc.prepareGraph(obrGraph);
 
                     resolve(gc.graph, e);
                 }
@@ -825,7 +715,7 @@ export class GraphComponentClass extends BaseComponent {
             }
         }
 
-        grid.onRowDblClick = (e, row) => gc.onGridRowDblClick(e, grid, row);
+        //grid.onRowDblClick = (e, row) => gc.onGridRowDblClick(e, grid, row);
 
         grid.remSetEditing = grid.setEditing;
         grid.setEditing = (value) => { grid.remSetEditing(value); gc.setEditing(grid, value); };

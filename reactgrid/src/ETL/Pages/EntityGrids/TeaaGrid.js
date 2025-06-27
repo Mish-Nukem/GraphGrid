@@ -24,7 +24,7 @@ export class TeaaGridClass extends GridINUClass {
         grid.cardRow = grid.selectedRow();
         grid.cardIsShowing = true;
         grid.popupIsShowing = true;
-        grid.lookupTitle = grid.title;
+        grid.popupTitle = grid.title;
         grid.onClosePopup = grid.closeCard;
 
         grid.refreshState();
@@ -149,7 +149,7 @@ export class TeaaGridClass extends GridINUClass {
 
         grid.reportPos = grid.reportPos || { x: 110, y: 110, w: 800, h: 600 };
         grid.popupPos = grid.reportPos;
-        grid.lookupTitle = 'Протокол экспорта';
+        grid.popupTitle = 'Протокол экспорта';
 
         grid.exportProtocolGraph = new GraphClass();
 

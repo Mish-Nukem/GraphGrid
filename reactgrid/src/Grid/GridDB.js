@@ -72,10 +72,11 @@ export class GridDBClass extends GridGRClass {
 
         grid.sortDisabled = props.sortDisabled;
 
-        grid.opt.toolbarClass = props.toolbarClass || BaseComponent.theme.toolbarClass;
-        grid.opt.toolbarButtonsClass = props.toolbarButtonsClass || BaseComponent.theme.toolbarButtonsClass;
-        grid.opt.pagerClass = props.pagerClass || BaseComponent.theme.pagerClass;
-        grid.opt.inputClass = props.inputClass || BaseComponent.theme.inputClass;
+        grid.opt.toolbarClass = props.toolbarClass;
+        grid.opt.toolbarButtonsClass = props.toolbarButtonsClass;
+        grid.opt.pagerClass = props.pagerClass;
+        grid.opt.pagerButtonsClass = props.pagerButtonsClass;
+        grid.opt.inputClass = props.inputClass;
 
         grid.sortColumns = [];
     }
@@ -148,7 +149,7 @@ export class GridDBClass extends GridGRClass {
                 <div
 
                     key={`gridtoolbardiv_${grid.id}_`}
-                    className={grid.opt.toolbarClass || 'toolbar-default'}
+                    className={grid.opt.toolbarClass || BaseComponent.theme.toolbarClass || 'toolbar-default'}
                 >
                     {
                         grid.buttons.map((button, ind) => {
@@ -176,7 +177,7 @@ export class GridDBClass extends GridGRClass {
                                     <button
                                         key={`toolbarbutton_${grid.id}_${button.id}_${ind}_`}
                                         grid-toolbar-button={`${grid.id}_${button.id}_`}
-                                        className={`${button.class || grid.opt.toolbarButtonsClass || 'grid-toolbar-button'}`}
+                                        className={`${button.class || grid.opt.toolbarButtonsClass || BaseComponent.theme.toolbarButtonsClass || 'grid-toolbar-button'}`}
                                         style={{
                                             width: button.w ? button.w : button.img ? '2.5em' : 'auto',
                                             display: button.getVisible && !button.getVisible() ? 'none' : '',
@@ -210,7 +211,7 @@ export class GridDBClass extends GridGRClass {
             grid.pagerButtons.length <= 0 || bottom && !grid.allowBottomPager ? <></> :
                 <div
                     key={`pagerdiv_${bottom ? 'bottom' : 'top'}_${grid.id}_`}
-                    className={grid.opt.pagerClass || 'grid-pager-default'}
+                    className={grid.opt.pagerClass || BaseComponent.theme.pagerClass || 'grid-pager-default'}
                 >
                     {
                         grid.pagerButtons.map((button, ind) => {
@@ -219,7 +220,7 @@ export class GridDBClass extends GridGRClass {
                                     <button
                                         key={`pager_${bottom ? 'bottom' : 'top'}_${grid.id}_${button.id}_${ind}_`}
                                         grid-pager-item={`${grid.id}_${button.id}_`}
-                                        className={`${button.class ? button.class : 'grid-pager-button'}`}
+                                        className={`${button.class || BaseComponent.theme.pagerButtonsClass || 'grid-pager-button'}`}
                                         title={grid.translate(button.title, 'grid-pager-button')}
                                         disabled={grid.isEditing() || button.getDisabled && button.getDisabled({ grid: grid }) || button.disabled ? 'disabled' : ''}
                                         onClick={button.click ? button.click : null}
@@ -282,7 +283,7 @@ export class GridDBClass extends GridGRClass {
                 grid.refresh();
             },
             img: images.refresh,
-            class: grid.opt.toolbarButtonsClass,
+            class: grid.pagerButtonsClass,
         }
 
         grid.pagerButtons.push(refresh);
@@ -298,7 +299,7 @@ export class GridDBClass extends GridGRClass {
                     grid.showGridSettings(e);
                 },
                 img: images.settings,
-                class: grid.opt.toolbarButtonsClass,
+                class: grid.pagerButtonsClass,
             }
 
             grid.pagerButtons.push(settings);
@@ -319,7 +320,7 @@ export class GridDBClass extends GridGRClass {
                     return !grid.rows || grid.rows.length <= 0 || grid.pageNumber === 1;
                 },
                 img: images.first,
-                class: grid.opt.toolbarButtonsClass,
+                class: grid.pagerButtonsClass,
             }
 
             grid.pagerButtons.push(first);
@@ -337,7 +338,7 @@ export class GridDBClass extends GridGRClass {
                     return !grid.rows || grid.rows.length <= 0 || grid.pageNumber === 1;
                 },
                 img: images.prev,
-                class: grid.opt.toolbarButtonsClass,
+                class: grid.pagerButtonsClass,
             }
 
             grid.pagerButtons.push(prev);
@@ -360,7 +361,7 @@ export class GridDBClass extends GridGRClass {
                             title={grid.translate(button.title, 'grid-pager-button')}
                             value={grid.pageNumber}
                             grid-pager-item={`${grid.id}_${button.id}_`}
-                            className={`${button.class ? button.class : grid.opt.inputClass || 'grid-pager-current'}`}
+                            className={`${button.class ? button.class : grid.opt.inputClass || BaseComponent.theme.inputClass || 'grid-pager-current'}`}
                             style={{ width: '3em', display: 'inline-block' }}
                             disabled={grid.isEditing() ? 'disabled' : ''}
                             onChange={function (e) {
@@ -414,7 +415,7 @@ export class GridDBClass extends GridGRClass {
                     return !grid.rows || grid.rows.length <= 0 || grid.pageNumber === grid.pagesCount;
                 },
                 img: images.next,
-                class: grid.opt.toolbarButtonsClass,
+                class: grid.pagerButtonsClass,
             }
 
             grid.pagerButtons.push(next);
@@ -432,7 +433,7 @@ export class GridDBClass extends GridGRClass {
                     return !grid.rows || grid.rows.length <= 0 || grid.pageNumber === grid.pagesCount;
                 },
                 img: images.last,
-                class: grid.opt.toolbarButtonsClass,
+                class: grid.pagerButtonsClass,
             }
 
             grid.pagerButtons.push(last);
@@ -449,7 +450,7 @@ export class GridDBClass extends GridGRClass {
                             key={`pager_${bottom ? 'bottom' : 'top'}_${grid.id}_${button.id}_`}
                             title={grid.translate(button.title, 'grid-pager-button')}
                             grid-pager-item={`${grid.id}_${button.id}_`}
-                            className={`grid-pager-size ${button.class ? button.class : grid.opt.inputClass || ''}`}
+                            className={`grid-pager-size ${button.class ? button.class : grid.opt.inputClass || BaseComponent.theme.inputClass || ''}`}
                             style={{ width: '4.5em', display: 'inline-block' }}
                             value={grid.pageSize}
                             disabled={grid.isEditing() ? 'disabled' : ''}
