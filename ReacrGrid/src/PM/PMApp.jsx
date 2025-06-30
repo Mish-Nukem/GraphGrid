@@ -39,7 +39,7 @@ function PMApp() {
         { id: 3, text: 'Graph PM, handmade', parent: 1 },
         { id: 4, text: 'Graph PM, Remarks_scheme', parent: 1 },
         {
-            id: 5, text: 'Change Theme', onClick: (e, item) => {
+            id: 5, text: 'Change Theme', onClick: (e) => {
                 //BaseComponent.theme = null;
                 //BaseComponent.useBootstrap = !BaseComponent.useBootstrap;
 

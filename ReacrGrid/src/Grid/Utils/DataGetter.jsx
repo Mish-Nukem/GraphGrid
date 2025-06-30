@@ -54,12 +54,10 @@
             let errorText = '';
 
             function doRequest() {
-                return new Promise(function (resolveRequest, rejectRequest) {
+                return new Promise(function (/*resolveRequest, rejectRequest*/) {
                     try {
                         if (e.params) {
-                            const item = e.params.find(function (item, index, array) {
-                                return String(item.key) === 'atoken';
-                            });
+                            const item = e.params.find((item) => String(item.key) === 'atoken');
 
                             if (item) {
                                 item.value = dg.atoken;
@@ -116,7 +114,7 @@
                                 reject(errorText);
                             });
                     }
-                    finally { }
+                    finally { /**/ }
                 });
             }
 

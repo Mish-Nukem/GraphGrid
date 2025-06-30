@@ -44,7 +44,7 @@ export class BootstrapTheme {
 
             for (let i = 0; i < document.styleSheets.length; i++) {
                 let ss = document.styleSheets[i];
-                for (let rule of ss.cssRules) {
+                for (let _ of ss.cssRules) {
                     prevCount++;
                 }
                 //document.BootstrapStyleSheets.push(document.styleSheets[i]);
@@ -52,7 +52,7 @@ export class BootstrapTheme {
 
             //document.styleSheets.length;
 
-            import('../../../node_modules/bootstrap/dist/css/bootstrap.min.css').then((e) => {
+            import('../../../node_modules/bootstrap/dist/css/bootstrap.min.css').then(() => {
                 let ncount = 0;
                 for (let i = 0; i < document.styleSheets.length; i++) {
                     let ss = document.styleSheets[i];

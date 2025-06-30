@@ -27,6 +27,15 @@ export function FieldEdit(props) {
 
     fe.disabled = props.disabled;
 
+    fe.buttonClass = props.buttonClass || BaseComponent.theme.filterButtonClass || '';
+    fe.inputClass = props.inputClass || BaseComponent.theme.inputClass || '';
+    fe.clearButtonClass = props.clearButtonClass || BaseComponent.theme.clearButtonClass || '';
+
+    fe.w = props.w;
+    fe.h = props.h || '1.7em';
+    fe.textareaH = props.textareaH || '2.1em';
+    fe.margin = props.margin || '0 2px 2px 2px';
+
     if (props.init) {
         const prevValue = fe.value;
         props.init(fe);
@@ -92,8 +101,10 @@ export class FieldEditClass extends BaseComponent {
 
         fe.dateFormat = props.dateFormat || BaseComponent.defaultDateFormat;
 
-        fe.inputClass = props.inputClass || BaseComponent.theme.inputClass || '';
-        fe.clearButtonClass = props.clearButtonClass || BaseComponent.theme.clearButtonClass || '';
+        fe.gridColumn = props.gridColumn;
+    //    fe.buttonClass = props.buttonClass || BaseComponent.theme.filterButtonClass || '';
+    //    fe.inputClass = props.inputClass || BaseComponent.theme.inputClass || '';
+    //    fe.clearButtonClass = props.clearButtonClass || BaseComponent.theme.clearButtonClass || '';
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     render() {
@@ -120,7 +131,13 @@ export class FieldEditClass extends BaseComponent {
                 <div
                     key={`fieldeditdiv_${fe.id}_${fe.column.id}_`}
                     className={fe.large ? 'field-edit' : isLookup || isDate ? 'grid-cell-lookup' : 'grid-cell-edit'}
-                    style={{ border: 'none', height: !fe.inputClass ? '1.7em' : '' }}
+                    style={{
+                        border: 'none',
+                        height: !fe.inputClass ? fe.h : '',
+                        gridColumn: fe.gridColumn || '',
+                        width: fe.w ? fe.w : '',
+                        margin: fe.margin,
+                    }}
                 >
                     {
                         isLookup ?
@@ -133,8 +150,8 @@ export class FieldEditClass extends BaseComponent {
                                                 width: 'calc(100% - 4px)',
                                                 gridColumn: noClear ? 'span 2' : 'span 1',
                                                 overflowX: 'hidden',
-                                                height: !fe.inputClass ? '1.7em' : '',
-                                                minHeight: !fe.inputClass ? '1.7em' : '',
+                                                height: !fe.inputClass ? fe.h : '',
+                                                minHeight: !fe.inputClass ? fe.h : '',
                                                 boxSizing: 'border-box',
                                             }}
                                             disabled={true}
@@ -148,7 +165,7 @@ export class FieldEditClass extends BaseComponent {
                                             inputClass={fe.inputClass || ''}
                                             value={fe._selectedOptions}
                                             getOptions={(filter, pageNum) => fe.getLookupValues(filter, pageNum)}
-                                            height={!fe.inputClass ? '1.7em' : '1.7em'}
+                                            height={fe.h}
                                             gridColumn={noClear ? 'span 2' : 'span 1'}
                                             isMulti={fe.multi}
                                             onChange={(e) => {
@@ -167,7 +184,7 @@ export class FieldEditClass extends BaseComponent {
                                 }
                                 <button
                                     key={`fieldlookupbtn_${fe.id}_${fe.column.id}_`}
-                                    className={`${fe.large ? 'graph-filter-button' : 'grid-cell-button'} ${fe.clearButtonClass || ''}`}
+                                    className={`${fe.large ? 'graph-filter-button' : 'grid-cell-button'} ${fe.large ? fe.buttonClass : ''}`}
                                     onClick={(e) => {
                                         fe.openLookupField(e);
                                     }}
@@ -183,8 +200,8 @@ export class FieldEditClass extends BaseComponent {
                                         key={`fielddatediv_${fe.id}_${fe.column.id}_`}
                                         style={{
                                             width: '100%',
-                                            height: !fe.inputClass ? '1.7em' : '',
-                                            minHeight: !fe.inputClass ? '1.7em' : '',
+                                            height: !fe.inputClass ? fe.h : '',
+                                            minHeight: !fe.inputClass ? fe.h : '',
                                             padding: '0',
                                             gridColumn: noClear ? 'span 3' : 'span 2',
                                             overflowX: 'hidden',
@@ -194,7 +211,7 @@ export class FieldEditClass extends BaseComponent {
                                         <DatePicker
                                             selected={parsedDate}
                                             className={fe.inputClass || ''}
-                                            style={{ height: '2.1em' }}
+                                            style={{ height: fe.textareaH }}
                                             locale="ru"
                                             dateFormat={fe.datePickerDateFormat}
                                             showMonthDropdown
@@ -217,8 +234,8 @@ export class FieldEditClass extends BaseComponent {
                                     value={fe.value || ''}
                                     style={{
                                         width: '100%',
-                                        height: !fe.inputClass ? '2.1em' : '1.7em',
-                                        minHeight: !fe.inputClass ? '2.1em' : '',
+                                        height: !fe.inputClass ? fe.textareaH : fe.h,
+                                        minHeight: !fe.inputClass ? fe.textareaH : fe.h,
                                         padding: '0',
                                         boxSizing: 'border-box',
                                         gridColumn: noClear ? 'span 3' : 'span 2',

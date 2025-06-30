@@ -324,6 +324,9 @@ tr.grid-selected-row > td {
 .grid-col-filter {
     height: 2em;
     margin: 2px;
+    width: calc(100% + 2px);
+    padding: 0 2px;
+    box-sizing: border-box;
 }
 
 .grid-cell-lookup {
@@ -333,6 +336,7 @@ tr.grid-selected-row > td {
     align-items: center;
     align-content: center;
     white-space: nowrap;
+    /*width: calc(100% + 6px);*/
 }
 
 .grid-cell-edit {
@@ -435,7 +439,7 @@ tr.grid-selected-row > td {
     height: 1.8em;
 */
     width: 2.5em;
-    height: 2.2em;
+    height: 2.0em;
     border-radius: 3px;
     border-width: 1px;
     display: flex;
@@ -530,7 +534,7 @@ tr.grid-selected-row > td {
 .datepicker-input > div.react-datepicker-wrapper,
 .datepicker-input > div > div.react-datepicker__input-container,
 .datepicker-input > div > div.react-datepicker__input-container input {
-    width: calc(100% - 3px);
+    width: calc(100% - 0px);
     /*height: 1.6em;*/
 }
 
@@ -538,7 +542,7 @@ tr.grid-selected-row > td {
 .datepicker-filter > div.react-datepicker-wrapper,
 .datepicker-filter > div > div.react-datepicker__input-container,
 .datepicker-filter > div > div.react-datepicker__input-container input {
-    width: calc(100% - 3px);
+    width: calc(100% - 0px);
     height: 1.7em;
 }
 
@@ -599,4 +603,8 @@ tr.grid-selected-row > td {
 
 .progress-bar {
     background-color: lightgray;
+}
+
+.react-datepicker-popper {
+    z-index: 9999 !important;
 }

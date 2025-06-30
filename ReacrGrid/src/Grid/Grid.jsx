@@ -23,6 +23,8 @@ export function Grid(props) {
         props.init(grid);
     }
 
+    grid.opt.selectedRowClass = props.selectedRowClass || BaseComponent.theme.selectedRowClass || '';
+
     //grid.log(' 0.1 ReactGrid(). state = ' + grid.stateind);
 
     grid.refreshState = function () {
@@ -93,6 +95,7 @@ export class GridClass extends BaseComponent {
 
         grid.stateind = 0;
 
+        grid.opt.selectedRowClass = props.selectedRowClass || BaseComponent.theme.selectedRowClass || '';
         //grid.theme = new Theme();
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -180,19 +183,19 @@ export class GridClass extends BaseComponent {
         log(' -------------------------------------------------------------------------------------------------------------------------------------- ');
 
         return (
-            <div
-                key={`griddiv_${grid.id}_`}
-                style={{ overflowX: 'auto', overflowY: 'hidden' }}
+            //<div
+            //    key={`griddiv_${grid.id}_`}
+            //    style={{ overflowX: 'auto', overflowY: 'hidden' }}
+            //>
+            <table
+                key={`grid_${grid.id}_`}
+                className={grid.opt.gridClass || BaseComponent.theme.gridClass || 'grid-default'}
+                style={{ width: w + "px", tableLayout: 'fixed' }}
             >
-                <table
-                    key={`grid_${grid.id}_`}
-                    className={grid.opt.gridClass || BaseComponent.theme.gridClass || 'grid-default'}
-                    style={{ width: w + "px", tableLayout: 'fixed' }}
-                >
-                    {grid.renderHeader()}
-                    {grid.renderBody()}
-                </table>
-            </div>
+                {grid.renderHeader()}
+                {grid.renderBody()}
+            </table>
+            //</div>
         );
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -213,7 +216,9 @@ export class GridClass extends BaseComponent {
 
         return (
             <thead>
-                <tr>
+                <tr
+                /*style={{ position: "sticky", top: 0 }}*/
+                >
                     {grid.multi && context !== 'fake' ? grid.renderSelectColumnHeader() : <></>}
                     {columns.map((col, ind) => {
                         return (
@@ -221,21 +226,36 @@ export class GridClass extends BaseComponent {
                                 key={`headercell_${grid.id}_${col.id}_${col.w}_${ind}_${grid.keyAdd()}_`}
                                 grid-header={`${grid.id}_${col.id}_${col.w}_`}
                                 className={`${grid.opt.columnClass ? grid.opt.columnClass : ''} grid-header-th`}
-                                style={{ position: "sticky", top: 0, width: col.w + "px", overflow: "hidden", verticalAlign: "top" }}
+                                style={{ /*position: "sticky", top: 0,*/
+                                    width: col.w + "px",
+                                    overflow: "hidden",
+                                    verticalAlign: "top",
+                                }}
                                 onMouseDown={(e) => grid.mouseDownColumnDrag(e, col)}
                                 onMouseOver={(e) => grid.mouseOverColumnDrag(e, col)}
                                 onMouseOut={(e) => grid.mouseOutColumnDrag(e, col)}
                             >
                                 <div
-                                    className={`grid-header-div-default ${grid.opt.headerDivClass || 'grid-header-div'}`}
+                                    style={{ /*position: "sticky", top: 0,*/
+                                        width: col.w + "px",
+                                        overflow: "hidden",
+                                        verticalAlign: "top",
+                                        display: 'grid',
+                                        gridTemplateColumns: 'calc(100% - 6px) 6px',
+                                    }}
                                 >
-                                    {grid.renderHeaderCell(col, context)}
-                                </div>
-                                <div
-                                    grid-rsz-x={`${grid.id}_${col.id}`}
-                                    style={{ position: "absolute", right: "-6px", top: "-1px", cursor: "e-resize", height: "100%", width: "12px", zIndex: (grid.opt.zInd + 1) }}
-                                    onMouseDown={(e) => { e.detail === 2 ? grid.mouseResizerDoubleClick(e, col) : grid.mouseResizerClick(e, col) }}
-                                >
+
+                                    <div
+                                        className={`grid-header-div-default ${grid.opt.headerDivClass || 'grid-header-div'}`}
+                                    >
+                                        {grid.renderHeaderCell(col, context)}
+                                    </div>
+                                    <div //style={{ position: "absolute", right: "-6px", top: "-1px", cursor: "e-resize", height: "100%", width: "12px", zIndex: (grid.opt.zInd + 1) }}
+                                        grid-rsz-x={`${grid.id}_${col.id}`}
+                                        style={{ position: "static", /*right: "-6px", top: "-1px",*/ cursor: "e-resize", height: "100%", width: "12px", zIndex: (grid.opt.zInd + 1) }}
+                                        onMouseDown={(e) => { e.detail === 2 ? grid.mouseResizerDoubleClick(e, col) : grid.mouseResizerClick(e, col) }}
+                                    >
+                                    </div>
                                 </div>
                             </th>
                         );
@@ -767,6 +787,8 @@ export class GridClass extends BaseComponent {
             otherColsW += col.w;
         }
 
+        const div = e.target.parentElement;
+
         let resizing;
         // -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  
         function resize(pageX) {
@@ -780,6 +802,7 @@ export class GridClass extends BaseComponent {
                     gridElement.style.width = '';
 
                     th.style.width = column.w + 'px';
+                    div.style.width = column.w + 'px';
 
                     gridElement.style.width = (otherColsW + column.w) + 'px';
                 }

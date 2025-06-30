@@ -132,7 +132,7 @@ export class DataExchangePageClass extends ModalClass {
         return res;
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
-    runExchange(e) {
+    runExchange() {
         const de = this;
         if (!de.fileName) {
             alert('Не определен файл обмена.');

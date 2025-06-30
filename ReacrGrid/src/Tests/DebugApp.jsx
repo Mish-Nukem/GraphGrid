@@ -58,7 +58,7 @@ function DebugApp() {
                 name: 'clear',
                 title: 'Clear console',
                 label: 'Clear console',
-                click: function (e) {
+                click: function () {
                     console.clear();
                 },
             }
@@ -100,8 +100,8 @@ function DebugApp() {
         grid.resetColumnsWidthsToDefault();
     }
 
-    const GetPopupItems = function (e) {
-        return new Promise(function (resolve, reject) {
+    const GetPopupItems = function () {
+        return new Promise(function (resolve) {
 
             const items = [
                 { id: 1, text: 'test 1 item' },
@@ -208,7 +208,7 @@ function DebugApp() {
                                         dateFormat={'dd.MM.yyyy'}
                                         showMonthDropdown
                                         showYearDropdown
-                                        onSelect={(date) => {
+                                        onSelect={() => {
                                         }}
                                     ></DatePicker>
 

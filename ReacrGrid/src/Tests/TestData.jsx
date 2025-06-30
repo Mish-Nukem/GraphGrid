@@ -1,5 +1,5 @@
 ﻿import { GraphClass, WaveType } from '../Grid/Graph';
-import { BaseComponent, NodeStatus, FilterType, log } from '../Grid/Base';
+import { BaseComponent, NodeStatus, FilterType } from '../Grid/Base';
 export default class TestData {
 
     //constructor() {

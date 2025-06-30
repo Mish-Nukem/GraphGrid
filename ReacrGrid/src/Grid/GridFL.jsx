@@ -120,11 +120,10 @@ export class GridFLClass extends GridDBClass {
                     <>
                         <input
                             key={`colfilter_${grid.id}_${col.id}_`}
-                            id={`colfilter_${grid.id}_${col.id}_`}
                             className={`grid-col-filter ${grid.opt.inputClass || BaseComponent.theme.inputClass || ''}`}
                             value={col.filter !== undefined ? col.filter : ''}
                             title={col.filter !== undefined ? col.filter : ''}
-                            style={{ gridColumn: !hasFilter ? 'span 2' : '', width: 'calc(100% - 4px)', padding: '0 2px', boxSizing: 'border-box' }}
+                            style={{ gridColumn: !hasFilter ? 'span 2' : '', width: 'calc(100% + 2px)', padding: '0 2px', boxSizing: 'border-box' }}
                             grid-col-filter={`${grid.id}_${col.id}_`}
                             onChange={(e) => { grid.onColumnFilterChanging(col, e.target.value, e) }}
                             onClick={(e) => { grid.onColumnFilterClick(col, e); }}

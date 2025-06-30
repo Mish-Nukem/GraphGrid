@@ -142,6 +142,7 @@ export class GridINUClass extends GridINUBaseClass {
             value={col.type === 'lookup' ? row[col.keyField] : row[col.name]}
             text={row[col.name]}
             findFieldEdit={() => { return col._fieldEditObj; }}
+            
             init={
                 (fe) => {
                     if (grid.isEditing() && !grid.changedRow) {
@@ -180,7 +181,42 @@ export class GridINUClass extends GridINUBaseClass {
                 }
             }}
         >
-        </FieldEdit>;
+        </FieldEdit>
+    }
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
+    renderHeaderCell(col, context) {
+        const grid = this;
+        if (grid.filtersDisabled || col.type !== 'date') {
+            return super.renderHeaderCell(col, context);
+        }
+
+        return (
+            <>
+                {super.renderHeaderCell(col, 'fake')}
+                <FieldEdit
+                    keyPref={grid.id + '_colfilter_'}
+                    column={{ type: 'date', id: col.id, title: col.title }}
+                    dataGetter={grid.dataGetter}
+                    value={col.filter}
+                    text={col.filter}
+                    findFieldEdit={() => { return col._filterEditObj; }}
+                    gridColumn={'span 2'}
+                    w={'calc(100% + 2px)'}
+                    
+                    init={
+                        (fe) => {
+                            col._filterEditObj = fe;
+                            fe.value = fe.text = col.filter;
+                        }
+                    }
+                    onChange={(e) => {
+                        col.filter = e.value;
+                        grid.refresh();
+                    }}
+                >
+                </FieldEdit>
+            </>
+        );
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     addToolbarButtons() {

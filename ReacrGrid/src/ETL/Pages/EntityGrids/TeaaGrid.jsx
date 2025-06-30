@@ -15,7 +15,7 @@ export class TeaaGridClass extends GridINUClass {
     //    const grid = this;
     //}
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
-    viewRecord(e) {
+    viewRecord() {
         const grid = this;
 
         grid.cardPos = grid.cardPos || { x: 110, y: 110, w: 800, h: 600 };
@@ -161,7 +161,7 @@ export class TeaaGridClass extends GridINUClass {
 
             let node = {
                 id: i, uid: i, title: item.entityNameRu, status: NodeStatus.grid, columns: [], pageSize: 0,
-                getRows: () => { return new Promise(function (resolve, reject) { resolve(item.rows); }) }, parents: [], children: [],
+                getRows: () => { return new Promise(function (resolve) { resolve(item.rows); }) }, parents: [], children: [],
             };
 
             for (let name in item.headersColumns) {

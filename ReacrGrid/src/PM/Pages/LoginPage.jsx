@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+﻿import { useState, useEffect } from 'react';
 import { BaseComponent } from '../../Grid/Base';
 export function LoginPage(props) {
     let loginForm = null;
@@ -76,7 +76,7 @@ export class loginFormClass extends BaseComponent {
                     <input className="login-form-item form-control" onChange={(e) => loginForm.login = e.target.value} value={loginForm.login}></input>
                     <span className="login-form-item">Password</span>
                     <input className="login-form-item form-control" type="password" onChange={(e) => loginForm.password = e.target.value} value={loginForm.password}></input>
-                    <button className="login-form-item btn btn-primary" onClick={(e) => loginForm.tryLogin()}>Login</button>
+                    <button className="login-form-item btn btn-primary" onClick={() => loginForm.tryLogin()}>Login</button>
                 </div>
             </>
         );
