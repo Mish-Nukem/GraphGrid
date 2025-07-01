@@ -13,7 +13,8 @@ export function GridINU(props) {
 
     grid = gridState.grid;
     let needGetRows = false;
-    if (!grid || grid.uid !== props.uid) {
+    if (!grid || grid.uid !== props.uid && props.uid !== undefined) {
+        grid = null;
         if (props.findGrid) {
             grid = props.findGrid(props);
         }
@@ -44,8 +45,7 @@ export function GridINU(props) {
                 }
             );
         }
-
-        if (grid.columns.length <= 0 && grid.getColumns) {
+        else if (grid.columns.length <= 0 && grid.getColumns) {
             grid.prepareColumns().then(() => grid.refreshState());;
         }
 
@@ -75,7 +75,7 @@ export class GridINUClass extends GridINUBaseClass {
         if (grid.columns.length <= 0 && grid.entity && !props.getColumns) {
             grid.getColumns = async () => {
                 const res = await grid.getEntityInfo();
-                grid.refresh();
+                //grid.refresh();
                 return res.Columns;
             };
         }
@@ -121,6 +121,12 @@ export class GridINUClass extends GridINUBaseClass {
                             delete col._fieldEditObj;
                         }
                     };
+                    card.close = () => {
+                        grid.cardIsShowing = false;
+                        grid.popupIsShowing = false;
+                        grid.onClosePopup();
+                        grid.refreshState();
+                    }
                 }}
             >
             </CardINU>
@@ -135,14 +141,14 @@ export class GridINUClass extends GridINUBaseClass {
         row = !grid.isEditing() || !grid.changedRow ? row : grid.changedRow;
 
         return <FieldEdit
-            keyPref={grid.id}
+            keyPref={grid.id + '_' + row[grid.keyField]}
             column={col}
             entity={grid.entity}
             dataGetter={grid.dataGetter}
             value={col.type === 'lookup' ? row[col.keyField] : row[col.name]}
             text={row[col.name]}
             findFieldEdit={() => { return col._fieldEditObj; }}
-            
+            selectH={'1.4em'}
             init={
                 (fe) => {
                     if (grid.isEditing() && !grid.changedRow) {
@@ -155,6 +161,11 @@ export class GridINUClass extends GridINUBaseClass {
                     col._fieldEditObj = fe;
                     fe.value = col.type === 'lookup' ? lrow[col.keyField] : lrow[col.name];
                     fe.text = lrow[col.name];
+
+                    fe._selectedOptions = [];
+                    if (fe.value !== undefined && fe.value !== '') {
+                        fe._selectedOptions.push({ value: fe.value, label: fe.text });
+                    }
                 }
             }
             onChange={(e) => {
@@ -433,6 +444,7 @@ export class GridINUClass extends GridINUBaseClass {
         grid.popupPos = grid.cardPos;
 
         grid.cardRow = grid.selectedRow();
+        grid.isNewRecord = false;
         grid.cardIsShowing = true;
         grid.popupIsShowing = true;
         grid.popupTitle = grid.title;

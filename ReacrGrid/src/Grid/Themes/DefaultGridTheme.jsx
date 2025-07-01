@@ -13,6 +13,7 @@ export class DefaultGridTheme {
         this.headerDivClass = ' ';
         this.selectedRowClass = 'table-active';
         this.inputClass = 'input-default-class';
+        this.selectClass = 'select-default-class';
 
         this.tabControlButtonClass = 'graph-tabcontrol-button';
 

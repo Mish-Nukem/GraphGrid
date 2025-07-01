@@ -9,8 +9,9 @@ export function GridGR(props) {
 
     grid = gridState.grid;
     let needGetRows = false;
-    if (!grid) {
-        if (props.findGrid || grid.uid !== props.uid) {
+    if (!grid || grid.uid !== props.uid && props.uid !== undefined) {
+        grid = null;
+        if (props.findGrid) {
             grid = props.findGrid(props);
         }
         grid = grid || new GridGRClass(props);
@@ -38,8 +39,7 @@ export function GridGR(props) {
                 }
             );
         }
-
-        if (grid.columns.length <= 0 && grid.getColumns) {
+        else if (grid.columns.length <= 0 && grid.getColumns) {
             grid.prepareColumns().then(() => grid.refreshState());;
         }
 

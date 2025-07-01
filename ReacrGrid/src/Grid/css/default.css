@@ -500,6 +500,11 @@ tr.grid-selected-row > td {
     box-sizing: border-box;
 }
 
+.select-default-class {
+    height: 1.8em;
+    box-sizing: border-box;
+}
+
 .login-form {
     display: grid;
     align-items: center;

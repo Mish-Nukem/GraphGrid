@@ -25,16 +25,20 @@ export function FieldEdit(props) {
         fe = fe || new FieldEditClass(props);
     }
 
+    fe.id = props.keyPref || window._seq++;
+
     fe.disabled = props.disabled;
 
     fe.buttonClass = props.buttonClass || BaseComponent.theme.filterButtonClass || '';
     fe.inputClass = props.inputClass || BaseComponent.theme.inputClass || '';
     fe.clearButtonClass = props.clearButtonClass || BaseComponent.theme.clearButtonClass || '';
+    fe.selectClass = props.selectClass || BaseComponent.theme.selectClass || '';
 
     fe.w = props.w;
     fe.h = props.h || '1.7em';
+    fe.selectH = props.selectH || '';
     fe.textareaH = props.textareaH || '2.1em';
-    fe.margin = props.margin || '0 2px 2px 2px';
+    //fe.margin = props.margin || '0 2px 2px 2px';
 
     if (props.init) {
         const prevValue = fe.value;
@@ -163,9 +167,10 @@ export class FieldEditClass extends BaseComponent {
                                         <Select
                                             key={`fieldlookupselect_${fe.id}_${fe.column.id}_`}
                                             inputClass={fe.inputClass || ''}
+                                            className={fe.selectClass || ''}
                                             value={fe._selectedOptions}
                                             getOptions={(filter, pageNum) => fe.getLookupValues(filter, pageNum)}
-                                            height={fe.h}
+                                            height={fe.selectH}
                                             gridColumn={noClear ? 'span 2' : 'span 1'}
                                             isMulti={fe.multi}
                                             onChange={(e) => {
@@ -308,6 +313,7 @@ export class FieldEditClass extends BaseComponent {
                     nameField={fe.column.refNameField}
                     activeRow={fe.value}
                     multi={fe.multi}
+                    findGrid={() => { return fe.grid; }}
                     onSelectValue={(e) => {
                         if (fe.multi) {
                             const texts = [];
@@ -419,6 +425,9 @@ export class FieldEditClass extends BaseComponent {
     onLookupGridInit(grid) {
         const fe = this;
         fe.grid = grid;
+        grid.value = fe.value;
+        grid.getSelectedRowIndex();
+
         if (grid._lookupPrepared) return;
 
         grid._lookupPrepared = true;
@@ -426,7 +435,6 @@ export class FieldEditClass extends BaseComponent {
 
         grid.visible = true;
         grid.title = fe.column.title;
-        grid.value = fe.value;
         grid.isSelecting = true;
         grid._entityInfo = info;
     };

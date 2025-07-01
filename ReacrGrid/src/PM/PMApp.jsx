@@ -32,14 +32,28 @@ function PMApp() {
     }
 
     const testMenuItems = [
-        { id: -1, text: 'Logout' },
-        { id: 0, text: 'Import ETL' },
-        { id: 1, text: 'PM Grids' },
-        { id: 2, text: 'Two PM Grids', parent: 1 },
-        { id: 3, text: 'Graph PM, handmade', parent: 1 },
-        { id: 4, text: 'Graph PM, Remarks_scheme', parent: 1 },
+        { id: -1, text: 'Выход' },
+        { id: 0, text: 'Управление проектами' }, //Import ETL
+        { id: 1, text: 'Управление проектами', parent: 0 },
+        { id: 2, text: 'Заказчики', parent: 0 },
+        { id: 3, text: 'Исполнители', parent: 0 },
+        { id: 4, text: 'Физические лица', parent: 0 },
+        { id: 5, text: 'Отчеты' },
+        { id: 6, text: 'Примеры отчетов', parent: 5 },
+        { id: 7, text: 'Карточка исполнителя', parent: 6 },
+        { id: 8, text: 'Список выполненных заданий', parent: 6 },
+        { id: 9, text: 'Список настроек обмена', parent: 6 },
+        { id: 10, text: 'Карточка настройки обмена', parent: 6 },
+        { id: 11, text: 'Обмен данными' },
+        { id: 12, text: 'Список настроек обмена данными', parent: 11 },
+        { id: 13, text: 'Управление системой' },
+        { id: 14, text: 'Справочники', parent: 13 },
+        { id: 16, text: 'Единицы измерения', parent: 14, entity: 'SEiEntity' },
+        { id: 17, text: 'Проект', parent: 14, entity: 'SrRProjectEntity' },
+        { id: 18, text: 'Статус', parent: 14, entity: 'SrRStatusEntity' },
+        { id: 19, text: 'Срочность', parent: 14, entity: 'SrRPromptnessEntity' },
         {
-            id: 5, text: 'Change Theme', onClick: (e) => {
+            id: 15, text: 'Сменить тему', parent: 13, onClick: (e) => {
                 //BaseComponent.theme = null;
                 //BaseComponent.useBootstrap = !BaseComponent.useBootstrap;
 
@@ -51,13 +65,21 @@ function PMApp() {
                 });
             }
         },
-        //{ id: 6, text: 'Submenu test 1', parent: 5 },
-        //{ id: 7, text: 'Submenu test', parent: 6 },
-        { id: 8, text: 'Tuning List', parent: 0 },
     ];
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     const getTestApp = () => {
         console.log('state == ' + state.menuObj.id);
+
+        const entity = state.menuObj.menuItem ? state.menuObj.menuItem.entity : '';
+
+        if (entity) {
+            return (
+                <div className="div-with-grid">
+                    <GridINU uid={entity + '_dictionary'} entity={entity} dataGetter={dataGetter}></GridINU>
+                </div>
+            );
+        }
+
         switch (state.menuObj.id) {
             case -1:
                 setState({ menuObj: { id: - 2 }, dataGetter: null, gridCreator: null });
@@ -68,26 +90,7 @@ function PMApp() {
                 break;
             case 0:
                 return <></>
-            case 2:
-                return (
-                    <>
-                        <div className="div-with-grid">
-                            <GridINU uid="proj" entity="SrRProjectEntity" dataGetter={dataGetter} keyField='ID_SR_R_PROJECT_SRPJ'></GridINU>
-                        </div>
-                        < div className="div-with-grid">
-                            <GridINU parentGrids="proj" uid="rem" entity="SrRemarkEntity" dataGetter={dataGetter}></GridINU>
-                        </div>
-                    </>
-                );
-            case 3:
-                return (
-                    <>
-                        <div className="div-with-grid">
-                            <GraphComponent uid="testGraph" graph={new PMTest().getTestGraph()} dataGetter={dataGetter}></GraphComponent>
-                        </div>
-                    </>
-                );
-            case 4:
+            case 1:
                 return (
                     <>
                         <div className="div-with-grid">
@@ -95,13 +98,36 @@ function PMApp() {
                         </div>
                     </>
                 );
+            case 2:
+                return (
+                    <>
+                        <div className="div-with-grid">
+                            <GraphComponent uid="Clients" schemeName="ClientsScheme" dataGetter={dataGetter} gridCreator={gridCreator}></GraphComponent>
+                        </div>
+                    </>
+                );
+            case 3:
+                return (
+                    <>
+                        <div className="div-with-grid">
+                            <GraphComponent uid="Executors" schemeName="Executors" dataGetter={dataGetter} gridCreator={gridCreator}></GraphComponent>
+                        </div>
+                    </>
+                );
+            case 4:
+                return (
+                    <>
+                        <div className="div-with-grid">
+                            <GraphComponent uid="PhysPers" schemeName="PhysPers" dataGetter={dataGetter} gridCreator={gridCreator}></GraphComponent>
+                        </div>
+                    </>
+                );
             case 5:
                 return (
                     <>
-                        <button onClick={(e) => { TEST(e); }} className="modal-window-footer-button">TEST</button>
                     </>
                 );
-            case 8:
+            case 12:
                 return (
                     <>
                         <div className="div-with-grid">
@@ -147,7 +173,7 @@ function PMApp() {
                             return;
                         }
 
-                        setState({ menuObj: { id: item.id }, dataGetter: dataGetter, gridCreator: gridCreator });
+                        setState({ menuObj: { id: item.id, menuItem: item }, dataGetter: dataGetter, gridCreator: gridCreator });
                     }}
                 >
                 </MainMenu>

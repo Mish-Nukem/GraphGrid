@@ -10,7 +10,8 @@ export function CardINU(props) {
 
     card = gridState.grid;
     let needGetRows = false;
-    if (!card || card.uid !== props.uid) {
+    if (!card || card.uid !== props.uid && props.uid !== undefined) {
+        card = null;
         if (props.findGrid) {
             card = props.findGrid(props);
         }
@@ -39,9 +40,7 @@ export function CardINU(props) {
                 }
             );
         }
-
-        if (card.columns.length <= 0 && card.getColumns) {
-            //card.columns = card.getColumns();
+        else if (card.columns.length <= 0 && card.getColumns) {
             card.prepareColumns().then(() => card.refreshState());
         }
 
@@ -209,7 +208,10 @@ export class CardINUClass extends GridINUBaseClass {
             title: card.translate('Rollback changes'),
             label: images.rollback ? '' : card.translate('Rollback changes'),
             img: images.rollback,
-            click: (e) => card.rollbackChangesNode(e),
+            click: (e) => {
+                card.rollbackChangesNode(e);
+                if (card.isNewRecord && card.close) card.close();
+            },
             getDisabled: (e) => card.rollbackChangesNodeDisabled(e),
         });
     }

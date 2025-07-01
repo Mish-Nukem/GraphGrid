@@ -11,7 +11,8 @@ export function GridFL(props) {
 
     grid = gridState.grid;
     let needGetRows = false;
-    if (!grid || grid.uid !== props.uid) {
+    if (!grid || grid.uid !== props.uid && props.uid !== undefined) {
+        grid = null;
         if (props.findGrid) {
             grid = props.findGrid(props);
         }
@@ -40,8 +41,7 @@ export function GridFL(props) {
                 }
             );
         }
-
-        if (grid.columns.length <= 0 && grid.getColumns) {
+        else if (grid.columns.length <= 0 && grid.getColumns) {
             grid.prepareColumns().then(() => grid.refreshState());;
         }
 
@@ -123,7 +123,7 @@ export class GridFLClass extends GridDBClass {
                             className={`grid-col-filter ${grid.opt.inputClass || BaseComponent.theme.inputClass || ''}`}
                             value={col.filter !== undefined ? col.filter : ''}
                             title={col.filter !== undefined ? col.filter : ''}
-                            style={{ gridColumn: !hasFilter ? 'span 2' : '', width: 'calc(100% + 2px)', padding: '0 2px', boxSizing: 'border-box' }}
+                            style={{ gridColumn: !hasFilter ? 'span 2' : '' }}
                             grid-col-filter={`${grid.id}_${col.id}_`}
                             onChange={(e) => { grid.onColumnFilterChanging(col, e.target.value, e) }}
                             onClick={(e) => { grid.onColumnFilterClick(col, e); }}

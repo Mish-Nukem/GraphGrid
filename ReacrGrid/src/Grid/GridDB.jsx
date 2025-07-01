@@ -14,8 +14,9 @@ export function GridDB(props) {
 
     grid = gridState.grid;
     let needGetRows = false;
-    if (!grid) {
-        if (props.findGrid || grid.uid !== props.uid) {
+    if (!grid || grid.uid !== props.uid && props.uid !== undefined) {
+        grid = null;
+        if (props.findGrid) {
             grid = props.findGrid(props);
         }
         grid = grid || new GridDBClass(props);
@@ -43,9 +44,7 @@ export function GridDB(props) {
                 }
             );
         }
-
-        if (grid.columns.length <= 0 && grid.getColumns) {
-            //grid.columns = grid.getColumns();
+        else if (grid.columns.length <= 0 && grid.getColumns) {
             grid.prepareColumns().then(() => grid.refreshState());;
         }
 

@@ -24,6 +24,7 @@ export function Select(props) {
     };
 
     const height = props.height || '30px';
+    const className = props.className || '';
 
     const customStyles = {
         control: (base, state) => ({
@@ -33,28 +34,33 @@ export function Select(props) {
             minHeight: height,
             height: height,
             boxShadow: state.isFocused ? null : null,
+            className: className,
             /*className: props.inputClass || '',*/
         }),
 
         valueContainer: (base) => ({
             ...base,
-            height: height,
-            padding: '0 6px'
+            height: 'calc(' + height + ' - 4px)',
+            padding: '0 6px',
+            className: className,
         }),
 
         input: (base) => ({
             ...base,
             margin: '0px',
+            height: 'calc(' + height + ' - 4px)',
             /*className: props.inputClass || '',*/
+            className: className,
         }),
 
         indicatorSeparator: () => ({
             display: 'none',
+            height: 'calc(' + height + ' - 4px)',
         }),
 
         indicatorsContainer: (base) => ({
             ...base,
-            height: height,
+            height: 'calc(' + height + ' - 4px)',
         }),
 
         option: (base, state) => ({
