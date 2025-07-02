@@ -47,7 +47,6 @@ export class MainMenuClass extends BaseComponent {
         menu.stateind = 0;
 
         menu.menuItems = props.menuItems;
-        menu.dataGetter = props.dataGetter;
         menu.onMenuItemClick = props.onMenuItemClick;
 
         menu.mainMenuItemClass = props.mainMenuItemClass || BaseComponent.theme.mainMenuItemClass;
@@ -94,7 +93,6 @@ export class MainMenuClass extends BaseComponent {
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     render() {
         const menu = this;
-        const images = Images.getImages() || {};
 
         return (
             menu.menuItems && menu.menuItems.length > 0 ?
@@ -109,7 +107,7 @@ export class MainMenuClass extends BaseComponent {
                             title={!menu.collapsed ? menu.translate('Collapse') : menu.translate('Expand')}
                             className='menu-collapse-button'
                         >
-                            {menu.collapsed ? images.caretDown() : images.caretUp()}
+                            {menu.collapsed ? Images.images.caretDown() : Images.images.caretUp()}
                         </button>
                         {
                             !menu.collapsed ?

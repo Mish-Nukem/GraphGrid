@@ -6,6 +6,7 @@ import { GridFL, GridFLClass } from './GridFL';
 import { GridINU, GridINUClass } from './GridINU';
 import { FadeLoader } from 'react-spinners';
 import { FieldEdit } from './FieldEdit';
+import { GLObject } from './GLObject';
 // ==================================================================================================================================================================
 export function GraphComponent(props) {
     let gc = null;
@@ -35,7 +36,7 @@ export function GraphComponent(props) {
                 }
             );
         }
-        else if (gc.dataGetter) {
+        else if (GLObject.dataGetter) {
             gc.getGraphInfo().then(
                 (gInfo) => {
                     gc.applyRestoredParams(gInfo);
@@ -65,9 +66,8 @@ export class GraphComponentClass extends BaseComponent {
 
         gc.id = window._graphSeq++;
         gc.uid = props.uid || gc.id;
-        gc.dataGetter = props.dataGetter;
 
-        gc.gridCreator = props.gridCreator || {
+        GLObject.gridCreator = GLObject.gridCreator || {
             CreateGridClass: (props) => {
                 if (props.entity) {
                     return new GridINUClass(props);
@@ -187,7 +187,6 @@ export class GraphComponentClass extends BaseComponent {
             uid={`${gc.uid}_select_${selectingNode.uid}_`}
             schemeName={selectingNode.schemeName}
             selectingNodeUid={selectingNode.inSchemeUid}
-            dataGetter={gc.dataGetter}
             onSelectFilterValue={(e) => gc.selectFilterValue(e, selectingNode)}
         >
         </GraphComponent >;
@@ -238,7 +237,6 @@ export class GraphComponentClass extends BaseComponent {
                     keyPref={node.id + '_filter_'}
                     column={node.filterColumn}
                     entity={node.entity}
-                    dataGetter={gc.dataGetter}
                     value={node.multi ? node._selectedOptions : node.value}
                     text={isInput || isDate ? node.value : node.value !== undefined && node.value !== '' && node.selectedText ? node.selectedText() : ''}
                     findFieldEdit={() => { return node.filterColumn._fieldEditObj; }}
@@ -324,7 +322,6 @@ export class GraphComponentClass extends BaseComponent {
                     graph={gc.graph}
                     uid={node.uid !== undefined ? node.uid : node.id}
                     entity={node.entity}
-                    dataGetter={gc.dataGetter || node.dataGetter}
                     init={(grid) => gc.onGridInit(grid, node.title, status, top)}
                 >
                 </GridINU>
@@ -333,7 +330,6 @@ export class GraphComponentClass extends BaseComponent {
                     findGrid={(props) => gc.replaceGrid(props)}
                     graph={gc.graph}
                     uid={node.uid !== undefined ? node.uid : node.id}
-                    dataGetter={gc.dataGetter || node.dataGetter}
                     init={(grid) => gc.onGridInit(grid, node.title, status, top)}
                 >
                 </GridFL>
@@ -435,7 +431,7 @@ export class GraphComponentClass extends BaseComponent {
                 { key: 'configUid', value: gc.uid }
             ];
 
-            gc.dataGetter.get({ url: 'system/graphScheme', params: params }).then(
+            GLObject.dataGetter.get({ url: 'system/graphScheme', params: params }).then(
                 (obrGraph) => {
                     gc.prepareGraph(obrGraph);
 
@@ -459,7 +455,7 @@ export class GraphComponentClass extends BaseComponent {
                 { key: 'configUid', value: gc.graph.uid }
             ];
 
-            gc.dataGetter.get({ url: 'system/getGraphSettings', params: params }).then(
+            GLObject.dataGetter.get({ url: 'system/getGraphSettings', params: params }).then(
                 (gInfo) => {
                     resolve(gInfo);
                 }
@@ -498,7 +494,7 @@ export class GraphComponentClass extends BaseComponent {
             { key: 'gdata', value: savingData },
         ];
 
-        gc.dataGetter.get({ url: 'system/saveGraphSettings', params: params, type: 'text' }).then(
+        GLObject.dataGetter.get({ url: 'system/saveGraphSettings', params: params, type: 'text' }).then(
             (res) => {
             }
         );
@@ -515,12 +511,14 @@ export class GraphComponentClass extends BaseComponent {
             }
 
             if (!node._replaced) {
-                node = gc.replaceGrid({ graph: gc.graph, uid: node.uid, dataGetter: gc.dataGetter || node.dataGetter, entity: node.entity });
+                node = gc.replaceGrid({ graph: gc.graph, uid: node.uid, entity: node.entity });
             }
 
             node.pageSize = 100;
             node.pageNumber = pageNum || 1;
             //node.pageNumber = +e.Page || 1;
+
+            ev.grid = node;
 
             node.getRows(ev).then(
                 (rows) => {
@@ -605,7 +603,7 @@ export class GraphComponentClass extends BaseComponent {
 
         if (grid && grid._replaced) return grid;
 
-        grid = gc.gridCreator.CreateGridClass(props);
+        grid = GLObject.gridCreator.CreateGridClass(props);
 
         delete grid.refreshState;
 
@@ -736,8 +734,6 @@ export class GraphComponentClass extends BaseComponent {
         }
 
         gc.graph.nodeCount = 0;
-
-        gc.graph.gridCreator = gc.gridCreator;
 
         gc.graph.checkNeedTriggerWave = (node) => { return gc.checkNeedTriggerWave(node) };
 

@@ -1,5 +1,6 @@
 ﻿import { useState, useEffect } from 'react';
 import { BaseComponent } from '../Grid/Base';
+import { GLObject } from '../Grid/GLObject';
 //import { BootstrapTheme as Theme } from '../Grid/Themes/BootstrapGridTheme';
 export function LoginPage(props) {
     let loginForm = null;
@@ -43,8 +44,6 @@ export class loginFormClass extends BaseComponent {
 
         loginForm.afterLogin = props.afterLogin;
 
-        loginForm.dataGetter = props.dataGetter;
-
         loginForm.stateind = 0;
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -58,14 +57,14 @@ export class loginFormClass extends BaseComponent {
 
         const params = [{ key: 'login', value: loginForm.login }, { key: 'password', value: loginForm.password }];
 
-        loginForm.dataGetter.get({ url: 'system/login', params: params, type: 'text' }).then(
+        GLObject.dataGetter.get({ url: 'system/login', params: params, type: 'text' }).then(
             (tokens) => {
                 if (tokens) {
                     const arr = tokens.split(';');
                     if (arr.length !== 2) return;
 
-                    loginForm.dataGetter.atoken = arr[0];
-                    loginForm.dataGetter.rtoken = arr[1];
+                    GLObject.dataGetter.atoken = arr[0];
+                    GLObject.dataGetter.rtoken = arr[1];
 
                     loginForm.afterLogin(tokens);
                 }

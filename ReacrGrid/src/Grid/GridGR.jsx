@@ -76,10 +76,10 @@ export class GridGRClass extends GridClass {
             window._graphDict[grid.graphUid] = window._graphDict[grid.graphUid] || new GraphClass();
             const graph = window._graphDict[grid.graphUid];
 
-            while (graph.nodesDict[window._gridSeq]) {
-                window._gridSeq++;
+            while (graph.nodesDict[GridClass._seq]) {
+                GridClass._seq++;
             }
-            grid.id = window._gridSeq++;
+            grid.id = GridClass._seq++;
 
             grid.graph = graph;
             graph.uid = grid.graphUid;
@@ -103,7 +103,7 @@ export class GridGRClass extends GridClass {
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     log(message, pref) {
         const grid = this;
-        super.log(`${pref ? pref : `grid#${grid.uid ? grid.id + '(' + grid.uid + ')' : grid.id}`} : ` + message, ' ');
+        super.log(`${pref ? pref : `grid#${grid.uid ? grid.id + '(' + grid.uid + ')' : grid.id}`} ${grid.title || ''}: ` + message, ' ');
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     clearEvents() {

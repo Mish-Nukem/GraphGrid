@@ -1,6 +1,6 @@
 ﻿import { useState, useEffect } from 'react';
 import { BaseComponent, log } from './Base';
-import { Overlay } from './Overlay';
+import { Overlay, OverlayClass } from './Overlay';
 import { renderToStaticMarkup } from 'react-dom/server';
 // ==================================================================================================================================================================
 export function Modal(props) {
@@ -42,9 +42,9 @@ export class ModalClass extends BaseComponent {
 
         wnd.opt = {};
 
-        wnd.id = window._wndSeq++;
+        wnd.id = ModalClass._seq++;
 
-        wnd.opt.zInd = props.zInd || ++window._wndZInd;
+        wnd.opt.zInd = props.zInd || ++OverlayClass._zInd;
 
         wnd.opt.pos = props.pos || { x: 0, y: 0, w: '100%', h: '100%' };
 
@@ -99,6 +99,8 @@ export class ModalClass extends BaseComponent {
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     static _isFake = false;
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
+    static _seq = 0;
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     render() {
         const wnd = this;

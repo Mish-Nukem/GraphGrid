@@ -13,14 +13,13 @@ export class PMGridClass extends GridINUClass {
 
         super.addToolbarButtons();
 
-        const images = Images.getImages() || {};
         let btn = {
             id: node.buttons.length,
             name: 'test',
             title: node.translate('TEST'),
             //label: node.translate('Test'),
             click: (e) => node.showReport(e),
-            img: images.test,
+            img: Images.images.test,
             /*padding: '1px 0',*/
         };
 

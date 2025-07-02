@@ -92,7 +92,6 @@ export class DropdownClass extends ModalClass {
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     renderDropdownContent() {
         const dd = this;
-        const images = Images.getImages();
 
         return (
             <>
@@ -115,7 +114,7 @@ export class DropdownClass extends ModalClass {
                                     onClick={(e) => dd.onItemClick(e, item.id)}
                                 >
                                     {dd.translate(item.text)}
-                                    {item.items && item.items.length > 0 ? images.caretRight() : ''}
+                                    {item.items && item.items.length > 0 ? Images.images.caretRight() : ''}
                                 </li>
                             );
                         })

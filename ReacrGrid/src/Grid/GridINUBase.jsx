@@ -1,8 +1,10 @@
 ﻿import { useState, useEffect } from 'react';
 import { GridFLClass } from './GridFL';
-import { FilterType, NodeStatus } from './Base';
+import { BaseComponent, FilterType, NodeStatus } from './Base';
 import { WaveType } from './Graph';
 import { Modal } from './Modal';
+import { GLObject } from './GLObject';
+
 // ==================================================================================================================================================================
 export function GridINUBase(props) {
     let grid = null;
@@ -33,7 +35,7 @@ export function GridINUBase(props) {
 
         if (needGetRows && (grid.rows.length <= 0 || grid.columns.length <= 0)) {
 
-            grid.getRows({ filters: grid.collectFilters(), grid: grid }).then(
+            grid.getRows().then(
                 rows => {
                     grid.rows = rows;
                     grid.afterGetRows();
@@ -61,7 +63,6 @@ export class GridINUBaseClass extends GridFLClass {
 
         grid.entity = props.entity;
         grid.entityAdd = props.entityAdd;
-        grid.dataGetter = props.dataGetter;
 
         grid.datePickerDateFormat = props.datePickerDateFormat || 'dd.MM.yyyy';
 
@@ -80,7 +81,7 @@ export class GridINUBaseClass extends GridFLClass {
         return this.visible;
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
-    render() { 
+    render() {
         const grid = this;
         return (
             <>
@@ -122,23 +123,26 @@ export class GridINUBaseClass extends GridFLClass {
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     async getEntityInfo() {
         const grid = this;
-        if (grid._entityInfo) return grid._entityInfo;
+        if (!grid.entity) return null;
+
+        if (GLObject.entityInfo[grid.entity]) return GLObject.entityInfo[grid.entity];
 
         const params = [
             { key: 'entity', value: grid.entity },
             { key: 'configUid', value: grid.getConfigUid() },
         ];
 
-        grid._entityInfo = await grid.dataGetter.get({ url: 'system/entityInfo', params: params });
+        const entityInfo = await GLObject.dataGetter.get({ url: 'system/entityInfo', params: params });
+        GLObject.entityInfo[grid.entity] = entityInfo;
 
-        if (grid._entityInfo) {
-            grid.allowEditGrid = grid.allowEditGrid !== undefined ? grid.allowEditGrid : grid._entityInfo.allowEdit;
-            grid.allowView = grid._entityInfo.allowView;
-            grid.allowAdd = grid.allowCopy = grid._entityInfo.allowAdd;
-            grid.allowDelete = grid._entityInfo.allowDelete;
+        if (entityInfo) {
+            grid.allowEditGrid = grid.allowEditGrid !== undefined ? grid.allowEditGrid : entityInfo.allowEdit;
+            grid.allowView = entityInfo.allowView;
+            grid.allowAdd = grid.allowCopy = entityInfo.allowAdd;
+            grid.allowDelete = entityInfo.allowDelete;
         }
 
-        return grid._entityInfo;
+        return entityInfo;
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     skipOnWaveVisit(e) {
@@ -202,14 +206,16 @@ export class GridINUBaseClass extends GridFLClass {
                     return link.condition.replace(/:id/gi, activeValue);
                 }
 
-                if (grid._entityInfo && parent._entityInfo && grid._entityInfo.tableName) {
-                    const refColumn = grid.columns.find(function (item) {
+                const entityInfo = GLObject.entityInfo[grid.entity];
+
+                if (entityInfo && entityInfo.tableName && parent.entity) {
+                    const refColumn = entityInfo.Columns.find(function (item) {
                         return item.type === 'lookup' && String(item.entity) === String(parent.entity);
                     });
 
                     if (!refColumn) return '';
 
-                    const arr = grid._entityInfo.tableName.split('.');
+                    const arr = entityInfo.tableName.split('.');
                     const tname = arr[arr.length - 1];
                     return tname + '.' + refColumn.keyField + ' = ' + activeValue;
                 }
@@ -225,6 +231,10 @@ export class GridINUBaseClass extends GridFLClass {
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     async prepareColumns() {
         const grid = this;
+        if (grid._waitingColumns) return;
+
+        const entityInfo = await grid.getEntityInfo();
+
         await super.prepareColumns().then(() => {
             for (let col of grid.columns) {
                 if (col._readonly !== undefined) {
@@ -233,12 +243,14 @@ export class GridINUBaseClass extends GridFLClass {
                 }
             }
 
-            if (grid._savedConfigApplied || !grid._entityInfo) return;
+            delete grid._waitingColumns;
+
+            if (!entityInfo || grid._savedConfigApplied) return;
 
             grid._savedConfigApplied = true;
 
             const newColumns = [];
-            for (let col of grid._entityInfo.Columns) {
+            for (let col of entityInfo.Columns) {
                 let obrCol = grid.colDict[col.name];
                 if (!obrCol) continue;
 
@@ -263,7 +275,7 @@ export class GridINUBaseClass extends GridFLClass {
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     getRows(e) {
         const grid = this;
-        e = e || { filters: [] };
+        e = e || { };
 
         const params = [
             { key: 'pageSize', value: grid.pageSize },
@@ -298,38 +310,44 @@ export class GridINUBaseClass extends GridFLClass {
             delete grid.activeRow;
         }
 
-        let i = 0, j = 0;
-        for (let cond of e.filters) {
-            if (cond.type === 'column') {
-                params.push({ key: 'f' + i++, value: cond.filter });
-            }
-            else if (cond.type === 'graphLink') {
-                params.push({ key: 'c' + j++, value: cond.filter });
-            }
-        }
-
         params.push({ key: 'reqInd', value: ++grid.reqInd });
 
         return new Promise(function (resolve, reject) {
-            grid.dataGetter.get({ url: grid.entity + '/' + (!e.autocompleteColumn ? 'list' : 'autocomplete'), params: params }).then(
-                (res) => {
-                    if (res != null) {
-                        if (+res.reqInd !== grid.reqInd) return;
+            grid.getEntityInfo().then((entityInfo) => {
+                GLObject.entityInfo[grid.entity] = entityInfo;
 
-                        if (!e.autocompleteColumn) {
-                            grid.totalRows = res.count;
-                        }
+                const filters = e.filters || grid.collectFilters();
 
-                        if (+res.pageNum > 0) {
-                            grid.pageNumber = res.pageNum;
-                        }
-
-                        resolve(res.rows);
-                    } else {
-                        reject(Error("Error getting rows"));
+                let i = 0, j = 0;
+                for (let cond of filters) {
+                    if (cond.type === 'column') {
+                        params.push({ key: 'f' + i++, value: cond.filter });
+                    }
+                    else if (cond.type === 'graphLink') {
+                        params.push({ key: 'c' + j++, value: cond.filter });
                     }
                 }
-            );
+
+                GLObject.dataGetter.get({ url: grid.entity + '/' + (!e.autocompleteColumn ? 'list' : 'autocomplete'), params: params }).then(
+                    (res) => {
+                        if (res != null) {
+                            if (+res.reqInd !== grid.reqInd) return;
+
+                            if (!e.autocompleteColumn) {
+                                grid.totalRows = res.count;
+                            }
+
+                            if (+res.pageNum > 0) {
+                                grid.pageNumber = res.pageNum;
+                            }
+
+                            resolve(res.rows);
+                        } else {
+                            reject(Error("Error getting rows"));
+                        }
+                    }
+                );
+            })
         });
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -341,7 +359,7 @@ export class GridINUBaseClass extends GridFLClass {
         ];
 
         return new Promise(function (resolve, reject) {
-            grid.dataGetter.get({ url: grid.entity + '/delete', params: params }).then(
+            GLObject.dataGetter.get({ url: grid.entity + '/delete', params: params }).then(
                 (res) => {
                     if (res && String(res.resStr.toLowerCase()) === 'true') {
                         resolve(res.resStr);
@@ -382,7 +400,7 @@ export class GridINUBaseClass extends GridFLClass {
         }
 
         return new Promise(function (resolve, reject) {
-            grid.dataGetter.get({ url: grid.entity + '/' + (grid.isNewRecord ? 'add' : 'update'), params: params }).then(
+            GLObject.dataGetter.get({ url: grid.entity + '/' + (grid.isNewRecord ? 'add' : 'update'), params: params }).then(
                 (res) => {
                     if (res && +res.resStr > 0) {
                         if (grid.isNewRecord) {
@@ -417,7 +435,7 @@ export class GridINUBaseClass extends GridFLClass {
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     saveColumnsConfig() {
         const grid = this;
-        if (!grid.dataGetter) return;
+        if (!GLObject.dataGetter) return;
 
         let savingColumns = [];
         for (let col of grid.columns) {
@@ -435,7 +453,7 @@ export class GridINUBaseClass extends GridFLClass {
             { key: 'columns', value: savingColumns },
         ];
 
-        grid.dataGetter.get({ url: 'system/saveColumnsSettings', params: params, type: 'text' });
+        GLObject.dataGetter.get({ url: 'system/saveColumnsSettings', params: params, type: 'text' });
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     afterSortColumn(column) {
@@ -457,6 +475,22 @@ export class GridINUBaseClass extends GridFLClass {
 
         const grid = this;
         grid.saveColumnsConfig();
+    }
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
+    visitByWave(e) {
+        const grid = this;
+
+        if (grid.skipOnWaveVisit(e)) return;
+
+        grid.selectedRowIndex = 0;
+
+        grid.getRows().then(
+            rows => {
+                grid.rows = rows;
+                grid.afterGetRows(e);
+                grid.refreshState();
+            }
+        );
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
 }

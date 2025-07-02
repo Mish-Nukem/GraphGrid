@@ -1,6 +1,7 @@
 ﻿import { useState, useEffect } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { BaseComponent, log } from './Base';
+import { OverlayClass } from './Overlay';
 import Moment from 'moment';
 import { FadeLoader } from 'react-spinners';
 // ==================================================================================================================================================================
@@ -62,13 +63,11 @@ export class GridClass extends BaseComponent {
     constructor(props) {
         super(props);
 
-        window._gridSeq = window._gridSeq || 0;
-
         const grid = this;
 
         grid.opt = { zInd: props.zInd || 1 };
 
-        grid.id = window._gridSeq++;
+        grid.id = GridClass._seq++;
 
         if (props.getRows) {
             grid.getRows = props.getRows;
@@ -95,8 +94,9 @@ export class GridClass extends BaseComponent {
         grid.stateind = 0;
 
         grid.opt.selectedRowClass = props.selectedRowClass || BaseComponent.theme.selectedRowClass || '';
-        //grid.theme = new Theme();
     }
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
+    static _seq = 0;
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     log(message, pref) {
         const grid = this;
@@ -111,13 +111,21 @@ export class GridClass extends BaseComponent {
             grid.totalRows = grid.rows && grid.rows.length ? grid.rows.length : 0;
         }
 
+        const afterAll = () => {
+            grid.calculatePagesCount();
+            grid.getSelectedRowIndex();
+            grid.onSelectedRowChanged({ grid: grid, prev: grid.selectedRowIndex, new: grid.selectedRowIndex, source: 'afterGetRows' });
+        };
+
         if (grid.columns.length <= 0) {
-            //grid.columns = grid.getColumns();
-            grid.prepareColumns().then(() => grid.refreshState());;
+            grid.prepareColumns().then(() => {
+                afterAll();
+                grid.refreshState();
+            });
         }
-        grid.calculatePagesCount();
-        grid.getSelectedRowIndex();
-        grid.onSelectedRowChanged({ grid: grid, prev: grid.selectedRowIndex, new: grid.selectedRowIndex, source: 'afterGetRows' });
+        else {
+            afterAll();
+        }
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     getSelectedRowIndex() {
@@ -178,7 +186,7 @@ export class GridClass extends BaseComponent {
             w += col.w;
         }
 
-        grid.log('RENDER(). columns = ' + grid.columns.length + '. w = ' + w + '. rows = ' + grid.rows.length + '. state = ' + grid.stateind);
+        grid.log('render()' + '. rows = ' + grid.rows.length +'. columns = ' + grid.columns.length + /*'. w = ' + w +*/ '. state = ' + grid.stateind);
         log(' -------------------------------------------------------------------------------------------------------------------------------------- ');
 
         return (
@@ -529,7 +537,7 @@ export class GridClass extends BaseComponent {
 
         fakeGrid.className = grid.opt.gridClass || BaseComponent.theme.gridClass || 'grid-default';
         fakeGrid.style = grid.opt.style || '';
-        fakeGrid.style.zIndex = ++window._wndZInd || 1000;
+        fakeGrid.style.zIndex = ++OverlayClass._zInd || 1000;
         fakeGrid.style.position = 'fixed';
         fakeGrid.style.top = (e.offsetY || 0 + rect.top + 5) + 'px';
         fakeGrid.style.width = rect.width + 'px';

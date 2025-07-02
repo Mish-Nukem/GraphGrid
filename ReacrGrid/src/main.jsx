@@ -8,7 +8,7 @@ import DebugApp from './Tests/DebugApp';
 const root = createRoot(document.getElementById('root'));
 let currentProject;
 currentProject = 'Debug';
-currentProject = 'PM';
+//currentProject = 'PM';
 
 root.render(
     <>

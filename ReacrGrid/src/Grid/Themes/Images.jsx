@@ -2,9 +2,11 @@
 export class Images {
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     static _images = null;
+    static get images() {
+        return Images.getImages();
+    }
     static getImages() {
         if (Images._images) return Images._images;
-        //images = images || {};
 
         const images = {};
         images.filterSelect = () => {

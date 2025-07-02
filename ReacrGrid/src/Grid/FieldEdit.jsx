@@ -9,6 +9,7 @@ import DatePicker, { registerLocale } from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import ru from "date-fns/locale/ru";
 import Moment from 'moment';
+import { GLObject } from './GLObject';
 
 registerLocale("ru", ru);
 // ==================================================================================================================================================================
@@ -25,9 +26,11 @@ export function FieldEdit(props) {
         fe = fe || new FieldEditClass(props);
     }
 
-    fe.id = props.keyPref || window._seq++;
+    fe.id = props.keyPref || FieldEditClass._seq++;
 
     fe.disabled = props.disabled;
+
+    BaseComponent.theme = BaseComponent.theme || {};
 
     fe.buttonClass = props.buttonClass || BaseComponent.theme.filterButtonClass || '';
     fe.inputClass = props.inputClass || BaseComponent.theme.inputClass || '';
@@ -40,27 +43,23 @@ export function FieldEdit(props) {
     fe.textareaH = props.textareaH || '2.1em';
     //fe.margin = props.margin || '0 2px 2px 2px';
 
+    const prevValue = fe.value;
     if (props.init) {
-        const prevValue = fe.value;
         props.init(fe);
-
-        if (prevValue !== fe.value && fe.setComboboxValue) {
-            fe.setComboboxValue({ value: fe.value, label: fe.text });
-        }
     }
 
     fe.refreshState = function () {
         setState({ fe: fe, ind: fe.stateind++ });
     }
 
-    //useEffect(() => {
-    //    if (fe.setComboboxValue) {
-    //        fe.setComboboxValue({ value: fe.value, label: fe.text });
-    //    }
+    useEffect(() => {
+        if (prevValue !== fe.value && fe.setComboboxValue) {
+            fe.setComboboxValue({ value: fe.value, label: fe.text });
+        }
 
-    //    return () => {
-    //    }
-    //}, [fe])
+        return () => {
+        }
+    }, [fe, prevValue])
 
     return (fe.render());
 }
@@ -74,15 +73,13 @@ export class FieldEditClass extends BaseComponent {
         const fe = this;
 
         fe.stateind = 0;
-        fe.id = props.keyPref || window._seq++;
+        fe.id = props.keyPref || FieldEditClass._seq++;
 
         fe.column = props.column;
         fe.selfEntity = props.entity;
 
         fe.value = props.value || '';
         fe.text = props.text || '';
-
-        fe.dataGetter = props.dataGetter;
 
         fe.multi = props.multi;
 
@@ -103,13 +100,15 @@ export class FieldEditClass extends BaseComponent {
 
         fe.large = props.large;
 
-        fe.dateFormat = props.dateFormat || BaseComponent.defaultDateFormat;
+        fe.dateFormat = props.dateFormat || BaseComponent.dateFormat;
 
         fe.gridColumn = props.gridColumn;
     //    fe.buttonClass = props.buttonClass || BaseComponent.theme.filterButtonClass || '';
     //    fe.inputClass = props.inputClass || BaseComponent.theme.inputClass || '';
     //    fe.clearButtonClass = props.clearButtonClass || BaseComponent.theme.clearButtonClass || '';
     }
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
+    static _seq = 0;
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     render() {
         const fe = this;
@@ -124,11 +123,6 @@ export class FieldEditClass extends BaseComponent {
             parsedDate = Moment(fe.value, fe.dateFormat);
             fe.value = parsedDate.format(fe.dateFormat);
         }
-
-        const images = Images.getImages();
-        //if (isLookup && fe.setComboboxValue) {
-        //    setTimeout(() => { fe.setComboboxValue({ value: fe.value, label: fe.text }); }, 10);
-        //}
 
         return (
             <>
@@ -195,7 +189,7 @@ export class FieldEditClass extends BaseComponent {
                                     }}
                                     disabled={fe.disabled}
                                 >
-                                    {!fe.large ? '...' : images.filterSelect()}
+                                    {!fe.large ? '...' : Images.images.filterSelect()}
                                 </button>
                             </>
                             :
@@ -274,7 +268,7 @@ export class FieldEditClass extends BaseComponent {
                                 }}
                                 disabled={fe.disabled}
                             >
-                                {!fe.large ? '×' : images.filterClear()}
+                                {!fe.large ? '×' : Images.images.filterClear()}
                             </button>
 
                     }
@@ -300,7 +294,7 @@ export class FieldEditClass extends BaseComponent {
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     renderLookupGrid() {
         const fe = this;
-        const info = BaseComponent._lookupEntityInfo[fe.column.entity];
+        //const info = GLObject.entityInfo[fe.column.entity];
 
         return (
             fe.column.renderLookup ?
@@ -308,7 +302,6 @@ export class FieldEditClass extends BaseComponent {
                 :
                 <GridINU
                     entity={fe.column.entity}
-                    dataGetter={fe.dataGetter}
                     keyField={fe.column.refKeyField}
                     nameField={fe.column.refNameField}
                     activeRow={fe.value}
@@ -342,7 +335,7 @@ export class FieldEditClass extends BaseComponent {
                         fe.lookupIsShowing = false;
                         fe.onChange(e);
                     }}
-                    getColumns={info.columns ? () => { return info.columns; } : null}
+                    //getColumns={info.columns ? () => { return info.columns; } : null}
                     init={(lookupGrid) => {
                         fe.onLookupGridInit(lookupGrid);
 
@@ -373,22 +366,24 @@ export class FieldEditClass extends BaseComponent {
             fe.ownerGrid._clicksDisabled = true;
         }
 
-        if (!BaseComponent._lookupEntityInfo[fe.column.entity]) {
-            const params = [
-                { key: 'entity', value: fe.column.entity },
-                { key: 'configUid', value: fe.column.entity + '_' },
-            ];
+        fe.refreshState();
 
-            fe.dataGetter.get({ url: 'system/entityInfo', params: params }).then(
-                (eInfo) => {
-                    BaseComponent._lookupEntityInfo[fe.column.entity] = eInfo;
-                    fe.refreshState();
-                }
-            );
-        }
-        else {
-            fe.refreshState();
-        }
+    //    if (!GLObject.entityInfo[fe.column.entity]) {
+    //        const params = [
+    //            { key: 'entity', value: fe.column.entity },
+    //            { key: 'configUid', value: fe.column.entity + '_' },
+    //        ];
+
+    //        GLObject.dataGetter.get({ url: 'system/entityInfo', params: params }).then(
+    //            (eInfo) => {
+    //                GLObject.entityInfo[fe.column.entity] = eInfo;
+    //                fe.refreshState();
+    //            }
+    //        );
+    //    }
+    //    else {
+    //        fe.refreshState();
+    //    }
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     getValueFromCombobox(texts, changeGridValue) {
@@ -431,12 +426,10 @@ export class FieldEditClass extends BaseComponent {
         if (grid._lookupPrepared) return;
 
         grid._lookupPrepared = true;
-        const info = BaseComponent._lookupEntityInfo[fe.column.entity];
 
         grid.visible = true;
         grid.title = fe.column.title;
         grid.isSelecting = true;
-        grid._entityInfo = info;
     };
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     getLookupValues(filter, pageNum) {
@@ -452,7 +445,7 @@ export class FieldEditClass extends BaseComponent {
         return fe.column.name ? new Promise((resolve) => {
             params.push({ key: 'columns', value: fe.column.name });
 
-            fe.dataGetter.get({ url: 'system/getLookupValues', params: params }).then(
+            GLObject.dataGetter.get({ url: 'system/getLookupValues', params: params }).then(
                 (res) => {
 
                     const result = {
@@ -471,7 +464,7 @@ export class FieldEditClass extends BaseComponent {
             new Promise(function (resolve, reject) {
                 params.push({ key: 'pageSize', value: 100 });
 
-                fe.dataGetter.get({ url: fe.selfEntity + '/list', params: params }).then(
+                GLObject.dataGetter.get({ url: fe.selfEntity + '/list', params: params }).then(
                     (res) => {
                         if (res != null) {
 

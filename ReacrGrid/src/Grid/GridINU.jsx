@@ -1,6 +1,7 @@
 ﻿/* eslint-disable no-mixed-operators */
 import { useState, useEffect } from 'react';
 import { GridINUBaseClass } from './GridINUBase';
+import { GLObject } from './GLObject';
 import { Images } from './Themes/Images';
 import { NodeStatus } from './Base';
 import { CardINU } from './CardINU';
@@ -37,7 +38,7 @@ export function GridINU(props) {
 
             grid._forceRefresh = false;
 
-            grid.getRows({ filters: grid.collectFilters(), grid: grid }).then(
+            grid.getRows().then(
                 rows => {
                     grid.rows = rows;
                     grid.afterGetRows();
@@ -73,10 +74,9 @@ export class GridINUClass extends GridINUBaseClass {
         grid.inSchemeUid = props.inSchemeUid;
 
         if (grid.columns.length <= 0 && grid.entity && !props.getColumns) {
-            grid.getColumns = async () => {
-                const res = await grid.getEntityInfo();
-                //grid.refresh();
-                return res.Columns;
+            grid.getColumns = () => {
+                const entityInfo = GLObject.entityInfo[grid.entity];
+                return entityInfo ? entityInfo.Columns : [];
             };
         }
 
@@ -109,7 +109,6 @@ export class GridINUClass extends GridINUBaseClass {
                 uid={(grid.uid || grid.id) + '_card_'}
                 entity={grid.entity}
                 keyField={grid.keyField}
-                dataGetter={grid.dataGetter}
                 init={(card) => {
                     card.visible = true;
                     card.columns = grid.columns;
@@ -144,7 +143,6 @@ export class GridINUClass extends GridINUBaseClass {
             keyPref={grid.id + '_' + row[grid.keyField]}
             column={col}
             entity={grid.entity}
-            dataGetter={grid.dataGetter}
             value={col.type === 'lookup' ? row[col.keyField] : row[col.name]}
             text={row[col.name]}
             findFieldEdit={() => { return col._fieldEditObj; }}
@@ -207,7 +205,6 @@ export class GridINUClass extends GridINUBaseClass {
                 <FieldEdit
                     keyPref={grid.id + '_colfilter_'}
                     column={{ type: 'date', id: col.id, title: col.title }}
-                    dataGetter={grid.dataGetter}
                     value={col.filter}
                     text={col.filter}
                     findFieldEdit={() => { return col._filterEditObj; }}
@@ -233,8 +230,6 @@ export class GridINUClass extends GridINUBaseClass {
     addToolbarButtons() {
         const grid = this;
 
-        const images = Images.getImages();
-
         //node.buttons.push({
         //    id: node.buttons.length,
         //    name: 'edit',
@@ -248,8 +243,8 @@ export class GridINUClass extends GridINUBaseClass {
             id: grid.buttons.length,
             name: 'commit',
             title: grid.translate('Commit changes'),
-            label: images.commit ? '' : grid.translate('Commit changes'),
-            img: images.commit,
+            label: Images.images.commit ? '' : grid.translate('Commit changes'),
+            img: Images.images.commit,
             click: (e) => grid.commitChanges(e),
             getDisabled: (e) => grid.commitChangesDisabled(e),
         });
@@ -258,8 +253,8 @@ export class GridINUClass extends GridINUBaseClass {
             id: grid.buttons.length,
             name: 'rollback',
             title: grid.translate('Rollback changes'),
-            label: images.rollback ? '' : grid.translate('Rollback changes'),
-            img: images.rollback,
+            label: Images.images.rollback ? '' : grid.translate('Rollback changes'),
+            img: Images.images.rollback,
             click: (e) => grid.rollbackChanges(e),
             getDisabled: (e) => grid.rollbackChangesDisabled(e),
         });
@@ -268,8 +263,8 @@ export class GridINUClass extends GridINUBaseClass {
             id: grid.buttons.length,
             name: 'add',
             title: grid.translate('Add new record'),
-            label: images.addRecord ? '' : grid.translate('Add new record'),
-            img: images.addRecord,
+            label: Images.images.addRecord ? '' : grid.translate('Add new record'),
+            img: Images.images.addRecord,
             click: (e) => grid.addRecord(e),
             getDisabled: (e) => grid.addRecordDisabled(e),
         });
@@ -278,8 +273,8 @@ export class GridINUClass extends GridINUBaseClass {
             id: grid.buttons.length,
             name: 'copy',
             title: grid.translate('Copy record'),
-            label: images.copyRecord ? '' : grid.translate('Copy record'),
-            img: images.copyRecord,
+            label: Images.images.copyRecord ? '' : grid.translate('Copy record'),
+            img: Images.images.copyRecord,
             click: (e) => grid.copyRecord(e),
             getDisabled: (e) => grid.copyRecordDisabled(e),
         });
@@ -288,8 +283,8 @@ export class GridINUClass extends GridINUBaseClass {
             id: grid.buttons.length,
             name: 'delete',
             title: grid.translate('Delete record'),
-            label: images.deleteRecord ? '' : grid.translate('Delete record'),
-            img: images.deleteRecord,
+            label: Images.images.deleteRecord ? '' : grid.translate('Delete record'),
+            img: Images.images.deleteRecord,
             click: (e) => grid.deleteRecord(e),
             getDisabled: (e) => grid.deleteRecordDisabled(e),
         });
@@ -298,8 +293,8 @@ export class GridINUClass extends GridINUBaseClass {
             id: grid.buttons.length,
             name: 'view',
             title: grid.translate('View record'),
-            label: images.viewRecord ? '' : grid.translate('View record'),
-            img: images.viewRecord,
+            label: Images.images.viewRecord ? '' : grid.translate('View record'),
+            img: Images.images.viewRecord,
             click: (e) => grid.viewRecord(e),
             getDisabled: (e) => grid.viewRecordDisabled(e),
         });
@@ -308,7 +303,7 @@ export class GridINUClass extends GridINUBaseClass {
             id: grid.buttons.length,
             name: 'selectValue',
             title: grid.translate('Select'),
-            label: images.selectFilterValue ? '' : grid.translate('Select value'),
+            label: Images.images.selectFilterValue ? '' : grid.translate('Select value'),
             click: (e) => {
                 if (!grid.multi) {
                     const row = grid.selectedRow();
@@ -323,7 +318,7 @@ export class GridINUClass extends GridINUBaseClass {
 
                 grid.onSelectValue(e);
             },
-            img: images.selectFilterValue,
+            img: Images.images.selectFilterValue,
             getVisible: () => { return grid.isSelecting },
         });
 

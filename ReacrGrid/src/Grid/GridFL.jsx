@@ -418,20 +418,18 @@ export class GridFLClass extends GridDBClass {
 
         super.setupPagerButtons();
 
-        const images = Images.getImages() || {};
-
         const clear = {
             id: 10,
             name: 'clear',
             title: 'Clear all filters',
-            label: images.clear ? '' : 'Clear',
+            label: Images.images.clear ? '' : 'Clear',
             click: () => {
                 grid.clearAllColumnFilters();
             },
             getDisabled: () => {
                 return !grid.isFiltered();
             },
-            img: images.clear,
+            img: Images.images.clear,
             class: grid.pagerButtonsClass,
         }
 

@@ -1,5 +1,6 @@
-import { useState, useEffect } from 'react';
+﻿import { useState, useEffect } from 'react';
 import { MainMenuClass } from '../../Grid/Pages/MainMenu';
+import { GLObject } from '../../Grid/GLObject';
 export function MainMenu(props) {
     let menu = null;
 
@@ -50,14 +51,12 @@ export class PMMainMenuClass extends MainMenuClass {
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     getMainMenuItems() {
-        const menu = this;
-
         return new Promise((resolve) => {
             const params = [
                 //{ key: 'filter', value: filter },
             ];
 
-            menu.dataGetter.get({ url: 'system/getMainMenuItems', params: params }).then(
+            GLObject.dataGetter.get({ url: 'system/getMainMenuItems', params: params }).then(
                 (result) => {
                     resolve(result);
                 });

@@ -47,8 +47,6 @@ export class TeaaGridClass extends GridINUClass {
                 uid={`${grid.graph.uid}_select_${grid.uid}_`}
                 schemeName={'TuningCardScheme'}
                 nodeBeforeOpenCondition={{ '2': `ID_TUNING_EXCH_TEAA in (${grid.selectedValue()})` }}
-                dataGetter={grid.dataGetter}
-                gridCreator={grid.graph.gridCreator}
             >
             </GraphComponent >
         );
@@ -58,7 +56,6 @@ export class TeaaGridClass extends GridINUClass {
         const node = this;
 
         super.addToolbarButtons();
-        const images = Images.getImages() || {};
 
         let btn = {
             id: node.buttons.length,
@@ -66,7 +63,7 @@ export class TeaaGridClass extends GridINUClass {
             title: 'Вызов обмена данными для текущей настройки',
             //label: 'Обмен данными',
             click: (e) => node.runDataExchange(e),
-            img: images.rightLeft,
+            img: Images.images.rightLeft,
         };
 
         node.buttons.push(btn);
@@ -115,7 +112,6 @@ export class TeaaGridClass extends GridINUClass {
                     de.showProtocol = (rows) => { grid.showExportProtocol(rows); };
                 }}
                 onClose={() => { grid._dataExchangePageVisible = false; }}
-                dataGetter={grid.dataGetter}
             ></DataExchangePage>
         );
     }

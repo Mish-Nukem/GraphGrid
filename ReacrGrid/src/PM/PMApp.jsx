@@ -9,15 +9,18 @@ import { DataGetter } from '../Grid/Utils/DataGetter';
 import { BaseComponent } from '../Grid/Base';
 import { PMGridCreator } from './PMGridClassCreator'
 import { MainMenu } from './Pages/MainMenu';
+import { GLObject } from '../Grid/GLObject';
 function PMApp() {
-    const [state, setState] = useState({ menuObj: { id: - 2 }, dataGetter: null, gridCreator: null });
+    const [state, setState] = useState({ menuObj: { id: - 2 } });
 
     window._logEnabled = true;
 
-    const dataGetter = state.dataGetter || new DataGetter(appSettings, () => setState({ menuObj: { id: - 2 }, dataGetter: null, gridCreator: null }));
-    const gridCreator = state.gridCreator || new PMGridCreator();
+    GLObject.dataGetter = GLObject.dataGetter || new DataGetter(appSettings);
+    GLObject.gridCreator = GLObject.gridCreator || new PMGridCreator();
 
-    dataGetter.menuId = state.menuObj.id;
+    GLObject.menuId = state.menuObj.id;
+
+    //GLObject.dataGetter = dataGetter;
 
     const TEST = function (e) {
 
@@ -28,7 +31,7 @@ function PMApp() {
 
         e.skipActivate = true;
 
-        setState({ menuObj: { id: state.dataGetter.menuId/*state.menuObj.id*/ }, dataGetter: dataGetter, gridCreator: gridCreator });
+        setState({ menuObj: { id: GLObject.menuId } });
     }
 
     const testMenuItems = [
@@ -61,7 +64,7 @@ function PMApp() {
 
                 BaseComponent.changeTheme().then(() => {
 
-                    setState({ menuObj: { id: state.dataGetter.menuId/*menuObj.id*/ }, dataGetter: dataGetter, gridCreator: gridCreator });
+                    setState({ menuObj: { id: GLObject.menuId } });
                 });
             }
         },
@@ -75,14 +78,14 @@ function PMApp() {
         if (entity) {
             return (
                 <div className="div-with-grid">
-                    <GridINU uid={entity + '_dictionary'} entity={entity} dataGetter={dataGetter}></GridINU>
+                    <GridINU uid={entity + '_dictionary'} entity={entity}></GridINU>
                 </div>
             );
         }
 
         switch (state.menuObj.id) {
             case -1:
-                setState({ menuObj: { id: - 2 }, dataGetter: null, gridCreator: null });
+                setState({ menuObj: { id: - 2 } });
 
                 //    return (
                 //        <></>
@@ -94,7 +97,7 @@ function PMApp() {
                 return (
                     <>
                         <div className="div-with-grid">
-                            <GraphComponent uid="PM" schemeName="Remarks_scheme" dataGetter={dataGetter} gridCreator={gridCreator}></GraphComponent>
+                            <GraphComponent uid="PM" schemeName="Remarks_scheme"></GraphComponent>
                         </div>
                     </>
                 );
@@ -102,7 +105,7 @@ function PMApp() {
                 return (
                     <>
                         <div className="div-with-grid">
-                            <GraphComponent uid="Clients" schemeName="ClientsScheme" dataGetter={dataGetter} gridCreator={gridCreator}></GraphComponent>
+                            <GraphComponent uid="Clients" schemeName="ClientsScheme"></GraphComponent>
                         </div>
                     </>
                 );
@@ -110,7 +113,7 @@ function PMApp() {
                 return (
                     <>
                         <div className="div-with-grid">
-                            <GraphComponent uid="Executors" schemeName="Executors" dataGetter={dataGetter} gridCreator={gridCreator}></GraphComponent>
+                            <GraphComponent uid="Executors" schemeName="Executors"></GraphComponent>
                         </div>
                     </>
                 );
@@ -118,7 +121,7 @@ function PMApp() {
                 return (
                     <>
                         <div className="div-with-grid">
-                            <GraphComponent uid="PhysPers" schemeName="PhysPers" dataGetter={dataGetter} gridCreator={gridCreator}></GraphComponent>
+                            <GraphComponent uid="PhysPers" schemeName="PhysPers"></GraphComponent>
                         </div>
                     </>
                 );
@@ -131,7 +134,7 @@ function PMApp() {
                 return (
                     <>
                         <div className="div-with-grid">
-                            <GraphComponent uid="TEAA" schemeName="TuningListScheme" dataGetter={dataGetter} gridCreator={gridCreator}></GraphComponent>
+                            <GraphComponent uid="TEAA" schemeName="TuningListScheme"></GraphComponent>
                         </div>
                     </>
                 );
@@ -143,7 +146,7 @@ function PMApp() {
     /*
                 <select onChange={(e) => {
                     //console.log('this == ' + e);
-                    setState({ menuItem: e.target.selectedIndex - 1, dataGetter: dataGetter, gridCreator: gridCreator });
+                    setState({ menuItem: e.target.selectedIndex - 1 });
                 }}>
                     <option>Logout</option>
                     <option>0. None</option>
@@ -157,11 +160,10 @@ function PMApp() {
     return (
         state.menuObj.id < -1 ?
             <LoginPage
-                dataGetter={dataGetter}
                 afterLogin={(tokens) => {
                     if (!tokens) return;
 
-                    setState({ menuObj: { id: 0 }, dataGetter: dataGetter, gridCreator: gridCreator });
+                    setState({ menuObj: { id: 0 } });
                 }}>
             </LoginPage> :
             <div >
@@ -173,7 +175,7 @@ function PMApp() {
                             return;
                         }
 
-                        setState({ menuObj: { id: item.id, menuItem: item }, dataGetter: dataGetter, gridCreator: gridCreator });
+                        setState({ menuObj: { id: item.id, menuItem: item } });
                     }}
                 >
                 </MainMenu>

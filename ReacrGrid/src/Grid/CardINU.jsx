@@ -1,6 +1,7 @@
 ﻿import { useState, useEffect } from 'react';
 import { Images } from './Themes/Images';
 import { GridINUBaseClass } from './GridINUBase';
+import { GLObject } from './GLObject';
 import { FieldEdit } from './FieldEdit';
 // =================================================================================================================================================================
 export function CardINU(props) {
@@ -32,7 +33,7 @@ export function CardINU(props) {
 
         if (needGetRows && card.selectedRow() === undefined) {
 
-            card.getRows({ filters: card.collectFilters(), card: card }).then(
+            card.getRows().then(
                 rows => {
                     card.rows = rows;
                     card.afterGetRows();
@@ -123,7 +124,6 @@ export class CardINUClass extends GridINUBaseClass {
                     keyPref={card.id + '_card_'}
                     column={col}
                     entity={card.entity}
-                    dataGetter={card.dataGetter}
                     value={value}
                     text={row[col.name]}
                     findFieldEdit={() => { return col._fieldEditObj; }}
@@ -181,8 +181,6 @@ export class CardINUClass extends GridINUBaseClass {
 
         card._cardButtonsAdded = true;
 
-        const images = Images.getImages();
-
         //card.cardButtons.push({
         //    id: card.cardButtons.length,
         //    name: 'edit',
@@ -196,8 +194,8 @@ export class CardINUClass extends GridINUBaseClass {
             id: card.cardButtons.length,
             name: 'commit',
             title: card.translate('Commit changes'),
-            label: images.commit ? '' : card.translate('Commit changes'),
-            img: images.commit,
+            label: Images.images.commit ? '' : card.translate('Commit changes'),
+            img: Images.images.commit,
             click: (e) => card.commitChangesNode(e),
             getDisabled: (e) => card.commitChangesNodeDisabled(e),
         });
@@ -206,8 +204,8 @@ export class CardINUClass extends GridINUBaseClass {
             id: card.cardButtons.length,
             name: 'rollback',
             title: card.translate('Rollback changes'),
-            label: images.rollback ? '' : card.translate('Rollback changes'),
-            img: images.rollback,
+            label: Images.images.rollback ? '' : card.translate('Rollback changes'),
+            img: Images.images.rollback,
             click: (e) => {
                 card.rollbackChangesNode(e);
                 if (card.isNewRecord && card.close) card.close();
@@ -250,7 +248,7 @@ export class CardINUClass extends GridINUBaseClass {
             card.refreshState();
         }
         else {
-            card.getRows({ filters: card.collectFilters(), card: card }).then(
+            card.getRows().then(
                 rows => {
                     card.rows = rows;
                     card.changedRow = rows[0];
@@ -279,7 +277,7 @@ export class CardINUClass extends GridINUBaseClass {
         params.push({ key: 'f0', value: card.keyField + ' = ' + card.initialRow[card.keyField] });
 
         return new Promise(function (resolve, reject) {
-            card.dataGetter.get({ url: card.entity + '/list', params: params }).then(
+            GLObject.dataGetter.get({ url: card.entity + '/list', params: params }).then(
                 (res) => {
                     if (res != null && res.rows && res.rows.length === 1) {
                         card.totalRows = res.count;

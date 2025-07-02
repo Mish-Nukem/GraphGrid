@@ -15,13 +15,14 @@ import appSettings from '../AppSettings';
 import { DataGetter } from '../Grid/Utils/DataGetter';
 import { Select } from '../Grid/OuterComponents/Select';
 import DatePicker from "react-datepicker";
+import { GLObject } from '../Grid/GLObject';
 
 function DebugApp() {
-    const [state, setState] = useState({ menuItem: - 2, dataGetter: null });
+    const [state, setState] = useState({ menuItem: - 2 });
 
     window._logEnabled = true;
 
-    const dataGetter = state.dataGetter || new DataGetter(appSettings, () => setState({ menuItem: -2, dataGetter: null }));
+    GLObject.dataGetter = GLObject.dataGetter || new DataGetter(appSettings, () => setState({ menuItem: -2 }));
 
     const GetFamily = function (e) {
         return new Promise(function (resolve, reject) {
@@ -120,7 +121,9 @@ function DebugApp() {
                 <div className="div-on-menu">
                     <button onClick={() => { console.clear() }} className="modal-window-footer-button">Clear console</button>
                 </div>
-                <Grid getRows={GetFamily} init={(grid) => { window.gridComponent = grid }}></Grid>
+                <Grid getRows={GetFamily}
+                    init={(grid) => { window.gridComponent = grid }}
+                ></Grid>
             </>
         )
     }
@@ -171,7 +174,7 @@ function DebugApp() {
         //<button onClick={() => { TEST() }} className="modal-window-footer-button">TEST</button> style={{ overflowX: "auto" }}
         return (
             <>
-                <div  className="graph-filter-line">
+                <div className="graph-filter-line">
                     <Select
                         getOptions={getOption}
                         onChange={() => { }}
@@ -337,10 +340,10 @@ function DebugApp() {
                             {drawClearConsole()}
                         </div>
                         <div className="div-with-grid">
-                            <GridINU uid="proj" entity="SrRProjectEntity" dataGetter={dataGetter} keyField='ID_SR_R_PROJECT_SRPJ'></GridINU>
+                            <GridINU uid="proj" entity="SrRProjectEntity" keyField='ID_SR_R_PROJECT_SRPJ'></GridINU>
                         </div>
                         < div className="div-with-grid">
-                            <GridINU parentGrids="proj" uid="rem" entity="SrRemarkEntity" dataGetter={dataGetter}></GridINU>
+                            <GridINU parentGrids="proj" uid="rem" entity="SrRemarkEntity"></GridINU>
                         </div>
                     </>
                 );
@@ -348,7 +351,7 @@ function DebugApp() {
                 return (
                     <>
                         <div className="div-with-grid">
-                            <GraphComponent uid="testGraph" graph={new TestData().getTestGraph()} dataGetter={dataGetter}></GraphComponent>
+                            <GraphComponent uid="testGraph" graph={new TestData().getTestGraph()}></GraphComponent>
                         </div>
                     </>
                 );
@@ -356,7 +359,7 @@ function DebugApp() {
                 return (
                     <>
                         <div className="div-with-grid">
-                            <GraphComponent uid="PM" schemeName="Remarks_scheme" dataGetter={dataGetter}></GraphComponent>
+                            <GraphComponent uid="PM" schemeName="Remarks_scheme"></GraphComponent>
                         </div>
                     </>
                 );
@@ -375,17 +378,16 @@ function DebugApp() {
     return (
         state.menuItem < -1 ?
             <LoginPage
-                dataGetter={dataGetter}
                 afterLogin={(tokens) => {
                     if (!tokens) return;
 
-                    setState({ menuItem: 0, dataGetter: dataGetter/*atoken: dataGetter.atoken, rtoken: dataGetter.rtoken*/ });
+                    setState({ menuItem: 0 });
                 }}>
             </LoginPage> :
             <div >
                 <select onChange={(e) => {
                     //console.log('this == ' + e);
-                    setState({ menuItem: e.target.selectedIndex - 1, dataGetter: dataGetter/*, atoken: dataGetter.atoken, rtoken: dataGetter.rtoken*/ });
+                    setState({ menuItem: e.target.selectedIndex - 1 });
                 }}>
                     <option>Logout</option>
                     <option>0. None</option>

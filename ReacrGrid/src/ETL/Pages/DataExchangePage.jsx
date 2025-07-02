@@ -1,6 +1,7 @@
 ﻿import { useState, useEffect, useRef } from 'react';
 //import { BaseComponent } from '../../Grid/Base';
 import { ModalClass } from '../../Grid/Modal';
+import { GLObject } from '../../Grid/GLObject';
 import { FileManager } from '../../Grid/Utils/FileManager';
 // режим пока один ImportRegims.InsertUpdate "Вставка с заменой"
 // ==================================================================================================================================================================
@@ -52,8 +53,6 @@ export class DataExchangePageClass extends ModalClass {
         de.opt.resizable = false;
         de.opt.isModal = true;
         de.opt.dimensionsByContent = true;
-
-        de.dataGetter = props.dataGetter;
 
         de.percent = '0%';
         de.continue = ' ';
@@ -183,7 +182,7 @@ export class DataExchangePageClass extends ModalClass {
             };
 
             // 2. Настраиваем его: POST-запрос по URL
-            xhr.open('POST', de.dataGetter.APIurl + 'system/DataExchange/UploadFile?SetUniqueTempFileName=true');
+            xhr.open('POST', GLObject.dataGetter.APIurl + 'system/DataExchange/UploadFile?SetUniqueTempFileName=true');
 
             // 3. Отсылаем запрос
             xhr.send(de.formData);
@@ -224,7 +223,7 @@ export class DataExchangePageClass extends ModalClass {
             if (e.ZipFileName)
                 params.push({ key: 'ZipFileName', value: e.ZipFileName });
 
-            de.dataGetter.get({ url: 'system/DataExchange/RunDataExchange', params: params }).then(
+            GLObject.dataGetter.get({ url: 'system/DataExchange/RunDataExchange', params: params }).then(
                 (data) => {
                     if (!data) return;
 

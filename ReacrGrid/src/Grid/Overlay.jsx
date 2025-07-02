@@ -42,10 +42,10 @@ export class OverlayClass extends BaseComponent {
         const ovl = this;
         ovl.opt = {};
 
-        ovl.id = window._wndSeq++;
+        ovl.id = OverlayClass._seq++;
         ovl.uid = props.uid;
 
-        ovl.opt.zInd = props.zInd || ++window._wndZInd;
+        ovl.opt.zInd = props.zInd || ++OverlayClass._zInd;
 
         ovl.opt.pos = props.pos || { x: 0, y: 0, w: '100%', h: '100%' };
 
@@ -64,6 +64,10 @@ export class OverlayClass extends BaseComponent {
 
         ovl.stateind = 0;
     }
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
+    static _seq = 0;
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
+    static _zInd = 999;
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     render() {
         const ovl = this;

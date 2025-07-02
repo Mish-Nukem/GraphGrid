@@ -271,17 +271,15 @@ export class GridDBClass extends GridGRClass {
         grid.pagerButtons = [];
         grid.pagerButtonsDict = {};
 
-        const images = Images.getImages() || {};
-
         const refresh = {
             id: 0,
             name: 'refresh',
             title: 'Refresh',
-            label: images.refresh ? '' : 'Refresh',
+            label: Images.images.refresh ? '' : 'Refresh',
             click: function (e) {
                 grid.refresh();
             },
-            img: images.refresh,
+            img: Images.images.refresh,
             class: grid.pagerButtonsClass,
         }
 
@@ -293,11 +291,11 @@ export class GridDBClass extends GridGRClass {
                 id: 1,
                 name: 'settings',
                 title: 'Settings',
-                label: images.settings ? '' : 'Settings',
+                label: Images.images.settings ? '' : 'Settings',
                 click: function (e) {
                     grid.showGridSettings(e);
                 },
-                img: images.settings,
+                img: Images.images.settings,
                 class: grid.pagerButtonsClass,
             }
 
@@ -311,14 +309,14 @@ export class GridDBClass extends GridGRClass {
                 id: 2,
                 name: 'first',
                 title: 'First',
-                label: images.first ? '' : 'First',
+                label: Images.images.first ? '' : 'First',
                 click: function (e) {
                     grid.gotoFirstPage();
                 },
                 getDisabled: function () {
                     return !grid.rows || grid.rows.length <= 0 || grid.pageNumber === 1;
                 },
-                img: images.first,
+                img: Images.images.first,
                 class: grid.pagerButtonsClass,
             }
 
@@ -329,14 +327,14 @@ export class GridDBClass extends GridGRClass {
                 id: 3,
                 name: 'prev',
                 title: 'Prev',
-                label: images.prev ? '' : 'Prev',
+                label: Images.images.prev ? '' : 'Prev',
                 click: function (e) {
                     grid.gotoPrevPage();
                 },
                 getDisabled: function () {
                     return !grid.rows || grid.rows.length <= 0 || grid.pageNumber === 1;
                 },
-                img: images.prev,
+                img: Images.images.prev,
                 class: grid.pagerButtonsClass,
             }
 
@@ -406,14 +404,14 @@ export class GridDBClass extends GridGRClass {
                 id: 6,
                 name: 'next',
                 title: 'Next',
-                label: images.next ? '' : 'Next',
+                label: Images.images.next ? '' : 'Next',
                 click: function (e) {
                     grid.gotoNextPage();
                 },
                 getDisabled: function () {
                     return !grid.rows || grid.rows.length <= 0 || grid.pageNumber === grid.pagesCount;
                 },
-                img: images.next,
+                img: Images.images.next,
                 class: grid.pagerButtonsClass,
             }
 
@@ -424,14 +422,14 @@ export class GridDBClass extends GridGRClass {
                 id: 7,
                 name: 'last',
                 title: 'Last',
-                label: images.last ? '' : 'Last',
+                label: Images.images.last ? '' : 'Last',
                 click: function (e) {
                     grid.gotoLastPage();
                 },
                 getDisabled: function () {
                     return !grid.rows || grid.rows.length <= 0 || grid.pageNumber === grid.pagesCount;
                 },
-                img: images.last,
+                img: Images.images.last,
                 class: grid.pagerButtonsClass,
             }
 
