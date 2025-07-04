@@ -1,3 +1,4 @@
-{
-  "APIurl": "http://localhost:5152/api/"
+﻿{
+  "APIurl": "http://m2.infomega.local/api/",
+  "DebugAPIurl": "http://localhost:5152/api/"
 }

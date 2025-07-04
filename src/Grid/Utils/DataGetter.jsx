@@ -1,12 +1,11 @@
 ﻿export class DataGetter {
-    constructor(settings, /*atoken, rtoken, */onError) {
+    constructor(settings, onError) {
         const dg = this;
 
-        //dg.atoken = atoken;
-        //dg.rtoken = rtoken;
         dg.onError = onError;
 
         dg.APIurl = settings.APIurl;
+        //dg.APIurl = settings.DebugAPIurl;
     }
 
     refreshToken() {

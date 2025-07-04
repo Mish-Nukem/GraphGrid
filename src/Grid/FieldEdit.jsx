@@ -36,6 +36,8 @@ export function FieldEdit(props) {
     fe.inputClass = props.inputClass || BaseComponent.theme.inputClass || '';
     fe.clearButtonClass = props.clearButtonClass || BaseComponent.theme.clearButtonClass || '';
     fe.selectClass = props.selectClass || BaseComponent.theme.selectClass || '';
+    fe.datePickerDateFormat = props.datePickerDateFormat || 'dd.MM.yyyy';
+    fe.divContainerClass = props.divContainerClass || '';
 
     fe.w = props.w;
     fe.h = props.h || '1.7em';
@@ -120,15 +122,21 @@ export class FieldEditClass extends BaseComponent {
 
         let parsedDate;
         if (isDate && fe.value) {
-            parsedDate = Moment(fe.value, fe.dateFormat);
-            fe.value = parsedDate.format(fe.dateFormat);
+            parsedDate = Moment(fe.value, fe.datePickerDateFormat);
+            if (parsedDate.isValid()) {
+                fe.value = parsedDate.format(fe.dateFormat);
+            }
+            else {
+                parsedDate = '';
+                fe.value = '';
+            }
         }
 
         return (
             <>
                 <div
                     key={`fieldeditdiv_${fe.id}_${fe.column.id}_`}
-                    className={fe.large ? 'field-edit' : isLookup || isDate ? 'grid-cell-lookup' : 'grid-cell-edit'}
+                    className={fe.divContainerClass ? fe.divContainerClass : fe.large ? 'field-edit' : isLookup || isDate ? 'grid-cell-lookup' : 'grid-cell-edit'}
                     style={{
                         border: 'none',
                         height: !fe.inputClass ? fe.h : '',
@@ -218,8 +226,8 @@ export class FieldEditClass extends BaseComponent {
                                             onSelect={(date) => {
                                                 //const e = { value: Moment(date, fe.dateFormat) };
                                                 const e = {};
-                                                fe.value = fe.text = Moment(date, fe.dateFormat);
-                                                e.value = e.text = Moment(date, fe.dateFormat);
+                                                fe.value = fe.text = Moment(date, fe.datePickerDateFormat).format(fe.dateFormat);//.format(fe.dateFormat);
+                                                e.value = e.text = Moment(date, fe.datePickerDateFormat).format(fe.dateFormat);//.format(fe.dateFormat);
                                                 fe.onChange(e);
                                             }}
                                             disabled={fe.disabled}

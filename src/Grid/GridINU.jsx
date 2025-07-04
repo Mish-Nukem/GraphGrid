@@ -210,7 +210,7 @@ export class GridINUClass extends GridINUBaseClass {
                     findFieldEdit={() => { return col._filterEditObj; }}
                     gridColumn={'span 2'}
                     w={'calc(100% + 2px)'}
-                    
+                    divContainerClass={'grid-header-content'}
                     init={
                         (fe) => {
                             col._filterEditObj = fe;

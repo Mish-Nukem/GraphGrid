@@ -17,7 +17,7 @@ export class BaseComponent {
         return Translate.translate(text, context);
     }
 
-    static dateFormat = 'dd.MM.yyyy';
+    static dateFormat = 'DD.MM.YYYY';
 
     static theme = null;
     static useBootstrap = false;

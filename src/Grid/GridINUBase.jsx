@@ -64,8 +64,6 @@ export class GridINUBaseClass extends GridFLClass {
         grid.entity = props.entity;
         grid.entityAdd = props.entityAdd;
 
-        grid.datePickerDateFormat = props.datePickerDateFormat || 'dd.MM.yyyy';
-
         grid.visible = true;
 
         grid.isVisible = props.isVisible || grid.isVisible;
