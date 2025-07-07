@@ -10,6 +10,7 @@ import { BaseComponent } from '../Grid/Base';
 import { PMGridCreator } from './PMGridClassCreator'
 import { MainMenu } from './Pages/MainMenu';
 import { GLObject } from '../Grid/GLObject';
+import { ReportParamsPage } from '../Reports/Pages/ReportParamsPage';
 function PMApp() {
     const [state, setState] = useState({ menuObj: { id: - 2 } });
 
@@ -20,13 +21,7 @@ function PMApp() {
 
     GLObject.menuId = state.menuObj.id;
 
-    //GLObject.dataGetter = dataGetter;
-
     const TEST = function (e) {
-
-        //BaseComponent.theme = null;
-        //BaseComponent.useBootstrap = !BaseComponent.useBootstrap;
-
         BaseComponent.changeTheme();
 
         e.skipActivate = true;
@@ -73,13 +68,41 @@ function PMApp() {
     const getTestApp = () => {
         console.log('state == ' + state.menuObj.id);
 
-        const entity = state.menuObj.menuItem ? state.menuObj.menuItem.entity : '';
+        const menuItem = state.menuObj.menuItem || {};
+        const entity = menuItem.entity || '';
+        const parent = menuItem.parent || '';
 
         if (entity) {
             return (
                 <div className="div-with-grid">
                     <GridINU uid={entity + '_dictionary'} entity={entity}></GridINU>
                 </div>
+            );
+        }
+
+        if (parent === 6) {
+            const parentItem = testMenuItems.find(function (item) {
+                return item.id === 6;
+            });
+
+            menuItem._reportParamsVisible = state.menuObj.id !== parentItem._lastItemId || menuItem._reportParamsVisible;
+            parentItem._lastItemId = state.menuObj.id;
+
+            parentItem.frmPos = parentItem.frmPos || { x: 210, y: 210 };
+
+            return (
+                <ReportParamsPage
+                    nameReport={menuItem.text}
+                    pos={parentItem.frmPos}
+                    visible={menuItem._reportParamsVisible}
+                    init={(de) => {
+                        //de.visible = true;
+                    }}
+                    onClose={() => {
+                        menuItem._reportParamsVisible = false;
+                        setState({ menuObj: { id: GLObject.menuId } });
+                    }}
+                ></ReportParamsPage>
             );
         }
 

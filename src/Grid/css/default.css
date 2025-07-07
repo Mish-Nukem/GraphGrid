@@ -488,7 +488,7 @@ tr.grid-selected-row > td {
     grid-auto-flow: row;
     align-items: center;
     align-content: center;
-    margin: 0 1em;
+    margin: 0 1em 0.5em 1em;
 }
 
     .graph-card-field > span {

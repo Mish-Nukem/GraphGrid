@@ -289,6 +289,7 @@ export class FieldEditClass extends BaseComponent {
                             pos={fe.popupPos}
                             onClose={(e) => {
                                 fe.lookupIsShowing = false;
+                                delete fe.grid.value;
                                 fe.refreshState();
                             }}
                         >
@@ -345,7 +346,9 @@ export class FieldEditClass extends BaseComponent {
                     }}
                     //getColumns={info.columns ? () => { return info.columns; } : null}
                     init={(lookupGrid) => {
-                        fe.onLookupGridInit(lookupGrid);
+                        if (!lookupGrid.value || fe.value && fe.value !== lookupGrid.value) {
+                            fe.onLookupGridInit(lookupGrid);
+                        }
 
                         for (let opt of fe._selectedOptions) {
                             let fakeRow = {};
