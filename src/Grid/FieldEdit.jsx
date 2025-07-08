@@ -85,6 +85,10 @@ export class FieldEditClass extends BaseComponent {
 
         fe.multi = props.multi;
 
+        if (props.comboboxValues) {
+            fe.comboboxValues = props.comboboxValues;
+        }
+
         if (fe.multi) {
             fe._selectedOptions = fe.value || [];
             const texts = [];
@@ -105,9 +109,9 @@ export class FieldEditClass extends BaseComponent {
         fe.dateFormat = props.dateFormat || BaseComponent.dateFormat;
 
         fe.gridColumn = props.gridColumn;
-    //    fe.buttonClass = props.buttonClass || BaseComponent.theme.filterButtonClass || '';
-    //    fe.inputClass = props.inputClass || BaseComponent.theme.inputClass || '';
-    //    fe.clearButtonClass = props.clearButtonClass || BaseComponent.theme.clearButtonClass || '';
+        //    fe.buttonClass = props.buttonClass || BaseComponent.theme.filterButtonClass || '';
+        //    fe.inputClass = props.inputClass || BaseComponent.theme.inputClass || '';
+        //    fe.clearButtonClass = props.clearButtonClass || BaseComponent.theme.clearButtonClass || '';
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     static _seq = 0;
@@ -122,9 +126,9 @@ export class FieldEditClass extends BaseComponent {
 
         let parsedDate;
         if (isDate && fe.value) {
-            parsedDate = Moment(fe.value, fe.datePickerDateFormat);
+            parsedDate = Moment(fe.value, fe.dateFormat);
             if (parsedDate.isValid()) {
-                fe.value = parsedDate.format(fe.dateFormat);
+                //fe.value = parsedDate.format(fe.datePickerDateFormat);
             }
             else {
                 parsedDate = '';
@@ -154,7 +158,7 @@ export class FieldEditClass extends BaseComponent {
                                             key={`fieldlookuptitle_${fe.id}_${fe.column.id}_`}
                                             style={{
                                                 width: 'calc(100% - 4px)',
-                                                gridColumn: noClear ? 'span 2' : 'span 1',
+                                                gridColumn: noClear ? !fe.comboboxValues ? 'span 2' : 'span 3' : 'span 1',
                                                 overflowX: 'hidden',
                                                 height: !fe.inputClass ? fe.h : '',
                                                 minHeight: !fe.inputClass ? fe.h : '',
@@ -189,16 +193,21 @@ export class FieldEditClass extends BaseComponent {
                                         >
                                         </Select>
                                 }
-                                <button
-                                    key={`fieldlookupbtn_${fe.id}_${fe.column.id}_`}
-                                    className={`${fe.large ? 'graph-filter-button' : 'grid-cell-button'} ${fe.large ? fe.buttonClass : ''}`}
-                                    onClick={(e) => {
-                                        fe.openLookupField(e);
-                                    }}
-                                    disabled={fe.disabled}
-                                >
-                                    {!fe.large ? '...' : Images.images.filterSelect()}
-                                </button>
+                                {
+                                    !fe.comboboxValues ?
+                                        <button
+                                            key={`fieldlookupbtn_${fe.id}_${fe.column.id}_`}
+                                            className={`${fe.large ? 'graph-filter-button' : 'grid-cell-button'} ${fe.large ? fe.buttonClass : ''}`}
+                                            onClick={(e) => {
+                                                fe.openLookupField(e);
+                                            }}
+                                            disabled={fe.disabled}
+                                        >
+                                            {!fe.large ? '...' : Images.images.filterSelect()}
+                                        </button>
+                                        :
+                                        <></>
+                                }
                             </>
                             :
                             isDate ?
@@ -379,22 +388,22 @@ export class FieldEditClass extends BaseComponent {
 
         fe.refreshState();
 
-    //    if (!GLObject.entityInfo[fe.column.entity]) {
-    //        const params = [
-    //            { key: 'entity', value: fe.column.entity },
-    //            { key: 'configUid', value: fe.column.entity + '_' },
-    //        ];
+        //    if (!GLObject.entityInfo[fe.column.entity]) {
+        //        const params = [
+        //            { key: 'entity', value: fe.column.entity },
+        //            { key: 'configUid', value: fe.column.entity + '_' },
+        //        ];
 
-    //        GLObject.dataGetter.get({ url: 'system/entityInfo', params: params }).then(
-    //            (eInfo) => {
-    //                GLObject.entityInfo[fe.column.entity] = eInfo;
-    //                fe.refreshState();
-    //            }
-    //        );
-    //    }
-    //    else {
-    //        fe.refreshState();
-    //    }
+        //        GLObject.dataGetter.get({ url: 'system/entityInfo', params: params }).then(
+        //            (eInfo) => {
+        //                GLObject.entityInfo[fe.column.entity] = eInfo;
+        //                fe.refreshState();
+        //            }
+        //        );
+        //    }
+        //    else {
+        //        fe.refreshState();
+        //    }
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     getValueFromCombobox(texts, changeGridValue) {
@@ -446,15 +455,29 @@ export class FieldEditClass extends BaseComponent {
     getLookupValues(filter, pageNum) {
         const fe = this;
 
+        if (fe.comboboxValues) {
+            return new Promise((resolve) => {
+                const result = {
+                    options: fe.comboboxValues,
+                    hasMore: false,
+                    additional: {
+                        page: pageNum + 1,
+                        //node: fe
+                    },
+                };
+
+                resolve(result);
+            });
+        }
+
         const params = [
             { key: 'filter', value: filter },
             { key: 'pageNumber', value: pageNum },
             { key: 'entity', value: fe.selfEntity },
-
         ];
 
         return fe.column.name ? new Promise((resolve) => {
-            params.push({ key: 'columns', value: fe.column.name });
+            params.push({ key: 'columns', value: fe.column.refNameField || fe.column.name });
 
             GLObject.dataGetter.get({ url: 'system/getLookupValues', params: params }).then(
                 (res) => {

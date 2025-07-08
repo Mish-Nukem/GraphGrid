@@ -2,6 +2,7 @@
 import { ModalClass } from '../../Grid/Modal';
 import { Select } from '../../Grid/OuterComponents/Select';
 import { FieldEdit } from '../../Grid/FieldEdit';
+import { Images } from '../../Grid/Themes/Images';
 
 import { GLObject } from '../../Grid/GLObject';
 import { FileManager } from '../../Grid/Utils/FileManager';
@@ -78,21 +79,44 @@ export class ReportParamsPageClass extends ModalClass {
                     <>
                         <div className="graph-card-field">
                             <span>{"Конфигурация:"}</span>
-                            <Select
-                                key={`configselect_${de.id}_`}
-                                inputClass={de.inputClass || ''}
-                                className={de.selectClass || ''}
-                                value={de._selectedConfig}
-                                getOptions={(filter, pageNum) => de.getConfigList(filter, pageNum)}
-                                height={de.selectH}
-                                //gridColumn={noClear ? 'span 2' : 'span 1'}
-                                onChange={(e) => {
-                                    de._selectedConfig = [e];
-                                }}
-                                init={(e) => { de.setComboboxValue = e.setComboboxValue; }}
-                                disabled={de.disabled}
-                            >
-                            </Select>
+                            <div className="field-edit"                            >
+                                <Select
+                                    key={`configselect_${de.id}_`}
+                                    inputClass={de.inputClass || ''}
+                                    className={de.selectClass || ''}
+                                    value={de._selectedConfig}
+                                    getOptions={(filter, pageNum) => de.getConfigList(filter, pageNum)}
+                                    height={de.selectH}
+                                    //gridColumn={noClear ? 'span 2' : 'span 1'}
+                                    onChange={(e) => {
+                                        de._selectedConfig = [e];
+                                        de.getConfig();
+                                    }}
+                                    init={(e) => { de.setComboboxValue = e.setComboboxValue; }}
+                                    disabled={de.disabled}
+                                    gridColumn={de._selectedConfig === undefined ? 'span 2' : 'span 1'}
+                                >
+                                </Select>
+                                <button
+                                    className="graph-filter-button"
+                                    onClick={() => de.saveConfig()}
+                                    disabled={de.disabled || de._selectedConfig === undefined || de._selectedConfig.value > 0 && !de._selectedConfig.changed}
+                                >
+                                    {Images.images.save()}
+                                </button>
+                                {
+                                    de._selectedConfig === undefined ?
+                                        <></>
+                                        :
+                                        <button
+                                            className="graph-filter-button"
+                                            onClick={() => de.deleteConfig()}
+                                            disabled={de.disabled || de._selectedConfig === undefined}
+                                        >
+                                            {Images.images.deleteRecord()}
+                                        </button>
+                                }
+                            </div>
                         </div>
                         <div>
                             {
@@ -135,6 +159,9 @@ export class ReportParamsPageClass extends ModalClass {
                     entity={param.entity}
                     findFieldEdit={() => { return param._fieldEditObj; }}
                     large={true}
+                    comboboxValues={param.comboboxValues}
+                    required={param.required}
+                    multi={param.multi}
                     init={
                         (fe) => {
                             param._fieldEditObj = fe;
@@ -150,6 +177,9 @@ export class ReportParamsPageClass extends ModalClass {
                                 param.setComboboxValue({ value: e.value, label: e.text });
                             }
                         }
+                        de._selectedConfig = de._selectedConfig === undefined ? { value: -1, label: de.translate('New configuration') } : de._selectedConfig;
+                        de._selectedConfig.changed = true;
+
                         de.refreshState();
                     }}
                 >
@@ -190,47 +220,145 @@ export class ReportParamsPageClass extends ModalClass {
         const de = this;
         const params = [];
 
-        params.push({ key: 'reportName', value: de.fileName });
+        params.push({ key: 'reportName', value: de.nameReport });
 
         return new Promise((resolve) => {
             GLObject.dataGetter.get({ url: 'reports/configList', params: params }).then(
                 (data) => {
-                    resolve(data);
+                    const res = [];
+                    for (let cfg of data) {
+                        if (cfg === '' || cfg === undefined) continue;
+
+                        res.push({ value: cfg, label: cfg });
+                    }
+
+                    resolve({
+                        options: res,
+                        hasMore: false,
+                        additional: {
+                            page: 1
+                        },
+                    });
                 }
             );
         });
+    }
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
+    saveConfig() {
+        const de = this;
+        if (de._selectedConfig === undefined) return;
+
+        if (de._selectedConfig.value <= 0) {
+            de._selectedConfig.label = prompt(de.translate('Enter configuration name')) || de._selectedConfig.label;
+        }
+
+        const paramsValues = {};
+        for (let param of de.reportParams) {
+            paramsValues[param.name] = { value: param.value, label: param.text };
+        }
+
+        const params = [];
+        params.push({ key: 'reportName', value: de.nameReport });
+        params.push({ key: 'configName', value: de._selectedConfig.label });
+        params.push({ key: 'paramsValues', value: paramsValues });
+
+        GLObject.dataGetter.get({ url: 'reports/saveConfig', params: params }).then(
+            (data) => {
+                delete de._selectedConfig.changed;
+                de._selectedConfig.value = data; 
+                de.refreshState();
+            }
+        );
+    }
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
+    deleteConfig() {
+        const de = this;
+        if (de._selectedConfig === undefined || de._selectedConfig.value <= 0) return;
+
+        const params = [];
+        params.push({ key: 'reportName', value: de.nameReport });
+        params.push({ key: 'configName', value: de._selectedConfig.label });
+
+        GLObject.dataGetter.get({ url: 'reports/deleteConfig', params: params }).then(
+            () => {
+                delete de._selectedConfig;
+                de.refreshState();
+            }
+        );
+    }
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
+    getConfig() {
+        const de = this;
+        if (de._selectedConfig === undefined || de._selectedConfig.value <= 0) return;
+
+        const params = [];
+        params.push({ key: 'reportName', value: de.nameReport });
+        params.push({ key: 'configName', value: de._selectedConfig.label });
+
+        GLObject.dataGetter.get({ url: 'reports/getConfig', params: params }).then(
+            (data) => {
+                delete de._selectedConfig.changed;
+
+                for (let param of de.reportParams) {
+                    let savedParam = data[param.name];
+                    if (!savedParam) continue;
+
+                    param.value = savedParam.value;
+                    param.text = savedParam.label;
+                }
+
+                de.refreshState();
+            }
+        );
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     getReportParams(/*filter, pageNum*/) {
         const de = this;
         if (de.reportParams.length > 0) return;
 
-        // TODO:
-        de.reportParams.push({
-            id: 0,
-            title: 'Исполнитель',
-            entity: 'SrRExecutiveEntity',
-            type: 'lookup',
-            allowCombobox: true,
-            refKeyField: 'ID_SR_R_EXECUTIVE_SREX',
-            refNameField: 'FIO_SREX',
-        });
-        de.refreshState();
-        return;
-        // end TODO
-
-
         const params = [];
-        params.push({ key: 'reportName', value: de.fileName });
+        params.push({ key: 'reportName', value: de.nameReport });
 
         GLObject.dataGetter.get({ url: 'reports/paramsList', params: params }).then(
             (data) => {
                 de.reportParams = data;
+
+                //let i = 1;
+                //for (let param of data) {
+                //    const rpm = {
+                //        id: i++,
+                //        title: param.Name,
+                //        entity: param.DataClassName || '',
+                //        type: param.DataClassName ? 'lookup' : param.DataType === 5 || param.DataType === 6 ? 'date' : '',
+                //        allowCombobox: param.DataClassName || param.Enumeration,
+                //        refNameField: param.ResultFieldName,
+                //        required: param.Required,
+                //        multi: param.ListFlag,
+                //        parentParams: param.ParentParamNumbers,
+                //    };
+
+                //    if (param.Enumeration) {
+                //        rpm.comboboxValues = [];
+                //        for (let val of param.Enumeration.split(';')) {
+                //            rpm.comboboxValues.push({ value: val, label: val });
+                //        }
+                //    }
+
+                //    de.reportParams.push(rpm);
+                //}
+
                 de.refreshState();
             }
         );
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+
+
+
+
     runExchange() {
         const de = this;
         if (!de.fileName) {
