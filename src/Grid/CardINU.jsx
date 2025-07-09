@@ -153,9 +153,6 @@ export class CardINUClass extends GridINUBaseClass {
                         if (col.type === 'lookup') {
                             card.changedRow[col.keyField] = e.value;
                             card.changedRow[col.name] = e.text;
-                            if (col.setComboboxValue) {
-                                col.setComboboxValue({ value: e.value, label: e.text });
-                            }
                             if (!card.isEditing()) {
                                 card.setEditing(true);
                                 card.refreshState();

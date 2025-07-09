@@ -45,9 +45,20 @@ export function FieldEdit(props) {
     fe.textareaH = props.textareaH || '2.1em';
     //fe.margin = props.margin || '0 2px 2px 2px';
 
-    const prevValue = fe.value;
     if (props.init) {
         props.init(fe);
+    }
+
+    if (fe.multi) {
+        if (fe.value !== undefined && fe.value !== '' && fe._selectedOptions.length <= 0) {
+            fe._selectedOptions = fe.value || [];
+            const texts = [];
+            fe.value = fe.getValueFromCombobox(texts);
+            fe.text = texts.join(', ');
+        }
+    }
+    else if (fe.value !== undefined && fe.value !== '' && (!fe._selectedOptions || fe._selectedOptions.length <= 0 || fe._selectedOptions[0].value !== fe.value)) {
+        fe._selectedOptions = [{ value: fe.value, label: fe.text }];
     }
 
     fe.refreshState = function () {
@@ -55,13 +66,9 @@ export function FieldEdit(props) {
     }
 
     useEffect(() => {
-        if (prevValue !== fe.value && fe.setComboboxValue) {
-            fe.setComboboxValue({ value: fe.value, label: fe.text });
-        }
-
         return () => {
         }
-    }, [fe, prevValue])
+    }, [fe])
 
     return (fe.render());
 }
@@ -179,16 +186,21 @@ export class FieldEditClass extends BaseComponent {
                                             height={fe.selectH}
                                             gridColumn={noClear ? 'span 2' : 'span 1'}
                                             isMulti={fe.multi}
+                                            required={noClear}
                                             onChange={(e) => {
+                                                if (e === null) {
+                                                    fe.onChange({ value: '', text: '' });
+                                                    fe.refreshState();
+                                                    return;
+                                                }
+
                                                 fe._selectedOptions = fe.multi ? e : [e];
                                                 const texts = [];
                                                 fe.value = fe.getValueFromCombobox(texts);
-                                                const ev = {};
-                                                ev.text = texts.join(', ');
-                                                ev.value = fe.value;
+                                                const ev = { value: fe.value, text: texts.join(', ') };
                                                 fe.onChange(ev);
+                                                fe.refreshState();
                                             }}
-                                            init={(e) => { fe.setComboboxValue = e.setComboboxValue; }}
                                             disabled={fe.disabled}
                                         >
                                         </Select>
@@ -261,6 +273,7 @@ export class FieldEditClass extends BaseComponent {
                                     onChange={(e) => {
                                         e.value = e.text = e.target.value;
                                         fe.value = fe.text = e.target.value;
+                                        e.fe = fe;
                                         fe.onChange(e);
                                     }}
                                     disabled={fe.disabled || fe.column.readonly}
@@ -277,9 +290,6 @@ export class FieldEditClass extends BaseComponent {
                                     e.value = e.text = '';
                                     fe.value = fe.text = '';
                                     fe._selectedOptions = [];
-                                    if (fe.setComboboxValue) {
-                                        fe.setComboboxValue([]);
-                                    }
 
                                     fe.onChange(e);
                                 }}
@@ -332,19 +342,11 @@ export class FieldEditClass extends BaseComponent {
 
                             fe.value = fe.getValueFromCombobox(texts);
                             fe.text = texts.join(', ');
-
-                            if (fe.setComboboxValue) {
-                                fe.setComboboxValue(e.value);
-                            }
                         }
                         else {
                             fe.value = e.value;
                             fe.text = e.text;
-
-                            if (fe.setComboboxValue) {
-                                fe._selectedOptions = [{ value: fe.value, label: fe.text }];
-                                fe.setComboboxValue(fe._selectedOptions);
-                            }
+                            fe._selectedOptions = [{ value: fe.value, label: fe.text }];
                         }
 
                         e.value = fe.value;
@@ -473,11 +475,12 @@ export class FieldEditClass extends BaseComponent {
         const params = [
             { key: 'filter', value: filter },
             { key: 'pageNumber', value: pageNum },
-            { key: 'entity', value: fe.selfEntity },
         ];
 
         return fe.column.name ? new Promise((resolve) => {
-            params.push({ key: 'columns', value: fe.column.refNameField || fe.column.name });
+            params.push({ key: 'columns', value: /*fe.column.refNameField ||*/ fe.column.name });
+            params.push({ key: 'entity', value: fe.selfEntity });
+            //params.push({ key: 'entity', value: fe.column.entity });
 
             GLObject.dataGetter.get({ url: 'system/getLookupValues', params: params }).then(
                 (res) => {

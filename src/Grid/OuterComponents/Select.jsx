@@ -4,14 +4,26 @@ import { AsyncPaginate } from 'react-select-async-paginate';
 export function Select(props) {
     const [value, setValue] = useState(props.value);
 
-    //let value = props.value;
-    //const onChange = useCallback((newValue) => {
-    //    value = newValue;
-    //}, []);
+    //if (value && !props.value
+    //    || !value && props.value
+    //    || value && value.length >= 0 && props.value && props.value.length >= 0 && props.value.length !== value.length) {
 
-    //    function (newValue) {
-    //    value = newValue;
+    //    setValue(props.value);
     //}
+    //else if (props.value && props.value.length > 0 && value && value.length > 0) {
+
+    //    for (let i = 0; i < props.value.length; i++) {
+    //        if (props.value[i].value !== value[i].value) {
+    //            setValue(props.value);
+    //            break;
+    //        }
+    //    }
+    //}
+    //else if (props.value && value && value.length > 0 && value[0] == null) {
+    //    setValue(props.value);
+    //}
+    if (value !== props.value)
+    setValue(props.value);
 
     const getOptions = props.getOptions;
 
@@ -72,34 +84,8 @@ export function Select(props) {
     };
 
     if (props.init) {
-        props.init({
-            setComboboxValue: function (newValue) {
-                //value = newValue;
-                setValue(newValue);
-            },
-            refreshState: function () {
-                setValue(value);
-            }
-        });
+        props.init();
     }
-
-    //useEffect(() => {
-    //    if (props.init) {
-    //        props.init({
-    //            setComboboxValue: function (newValue) {
-    //                value = newValue;
-    //                //onChange(newValue);
-    //            },
-    //            refreshState: function () {
-    //                //onChange(value);
-    //            }
-    //        });
-    //    }
-
-
-    //    return () => {
-    //    }
-    //}, [value, props/*, onChange*/])
 
     return (
         <div
@@ -109,12 +95,16 @@ export function Select(props) {
                 key={value}
                 value={!props.isMulti ? value : value && value.length > 0 ? value : ''}
                 isMulti={props.isMulti}
+                isClearable={!props.required}
                 cacheOptions
                 loadOptions={loadOptions}
                 additional={{
                     page: 1,
                 }}
-                onChange={(e) => { props.onChange(e); setValue(e); }}
+                onChange={(e) => {
+                    props.onChange(e);
+                    setValue(props.isMulti ? e : [e]);
+                }}
                 placeholder=""
                 styles={customStyles}
                 isDisabled={props.disabled ? true : false}

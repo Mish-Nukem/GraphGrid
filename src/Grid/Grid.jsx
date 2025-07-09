@@ -190,10 +190,10 @@ export class GridClass extends BaseComponent {
         log(' -------------------------------------------------------------------------------------------------------------------------------------- ');
 
         return (
-            //<div
-            //    key={`griddiv_${grid.id}_`}
-            //    style={{ overflowX: 'auto', overflowY: 'hidden' }}
-            //>
+            <div
+                key={`griddiv_${grid.id}_`}
+                style={{ overflowX: 'auto', overflowY: 'hidden' }}
+            >
             <table
                 key={`grid_${grid.id}_`}
                 className={grid.opt.gridClass || BaseComponent.theme.gridClass || 'grid-default'}
@@ -202,7 +202,7 @@ export class GridClass extends BaseComponent {
                 {grid.renderHeader()}
                 {grid.renderBody()}
             </table>
-            //</div>
+            </div>
         );
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------

@@ -73,6 +73,8 @@ export class ReportParamsPageClass extends ModalClass {
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     renderReportParamsPage() {
         const de = this;
+        const canDelete = de._selectedConfig !== undefined && de._selectedConfig.value;
+        const canSave = de._selectedConfig === undefined || !de._selectedConfig.saved || de._selectedConfig.changed;
         return (
             <div>
                 {
@@ -87,25 +89,30 @@ export class ReportParamsPageClass extends ModalClass {
                                     value={de._selectedConfig}
                                     getOptions={(filter, pageNum) => de.getConfigList(filter, pageNum)}
                                     height={de.selectH}
+                                    required={false}
                                     //gridColumn={noClear ? 'span 2' : 'span 1'}
                                     onChange={(e) => {
-                                        de._selectedConfig = [e];
-                                        de.getConfig();
+                                        de._selectedConfig = e || { value: null, label: de.translate('New configuration') };
+                                        if (de._selectedConfig.value) {
+                                            de.getConfig();
+                                        }
+                                        else {
+                                            de.refreshState();
+                                        }
                                     }}
-                                    init={(e) => { de.setComboboxValue = e.setComboboxValue; }}
                                     disabled={de.disabled}
-                                    gridColumn={de._selectedConfig === undefined ? 'span 2' : 'span 1'}
+                                    gridColumn={!canDelete ? 'span 2' : 'span 1'}
                                 >
                                 </Select>
                                 <button
                                     className="graph-filter-button"
                                     onClick={() => de.saveConfig()}
-                                    disabled={de.disabled || de._selectedConfig === undefined || de._selectedConfig.value > 0 && !de._selectedConfig.changed}
+                                    disabled={de.disabled || !canSave}
                                 >
                                     {Images.images.save()}
                                 </button>
                                 {
-                                    de._selectedConfig === undefined ?
+                                    !canDelete ?
                                         <></>
                                         :
                                         <button
@@ -117,6 +124,9 @@ export class ReportParamsPageClass extends ModalClass {
                                         </button>
                                 }
                             </div>
+                        </div>
+                        <div className="report-params-header">
+                            {"Параметры отчета"}
                         </div>
                         <div>
                             {
@@ -172,12 +182,7 @@ export class ReportParamsPageClass extends ModalClass {
                     onChange={(e) => {
                         param.value = e.value;
                         param.text = e.text;
-                        if (param.type === 'lookup') {
-                            if (param.setComboboxValue) {
-                                param.setComboboxValue({ value: e.value, label: e.text });
-                            }
-                        }
-                        de._selectedConfig = de._selectedConfig === undefined ? { value: -1, label: de.translate('New configuration') } : de._selectedConfig;
+                        de._selectedConfig = de._selectedConfig === undefined || de._selectedConfig === null ? { value: -1, label: de.translate('New configuration') } : de._selectedConfig;
                         de._selectedConfig.changed = true;
 
                         de.refreshState();
@@ -248,13 +253,13 @@ export class ReportParamsPageClass extends ModalClass {
         const de = this;
         if (de._selectedConfig === undefined) return;
 
-        if (de._selectedConfig.value <= 0) {
+        if (!de._selectedConfig.saved) {
             de._selectedConfig.label = prompt(de.translate('Enter configuration name')) || de._selectedConfig.label;
         }
 
         const paramsValues = {};
         for (let param of de.reportParams) {
-            paramsValues[param.name] = { value: param.value, label: param.text };
+            paramsValues[param.id] = { value: param.value, label: param.text };
         }
 
         const params = [];
@@ -263,9 +268,10 @@ export class ReportParamsPageClass extends ModalClass {
         params.push({ key: 'paramsValues', value: paramsValues });
 
         GLObject.dataGetter.get({ url: 'reports/saveConfig', params: params }).then(
-            (data) => {
+            () => {
                 delete de._selectedConfig.changed;
-                de._selectedConfig.value = data; 
+                de._selectedConfig.saved = true;
+                de._selectedConfig.value = de._selectedConfig.label;
                 de.refreshState();
             }
         );
@@ -273,7 +279,7 @@ export class ReportParamsPageClass extends ModalClass {
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     deleteConfig() {
         const de = this;
-        if (de._selectedConfig === undefined || de._selectedConfig.value <= 0) return;
+        if (de._selectedConfig === undefined || !de._selectedConfig.saved) return;
 
         const params = [];
         params.push({ key: 'reportName', value: de.nameReport });
@@ -289,7 +295,7 @@ export class ReportParamsPageClass extends ModalClass {
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     getConfig() {
         const de = this;
-        if (de._selectedConfig === undefined || de._selectedConfig.value <= 0) return;
+        if (de._selectedConfig === undefined || !de._selectedConfig.label) return;
 
         const params = [];
         params.push({ key: 'reportName', value: de.nameReport });
@@ -299,8 +305,10 @@ export class ReportParamsPageClass extends ModalClass {
             (data) => {
                 delete de._selectedConfig.changed;
 
+                de._selectedConfig.saved = true;
+
                 for (let param of de.reportParams) {
-                    let savedParam = data[param.name];
+                    let savedParam = data[param.id];
                     if (!savedParam) continue;
 
                     param.value = savedParam.value;

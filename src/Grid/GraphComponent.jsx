@@ -346,17 +346,7 @@ export class GraphComponentClass extends BaseComponent {
 
         const fe = node.filterColumn._fieldEditObj;
 
-        if (fe.setComboboxValue) {
-            if (node.multi) {
-                fe.setComboboxValue(selectedValues);
-            }
-            else {
-                fe.setComboboxValue([{ value: node.value, label: selectedText }]);
-            }
-        }
-        else {
-            node._selectedText = node.text = selectedText;
-        }
+        node._selectedText = node.text = selectedText;
 
         node._selectedOptions = selectedValues;
 

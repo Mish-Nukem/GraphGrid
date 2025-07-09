@@ -614,3 +614,10 @@ tr.grid-selected-row > td {
 .react-datepicker-popper {
     z-index: 9999 !important;
 }
+
+.report-params-header {
+    display: flex;
+    font-weight: bold;
+    justify-content: center;
+    margin: 5px;
+}

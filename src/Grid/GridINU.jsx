@@ -175,9 +175,6 @@ export class GridINUClass extends GridINUBaseClass {
                 if (col.type === 'lookup') {
                     grid.changedRow[col.keyField] = e.value;
                     grid.changedRow[col.name] = e.text;
-                    if (col.setComboboxValue) {
-                        col.setComboboxValue({ value: e.value, label: e.text });
-                    }
                     if (!grid.isEditing()) {
                         grid.setEditing(true);
                         grid.refreshState();
@@ -185,8 +182,13 @@ export class GridINUClass extends GridINUBaseClass {
                 }
                 else {
                     grid.changedRow[col.name] = e.value;
-                    grid.setEditing(true);
-                    grid.refreshState();
+                    if (!grid.isEditing()) {
+                        grid.setEditing(true);
+                        grid.refreshState();
+                    }
+                    else {
+                        e.fe.refreshState();
+                    }
                 }
             }}
         >
