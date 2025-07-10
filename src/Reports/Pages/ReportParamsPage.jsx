@@ -209,8 +209,8 @@ export class ReportParamsPageClass extends ModalClass {
         const res = [
             {
                 title: 'Запуск отчета',
-                onclick: (e) => de.runExchange(e),
-                getDisabled: () => { return !de.enableRun; },
+                onclick: (e) => de.runReport(e),
+                //getDisabled: () => { return !de.enableRun; },
             },
             {
                 title: 'Отменить',
@@ -330,37 +330,55 @@ export class ReportParamsPageClass extends ModalClass {
         GLObject.dataGetter.get({ url: 'reports/paramsList', params: params }).then(
             (data) => {
                 de.reportParams = data;
-
-                //let i = 1;
-                //for (let param of data) {
-                //    const rpm = {
-                //        id: i++,
-                //        title: param.Name,
-                //        entity: param.DataClassName || '',
-                //        type: param.DataClassName ? 'lookup' : param.DataType === 5 || param.DataType === 6 ? 'date' : '',
-                //        allowCombobox: param.DataClassName || param.Enumeration,
-                //        refNameField: param.ResultFieldName,
-                //        required: param.Required,
-                //        multi: param.ListFlag,
-                //        parentParams: param.ParentParamNumbers,
-                //    };
-
-                //    if (param.Enumeration) {
-                //        rpm.comboboxValues = [];
-                //        for (let val of param.Enumeration.split(';')) {
-                //            rpm.comboboxValues.push({ value: val, label: val });
-                //        }
-                //    }
-
-                //    de.reportParams.push(rpm);
-                //}
-
                 de.refreshState();
             }
         );
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
+    checkReportParams() {
+        const de = this;
+        let errorParams = [];
+        for (let param of de.reportParams) {
+            if (param.required && param.value === undefined) {
+                errorParams.push(param.name);
+            }
+        }
 
+        if (errorParams.length > 0) {
+            alert('Не заполнены обязательные параметры: ' + errorParams.join(', '))
+        }
+
+        return errorParams.length === 0;
+    }
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
+    runReport() {
+        const de = this;
+        if (!de.checkReportParams()) return;
+
+        const paramsDict = {};
+        for (let param of de.reportParams) {
+            paramsDict[param.title] = param.value;
+        }
+
+        const params = [];
+        params.push({ key: 'reportName', value: de.nameReport });
+        params.push({ key: 'reportParams', value: paramsDict });
+
+        GLObject.dataGetter.get({ url: 'reports/executeReport', params: params }).then(
+            (data) => {
+                if (data.reportStr) {
+                    const fm = new FileManager();
+                    fm.SaveToFile(data.reportStr, ("reportResult_" + String(new Date())) + ".xls", "excel");
+                }
+                else {
+                    alert("Ошибка: " + data.error);
+                }
+                de.refreshState();
+            }
+        );
+
+    }
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 
 

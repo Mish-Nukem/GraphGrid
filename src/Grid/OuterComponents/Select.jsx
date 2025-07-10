@@ -22,8 +22,9 @@ export function Select(props) {
     //else if (props.value && value && value.length > 0 && value[0] == null) {
     //    setValue(props.value);
     //}
-    if (value !== props.value)
-    setValue(props.value);
+    if (value !== props.value) {
+        setValue(props.value);
+    }
 
     const getOptions = props.getOptions;
 

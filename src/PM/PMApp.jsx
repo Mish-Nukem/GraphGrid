@@ -95,9 +95,9 @@ function PMApp() {
                     nameReport={menuItem.text}
                     pos={parentItem.frmPos}
                     visible={menuItem._reportParamsVisible}
-                    init={(de) => {
+                    //init={(de) => {
                         //de.visible = true;
-                    }}
+                    //}}
                     onClose={() => {
                         menuItem._reportParamsVisible = false;
                         setState({ menuObj: { id: GLObject.menuId } });
