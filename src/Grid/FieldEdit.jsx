@@ -245,13 +245,13 @@ export class FieldEditClass extends BaseComponent {
                                             showMonthDropdown
                                             showYearDropdown
                                             onSelect={(date) => {
-                                                //const e = { value: Moment(date, fe.dateFormat) };
                                                 const e = {};
                                                 fe.value = fe.text = Moment(date, fe.datePickerDateFormat).format(fe.dateFormat);//.format(fe.dateFormat);
                                                 e.value = e.text = Moment(date, fe.datePickerDateFormat).format(fe.dateFormat);//.format(fe.dateFormat);
                                                 fe.onChange(e);
                                             }}
                                             disabled={fe.disabled}
+                                            portalId="root-portal"
                                         ></DatePicker>
                                     </div>
                                 </>

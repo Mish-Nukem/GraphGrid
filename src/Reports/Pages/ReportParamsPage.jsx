@@ -2,8 +2,9 @@
 import { ModalClass } from '../../Grid/Modal';
 import { Select } from '../../Grid/OuterComponents/Select';
 import { FieldEdit } from '../../Grid/FieldEdit';
+import { BaseComponent } from '../../Grid/Base';
 import { Images } from '../../Grid/Themes/Images';
-
+import Moment from 'moment';
 import { GLObject } from '../../Grid/GLObject';
 import { FileManager } from '../../Grid/Utils/FileManager';
 // ==================================================================================================================================================================
@@ -53,7 +54,7 @@ export class ReportParamsPageClass extends ModalClass {
 
         de.nameReport = props.nameReport;
         de.reportParams = [];
-        de.opt.title = 'Параметры отчета - ' + de.nameReport;
+        de.opt.title = de.nameReport;
 
 
         de.opt.closeWhenEscape = true;
@@ -78,72 +79,75 @@ export class ReportParamsPageClass extends ModalClass {
         return (
             <div>
                 {
-                    <>
-                        <div className="graph-card-field">
-                            <span>{"Конфигурация:"}</span>
-                            <div className="field-edit"                            >
-                                <Select
-                                    key={`configselect_${de.id}_`}
-                                    inputClass={de.inputClass || ''}
-                                    className={de.selectClass || ''}
-                                    value={de._selectedConfig}
-                                    getOptions={(filter, pageNum) => de.getConfigList(filter, pageNum)}
-                                    height={de.selectH}
-                                    required={false}
-                                    //gridColumn={noClear ? 'span 2' : 'span 1'}
-                                    onChange={(e) => {
-                                        de._selectedConfig = e || { value: null, label: de.translate('New configuration') };
-                                        if (de._selectedConfig.value) {
-                                            de.getConfig();
-                                        }
-                                        else {
-                                            de.refreshState();
-                                        }
-                                    }}
-                                    disabled={de.disabled}
-                                    gridColumn={!canDelete ? 'span 2' : 'span 1'}
-                                >
-                                </Select>
-                                <button
-                                    className="graph-filter-button"
-                                    onClick={() => de.saveConfig()}
-                                    disabled={de.disabled || !canSave}
-                                >
-                                    {Images.images.save()}
-                                </button>
+                    !de.reportParams || de.reportParams.length <= 0 ?
+                        <></>
+                        :
+                        <>
+                            <div className="graph-card-field">
+                                <span>{"Конфигурация:"}</span>
+                                <div className="field-edit"                            >
+                                    <Select
+                                        key={`configselect_${de.id}_`}
+                                        inputClass={de.inputClass || ''}
+                                        className={de.selectClass || ''}
+                                        value={de._selectedConfig}
+                                        getOptions={(filter, pageNum) => de.getConfigList(filter, pageNum)}
+                                        height={de.selectH}
+                                        required={false}
+                                        //gridColumn={noClear ? 'span 2' : 'span 1'}
+                                        onChange={(e) => {
+                                            de._selectedConfig = e || { value: null, label: de.translate('New configuration') };
+                                            if (de._selectedConfig.value) {
+                                                de.getConfig();
+                                            }
+                                            else {
+                                                de.refreshState();
+                                            }
+                                        }}
+                                        disabled={de.disabled}
+                                        gridColumn={!canDelete ? 'span 2' : 'span 1'}
+                                    >
+                                    </Select>
+                                    <button
+                                        className="graph-filter-button"
+                                        onClick={() => de.saveConfig()}
+                                        disabled={de.disabled || !canSave}
+                                    >
+                                        {Images.images.save()}
+                                    </button>
+                                    {
+                                        !canDelete ?
+                                            <></>
+                                            :
+                                            <button
+                                                className="graph-filter-button"
+                                                onClick={() => de.deleteConfig()}
+                                                disabled={de.disabled || de._selectedConfig === undefined}
+                                            >
+                                                {Images.images.deleteRecord()}
+                                            </button>
+                                    }
+                                </div>
+                            </div>
+                            <div className="report-params-header">
+                                {"Параметры отчета"}
+                            </div>
+                            <div>
                                 {
-                                    !canDelete ?
-                                        <></>
-                                        :
-                                        <button
-                                            className="graph-filter-button"
-                                            onClick={() => de.deleteConfig()}
-                                            disabled={de.disabled || de._selectedConfig === undefined}
-                                        >
-                                            {Images.images.deleteRecord()}
-                                        </button>
+                                    de.reportParams.map((param) => { return de.renderParam(param) })
                                 }
                             </div>
-                        </div>
-                        <div className="report-params-header">
-                            {"Параметры отчета"}
-                        </div>
-                        <div>
-                            {
-                                de.reportParams.map((param) => { return de.renderParam(param) })
-                            }
-                        </div>
-                        <div style={{ display: 'none' }}>
-                            <div id="progress0" className="upload-percent" style={{ marginTop: "5px" }}>
-                                <span>{"Формирование отчета: "}</span><span className="percent">{de.percent}</span>
-                                <br></br>
-                                <div className="percent" style={{ height: "22px" }}>{de.continue}</div>
+                            <div style={{ display: 'none' }}>
+                                <div id="progress0" className="upload-percent" style={{ marginTop: "5px" }}>
+                                    <span>{"Формирование отчета: "}</span><span className="percent">{de.percent}</span>
+                                    <br></br>
+                                    <div className="percent" style={{ height: "22px" }}>{de.continue}</div>
+                                </div>
+                                <div className="progress" style={{ marginTop: "5px", width: "525px", height: '22px' }}>
+                                    <div className="progress-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style={{ width: de.percent, height: '22px' }}></div>
+                                </div>
                             </div>
-                            <div className="progress" style={{ marginTop: "5px", width: "525px", height: '22px' }}>
-                                <div className="progress-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style={{ width: de.percent, height: '22px' }}></div>
-                            </div>
-                        </div>
-                    </>
+                        </>
                 }
             </div>
         );
@@ -185,12 +189,25 @@ export class ReportParamsPageClass extends ModalClass {
                         de._selectedConfig = de._selectedConfig === undefined || de._selectedConfig === null ? { value: -1, label: de.translate('New configuration') } : de._selectedConfig;
                         de._selectedConfig.changed = true;
 
+                        de.clearChildrenParams(param.id);
+
                         de.refreshState();
                     }}
                 >
                 </FieldEdit>
             </div>
         );
+    }
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
+    clearChildrenParams(paramId) {
+        const de = this;
+        for (let param of de.reportParams) {
+            if (!param.parentParams || !param.parentParams.length) continue;
+
+            if (param.parentParams.indexOf(paramId) >= 0) {
+                param.value = param.text = '';
+            }
+        }
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     close() {
@@ -330,6 +347,9 @@ export class ReportParamsPageClass extends ModalClass {
         GLObject.dataGetter.get({ url: 'reports/paramsList', params: params }).then(
             (data) => {
                 de.reportParams = data;
+                if (de.reportParams.length > 0) {
+                    de.opt.title = 'Параметры отчета - ' + de.nameReport;
+                }
                 de.refreshState();
             }
         );
@@ -368,7 +388,7 @@ export class ReportParamsPageClass extends ModalClass {
             (data) => {
                 if (data.reportStr) {
                     const fm = new FileManager();
-                    fm.SaveToFile(data.reportStr, ("reportResult_" + String(new Date())) + ".xls", "excel");
+                    fm.SaveToFile(data.reportStr, ("reportResult_" + String(Moment().format(BaseComponent.dateFormat))) + ".xls", "excel");
                 }
                 else {
                     alert("Ошибка: " + data.error);
@@ -377,136 +397,6 @@ export class ReportParamsPageClass extends ModalClass {
             }
         );
 
-    }
-    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
-
-
-
-
-
-
-    runExchange() {
-        const de = this;
-        if (!de.fileName) {
-            alert('Не определен файл обмена.');
-            return;
-        }
-
-        de.percent = '0%';
-        de.continue = ' ';
-        de.isRunning = true;
-        de.enableRun = false;
-        de.refreshState();
-
-        if (+de.edType === 2 && !de.fileImport) {
-            const ImpotrFile0 = de.inputRef.current.files[0];
-            de.formData = new FormData();
-            de.formData.append("ImpotrFile", ImpotrFile0);
-
-            // 1. Создаём новый XMLHttpRequest-объект
-            let xhr = new XMLHttpRequest();
-
-            // отслеживаем процесс отправки
-            xhr.upload.onprogress = function (evt) {
-                if (evt.lengthComputable) {
-                    let percentComplete = evt.loaded / evt.total;
-                    percentComplete = parseInt(percentComplete * 100);
-                    de.percent = percentComplete + '%';
-                    de.refreshState();
-                }
-            };
-
-            // Ждём завершения: неважно, успешного или нет
-            xhr.onloadend = function (data) {
-                if (xhr.status === 200) {
-                    if (data) {
-                        de.percent = 'Успешно.';
-                        de.continue = 'Для запуска импорта нажмите кнопку "Продолжить"';
-                        de.isRunning = false;
-                        de.fileImport = data.target.responseText;
-                        de.enableRun = true;
-                        de.refreshState();
-                    }
-                } else {
-                    console.log("Ошибка " + this.status);
-                    de.isRunning = false;
-                    de.continue = "Ошибка " + this.status;
-                    de.refreshState();
-                }
-            };
-
-            // 2. Настраиваем его: POST-запрос по URL
-            xhr.open('POST', GLObject.dataGetter.APIurl + 'system/DataExchange/UploadFile?SetUniqueTempFileName=true');
-
-            // 3. Отсылаем запрос
-            xhr.send(de.formData);
-
-            xhr.onerror = function () {
-                alert("Запрос не удался");
-            };
-
-            //de.dataGetter.get({ url: 'system/DataExchange/UploadFile?SetUniqueTempFileName=true', data: de.formData, contentType: null, type: 'text' }).then(
-            //    (data) => {
-            //        if (data) {
-            //            de.percent = 'Успешно.';
-            //            de.continue = 'Для запуска импорта нажмите кнопку "Продолжить"';
-            //            de.isRunning = false;
-            //            de.fileImport = data;
-            //            de.refreshState();
-            //        }
-            //    }
-            //).catch();
-            return;
-        }
-
-        de.continueDataExchange({ ZipFileName: de.fileImport });
-    }
-    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
-    continueDataExchange(e) {
-        const de = this;
-        de.enableRun = false;
-
-        setTimeout(function () {
-            const params = [];
-
-            params.push({ key: 'ID_teaa', value: de.edId });
-            params.push({ key: 'FileName', value: de.fileName });
-            params.push({ key: 'url', value: document.URL });
-            if (e.uploadDate)
-                params.push({ key: 'UploadDate', value: e.uploadDate });
-            if (e.ZipFileName)
-                params.push({ key: 'ZipFileName', value: e.ZipFileName });
-
-            GLObject.dataGetter.get({ url: 'system/DataExchange/RunDataExchange', params: params }).then(
-                (data) => {
-                    if (!data) return;
-
-                    if (+de.edType === 3) {
-                        if (data.result === true && data.exchangecontent) {
-                            const fm = new FileManager();
-                            fm.SaveToFile(data.exchangecontent, (data.filename ? data.filename : de.edType + "-ID=" + de.edId) + ".zip", "zip");
-                        }
-                        //baseGraph.hideGridOverlay(baseNode);
-                        setTimeout(function () {
-                            alert(data.protokol);
-                        }, 100);
-                    }
-                    else if (+de.edType === 2) { //импорт, протокол
-                        if (data.protokolImp) {
-                            de.showProtocol(data.protokolImp);
-                        }
-                        else if (data.protokol) {//импорт завершился аварийно, полноценного протокола нет, просто сообщение об ошибке
-                            alert(data.protokol);
-                        }
-                        else {
-                            alert('Импорт. Ошибка протокола.');
-                        }
-                    }
-
-                    de.refreshState();
-                }
-            ).catch();
-        }, 500);
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
 }
