@@ -5,7 +5,8 @@
         dg.onError = onError;
 
         dg.APIurl = settings.APIurl;
-        dg.APIurl = settings.DebugAPIurl;
+        //dg.APIurl = settings.DebugAPIurl;
+        //dg.APIurl = settings.localAPIurl;
     }
 
     refreshToken() {

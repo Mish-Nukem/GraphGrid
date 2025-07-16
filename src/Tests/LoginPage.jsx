@@ -77,7 +77,7 @@ export class loginFormClass extends BaseComponent {
         return (
             <>
                 <div className="login-form" style={{ width: '400px' }}>
-                    <span className="login-form-item">Login</span>
+                    <span className="login-form-item">Login</span> 
                     <input className="login-form-item form-control" onChange={(e) => loginForm.login = e.target.value} value={loginForm.login}></input>
                     <span className="login-form-item">Password</span>
                     <input className="login-form-item form-control" type="password" onChange={(e) => loginForm.password = e.target.value} value={loginForm.password}></input>
