@@ -1,6 +1,7 @@
 ﻿import { useState, useEffect } from 'react';
 import { BaseComponent } from '../../Grid/Base';
 import { GLObject } from '../../Grid/GLObject';
+import { ClipLoader } from 'react-spinners';
 export function LoginPage(props) {
     let loginForm = null;
 
@@ -19,7 +20,6 @@ export function LoginPage(props) {
 
     if (!loginForm.refreshState) {
         loginForm.refreshState = function () {
-            loginForm.log(' -------------- refreshState ' + loginForm.stateind + ' --------------- ');
             setState({ form: loginForm, login: loginForm.login, password: loginForm.password, ind: loginForm.stateind++ });
         }
     }
@@ -75,7 +75,20 @@ export class loginFormClass extends BaseComponent {
                     <input className="login-form-item form-control" onChange={(e) => loginForm.login = e.target.value} value={loginForm.login}></input>
                     <span className="login-form-item">Password</span>
                     <input className="login-form-item form-control" type="password" onChange={(e) => loginForm.password = e.target.value} value={loginForm.password}></input>
-                    <button className="login-form-item btn btn-primary" onClick={() => loginForm.tryLogin()}>Login</button>
+                    {
+                        loginForm.isLogging ?
+                            <div className='grid-loader'>
+                                <ClipLoader
+                                    size={15}
+                                />
+                            </div>
+                            :
+                            <button className="login-form-item btn btn-primary" onClick={() => {
+                                loginForm.isLogging = true;
+                                loginForm.refreshState();
+                                loginForm.tryLogin();
+                            }}>Login</button>
+                    }
                 </div>
             </>
         );

@@ -64,7 +64,7 @@ export class ReportParamsPageClass extends ModalClass {
 
         de.percent = '0%';
         de.continue = ' ';
-        de.enableRun = false;
+        de.isRunning = false;
 
         de.buttons = de.getButtons();
 
@@ -216,7 +216,7 @@ export class ReportParamsPageClass extends ModalClass {
         de.percent = '0%';
         de.continue = ' ';
         de.fileName = '';
-        de.enableRun = false;
+        de.isRunning = false;
 
         super.close();
     }
@@ -227,11 +227,11 @@ export class ReportParamsPageClass extends ModalClass {
             {
                 title: 'Запуск отчета',
                 onclick: (e) => de.runReport(e),
-                //getDisabled: () => { return !de.enableRun; },
+                getDisabled: () => { return de.isRunning; },
             },
             {
                 title: 'Отменить',
-                onclick: (e) => { de.isRunning = false; de.close(e); },
+                onclick: (e) => { de.close(e); },
             },
         ];
 
@@ -375,6 +375,8 @@ export class ReportParamsPageClass extends ModalClass {
         const de = this;
         if (!de.checkReportParams()) return;
 
+        de.isRunning = true;
+
         const paramsDict = {};
         for (let param of de.reportParams) {
             paramsDict[param.title] = param.value;
@@ -386,6 +388,8 @@ export class ReportParamsPageClass extends ModalClass {
 
         GLObject.dataGetter.get({ url: 'reports/executeReport', params: params }).then(
             (data) => {
+                de.isRunning = false;
+
                 if (data.reportStr) {
                     const fm = new FileManager();
                     fm.SaveToFile(data.reportStr, ("reportResult_" + String(Moment().format(BaseComponent.dateFormat))) + ".xls", "excel");
@@ -397,6 +401,7 @@ export class ReportParamsPageClass extends ModalClass {
             }
         );
 
+        de.refreshState();
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
 }

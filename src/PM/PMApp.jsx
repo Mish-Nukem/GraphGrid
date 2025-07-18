@@ -11,13 +11,18 @@ import { PMGridCreator } from './PMGridClassCreator'
 import { MainMenu } from './Pages/MainMenu';
 import { GLObject } from '../Grid/GLObject';
 import { ReportParamsPage } from '../Reports/Pages/ReportParamsPage';
+import { GLSettings } from '../Grid/Pages/GLSettings';
 function PMApp() {
     const [state, setState] = useState({ menuObj: { id: - 2 } });
 
     window._logEnabled = true;
 
+    document.title = 'Управление проектом';
+
     GLObject.dataGetter = GLObject.dataGetter || new DataGetter(appSettings);
     GLObject.gridCreator = GLObject.gridCreator || new PMGridCreator();
+
+    const prevMenuId = GLObject.menuId;
 
     GLObject.menuId = state.menuObj.id;
 
@@ -51,20 +56,21 @@ function PMApp() {
         { id: 17, text: 'Проект', parent: 14, entity: 'SrRProjectEntity' },
         { id: 18, text: 'Статус', parent: 14, entity: 'SrRStatusEntity' },
         { id: 19, text: 'Срочность', parent: 14, entity: 'SrRPromptnessEntity' },
-        {
-            id: 15, text: 'Сменить тему', parent: 13, onClick: (e) => {
-                //BaseComponent.theme = null;
-                //BaseComponent.useBootstrap = !BaseComponent.useBootstrap;
+        //{
+        //    id: 15, text: 'Сменить тему', parent: 13, onClick: (e) => {
+        //        //BaseComponent.theme = null;
+        //        //BaseComponent.useBootstrap = !BaseComponent.useBootstrap;
 
-                e.skipActivate = true;
+        //        e.skipActivate = true;
 
-                BaseComponent.changeTheme().then(() => {
+        //        BaseComponent.changeTheme().then(() => {
 
-                    setState({ menuObj: { id: GLObject.menuId } });
-                });
-            }
-        },
-        { id: 20, text: 'API = ' + GLObject.dataGetter.APIurl, parent: 13 },
+        //            setState({ menuObj: { id: GLObject.menuId } });
+        //        });
+        //    }
+        //},
+        //{ id: 20, text: 'API = ' + GLObject.dataGetter.APIurl, parent: 13 },
+        { id: 21, text: 'Настройки', parent: 13 }
 
     ];
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -75,6 +81,10 @@ function PMApp() {
         const entity = menuItem.entity || '';
         const parent = menuItem.parent || '';
 
+        const parentItem = testMenuItems.find(function (item) {
+            return item.id === menuItem.parent;
+        });
+
         if (entity) {
             return (
                 <div className="div-with-grid">
@@ -84,10 +94,6 @@ function PMApp() {
         }
 
         if (parent === 6) {
-            const parentItem = testMenuItems.find(function (item) {
-                return item.id === 6;
-            });
-
             menuItem._reportParamsVisible = state.menuObj.id !== parentItem._lastItemId || menuItem._reportParamsVisible;
             parentItem._lastItemId = state.menuObj.id;
 
@@ -163,6 +169,29 @@ function PMApp() {
                             <GraphComponent uid="TEAA" schemeName="TuningListScheme"></GraphComponent>
                         </div>
                     </>
+                );
+            case 21:
+                menuItem._settingsVisible = parentItem && state.menuObj.id !== parentItem._lastItemId || menuItem._settingsVisible;
+                if (parentItem) {
+                    parentItem._lastItemId = state.menuObj.id;
+                }
+
+                //menuItem._settingsVisible = prevMenuId !== 21;//  menuItem._settingsVisible === undefined ? state.menuObj.id === 21 : menuItem._settingsVisible;
+                menuItem.frmPos = menuItem.frmPos || { x: 210, y: 210, w: 400, h: 300 };
+
+                return (
+                    <GLSettings
+                        pos={menuItem.frmPos}
+                        visible={menuItem._settingsVisible}
+                        //init={(de) => {
+                        //de.visible = true;
+                        //}}
+                        onClose={() => {
+                            menuItem._settingsVisible = false;
+                            setState({ menuObj: { id: GLObject.menuId } });
+                        }}
+                    ></GLSettings>
+
                 );
             default:
                 return null;

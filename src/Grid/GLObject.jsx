@@ -7,4 +7,6 @@
     static menuId;
 
     static entityInfo = {};
+
+    static gridSettings = {};
 }

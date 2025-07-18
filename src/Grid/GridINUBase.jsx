@@ -138,6 +138,9 @@ export class GridINUBaseClass extends GridFLClass {
             grid.allowView = entityInfo.allowView;
             grid.allowAdd = grid.allowCopy = entityInfo.allowAdd;
             grid.allowDelete = entityInfo.allowDelete;
+
+            grid.pageSize = entityInfo.pageSize !== null && entityInfo.pageSize !== undefined ? entityInfo.pageSize : grid.pageSize;
+            grid.pageNumber = entityInfo.pageNumber !== null && entityInfo.pageNumber !== undefined ? entityInfo.pageNumber : grid.pageNumber;
         }
 
         return entityInfo;
@@ -207,7 +210,7 @@ export class GridINUBaseClass extends GridFLClass {
                 const entityInfo = GLObject.entityInfo[grid.entity];
 
                 if (entityInfo && entityInfo.tableName && parent.entity) {
-                    const refColumn = entityInfo.Columns.find(function (item) {
+                    const refColumn = entityInfo.columns.find(function (item) {
                         return item.type === 'lookup' && String(item.entity) === String(parent.entity);
                     });
 
@@ -248,7 +251,7 @@ export class GridINUBaseClass extends GridFLClass {
             grid._savedConfigApplied = true;
 
             const newColumns = [];
-            for (let col of entityInfo.Columns) {
+            for (let col of entityInfo.columns) {
                 let obrCol = grid.colDict[col.name];
                 if (!obrCol) continue;
 
@@ -273,13 +276,9 @@ export class GridINUBaseClass extends GridFLClass {
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     getRows(e) {
         const grid = this;
-        e = e || { };
+        e = e || {};
 
-        const params = [
-            { key: 'pageSize', value: grid.pageSize },
-            { key: 'pageNumber', value: grid.pageNumber },
-            { key: 'entity', value: grid.entity },
-        ];
+        const params = [{ key: 'entity', value: grid.entity }];
 
         const orderBy = [];
         for (let col of grid.columns) {
@@ -313,6 +312,9 @@ export class GridINUBaseClass extends GridFLClass {
         return new Promise(function (resolve, reject) {
             grid.getEntityInfo().then((entityInfo) => {
                 GLObject.entityInfo[grid.entity] = entityInfo;
+
+                params.push({ key: 'pageSize', value: grid.pageSize });
+                params.push({ key: 'pageNumber', value: grid.pageNumber });
 
                 const filters = e.filters || grid.collectFilters();
 
@@ -435,7 +437,7 @@ export class GridINUBaseClass extends GridFLClass {
         const grid = this;
         if (!GLObject.dataGetter) return;
 
-        let savingColumns = [];
+        const savingColumns = [];
         for (let col of grid.columns) {
             let scol = { n: col.name, w: col.w };
             if (col.visible === false) scol.v = '0';
@@ -446,9 +448,15 @@ export class GridINUBaseClass extends GridFLClass {
 
         if (savingColumns.length <= 0) return;
 
+        const gridInfo = {
+            s: grid.pageSize,
+            /*p: grid.pageNumber*/
+        };
+
         const params = [
             { key: 'configUid', value: grid.getConfigUid() },
             { key: 'columns', value: savingColumns },
+            { key: 'ndata', value: gridInfo },
         ];
 
         GLObject.dataGetter.get({ url: 'system/saveColumnsSettings', params: params, type: 'text' });

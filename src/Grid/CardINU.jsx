@@ -191,7 +191,7 @@ export class CardINUClass extends GridINUBaseClass {
             id: card.cardButtons.length,
             name: 'commit',
             title: card.translate('Commit changes'),
-            label: Images.images.commit ? '' : card.translate('Commit changes'),
+            label: card.translate('Commit'),
             img: Images.images.commit,
             click: (e) => card.commitChangesNode(e),
             getDisabled: (e) => card.commitChangesNodeDisabled(e),
@@ -201,7 +201,7 @@ export class CardINUClass extends GridINUBaseClass {
             id: card.cardButtons.length,
             name: 'rollback',
             title: card.translate('Rollback changes'),
-            label: Images.images.rollback ? '' : card.translate('Rollback changes'),
+            label: card.translate('Rollback'),
             img: Images.images.rollback,
             click: (e) => {
                 card.rollbackChangesNode(e);

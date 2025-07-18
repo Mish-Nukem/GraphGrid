@@ -76,7 +76,7 @@ export class GridINUClass extends GridINUBaseClass {
         if (grid.columns.length <= 0 && grid.entity && !props.getColumns) {
             grid.getColumns = () => {
                 const entityInfo = GLObject.entityInfo[grid.entity];
-                return entityInfo ? entityInfo.Columns : [];
+                return entityInfo ? entityInfo.columns : [];
             };
         }
 
@@ -245,7 +245,7 @@ export class GridINUClass extends GridINUBaseClass {
             id: grid.buttons.length,
             name: 'commit',
             title: grid.translate('Commit changes'),
-            label: Images.images.commit ? '' : grid.translate('Commit changes'),
+            label: grid.translate('Commit'),
             img: Images.images.commit,
             click: (e) => grid.commitChanges(e),
             getDisabled: (e) => grid.commitChangesDisabled(e),
@@ -255,7 +255,7 @@ export class GridINUClass extends GridINUBaseClass {
             id: grid.buttons.length,
             name: 'rollback',
             title: grid.translate('Rollback changes'),
-            label: Images.images.rollback ? '' : grid.translate('Rollback changes'),
+            label: grid.translate('Rollback'),
             img: Images.images.rollback,
             click: (e) => grid.rollbackChanges(e),
             getDisabled: (e) => grid.rollbackChangesDisabled(e),
@@ -265,7 +265,7 @@ export class GridINUClass extends GridINUBaseClass {
             id: grid.buttons.length,
             name: 'add',
             title: grid.translate('Add new record'),
-            label: Images.images.addRecord ? '' : grid.translate('Add new record'),
+            label: grid.translate('Add'),
             img: Images.images.addRecord,
             click: (e) => grid.addRecord(e),
             getDisabled: (e) => grid.addRecordDisabled(e),
@@ -275,7 +275,7 @@ export class GridINUClass extends GridINUBaseClass {
             id: grid.buttons.length,
             name: 'copy',
             title: grid.translate('Copy record'),
-            label: Images.images.copyRecord ? '' : grid.translate('Copy record'),
+            label: grid.translate('Copy'),
             img: Images.images.copyRecord,
             click: (e) => grid.copyRecord(e),
             getDisabled: (e) => grid.copyRecordDisabled(e),
@@ -285,7 +285,7 @@ export class GridINUClass extends GridINUBaseClass {
             id: grid.buttons.length,
             name: 'delete',
             title: grid.translate('Delete record'),
-            label: Images.images.deleteRecord ? '' : grid.translate('Delete record'),
+            label: grid.translate('Delete'),
             img: Images.images.deleteRecord,
             click: (e) => grid.deleteRecord(e),
             getDisabled: (e) => grid.deleteRecordDisabled(e),
@@ -295,7 +295,7 @@ export class GridINUClass extends GridINUBaseClass {
             id: grid.buttons.length,
             name: 'view',
             title: grid.translate('View record'),
-            label: Images.images.viewRecord ? '' : grid.translate('View record'),
+            label: grid.translate('View'),
             img: Images.images.viewRecord,
             click: (e) => grid.viewRecord(e),
             getDisabled: (e) => grid.viewRecordDisabled(e),
@@ -304,8 +304,8 @@ export class GridINUClass extends GridINUBaseClass {
         grid.buttons.push({
             id: grid.buttons.length,
             name: 'selectValue',
-            title: grid.translate('Select'),
-            label: Images.images.selectFilterValue ? '' : grid.translate('Select value'),
+            title: grid.translate('Select value'),
+            label: grid.translate('Select'),
             click: (e) => {
                 if (!grid.multi) {
                     const row = grid.selectedRow();
@@ -459,6 +459,13 @@ export class GridINUClass extends GridINUBaseClass {
     //    const node = this;
     //    return node.value !== undefined && node.value !== '' ? row[node.keyField] === node.value : node.selectedRowIndex === rowInd;
     //}
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
+    setPageSize(newSize) {
+        const grid = this;
+        super.setPageSize(newSize);
+
+        grid.saveColumnsConfig();
+    }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     onSelectedRowChanged(e) {
         const grid = this;

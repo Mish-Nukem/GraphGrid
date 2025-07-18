@@ -100,6 +100,7 @@ export class MainMenuClass extends BaseComponent {
                     <div
                         key={`mainmenu_div_`}
                         className="main-menu-div"
+                        style={{ height: menu.collapsed ? '0' : '' }}
                     >
                         <button
                             key={`menucollapse_button_`}

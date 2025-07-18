@@ -6,6 +6,7 @@ import { Dropdown } from './Dropdown';
 import { WaveType } from './Graph';
 import { NodeStatus } from './Base';
 import { BaseComponent } from './Base';
+import { GLObject } from './GLObject';
 // ==================================================================================================================================================================
 export function GridDB(props) {
     let grid = null;
@@ -178,7 +179,7 @@ export class GridDBClass extends GridGRClass {
                                         grid-toolbar-button={`${grid.id}_${button.id}_`}
                                         className={`${button.class || grid.opt.toolbarButtonsClass || BaseComponent.theme.toolbarButtonsClass || 'grid-toolbar-button'}`}
                                         style={{
-                                            width: button.w ? button.w : button.img ? '2.5em' : 'auto',
+                                            width: button.w ? button.w : button.img ? '' : 'auto',
                                             display: button.getVisible && !button.getVisible() ? 'none' : '',
                                             padding: button.padding ? button.padding : '',
                                         }}
@@ -190,7 +191,7 @@ export class GridDBClass extends GridGRClass {
                                         } : grid.onButtonClick ? (e) => { grid.onButtonClick(e) } : null}
                                     >
                                         {button.img ? button.img() : ''}
-                                        {button.label ? grid.translate(button.label, 'grid-toolbar-button') : ''}
+                                        {GLObject.gridSettings.buttonSize == 2 ? grid.translate(button.label, 'grid-toolbar-button') || grid.translate(button.title, 'grid-toolbar-button') : ''}
                                     </button>
                                 );
                             })
@@ -452,14 +453,7 @@ export class GridDBClass extends GridGRClass {
                             value={grid.pageSize}
                             disabled={grid.isEditing() ? 'disabled' : ''}
                             onChange={function (e) {
-                                const newSize = +e.target.value;
-
-                                if (grid.pageSize !== newSize) {
-                                    grid.pageSize = newSize;
-                                    grid.pageNumber = 1;
-                                    grid.selectedRowIndex = 0;
-                                    grid.refresh();
-                                }
+                                grid.setPageSize(+e.target.value);
                             }}
                         >
                             {
@@ -503,6 +497,17 @@ export class GridDBClass extends GridGRClass {
 
         grid.pagerButtons.push(rows);
         grid.pagerButtonsDict[rows.id] = grid.pagerButtonsDict[rows.name] = rows;
+    }
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
+    setPageSize(newSize) {
+        const grid = this;
+
+        if (grid.pageSize === newSize || grid.pageSizes.indexOf(newSize) < 0) return;
+
+        grid.pageSize = newSize;
+        grid.pageNumber = 1;
+        grid.selectedRowIndex = 0;
+        grid.refresh();
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     renderHeaderCell(col, context) {

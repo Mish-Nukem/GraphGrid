@@ -7,6 +7,7 @@ import { GridINU, GridINUClass } from './GridINU';
 import { FadeLoader } from 'react-spinners';
 import { FieldEdit } from './FieldEdit';
 import { GLObject } from './GLObject';
+import { Images } from './Themes/Images';
 // ==================================================================================================================================================================
 export function GraphComponent(props) {
     let gc = null;
@@ -146,11 +147,34 @@ export class GraphComponentClass extends BaseComponent {
         return (
             <>
                 <div key={`graphall_${gc.id}_`}>
-                    <div className="graph-filter-line" key={`filterstop_${gc.id}_`}>
-                        {
-                            topFilters.map((node) => { return gc.renderFilter(node, true) })
-                        }
-                    </div>
+                    {
+                        topFilters.length <= 0 ? <></>
+                            :
+                            <div
+                                key={`topFiltersMainDiv_${gc.id}_`}
+                                className="graph-filters-div"
+                                style={{ height: gc.topFiltersCollapsed ? '0' : ''  }}
+                            >
+                                <button
+                                    key={`topFiltersCollapseButton_${gc.id}_`}
+                                    onClick={() => { gc.topFiltersCollapsed = !gc.topFiltersCollapsed; gc.refreshState(); }}
+                                    title={!gc.topFiltersCollapsed ? gc.translate('Collapse') : gc.translate('Expand')}
+                                    className='menu-collapse-button'
+                                >
+                                    {gc.topFiltersCollapsed ? Images.images.caretDown() : Images.images.caretUp()}
+                                </button>
+                                {
+                                    !gc.topFiltersCollapsed ?
+                                        <div className="graph-filter-line" key={`filterstop_${gc.id}_`}>
+                                            {
+                                                topFilters.map((node) => { return gc.renderFilter(node, true) })
+                                            }
+                                        </div>
+                                        :
+                                        <></>
+                                }
+                            </div>
+                    }
                     <div className="graph-tabcontrol-buttons" key={`tabsstop_${gc.id}_`}>
                         {
                             topGrids.map((node) => { return gc.renderGridTab(node, true) })
@@ -161,11 +185,35 @@ export class GraphComponentClass extends BaseComponent {
                             gc.renderGridInGraph(gc.graph.nodesDict[gc.activeMaster], true)
                         }
                     </div>
-                    <div className="graph-filter-line" key={`filterslow_${gc.id}_`}>
-                        {
-                            lowFilters.map((node) => { return gc.renderFilter(node, false) })
-                        }
-                    </div>
+                    {
+                        lowFilters.length <= 0 ? <></>
+                            :
+
+                            <div
+                                key={`lowFiltersMainDiv_${gc.id}_`}
+                                className="graph-filters-div"
+                                style={{ height: gc.lowFiltersCollapsed ? '0' : '' }}
+                            >
+                                <button
+                                    key={`lowFiltersCollapseButton_${gc.id}_`}
+                                    onClick={() => { gc.lowFiltersCollapsed = !gc.lowFiltersCollapsed; gc.refreshState(); }}
+                                    title={!gc.lowFiltersCollapsed ? gc.translate('Collapse') : gc.translate('Expand')}
+                                    className='menu-collapse-button'
+                                >
+                                    {gc.lowFiltersCollapsed ? Images.images.caretDown() : Images.images.caretUp()}
+                                </button>
+                                {
+                                    !gc.lowFiltersCollapsed ?
+                                        <div className="graph-filter-line" key={`filterslow_${gc.id}_`}>
+                                            {
+                                                lowFilters.map((node) => { return gc.renderFilter(node, false) })
+                                            }
+                                        </div>
+                                        :
+                                        <></>
+                                }
+                            </div>
+                    }
                     <div className="graph-tabcontrol-buttons" key={`tabsslow_${gc.id}_`}>
                         {
                             lowGrids.map((node) => { return gc.renderGridTab(node, false) })
@@ -476,6 +524,9 @@ export class GraphComponentClass extends BaseComponent {
             }
             so.t = so.o.length === 1 ? so.o[0].t : `${so.o.length} ${node.translate('items selected')}`;
 
+            so.s = node.pageSize;
+            so.n = node.pageNumber;
+
             savingData[node.uid] = so;
         }
 
@@ -608,11 +659,11 @@ export class GraphComponentClass extends BaseComponent {
         grid.nameField = obr.nameField || grid.nameField;
         grid.keyField = obr.keyField || grid.keyField;
 
-        grid.pageSize = obr.pageSize !== undefined ? obr.pageSize : grid.pageSize;
+        grid.pageSize = obr.pageSize !== undefined && obr.pageSize !== null ? obr.pageSize : grid.pageSize;
 
         graph.nodesDict[grid.uid] = grid;
 
-        grid.allowEditGrid = obr.allowEditGrid;
+        grid.allowEditGrid = obr.allowEdit;
         grid.allowAdd = obr.allowAdd;
         grid.allowCopy = obr.allowCopy;
         grid.allowDelete = obr.allowDelete;
@@ -794,6 +845,9 @@ export class GraphComponentClass extends BaseComponent {
             if (node.value && obr.t) {
                 node._selectedText = obr.t;
             }
+
+            node.pageSize = node.pageSizes && node.pageSizes.indexOf(+obr.s) >= 0 ? +obr.s : node.pageSize;
+            node.pageNumber = +obr.n >= 0 ? +obr.n : node.pageNumber;
         }
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------

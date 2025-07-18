@@ -153,6 +153,7 @@
     display: flex;
     justify-content: center;
     align-items: center;
+    margin-left: 8px;
     /*margin: 0 2px;*/
 }
 
@@ -215,6 +216,11 @@ tr.grid-selected-row > td {
         margin: 5px 2px;
     }
 
+        .toolbar-default > button:hover:not(:disabled) {
+            cursor: pointer;
+            background-color: lightgray;
+        }
+
 .grid-toolbar-button {
     /*height: 2em;*/
     /*height: 28px;*/
@@ -232,6 +238,29 @@ tr.grid-selected-row > td {
         cursor: pointer;
         background-color: lightgray;
     }
+
+.grid-toolbar-button-md {
+    height: 3em;
+    width: 3.5em;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 3px;
+    border-width: 1px;
+}
+
+.grid-toolbar-button-lg {
+    height: 4em;
+    width: auto;
+    display: grid;
+    border-radius: 3px;
+    border-width: 1px;
+    align-content: space-around;
+    align-items: center;
+    justify-items: center;
+    min-width: 8em;
+    box-shadow: 2px 2px 4px 0px;
+}
 
 .grid-pager-current {
     width: 3em;
@@ -393,13 +422,21 @@ tr.grid-selected-row > td {
         background-color: lightgray;
     }
 
+.graph-filters-div {
+    display: grid;
+    grid-template-columns: 18px auto;
+    align-items: center;
+    margin: 0 -10px;
+}
+
 .graph-filter-line {
     display: grid;
-    grid-template-columns: minmax(150px, 17%) minmax(150px, 17%) minmax(150px, 17%) minmax(150px, 17%) minmax(150px, 17%) minmax(150px, 17%);
-    grid-template-rows: auto auto;
+    grid-template-columns: repeat(auto-fit, minmax(15em, 1fr));
+    grid-template-rows: auto auto auto;
     grid-auto-flow: row;
     align-items: center;
     align-content: center;
+    overflow-x: auto;
 }
 
 .graph-filter {
@@ -561,6 +598,7 @@ tr.grid-selected-row > td {
     flex-wrap: nowrap;
     align-content: center;
     align-items: center;
+    margin-left: 4px;
 }
 
     .main-menu-div > button {
@@ -578,6 +616,7 @@ tr.grid-selected-row > td {
     border-width: 1px;
     border-radius: 2px;
     cursor: pointer;
+    white-space: nowrap;
 }
 
     .menu-item:hover {
@@ -589,6 +628,7 @@ tr.grid-selected-row > td {
     border-width: 1px;
     border-radius: 2px;
     cursor: pointer;
+    white-space: nowrap;
 }
 
 .menu-collapse-button {
