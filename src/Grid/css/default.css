@@ -213,7 +213,6 @@ tr.grid-selected-row > td {
 }
 
     .toolbar-default > button {
-        margin: 5px 2px;
     }
 
         .toolbar-default > button:hover:not(:disabled) {
@@ -232,6 +231,7 @@ tr.grid-selected-row > td {
     border-radius: 3px;
     border-width: 1px;
     /*padding: 1px 0px;*/
+    margin: 5px 2px;
 }
 
     .grid-toolbar-button:hover:not(:disabled) {
@@ -241,12 +241,16 @@ tr.grid-selected-row > td {
 
 .grid-toolbar-button-md {
     height: 3em;
-    width: 3.5em;
-    display: flex;
+    width: auto;
+    display: grid;
+    grid-template-columns: 2em auto;
     align-items: center;
-    justify-content: center;
     border-radius: 3px;
     border-width: 1px;
+    min-width: 6em;
+    justify-content: start;
+    margin: 4px;
+    overflow: hidden;
 }
 
 .grid-toolbar-button-lg {
@@ -260,6 +264,8 @@ tr.grid-selected-row > td {
     justify-items: center;
     min-width: 8em;
     box-shadow: 2px 2px 4px 0px;
+    margin: 4px;
+    overflow: hidden;
 }
 
 .grid-pager-current {
@@ -378,8 +384,8 @@ tr.grid-selected-row > td {
 }
 
 .grid-cell-button {
-    height: 1.5em;
-    width: 1.5em;
+    height: 1.6em;
+    width: 1.6em;
     display: flex;
     padding: 0 !important;
     margin: 0 2px;
@@ -605,7 +611,12 @@ tr.grid-selected-row > td {
         margin: 10px 2px;
         font-size: medium;
         font-weight: 300;
+        border-color: lightgray;
     }
+
+        .main-menu-div > button.active {
+            font-weight: bolder;
+        }
 
         .main-menu-div > button:hover:not(:disabled) {
             cursor: pointer;

@@ -19,10 +19,17 @@ function PMApp() {
 
     document.title = 'Управление проектом';
 
+    //"APIurl": "http://m2.infomega.local:5152/api/",
+    //"DebugAPIurl": "http://localhost:5152/api/",
+    //"localAPIurl": "http://localhost/api/"
+
+    appSettings.APIurl = appSettings.DebugAPIurl;
+    //appSettings.APIurl = appSettings.localAPIurl;
+
     GLObject.dataGetter = GLObject.dataGetter || new DataGetter(appSettings);
     GLObject.gridCreator = GLObject.gridCreator || new PMGridCreator();
 
-    const prevMenuId = GLObject.menuId;
+    //const prevMenuId = GLObject.menuId;
 
     GLObject.menuId = state.menuObj.id;
 
@@ -177,7 +184,7 @@ function PMApp() {
                 }
 
                 //menuItem._settingsVisible = prevMenuId !== 21;//  menuItem._settingsVisible === undefined ? state.menuObj.id === 21 : menuItem._settingsVisible;
-                menuItem.frmPos = menuItem.frmPos || { x: 210, y: 210, w: 400, h: 300 };
+                menuItem.frmPos = menuItem.frmPos || { x: 210, y: 210, w: 400, h: 260 };
 
                 return (
                     <GLSettings

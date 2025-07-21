@@ -63,13 +63,15 @@ export class DropdownClass extends ModalClass {
         dd.maxW = props.maxW;
 
         dd.opt.closeWhenEscape = true;
-        dd.opt.closeWhenMiss = true;
         dd.opt.noHeader = true;
         dd.opt.noFooter = true;
         dd.opt.resizable = false;
         dd.opt.noPadding = true;
         dd.opt.hiddenOverlay = true;
-        dd.opt.isModal = true;
+        //dd.opt.closeWhenMiss = !props.closeWhenMouseLeave;
+        //dd.opt.isModal = !props.closeWhenMouseLeave;
+
+        dd.opt.onItemMouseEnter = props.onItemMouseEnter;
 
         dd.renderContent = dd.renderDropdownContent;
 
@@ -112,9 +114,13 @@ export class DropdownClass extends ModalClass {
                                     title={dd.translate(item.title || item.text)}
                                     className={dd.menuItemClass + (dd.activeItem === item ? ' active' : '')}
                                     onClick={(e) => dd.onItemClick(e, item.id)}
+                                    onMouseEnter={(e) => {
+                                        if (!dd.opt.onItemMouseEnter) return;
+                                        dd.opt.onItemMouseEnter(e, item);
+                                    }}
                                 >
                                     {dd.translate(item.text)}
-                                    {item.items && item.items.length > 0 ? Images.images.caretRight() : ''}
+                                    {item.items && item.items.length > 0 ? <div>{Images.images.next(20, 10)}</div> : ''}
                                 </li>
                             );
                         })

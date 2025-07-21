@@ -239,7 +239,7 @@ export class GridClass extends BaseComponent {
                                     verticalAlign: "top",
                                 }}
                                 onMouseDown={(e) => grid.mouseDownColumnDrag(e, col)}
-                                onMouseOver={(e) => grid.mouseOverColumnDrag(e, col)}
+                                onMouseEnter={(e) => grid.mouseOverColumnDrag(e, col)}
                                 onMouseOut={(e) => grid.mouseOutColumnDrag(e, col)}
                             >
                                 <div

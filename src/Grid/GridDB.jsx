@@ -191,7 +191,7 @@ export class GridDBClass extends GridGRClass {
                                         } : grid.onButtonClick ? (e) => { grid.onButtonClick(e) } : null}
                                     >
                                         {button.img ? button.img() : ''}
-                                        {GLObject.gridSettings.buttonSize == 2 ? grid.translate(button.label, 'grid-toolbar-button') || grid.translate(button.title, 'grid-toolbar-button') : ''}
+                                        {GLObject.gridSettings.buttonSize > 0 ? grid.translate(button.label, 'grid-toolbar-button') || grid.translate(button.title, 'grid-toolbar-button') : ''}
                                     </button>
                                 );
                             })

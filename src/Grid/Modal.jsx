@@ -48,10 +48,16 @@ export class ModalClass extends BaseComponent {
 
         wnd.opt.pos = props.pos || { x: 0, y: 0, w: '100%', h: '100%' };
 
+        wnd.opt.isModal = props.isModal !== undefined ? props.isModal : true;
+
         wnd.opt.closeWhenClick = props.closeWhenClick;
         wnd.opt.closeWhenEscape = props.closeWhenEscape;
-        wnd.opt.isModal = props.isModal !== undefined ? props.isModal : true;
-        wnd.opt.closeWhenMiss = props.closeWhenMiss;
+        wnd.opt.closeWhenMiss = props.closeWhenMiss && props.isModal;
+        wnd.opt.closeWhenMouseLeave = props.closeWhenMouseLeave;
+
+        wnd.opt.onMouseEnter = props.onMouseEnter;
+        wnd.opt.onMouseLeave = props.onMouseLeave;
+
         wnd.opt.resizable = props.resizable !== undefined ? props.resizable : true;
         wnd.opt.draggable = props.draggable !== undefined ? props.draggable : true;
 
@@ -152,6 +158,8 @@ export class ModalClass extends BaseComponent {
                         }
                     }
                     className="modal-window-wnd"
+                    onMouseLeave={(e) => wnd.onMouseLeave(e)}
+                    onMouseEnter={(e) => wnd.onMouseEnter(e)}
                 >
                     {wnd.opt.noHeader ? <></> : wnd.renderHeader()}
                     <div
@@ -358,6 +366,25 @@ export class ModalClass extends BaseComponent {
 
         wnd.clearEvents = function () {
             document.removeEventListener('keydown', onKeyDown);
+        }
+    }
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
+    onMouseLeave() {
+        const wnd = this;
+
+        if (wnd.opt.onMouseLeave) {
+            wnd.opt.onMouseLeave(wnd);
+        }
+
+        if (wnd.opt.closeWhenMouseLeave) {
+            wnd.close();
+        }
+    }
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
+    onMouseEnter(e) {
+        const wnd = this;
+        if (wnd.opt.onMouseEnter) {
+            wnd.opt.onMouseEnter(e);
         }
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
