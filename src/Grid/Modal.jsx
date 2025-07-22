@@ -52,7 +52,7 @@ export class ModalClass extends BaseComponent {
 
         wnd.opt.closeWhenClick = props.closeWhenClick;
         wnd.opt.closeWhenEscape = props.closeWhenEscape;
-        wnd.opt.closeWhenMiss = props.closeWhenMiss && props.isModal;
+        wnd.opt.closeWhenMiss = (props.closeWhenMiss || !props.closeWhenMouseLeave) && wnd.opt.isModal;
         wnd.opt.closeWhenMouseLeave = props.closeWhenMouseLeave;
 
         wnd.opt.onMouseEnter = props.onMouseEnter;
