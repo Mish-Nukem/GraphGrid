@@ -110,7 +110,7 @@ export class MainMenuClass extends BaseComponent {
                             title={!menu.collapsed ? menu.translate('Collapse') : menu.translate('Expand')}
                             className='menu-collapse-button'
                         >
-                            {menu.collapsed ? Images.images.caretDown() : Images.images.caretUp()}
+                            {menu.collapsed ? /*Images.images.caretDown() : Images.images.caretUp()*/Images.images.chevronDown(20, 10) : Images.images.chevronUp(20, 10)}
                         </button>
                         {
                             !menu.collapsed ?
@@ -179,7 +179,7 @@ export class MainMenuClass extends BaseComponent {
                                                         items={item.items}
                                                         dimensionsByContent={true}
                                                         isModal={false}
-                                                        pos={{ x: item.x, y: item.y }}
+                                                        pos={{ x: item.x, y: item.y, minW: item.minW }}
                                                         init={(dd) => {
                                                             dd.activeItem = item.items.find(function (fitem) {
                                                                 return menu.selectedItems[fitem.id];
@@ -214,6 +214,7 @@ export class MainMenuClass extends BaseComponent {
             const rect = e.target.getBoundingClientRect();
             item.x = parseInt(rect.x) + (item.level === 1 ? 0 : parseInt(rect.width));
             item.y = parseInt(rect.y) + (item.level === 1 ? parseInt(rect.height) : 0);
+            item.minW = parseInt(rect.width);
         }
         else {
             menu.isShowingDropdown = item.level !== 1;

@@ -3,7 +3,7 @@ import { renderToStaticMarkup } from 'react-dom/server';
 import { BaseComponent, log } from './Base';
 import { OverlayClass } from './Overlay';
 import Moment from 'moment';
-import { FadeLoader } from 'react-spinners';
+import { ClipLoader } from 'react-spinners';
 // ==================================================================================================================================================================
 export function Grid(props) {
     let grid = null;
@@ -87,6 +87,7 @@ export class GridClass extends BaseComponent {
         }
 
         grid.dateFormat = props.dateFormat || 'DD.MM.YYYY';
+        grid.dateTimeFormat = props.dateTimeFormat || 'DD.MM.YYYY HH:mm:ss';
 
         grid.rows = [];
         grid.columns = [];
@@ -314,7 +315,10 @@ export class GridClass extends BaseComponent {
 
         if (!grid.columns || !grid.rows) {
             return <div key={`gridloader_${grid.id}_`}
-                className='grid-loader'><FadeLoader /></div>;
+                className='grid-loader'
+            >
+                <ClipLoader size={15} />
+            </div>;
         }
 
         return (//onMouseDown={(e) => { e.detail === 2 ? grid.onRowDblClick(e, row) : grid.onSelectGridRow(e) }}

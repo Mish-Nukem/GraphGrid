@@ -4,7 +4,7 @@ import { BaseComponent, NodeStatus, FilterType, log } from './Base';
 import { GraphClass } from './Graph';
 import { GridFL, GridFLClass } from './GridFL';
 import { GridINU, GridINUClass } from './GridINU';
-import { FadeLoader } from 'react-spinners';
+import { ClipLoader } from 'react-spinners';
 import { FieldEdit } from './FieldEdit';
 import { GLObject } from './GLObject';
 import { Images } from './Themes/Images';
@@ -116,7 +116,7 @@ export class GraphComponentClass extends BaseComponent {
         }
 
         if (!gc.graph) {
-            return <div className='grid-loader'><FadeLoader /></div>;
+            return <div className='grid-loader'><ClipLoader size={15} /></div>;
         }
 
         const topFilters = [];
@@ -161,7 +161,7 @@ export class GraphComponentClass extends BaseComponent {
                                     title={!gc.topFiltersCollapsed ? gc.translate('Collapse') : gc.translate('Expand')}
                                     className='menu-collapse-button'
                                 >
-                                    {gc.topFiltersCollapsed ? Images.images.caretDown() : Images.images.caretUp()}
+                                    {gc.topFiltersCollapsed ? Images.images.chevronDown(20, 10) : Images.images.chevronUp(20, 10)}
                                 </button>
                                 {
                                     !gc.topFiltersCollapsed ?
@@ -200,7 +200,7 @@ export class GraphComponentClass extends BaseComponent {
                                     title={!gc.lowFiltersCollapsed ? gc.translate('Collapse') : gc.translate('Expand')}
                                     className='menu-collapse-button'
                                 >
-                                    {gc.lowFiltersCollapsed ? Images.images.caretDown() : Images.images.caretUp()}
+                                    {gc.lowFiltersCollapsed ? Images.images.chevronDown(20, 10) : Images.images.chevronUp(20, 10)}
                                 </button>
                                 {
                                     !gc.lowFiltersCollapsed ?

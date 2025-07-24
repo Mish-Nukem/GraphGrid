@@ -81,6 +81,10 @@ export class ModalClass extends BaseComponent {
         wnd.opt.pos.y = !isNaN(wnd.opt.pos.y) ? wnd.opt.pos.y + 'px' : wnd.opt.pos.y;
         wnd.opt.pos.w = !isNaN(wnd.opt.pos.w) ? wnd.opt.pos.w + 'px' : wnd.opt.pos.w;
         wnd.opt.pos.h = !isNaN(wnd.opt.pos.h) ? wnd.opt.pos.h + 'px' : wnd.opt.pos.h;
+        wnd.opt.pos.minW = !isNaN(wnd.opt.pos.minW) ? wnd.opt.pos.minW + 'px' : wnd.opt.pos.minW;
+        wnd.opt.pos.minH = !isNaN(wnd.opt.pos.minH) ? wnd.opt.pos.minH + 'px' : wnd.opt.pos.minH;
+        wnd.opt.pos.maxW = !isNaN(wnd.opt.pos.maxW) ? wnd.opt.pos.maxW + 'px' : wnd.opt.pos.maxW;
+        wnd.opt.pos.maxH = !isNaN(wnd.opt.pos.maxH) ? wnd.opt.pos.maxH + 'px' : wnd.opt.pos.maxH;
 
         wnd.onClose = props.onClose;
 
@@ -150,6 +154,10 @@ export class ModalClass extends BaseComponent {
                             height: wnd.opt.pos.h,
                             top: wnd.opt.pos.y,
                             left: wnd.opt.pos.x,
+                            minWidth: wnd.opt.pos.minW || '',
+                            minHeight: wnd.opt.pos.minH || '',
+                            maxWidth: wnd.opt.pos.maxW || '',
+                            maxHeight: wnd.opt.pos.maxH || '',
                             zIndex: zInd || wnd.opt.zInd,
                             display: "flex",
                             flexDirection: "column",

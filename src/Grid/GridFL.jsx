@@ -3,6 +3,7 @@ import { BaseComponent } from './Base';
 import { Images } from './Themes/Images';
 import { GridDBClass } from './GridDB';
 import { Dropdown } from './Dropdown';
+import Moment from 'moment';
 // ==================================================================================================================================================================
 export function GridFL(props) {
     let grid = null;
@@ -159,7 +160,16 @@ export class GridFLClass extends GridDBClass {
                     const res = [];
                     let i = 0;
                     for (let row of rows) {
-                        res.push({ id: i++, text: row[grid._inputingColumn.name] || String(row) });
+                        let txt = row[grid._inputingColumn.name] || String(row);
+
+                        if (grid._inputingColumn.type === 'date') {
+                            txt = Moment(txt).format(grid.dateFormat);
+                        } 
+                        else if(grid._inputingColumn.type === 'datetime') {
+                            txt = Moment(txt).format(grid.dateTimeFormat);
+                        } 
+
+                        res.push({ id: i++, text: txt });
                     };
 
                     resolve(res);

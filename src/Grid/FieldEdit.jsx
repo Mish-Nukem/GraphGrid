@@ -40,6 +40,7 @@ export function FieldEdit(props) {
     fe.divContainerClass = props.divContainerClass || '';
 
     fe.w = props.w;
+    fe.maxW = props.maxW;
     fe.h = props.h || '1.7em';
     fe.selectH = props.selectH || '';
     fe.textareaH = props.textareaH || '2.1em';
@@ -153,6 +154,7 @@ export class FieldEditClass extends BaseComponent {
                         height: !fe.inputClass ? fe.h : '',
                         gridColumn: fe.gridColumn || '',
                         width: fe.w ? fe.w : '',
+                        maxWidth: fe.maxW ? fe.maxW : '',
                         margin: fe.margin,
                     }}
                 >

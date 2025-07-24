@@ -325,6 +325,7 @@ tr.grid-selected-row > td {
         display: flex;
         align-items: center;
         flex-wrap: nowrap;
+        justify-content: space-between;
     }
 
         .dropdown-ul > li:hover {
@@ -437,7 +438,7 @@ tr.grid-selected-row > td {
 
 .graph-filter-line {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(15em, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(15em, 25em));
     grid-template-rows: auto auto auto;
     grid-auto-flow: row;
     align-items: center;
@@ -646,8 +647,11 @@ tr.grid-selected-row > td {
     display: flex;
     border: none;
     height: 22px;
-    width: 22px;
+    width: 24px;
     padding: 0;
+    border-radius: 3px;
+    align-items: center;
+    margin-top: 5px;
 }
 
     .menu-collapse-button:hover:not(:disabled) {
