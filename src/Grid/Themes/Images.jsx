@@ -8,6 +8,8 @@ export class Images {
     static getImages() {
         if (Images._images) return Images._images;
 
+        Images._outerImagesDict = Images._outerImagesDict || {};
+
         const images = {};
         images.filterSelect = (w, h) => {
             return (
@@ -34,13 +36,16 @@ export class Images {
         };
 
         images.addRecord = (w, h) => {
+            const oi = Images._outerImagesDict['addRecord'];
             return (
-                //<svg xmlns="http://www.w3.org/2000/svg" width={w || "20"} height={h || "20"} fill="currentColor" viewBox="0 0 512 512">
-                //    <path d="M256 512A256 256 0 1 0 256 0a256 256 0 1 0 0 512zM232 344l0-64-64 0c-13.3 0-24-10.7-24-24s10.7-24 24-24l64 0 0-64c0-13.3 10.7-24 24-24s24 10.7 24 24l0 64 64 0c13.3 0 24 10.7 24 24s-10.7 24-24 24l-64 0 0 64c0 13.3-10.7 24-24 24s-24-10.7-24-24z" />
-                //</svg>
-                <svg xmlns="http://www.w3.org/2000/svg" width={w || "20"} height={h || "20"} fill="currentColor" viewBox="0 0 448 512">
-                    <path d="M256 80c0-17.7-14.3-32-32-32s-32 14.3-32 32l0 144L48 224c-17.7 0-32 14.3-32 32s14.3 32 32 32l144 0 0 144c0 17.7 14.3 32 32 32s32-14.3 32-32l0-144 144 0c17.7 0 32-14.3 32-32s-14.3-32-32-32l-144 0 0-144z" />
-                </svg>
+                oi ?
+                    <div dangerouslySetInnerHTML={{ __html: oi }} className="image-container-div"></div>
+                    :
+                    <div className="image-container-div">
+                        <svg xmlns="http://www.w3.org/2000/svg" width={w || "20"} height={h || "20"} fill="currentColor" viewBox="0 0 448 512">
+                            <path d="M256 80c0-17.7-14.3-32-32-32s-32 14.3-32 32l0 144L48 224c-17.7 0-32 14.3-32 32s14.3 32 32 32l144 0 0 144c0 17.7 14.3 32 32 32s32-14.3 32-32l0-144 144 0c17.7 0 32-14.3 32-32s-14.3-32-32-32l-144 0 0-144z" />
+                        </svg>
+                    </div>
             )
         };
 
@@ -54,9 +59,6 @@ export class Images {
 
         images.deleteRecord = (w, h) => {
             return (
-                //<svg xmlns="http://www.w3.org/2000/svg" width={w || "20"} height={h || "20"} fill="currentColor" viewBox="0 0 512 512">
-                //    <path d="M256 512A256 256 0 1 0 256 0a256 256 0 1 0 0 512zM184 232l144 0c13.3 0 24 10.7 24 24s-10.7 24-24 24l-144 0c-13.3 0-24-10.7-24-24s10.7-24 24-24z" />
-                //</svg>
                 <svg xmlns="http://www.w3.org/2000/svg" width={w || "20"} height={h || "20"} fill="currentColor" viewBox="0 0 448 512">
                     <path d="M432 256c0 17.7-14.3 32-32 32L48 288c-17.7 0-32-14.3-32-32s14.3-32 32-32l352 0c17.7 0 32 14.3 32 32z" />
                 </svg>
@@ -96,10 +98,16 @@ export class Images {
         };
 
         images.refresh = (w, h) => {
+            const oi = Images._outerImagesDict['refresh'];
             return (
-                <svg xmlns="http://www.w3.org/2000/svg" width={w || "20"} height={h || "20"} fill="currentColor" viewBox="0 0 512 512">
-                    <path d="M105.1 202.6c7.7-21.8 20.2-42.3 37.8-59.8c62.5-62.5 163.8-62.5 226.3 0L386.3 160 352 160c-17.7 0-32 14.3-32 32s14.3 32 32 32l111.5 0c0 0 0 0 0 0l.4 0c17.7 0 32-14.3 32-32l0-112c0-17.7-14.3-32-32-32s-32 14.3-32 32l0 35.2L414.4 97.6c-87.5-87.5-229.3-87.5-316.8 0C73.2 122 55.6 150.7 44.8 181.4c-5.9 16.7 2.9 34.9 19.5 40.8s34.9-2.9 40.8-19.5zM39 289.3c-5 1.5-9.8 4.2-13.7 8.2c-4 4-6.7 8.8-8.1 14c-.3 1.2-.6 2.5-.8 3.8c-.3 1.7-.4 3.4-.4 5.1L16 432c0 17.7 14.3 32 32 32s32-14.3 32-32l0-35.1 17.6 17.5c0 0 0 0 0 0c87.5 87.4 229.3 87.4 316.7 0c24.4-24.4 42.1-53.1 52.9-83.8c5.9-16.7-2.9-34.9-19.5-40.8s-34.9 2.9-40.8 19.5c-7.7 21.8-20.2 42.3-37.8 59.8c-62.5 62.5-163.8 62.5-226.3 0l-.1-.1L125.6 352l34.4 0c17.7 0 32-14.3 32-32s-14.3-32-32-32L48.4 288c-1.6 0-3.2 .1-4.8 .3s-3.1 .5-4.6 1z" />
-                </svg>
+                oi ?
+                    <div dangerouslySetInnerHTML={{ __html: oi }} className="image-container-div"></div>
+                    :
+                    <div className="image-container-div">
+                        <svg xmlns="http://www.w3.org/2000/svg" width={w || "20"} height={h || "20"} fill="currentColor" viewBox="0 0 512 512">
+                            <path d="M105.1 202.6c7.7-21.8 20.2-42.3 37.8-59.8c62.5-62.5 163.8-62.5 226.3 0L386.3 160 352 160c-17.7 0-32 14.3-32 32s14.3 32 32 32l111.5 0c0 0 0 0 0 0l.4 0c17.7 0 32-14.3 32-32l0-112c0-17.7-14.3-32-32-32s-32 14.3-32 32l0 35.2L414.4 97.6c-87.5-87.5-229.3-87.5-316.8 0C73.2 122 55.6 150.7 44.8 181.4c-5.9 16.7 2.9 34.9 19.5 40.8s34.9-2.9 40.8-19.5zM39 289.3c-5 1.5-9.8 4.2-13.7 8.2c-4 4-6.7 8.8-8.1 14c-.3 1.2-.6 2.5-.8 3.8c-.3 1.7-.4 3.4-.4 5.1L16 432c0 17.7 14.3 32 32 32s32-14.3 32-32l0-35.1 17.6 17.5c0 0 0 0 0 0c87.5 87.4 229.3 87.4 316.7 0c24.4-24.4 42.1-53.1 52.9-83.8c5.9-16.7-2.9-34.9-19.5-40.8s-34.9 2.9-40.8 19.5c-7.7 21.8-20.2 42.3-37.8 59.8c-62.5 62.5-163.8 62.5-226.3 0l-.1-.1L125.6 352l34.4 0c17.7 0 32-14.3 32-32s-14.3-32-32-32L48.4 288c-1.6 0-3.2 .1-4.8 .3s-3.1 .5-4.6 1z" />
+                        </svg>
+                    </div>
             )
         };
 
@@ -192,10 +200,16 @@ export class Images {
         };
 
         images.test = (w, h) => {
+            const oi = Images._outerImagesDict['test'];
             return (
-                <svg xmlns="http://www.w3.org/2000/svg" width={w || "28"} height={h || "20"} fill="currentColor" viewBox="100 0 320 512" style={{ marginLeft: "-3px" }}>
-                    <path d="M342.6 9.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l9.4 9.4L28.1 342.6C10.1 360.6 0 385 0 410.5L0 416c0 53 43 96 96 96l5.5 0c25.5 0 49.9-10.1 67.9-28.1L448 205.3l9.4 9.4c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3l-32-32-96-96-32-32zM205.3 256L352 109.3 402.7 160l-96 96-101.5 0z" />
-                </svg>
+                oi ?
+                    <div dangerouslySetInnerHTML={{ __html: oi }} className="image-container-div"></div>
+                    :
+                    <div className="image-container-div">
+                        <svg xmlns="http://www.w3.org/2000/svg" width={w || "28"} height={h || "20"} fill="currentColor" viewBox="100 0 320 512" style={{ marginLeft: "-3px" }}>
+                            <path d="M342.6 9.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l9.4 9.4L28.1 342.6C10.1 360.6 0 385 0 410.5L0 416c0 53 43 96 96 96l5.5 0c25.5 0 49.9-10.1 67.9-28.1L448 205.3l9.4 9.4c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3l-32-32-96-96-32-32zM205.3 256L352 109.3 402.7 160l-96 96-101.5 0z" />
+                        </svg>
+                    </div>
             )
         };
 
@@ -223,11 +237,31 @@ export class Images {
             )
         };
 
-        images.newImage = (w, h) => {
+        images.question = (w, h) => {
+            const oi = Images._outerImagesDict['question'];
             return (
-                <svg xmlns="http://www.w3.org/2000/svg" width={w || "20"} height={h || "20"} fill="currentColor" viewBox="0 0 320 512">
+                oi ?
+                    <div dangerouslySetInnerHTML={{ __html: oi }} className="image-container-div"></div>
+                    :
+                    <div className="image-container-div">
+                        <svg xmlns="http://www.w3.org/2000/svg" width={w || "20"} height={h || "20"} fill="currentColor" viewBox="0 0 320 512">
+                            <path d="M224 224C224 171 267 128 320 128C373 128 416 171 416 224C416 266.7 388.1 302.9 349.5 315.4C321.1 324.6 288 350.7 288 392L288 416C288 433.7 302.3 448 320 448C337.7 448 352 433.7 352 416L352 392C352 390.3 352.6 387.9 355.5 384.7C358.5 381.4 363.4 378.2 369.2 376.3C433.5 355.6 480 295.3 480 224C480 135.6 408.4 64 320 64C231.6 64 160 135.6 160 224C160 241.7 174.3 256 192 256C209.7 256 224 241.7 224 224zM320 576C342.1 576 360 558.1 360 536C360 513.9 342.1 496 320 496C297.9 496 280 513.9 280 536C280 558.1 297.9 576 320 576z" />
+                        </svg>
+                    </div>
+            )
+        };
 
-                </svg>
+        images.newImage = (w, h) => {
+            const oi = Images._outerImagesDict['newImage'];
+            return (
+                oi ?
+                    <div dangerouslySetInnerHTML={{ __html: oi }} className="image-container-div"></div>
+                    :
+                    <div className="image-container-div">
+                        <svg xmlns="http://www.w3.org/2000/svg" width={w || "20"} height={h || "20"} fill="currentColor" viewBox="0 0 320 512">
+
+                        </svg>
+                    </div>
             )
         };
 

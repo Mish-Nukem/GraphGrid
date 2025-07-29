@@ -184,10 +184,11 @@ export class GridClass extends BaseComponent {
 
         let w = 0;
         for (let col of grid.columns) {
+            if (col.visible === false) continue;
             w += col.w;
         }
 
-        grid.log('render()' + '. rows = ' + grid.rows.length +'. columns = ' + grid.columns.length + /*'. w = ' + w +*/ '. state = ' + grid.stateind);
+        grid.log('render()' + '. rows = ' + grid.rows.length + '. columns = ' + grid.columns.length + /*'. w = ' + w +*/ '. state = ' + grid.stateind);
         log(' -------------------------------------------------------------------------------------------------------------------------------------- ');
 
         return (
@@ -195,14 +196,14 @@ export class GridClass extends BaseComponent {
                 key={`griddiv_${grid.id}_`}
                 style={{ overflowX: 'auto', overflowY: 'hidden' }}
             >
-            <table
-                key={`grid_${grid.id}_`}
-                className={grid.opt.gridClass || BaseComponent.theme.gridClass || 'grid-default'}
-                style={{ width: w + "px", tableLayout: 'fixed' }}
-            >
-                {grid.renderHeader()}
-                {grid.renderBody()}
-            </table>
+                <table
+                    key={`grid_${grid.id}_`}
+                    className={grid.opt.gridClass || BaseComponent.theme.gridClass || 'grid-default'}
+                    style={{ width: w + "px", tableLayout: 'fixed' }}
+                >
+                    {grid.renderHeader()}
+                    {grid.renderBody()}
+                </table>
             </div>
         );
     }
@@ -230,42 +231,43 @@ export class GridClass extends BaseComponent {
                     {grid.multi && context !== 'fake' ? grid.renderSelectColumnHeader() : <></>}
                     {columns.map((col, ind) => {
                         return (
-                            <th
-                                key={`headercell_${grid.id}_${col.id}_${col.w}_${ind}_${grid.keyAdd()}_`}
-                                grid-header={`${grid.id}_${col.id}_${col.w}_`}
-                                className={`${grid.opt.columnClass ? grid.opt.columnClass : ''} grid-header-th`}
-                                style={{ /*position: "sticky", top: 0,*/
-                                    width: col.w + "px",
-                                    overflow: "hidden",
-                                    verticalAlign: "top",
-                                }}
-                                onMouseDown={(e) => grid.mouseDownColumnDrag(e, col)}
-                                onMouseEnter={(e) => grid.mouseOverColumnDrag(e, col)}
-                                onMouseOut={(e) => grid.mouseOutColumnDrag(e, col)}
-                            >
-                                <div
+                            col.visible === false ? <></> :
+                                <th
+                                    key={`headercell_${grid.id}_${col.id}_${col.w}_${ind}_${grid.keyAdd()}_`}
+                                    grid-header={`${grid.id}_${col.id}_${col.w}_`}
+                                    className={`${grid.opt.columnClass ? grid.opt.columnClass : ''} grid-header-th`}
                                     style={{ /*position: "sticky", top: 0,*/
                                         width: col.w + "px",
                                         overflow: "hidden",
                                         verticalAlign: "top",
-                                        display: 'grid',
-                                        gridTemplateColumns: 'calc(100% - 6px) 6px',
                                     }}
+                                    onMouseDown={(e) => grid.mouseDownColumnDrag(e, col)}
+                                    onMouseEnter={(e) => grid.mouseOverColumnDrag(e, col)}
+                                    onMouseLeave={(e) => grid.mouseOutColumnDrag(e, col)}
                                 >
-
                                     <div
-                                        className={`grid-header-div-default ${grid.opt.headerDivClass || 'grid-header-div'}`}
+                                        style={{ /*position: "sticky", top: 0,*/
+                                            width: col.w + "px",
+                                            overflow: "hidden",
+                                            verticalAlign: "top",
+                                            display: 'grid',
+                                            gridTemplateColumns: 'calc(100% - 6px) 6px',
+                                        }}
                                     >
-                                        {grid.renderHeaderCell(col, context)}
+
+                                        <div
+                                            className={`grid-header-div-default ${grid.opt.headerDivClass || 'grid-header-div'}`}
+                                        >
+                                            {grid.renderHeaderCell(col, context)}
+                                        </div>
+                                        <div //style={{ position: "absolute", right: "-6px", top: "-1px", cursor: "e-resize", height: "100%", width: "12px", zIndex: (grid.opt.zInd + 1) }}
+                                            grid-rsz-x={`${grid.id}_${col.id}`}
+                                            style={{ position: "static", /*right: "-6px", top: "-1px",*/ cursor: "e-resize", height: "100%", width: "12px", zIndex: (grid.opt.zInd + 1) }}
+                                            onMouseDown={(e) => { e.detail === 2 ? grid.mouseResizerDoubleClick(e, col) : grid.mouseResizerClick(e, col) }}
+                                        >
+                                        </div>
                                     </div>
-                                    <div //style={{ position: "absolute", right: "-6px", top: "-1px", cursor: "e-resize", height: "100%", width: "12px", zIndex: (grid.opt.zInd + 1) }}
-                                        grid-rsz-x={`${grid.id}_${col.id}`}
-                                        style={{ position: "static", /*right: "-6px", top: "-1px",*/ cursor: "e-resize", height: "100%", width: "12px", zIndex: (grid.opt.zInd + 1) }}
-                                        onMouseDown={(e) => { e.detail === 2 ? grid.mouseResizerDoubleClick(e, col) : grid.mouseResizerClick(e, col) }}
-                                    >
-                                    </div>
-                                </div>
-                            </th>
+                                </th>
                         );
                     })}
                 </tr>
@@ -362,11 +364,12 @@ export class GridClass extends BaseComponent {
                 {
                     grid.columns.map((col, cind) => {
                         return (
-                            <td
-                                key={`gridcell_${grid.id}_${rowInd}_${cind}_${grid.keyAdd()}_${row[grid.keyField]}_`}
-                            >
-                                {grid.renderCell(col, row)}
-                            </td>
+                            col.visible === false ? <></> :
+                                <td
+                                    key={`gridcell_${grid.id}_${rowInd}_${cind}_${grid.keyAdd()}_${row[grid.keyField]}_`}
+                                >
+                                    {grid.renderCell(col, row)}
+                                </td>
                         );
                     })
                 }
@@ -487,13 +490,16 @@ export class GridClass extends BaseComponent {
 
             fakeGrid.style.left = x + 'px';
         }
-        function onMouseMove(e) {
-            drawMovingColumn(e.clientX);
+        function onMouseMove(ev) {
+            drawMovingColumn(ev.clientX);
+
+            grid._skipClickColumn = column;
         }
 
         document.addEventListener('mousemove', onMouseMove);
         document.addEventListener('mouseup', onMouseUp);
         function onMouseUp() {
+            //e.preventDefault();
             document.removeEventListener('mousemove', onMouseMove);
             document.removeEventListener('mouseup', onMouseUp);
 
@@ -610,9 +616,11 @@ export class GridClass extends BaseComponent {
 
 
         const prevSelRow = rows[grid.selectedRowIndex];
-        prevSelRow.classList.remove('grid-selected-row');
-        if (grid.opt.selectedRowClass) {
-            prevSelRow.classList.remove(grid.opt.selectedRowClass);
+        if (prevSelRow) {
+            prevSelRow.classList.remove('grid-selected-row');
+            if (grid.opt.selectedRowClass) {
+                prevSelRow.classList.remove(grid.opt.selectedRowClass);
+            }
         }
 
         grid.selectedRowIndex = newSelectedIndex;
@@ -800,7 +808,7 @@ export class GridClass extends BaseComponent {
 
         let otherColsW = 0;
         for (let col of columns) {
-            if (col === column) continue;
+            if (col === column || col.visible === false) continue;
             otherColsW += col.w;
         }
 

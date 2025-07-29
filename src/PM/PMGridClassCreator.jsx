@@ -1,25 +1,22 @@
 ﻿import { GridINUClass } from '../Grid/GridINU';
-import { GridFLClass } from '../Grid/GridFL';
 import { PMGridClass } from './Pages/EntityGrids/PMGrid';
-import { TeaaGridClass } from '../ETL/Pages/EntityGrids/TeaaGrid';
-export function PMGridCreator() {
-    return {
-        CreateGridClass: (props) => {
-            const entity = props.entity || '';
+import { DDObjGridClass } from './Pages/EntityGrids/DDObjGrid';
+import { GridCreator } from '../Grid/Utils/GridClassCreator'
+export class PMGridCreator extends GridCreator {
+    constructor(props) {
+        super(props);
+    }
 
-            if (entity.toLowerCase() === 'srremarkentity') {
-                return new PMGridClass(props);
-            }
-            else if (entity.toLowerCase() === 'tinutuningexchteaaentity') {
-                return new TeaaGridClass(props);
-            }
+    CreateGridClass(props) {
+        const entity = props.entity || '';
 
-            if (props.entity) {
-                return new GridINUClass(props);
-            }
-            else {
-                return new GridFLClass(props);
-            }
+        if (entity.toLowerCase() === 'srremarkentity') {
+            return new PMGridClass(props);
         }
+        else if (entity.toLowerCase() === 'ddobjectentity') {
+            return new DDObjGridClass(props);
+        }
+
+        return super.CreateGridClass(props);
     }
 }

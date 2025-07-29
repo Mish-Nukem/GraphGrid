@@ -123,7 +123,11 @@ export class GraphComponentClass extends BaseComponent {
         const lowFilters = [];
         const topGrids = [];
         const lowGrids = [];
-        for (let uid in gc.graph.nodesDict) {
+
+        const keys = Object.keys(gc.graph.nodesDict);
+        keys.sort(); 
+
+        for (let uid of keys) {
             let node = gc.graph.nodesDict[uid];
 
             if (node.status === NodeStatus.filter) {
@@ -278,7 +282,7 @@ export class GraphComponentClass extends BaseComponent {
                     //style={{ gridColumn: 'span 3', width: '100%' }}
                     className='graph-filter-title'
                 >
-                    {node.title}
+                    {node.title + (node.multi && node._selectedOptions && node._selectedOptions.length > 1 ? ` (${node._selectedOptions.length})` : '')}
                 </span>
 
                 <FieldEdit

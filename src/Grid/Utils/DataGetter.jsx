@@ -70,8 +70,12 @@
                             method: e.method || 'post',
                             headers: {},
                             /*headers: { 'Content-Type': e.contentType || 'application/json' },*/
-                            body: e.params ? JSON.stringify(e.params) : e.data || null
+                            //body: 
                         };
+
+                        if (e.method !== 'get') {
+                            fetchParams.body = e.params ? JSON.stringify(e.params) : e.data || null;
+                        }
 
                         if (e.contentType !== null) {
                             fetchParams.headers['Content-Type'] = e.contentType || 'application/json';

@@ -600,6 +600,11 @@ export class GridDBClass extends GridGRClass {
     changeColumnSortOrder(column, e) {
         const grid = this;
 
+        if (column === grid._skipClickColumn) {
+            delete grid._skipClickColumn;
+            return;
+        }
+
         if (!column.sortable || grid.isEditing()) return;
 
         let nextInd = 1;
