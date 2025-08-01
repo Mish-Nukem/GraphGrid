@@ -86,6 +86,11 @@ export class GridClass extends BaseComponent {
             grid._allRowsOnPageSelected = false;
         }
 
+        if (props.renderCell) {
+            grid.defaultRenderCell = grid.renderCell;
+            grid.renderCell = props.renderCell;
+        }
+
         grid.dateFormat = props.dateFormat || 'DD.MM.YYYY';
         grid.dateTimeFormat = props.dateTimeFormat || 'DD.MM.YYYY HH:mm:ss';
 
@@ -368,7 +373,7 @@ export class GridClass extends BaseComponent {
                                 <td
                                     key={`gridcell_${grid.id}_${rowInd}_${cind}_${grid.keyAdd()}_${row[grid.keyField]}_`}
                                 >
-                                    {grid.renderCell(col, row)}
+                                    {grid.renderCell(grid, col, row)}
                                 </td>
                         );
                     })
@@ -377,8 +382,7 @@ export class GridClass extends BaseComponent {
         )
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
-    renderCell(col, row) {
-        const grid = this;
+    renderCell(grid, col, row) {
         let val = row[col.name];
 
         if (col.type === 'date' && val) {
@@ -775,7 +779,7 @@ export class GridClass extends BaseComponent {
         fakeDiv.className = '';
 
         for (let row of grid.rows) {
-            fakeDiv.innerHTML = renderToStaticMarkup(grid.renderCell(column, row));
+            fakeDiv.innerHTML = renderToStaticMarkup(grid.renderCell(grid, column, row));
             contentSize = Math.max(contentSize, parseInt(getComputedStyle(fakeDiv).width));
         }
 

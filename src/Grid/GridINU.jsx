@@ -132,10 +132,8 @@ export class GridINUClass extends GridINUBaseClass {
         );
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
-    renderCell(col, row) {
-        const grid = this;
-
-        if (!grid.allowEditGrid || col.readonly || row !== grid.selectedRow()) return super.renderCell(col, row);
+    renderCell(grid, col, row) {
+        if (!grid.allowEditGrid || col.readonly || row !== grid.selectedRow()) return super.renderCell(grid, col, row);
 
         row = !grid.isEditing() || !grid.changedRow ? row : grid.changedRow;
 

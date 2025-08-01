@@ -682,3 +682,55 @@ tr.grid-selected-row > td {
     justify-content: center;
     margin: 5px;
 }
+
+
+.tree-div {
+    display: grid;
+    grid-template-columns: 16em calc(100% - 16em);
+}
+
+.tree,
+.tree-node,
+.tree-node-group {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.tree-branch-wrapper,
+.tree-node__leaf {
+    outline: none;
+}
+
+.tree-node {
+    cursor: pointer;
+}
+
+    .tree-node .name:hover {
+        background: rgba(0, 0, 0, 0.1);
+    }
+
+    .tree-node > span {
+        white-space: nowrap;
+    }
+
+
+.tree-node--focused .name {
+    background: rgba(0, 0, 0, 0.2);
+}
+
+.tree-node {
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: center;
+    font-size: 16px;
+    user-select: none;
+    box-sizing: content-box;
+    max-width: 30em;
+    overflow-x: hidden;
+}
+
+.tree-right-panel {
+    display: flex;
+    justify-content: space-around;
+}

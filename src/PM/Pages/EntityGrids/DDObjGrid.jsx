@@ -3,11 +3,14 @@ import { Images } from '../../../Grid/Themes/Images';
 import { GLObject } from '../../../Grid/GLObject';
 export class DDObjGridClass extends GridINUClass {
 
-    //constructor(props) {
-    //    super(props);
+    constructor(props) {
+        super(props);
 
-    //    const grid = this;
-    //}
+        const grid = this;
+
+        grid.popupDimensionsByContent = true;
+        grid._buttonsDict['copy'].getVisible = () => { return false };
+    }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     addRecord() {
         const grid = this;
@@ -16,7 +19,7 @@ export class DDObjGridClass extends GridINUClass {
             alert('Не определены ID объекта и номер класса!');
         }
 
-        grid.fileSelectPos = grid.fileSelectPos || { x: 110, y: 110, w: 500, h: 300 };
+        grid.fileSelectPos = grid.fileSelectPos || { x: 110, y: 110, w: 300, h: 200 };
         grid.popupPos = grid.fileSelectPos;
 
         grid.popupIsShowing = true;
@@ -24,6 +27,52 @@ export class DDObjGridClass extends GridINUClass {
         grid.popupTitle = grid.title + ': выбор файла.';
 
         grid.refreshState();
+    }
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
+    viewRecord() {
+        const grid = this;
+
+        if (!grid.tryGetNumClassAndId()) {
+            alert('Не определены ID объекта и номер класса!');
+        }
+
+        delete grid.previewData;
+        grid.previewLoaded = false;
+
+        const params = [];
+        params.push({ key: 'id', value: grid.selectedValue() });
+
+        GLObject.dataGetter.get({ url: 'DdObjectEntity/getDData', params: params }).then(
+            (data) => {
+                if (!data) return;
+
+                grid.previewData = data;
+
+                grid.fileViewPos = grid.fileViewPos || { x: 110, y: 110, w: 300, h: 200 };
+                grid.popupPos = grid.fileViewPos;
+
+                grid.popupIsShowing = true;
+                grid.fileViewing = true;
+                grid.popupTitle = grid.title + ': просмотр файла.';
+
+                grid.refreshState();
+            });
+    }
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
+    async prepareColumns() {
+        const grid = this;
+        if (grid._waitingColumns) return;
+
+        await super.prepareColumns().then(() => {
+            const ddCol = grid.colDict['DOP_DATA_DDOB'] || grid.colDict['dop_data_ddob'];
+            if (ddCol) {
+                ddCol.visible = false;
+            }
+            const idddCol = grid.colDict['ID_OBJECT_DDOB'] || grid.colDict['id_object_ddob'];
+            if (idddCol) {
+                idddCol.visible = false;
+            }
+        });
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     tryGetNumClassAndId() {
@@ -42,8 +91,95 @@ export class DDObjGridClass extends GridINUClass {
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     renderPopupContent() {
         const grid = this;
-        return !grid.fileSelecting ? super.renderPopupContent()
-            :
+        return grid.fileSelecting ? grid.renderSelectFile()
+            : grid.fileViewing ? grid.renderViewFile()
+                : super.renderPopupContent()
+            ;
+    }
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
+    renderViewFile() {
+        const grid = this;
+        const row = grid.selectedRow();
+        if (!row || !grid.previewData) return;
+
+        //const decodedBase64 = atob(grid.previewData);
+
+        const extention = row['EXPAND_DDOB'] || row['expand_ddob'];
+
+        let mimeType = 'image/jpeg';
+        let isImage = true;
+        let isText = false;
+        switch (extention) {
+            case '.jpg':
+                mimeType = 'image/jpeg';
+                break;
+            case '.png':
+                mimeType = 'image/png';
+                break;
+            case '.gif':
+                mimeType = 'image/gif';
+                break;
+            case '.svg':
+                mimeType = 'image/svg+xml';
+                break;
+            case '.js':
+                mimeType = 'text/javascript';
+                isText = true;
+                isImage = false;
+                break;
+            case '.xml':
+                mimeType = 'application/xml';
+                isImage = false;
+                break;
+            case '.pdf':
+                mimeType = 'application/pdf';
+                isImage = false;
+                break;
+        }
+
+        const dataUri = `data:${mimeType};base64,${grid.previewData}`;
+
+        return (
+            <div>
+                <div style={{ marginTop: "5px" }}>
+                    {
+                        isImage ?
+                            <img src={dataUri}
+                                onLoad={() => {
+                                    if (grid.previewLoaded) return;
+
+                                    grid.previewLoaded = true;
+                                    grid.refreshState();
+                                }}
+                            />
+                            :
+                            isText ?
+                                //<div dangerouslySetInnerHTML={{ __html: atob(grid.previewData) }}>
+                                //</div>
+                                <textarea
+                                    value={atob(grid.previewData)}
+                                    style={{ height: '600px', width: '800px' }}
+                                >
+                                </textarea>
+                                :
+                                <iframe
+                                    src={dataUri} width="100%" height="600px"
+                                    onLoad={() => {
+                                        if (grid.previewLoaded) return;
+
+                                        grid.previewLoaded = true;
+                                        grid.refreshState();
+                                    }}
+                                />
+                    }
+                </div>
+            </div>
+        );
+    }
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
+    renderSelectFile() {
+        const grid = this;
+        return (
             <div>
                 <input
                     className="form-control-file"
@@ -56,43 +192,21 @@ export class DDObjGridClass extends GridINUClass {
                         grid.formData = new FormData();
                         grid.formData.append("DDFile", DDFile);
 
-                        //super.addRecord(e);
-
                         grid.saveNewDDObject();
-
-                        //grid.refreshState();
-
                     }}
                 />
                 <div id="progress0" className="upload-percent" style={{ marginTop: "5px" }}>
                     <span>{"Передача файла на сервер: "}</span><span className="percent">{grid.percent}</span>
                 </div>
-            </div>;
+            </div>
+        );
     }
-    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
-    //addToolbarButtons() {
-    //    const node = this;
-
-    //    super.addToolbarButtons();
-
-    //    let btn = {
-    //        id: node.buttons.length,
-    //        name: 'test',
-    //        title: node.translate('TEST'),
-    //        //label: node.translate('Test'),
-    //        click: (e) => node.showResult(e),
-    //        img: Images.images.test,
-    //        /*padding: '1px 0',*/
-    //    };
-
-    //    node.buttons.push(btn);
-    //    node._buttonsDict[btn.name] = btn;
-    //}
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     onClosePopup() {
         const grid = this;
         grid.popupIsShowing = false;
         grid.fileSelecting = false;
+        grid.fileViewing = false;
 
         delete grid.formData;
     }
@@ -145,26 +259,6 @@ export class DDObjGridClass extends GridINUClass {
         xhr.onerror = function () {
             alert("Запрос не удался");
         };
-
-
-        //const params = [];
-
-        //GLObject.dataGetter.get({ url: 'DdObjectEntity/saveNewDDObject', params: params, type: 'text', method: 'get' }).then(
-        //    (result) => {
-        //        if (result) {
-        //            grid._testResult = result;
-        //            grid.popupIsShowing = true;
-        //            grid.popupPos = grid.popupPos || { x: 100, y: 100, w: 200, h: 200 };
-        //            grid.popupTitle = 'TEST';
-
-        //            Images._outerImagesDict['test'] = result;
-
-        //            grid.refreshState();
-        //        }
-        //    }
-        //);
-
-        //alert('PMGridClass TEST!');
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
 }

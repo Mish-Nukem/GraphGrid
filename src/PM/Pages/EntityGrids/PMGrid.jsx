@@ -1,6 +1,7 @@
 ﻿import { GridINUClass } from '../../../Grid/GridINU';
 import { Images } from '../../../Grid/Themes/Images';
 import { GLObject } from '../../../Grid/GLObject';
+import { RTreeView } from '../../../Grid/OuterComponents/TreeView'
 export class PMGridClass extends GridINUClass {
 
     //constructor(props) {
@@ -11,10 +12,16 @@ export class PMGridClass extends GridINUClass {
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     renderPopupContent() {
         const grid = this;
-        return !grid._testResult ? super.renderPopupContent()
-            :
+        return grid.showingTestResult ?
             <div dangerouslySetInnerHTML={{ __html: grid._testResult }}>
-            </div>;
+            </div>
+            : grid.showingTree ?
+                <RTreeView
+                    data={grid._treeData}
+                >
+                </RTreeView>
+                :
+                super.renderPopupContent();
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     addToolbarButtons() {
@@ -24,12 +31,21 @@ export class PMGridClass extends GridINUClass {
 
         let btn = {
             id: node.buttons.length,
+            name: 'tree',
+            title: node.translate('Tree'),
+            click: (e) => node.showTree(e),
+            img: Images.images.folderTree,
+        };
+
+        node.buttons.push(btn);
+        node._buttonsDict[btn.name] = btn;
+
+        btn = {
+            id: node.buttons.length,
             name: 'test',
             title: node.translate('TEST'),
-            //label: node.translate('Test'),
-            click: (e) => node.showResult(e),
+            click: (e) => node.showTestResult(e),
             img: Images.images.test,
-            /*padding: '1px 0',*/
         };
 
         node.buttons.push(btn);
@@ -38,16 +54,18 @@ export class PMGridClass extends GridINUClass {
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     onClosePopup() {
         const grid = this;
-        delete grid._testResult;
+        delete grid.showingTestResult;
+        delete grid.showingTree;
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
-    showResult() {
+    showTestResult() {
         const grid = this;
 
         GLObject.dataGetter.get({ url: 'system/test', params: [], type: 'text', method: 'get' }).then(
             (result) => {
                 if (result) {
                     grid._testResult = result;
+                    grid.showingTestResult = true;
                     grid.popupIsShowing = true;
                     grid.popupPos = grid.popupPos || { x: 100, y: 100, w: 200, h: 200 };
                     grid.popupTitle = 'TEST';
@@ -58,8 +76,30 @@ export class PMGridClass extends GridINUClass {
                 }
             }
         );
+    }
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
+    showTree() {
+        //alert('Showing tree!');
 
-        //alert('PMGridClass TEST!');
+        const grid = this;
+        const id = grid.selectedValue();
+        if (!id || +id <= 0) return;
+
+        GLObject.dataGetter.get({ url: 'SrRemarkEntity/getTree', params: [{ key: 'id', value: id }] }).then(
+            (result) => {
+                if (result) {
+                    grid._treeData = result;
+
+                    grid.popupIsShowing = true;
+                    grid.showingTree = true;
+                    grid.popupPos = grid.popupPos || { x: 100, y: 100, w: 800, h: 600 };
+                    grid.popupTitle = 'Дерево';
+
+                    grid.refreshState();
+                }
+            }
+        );
+
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
 }

@@ -96,6 +96,7 @@ export class GridINUBaseClass extends GridFLClass {
                 <Modal
                     title={grid.popupTitle}
                     renderContent={() => { return grid.renderPopupContent() }}
+                    dimensionsByContent={grid.popupDimensionsByContent}
                     pos={grid.popupPos}
                     onClose={(e) => {
                         if (grid.onClosePopup) {
