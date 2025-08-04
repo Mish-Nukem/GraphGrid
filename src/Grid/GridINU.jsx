@@ -145,6 +145,7 @@ export class GridINUClass extends GridINUBaseClass {
             text={row[col.name]}
             findFieldEdit={() => { return col._fieldEditObj; }}
             selectH={'1.4em'}
+            comboboxValues={col.comboboxValues}
             init={
                 (fe) => {
                     if (grid.isEditing() && !grid.changedRow) {
@@ -349,6 +350,7 @@ export class GridINUClass extends GridINUBaseClass {
             () => {
                 grid.setEditing(false);
                 Object.assign(row, grid.changedRow);
+                delete grid.changedRow;
                 grid.refreshState();
             }
         ).catch((message) => {
@@ -502,6 +504,7 @@ export class GridINUClass extends GridINUBaseClass {
             () => {
                 grid.setEditing(false);
                 Object.assign(row, grid.changedRow);
+                delete grid.changedRow;
                 grid.refreshState();
                 res = true;
             }

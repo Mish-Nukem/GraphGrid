@@ -128,6 +128,7 @@ export class CardINUClass extends GridINUBaseClass {
                     text={row[col.name]}
                     findFieldEdit={() => { return col._fieldEditObj; }}
                     large={true}
+                    comboboxValues={col.comboboxValues}
                     init={
                         (fe) => {
                             if (card.isEditing() && !card.changedRow) {

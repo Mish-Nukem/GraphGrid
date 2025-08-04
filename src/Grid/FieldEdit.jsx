@@ -93,7 +93,7 @@ export class FieldEditClass extends BaseComponent {
 
         fe.multi = props.multi;
 
-        if (props.comboboxValues) {
+        if (props.comboboxValues && props.comboboxValues.length > 0) {
             fe.comboboxValues = props.comboboxValues;
         }
 
@@ -186,7 +186,7 @@ export class FieldEditClass extends BaseComponent {
                                             value={fe._selectedOptions}
                                             getOptions={(filter, pageNum) => fe.getLookupValues(filter, pageNum)}
                                             height={fe.selectH}
-                                            gridColumn={noClear ? 'span 2' : 'span 1'}
+                                            gridColumn={noClear ? !fe.comboboxValues ? 'span 2' : 'span 3' : 'span 1'}
                                             isMulti={fe.multi}
                                             required={noClear}
                                             onChange={(e) => {

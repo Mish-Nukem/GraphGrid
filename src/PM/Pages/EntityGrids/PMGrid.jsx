@@ -2,6 +2,7 @@
 import { Images } from '../../../Grid/Themes/Images';
 import { GLObject } from '../../../Grid/GLObject';
 import { RTreeView } from '../../../Grid/OuterComponents/TreeView'
+import { FieldEdit } from '../../../Grid/FieldEdit';
 export class PMGridClass extends GridINUClass {
 
     //constructor(props) {
@@ -22,6 +23,18 @@ export class PMGridClass extends GridINUClass {
                 </RTreeView>
                 :
                 super.renderPopupContent();
+    }
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
+    renderCell(grid, col, row) {
+        if (col.name.toLowerCase() === 'isfavorite' && col.type !== 'lookup') {
+            col.type = 'lookup';
+            col.readonly = false;
+            col.allowCombobox = true;
+            col.required = true;
+            col.keyField = col.name;
+            col.comboboxValues = [{ value: 'Д', label: 'Д' }, { value: 'Н', label: 'Н' }];
+        }
+        return super.renderCell(grid, col, row);
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     addToolbarButtons() {

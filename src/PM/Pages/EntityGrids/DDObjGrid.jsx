@@ -127,6 +127,11 @@ export class DDObjGridClass extends GridINUClass {
                 isText = true;
                 isImage = false;
                 break;
+            case '.txt':
+                mimeType = 'text/plain';
+                isText = true;
+                isImage = false;
+                break;
             case '.xml':
                 mimeType = 'application/xml';
                 isImage = false;
@@ -135,6 +140,25 @@ export class DDObjGridClass extends GridINUClass {
                 mimeType = 'application/pdf';
                 isImage = false;
                 break;
+            case '.doc':
+                mimeType = 'application/msword';
+                isImage = false;
+                break;
+            case '.docx':
+                mimeType = 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
+                isImage = false;
+                break;
+            case '.xls':
+                mimeType = 'application/vnd.ms-excel';
+                isImage = false;
+                break;
+            case '.xlsx':
+                mimeType = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+                isImage = false;
+                break;
+
+
+                
         }
 
         const dataUri = `data:${mimeType};base64,${grid.previewData}`;
@@ -233,14 +257,20 @@ export class DDObjGridClass extends GridINUClass {
             grid.fileSelecting = false;
 
             if (xhr.status === 200) {
-                if (data && +data.target.responseText > 0) {
-                    grid.percent = 'Успешно.';
-                    //grid.fileLoaded = data.target.responseText;
-
-                    setTimeout(() => {
-                        grid.refresh();
+                if (data) {
+                    if (+data.target.responseText > 0) {
+                        grid.percent = 'Успешно.';
+                        setTimeout(() => {
+                            grid.refresh();
+                            grid.refreshState();
+                        }, 10);
+                    }
+                    else {
+                        alert('Не удалось сохранить файл.');
+                        console.log("Ошибка " + this.status);
                         grid.refreshState();
-                    }, 10);
+                    }
+                    //grid.fileLoaded = data.target.responseText;
                     //grid.refresh();
                 }
             } else {
