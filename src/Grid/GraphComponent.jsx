@@ -443,7 +443,17 @@ export class GraphComponentClass extends BaseComponent {
 
         if (+node.status !== +NodeStatus.grid || gc.isTop(node) !== top || isActive) return;
 
-        if (top) gc.activeMaster = node.uid; else gc.activeDetail = node.uid;
+        if (top) {
+            gc.activeMaster = node.uid;
+
+            const dnode = gc.graph.nodesDict[gc.activeDetail];
+            if (dnode && dnode.parents.indexOf(node.uid) < 0) {
+                delete gc.activeDetail;
+            }
+        }
+        else {
+            gc.activeDetail = node.uid;
+        }
 
         for (let uid in gc.graph.nodesDict) {
             let lnode = gc.graph.nodesDict[uid];
@@ -451,6 +461,11 @@ export class GraphComponentClass extends BaseComponent {
 
             if (gc.isTop(node) === gc.isTop(lnode)) {
                 lnode.visible = false;
+            }
+
+            if (gc.isTop(node) && !gc.isTop(lnode)) {
+                lnode.visible = lnode.parents.indexOf(node.uid) >= 0;
+                if (lnode.visible && !gc.activeDetail) gc.activeDetail = lnode.uid;
             }
         }
 
