@@ -23,7 +23,7 @@ function PMApp() {
     //"DebugAPIurl": "http://localhost:5152/api/",
     //"localAPIurl": "http://localhost/api/"
 
-    appSettings.APIurl = appSettings.DebugAPIurl;
+    //appSettings.APIurl = appSettings.DebugAPIurl;
     //appSettings.APIurl = appSettings.localAPIurl;
 
     GLObject.dataGetter = GLObject.dataGetter || new DataGetter(appSettings);
