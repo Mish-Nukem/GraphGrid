@@ -436,7 +436,7 @@ export class GridClass extends BaseComponent {
                 col.w = col.initW = col.w || 100;
                 col.minW = col.minW || 30;
                 col.grid = grid;
-                grid.colDict[col.id] = grid.colDict[col.name] = col;
+                grid.colDict[col.id] = grid.colDict[col.name] = grid.colDict[col.name.toLowerCase()] = col;
             }
 
             Object.assign(grid.columnsDefaultOrder, grid.columns);

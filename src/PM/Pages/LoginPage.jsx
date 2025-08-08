@@ -71,6 +71,20 @@ export class loginFormClass extends BaseComponent {
         return (
             <>
                 <div className="login-form" style={{ width: '400px' }}>
+                    <span className="login-form-item">Server Type</span>
+                    <select
+                        onChange={(e) => {
+                            const serverType = e.target.selectedOptions.length > 0 && e.target.selectedOptions[0].value === 'MSSQL' ? 1 : 0;
+
+                            GLObject.changeAPIurl(serverType);
+
+                            loginForm.refreshState();
+                        }}
+                        value={GLObject.serverType === 1 ? "MSSQL" : "PostgreSQL"}
+                    >
+                        <option >PostgreSQL</option>
+                        <option >MSSQL</option>
+                    </select>
                     <span className="login-form-item">Login</span>
                     <input className="login-form-item form-control" onChange={(e) => loginForm.login = e.target.value} value={loginForm.login}></input>
                     <span className="login-form-item">Password</span>

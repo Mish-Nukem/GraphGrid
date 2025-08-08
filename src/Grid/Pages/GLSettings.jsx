@@ -106,6 +106,12 @@ export class SettingsPageClass extends ModalClass {
                             <span>{GLObject.dataGetter.APIurl}</span>
                         </div>
                     </div>
+                    <div className="graph-card-field">
+                        <span>{"Server type:"}</span>
+                        <div className="field-edit">
+                            <span>{GLObject.serverType !== 0 ? "MSSQL" : "PostgreSQL"}</span>
+                        </div>
+                    </div>
                 </>
 
             </div>

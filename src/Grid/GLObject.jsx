@@ -9,4 +9,9 @@
     static entityInfo = {};
 
     static gridSettings = {};
+
+    static appSettings = {};
+
+    // 0 - PostgreSAL, 1 - MSSQL
+    static serverType = 0;
 }

@@ -175,7 +175,7 @@ export class FieldEditClass extends BaseComponent {
                                             }}
                                             disabled={true}
                                             className={fe.inputClass || ''}
-                                            value={fe.value}
+                                            value={fe.text !== undefined ? fe.text : fe.value}
                                         >
                                         </input>
                                         :

@@ -20,18 +20,27 @@ function PMApp() {
     document.title = 'Управление проектом';
 
     //"APIurl": "http://m2.infomega.local:5152/api/",
+    //"PostgreSQLAPIurl": "http://m2.infomega.local:5152/api/"
     //"DebugAPIurl": "http://localhost:5152/api/",
     //"localAPIurl": "http://localhost/api/"
 
+    appSettings.APIurl = GLObject.serverType !== 0 ? appSettings.MSSQLAPIurl : appSettings.PostgreSQLAPIurl;
+
+    // !!! раскомментрировать для отладки локально !!!
     //appSettings.APIurl = appSettings.DebugAPIurl;
-    //appSettings.APIurl = appSettings.localAPIurl;
 
     GLObject.dataGetter = GLObject.dataGetter || new DataGetter(appSettings);
     GLObject.gridCreator = GLObject.gridCreator || new PMGridCreator();
 
-    //const prevMenuId = GLObject.menuId;
+    GLObject.dataGetter.APIurl = appSettings.APIurl;
+    GLObject.appSettings = appSettings;
 
     GLObject.menuId = state.menuObj.id;
+
+    GLObject.changeAPIurl = GLObject.changeAPIurl || function (serverType) {
+        GLObject.serverType = serverType;
+        GLObject.dataGetter.APIurl = appSettings.APIurl = serverType !== 0 ? appSettings.MSSQLAPIurl : appSettings.PostgreSQLAPIurl;
+    };
 
     const TEST = function (e) {
         BaseComponent.changeTheme();
@@ -43,7 +52,7 @@ function PMApp() {
 
     const testMenuItems = [
         { id: -1, text: 'Выход' },
-        { id: 0, text: 'Управление проектами' }, //Import ETL
+        { id: 0, text: 'Управление проектами' },
         { id: 1, text: 'Управление проектами', parent: 0 },
         { id: 2, text: 'Заказчики', parent: 0 },
         { id: 3, text: 'Исполнители', parent: 0 },
@@ -63,26 +72,18 @@ function PMApp() {
         { id: 17, text: 'Проект', parent: 14, entity: 'SrRProjectEntity' },
         { id: 18, text: 'Статус', parent: 14, entity: 'SrRStatusEntity' },
         { id: 19, text: 'Срочность', parent: 14, entity: 'SrRPromptnessEntity' },
-        //{
-        //    id: 15, text: 'Сменить тему', parent: 13, onClick: (e) => {
-        //        //BaseComponent.theme = null;
-        //        //BaseComponent.useBootstrap = !BaseComponent.useBootstrap;
-
-        //        e.skipActivate = true;
-
-        //        BaseComponent.changeTheme().then(() => {
-
-        //            setState({ menuObj: { id: GLObject.menuId } });
-        //        });
-        //    }
-        //},
-        //{ id: 20, text: 'API = ' + GLObject.dataGetter.APIurl, parent: 13 },
-        { id: 21, text: 'Настройки', parent: 13 }
+        { id: 21, text: 'Настройки', parent: 13 },
+        //{ id: 22, text: '?' }
 
     ];
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     const getTestApp = () => {
         console.log('state == ' + state.menuObj.id);
+
+        const serverMenuItem = testMenuItems.find(function (item) {
+            return item.id === -1;
+        });
+        serverMenuItem.text = GLObject.serverType !== 0 ? "Выход (MSSQL)" : "Выход (PostgreSQL)";
 
         const menuItem = state.menuObj.menuItem || {};
         const entity = menuItem.entity || '';
@@ -111,9 +112,6 @@ function PMApp() {
                     nameReport={menuItem.text}
                     pos={parentItem.frmPos}
                     visible={menuItem._reportParamsVisible}
-                    //init={(de) => {
-                        //de.visible = true;
-                    //}}
                     onClose={() => {
                         menuItem._reportParamsVisible = false;
                         setState({ menuObj: { id: GLObject.menuId } });
@@ -126,9 +124,6 @@ function PMApp() {
             case -1:
                 setState({ menuObj: { id: - 2 } });
 
-                //    return (
-                //        <></>
-                //    )
                 break;
             case 0:
                 return <></>
@@ -183,16 +178,12 @@ function PMApp() {
                     parentItem._lastItemId = state.menuObj.id;
                 }
 
-                //menuItem._settingsVisible = prevMenuId !== 21;//  menuItem._settingsVisible === undefined ? state.menuObj.id === 21 : menuItem._settingsVisible;
-                menuItem.frmPos = menuItem.frmPos || { x: 210, y: 210, w: 400, h: 260 };
+                menuItem.frmPos = menuItem.frmPos || { x: 210, y: 210, w: 400, h: 310 };
 
                 return (
                     <GLSettings
                         pos={menuItem.frmPos}
                         visible={menuItem._settingsVisible}
-                        //init={(de) => {
-                        //de.visible = true;
-                        //}}
                         onClose={() => {
                             menuItem._settingsVisible = false;
                             setState({ menuObj: { id: GLObject.menuId } });
@@ -205,20 +196,6 @@ function PMApp() {
         }
     };
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
-    /*
-                <select onChange={(e) => {
-                    //console.log('this == ' + e);
-                    setState({ menuItem: e.target.selectedIndex - 1 });
-                }}>
-                    <option>Logout</option>
-                    <option>0. None</option>
-                    <option>1. Two PM Grids</option>
-                    <option>2. Graph PM, handmade</option>
-                    <option>3. Graph PM, Remarks_scheme</option>
-                    <option>4. TEST</option>
-                </select>
-
-    */
     return (
         state.menuObj.id < -1 ?
             <LoginPage

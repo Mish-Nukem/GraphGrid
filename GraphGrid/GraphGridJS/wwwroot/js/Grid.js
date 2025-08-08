@@ -208,7 +208,7 @@ export default class Grid {
             col.w = col.initW = col.w || 100;
             col.minW = col.minW || 30;
             col.grid = this;
-            this.colDict[col.id] = this.colDict[col.name] = col;
+            this.colDict[col.id] = this.colDict[col.name] = this.colDict[col.name.toLowerCase()] = col;
         }
 
         Object.assign(this.columnsDefaultOrder, this.columns);

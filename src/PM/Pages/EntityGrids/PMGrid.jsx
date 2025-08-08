@@ -38,31 +38,51 @@ export class PMGridClass extends GridINUClass {
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     addToolbarButtons() {
-        const node = this;
+        const grid = this;
 
         super.addToolbarButtons();
 
         let btn = {
-            id: node.buttons.length,
+            id: grid.buttons.length,
             name: 'tree',
-            title: node.translate('Tree'),
-            click: (e) => node.showTree(e),
+            title: grid.translate('Tree'),
+            click: (e) => grid.showTree(e),
             img: Images.images.folderTree,
         };
 
-        node.buttons.push(btn);
-        node._buttonsDict[btn.name] = btn;
+        grid.buttons.push(btn);
+        grid._buttonsDict[btn.name] = btn;
 
         btn = {
-            id: node.buttons.length,
+            id: grid.buttons.length,
+            name: 'link',
+            title: 'Перейти по ссылке',
+            click: (e) => grid.gotoLink(e),
+            img: Images.images.link,
+            getDisabled: () => {
+                const row = grid.selectedRow();
+
+                if (!row || !grid.colDict) return true;
+
+                const col = grid.colDict['link_srrm'];
+
+                return !col || !row[col.name];
+            },
+        };
+
+        grid.buttons.push(btn);
+        grid._buttonsDict[btn.name] = btn;
+
+        btn = {
+            id: grid.buttons.length,
             name: 'test',
-            title: node.translate('TEST'),
-            click: (e) => node.showTestResult(e),
+            title: grid.translate('TEST'),
+            click: (e) => grid.showTestResult(e),
             img: Images.images.test,
         };
 
-        node.buttons.push(btn);
-        node._buttonsDict[btn.name] = btn;
+        grid.buttons.push(btn);
+        grid._buttonsDict[btn.name] = btn;
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     onClosePopup() {
@@ -89,6 +109,38 @@ export class PMGridClass extends GridINUClass {
                 }
             }
         );
+    }
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
+    gotoLink() {
+        const grid = this;
+
+        const col = grid.colDict['link_srrm'].name;
+        let link = grid.selectedRow()[col];
+        if (!link) return;
+
+
+        const arr = link.split(':');
+        if (arr.length > 1) {
+            navigator.clipboard.writeText(link);
+            alert('Ссылка скопирована в буфер.');
+            if (arr[0] !== 'http' && arr[0] !== 'https') {
+                link = 'file:///' + link.trim();
+            }
+        }
+        else {
+            link = 'http://' + link;
+        }
+
+        window.open(link, "_blank");
+
+        //Object.assign(document.createElement('a'), {
+        //    target: '_blank',
+        //    rel: 'noopener noreferrer',
+        //    href: link,
+        //}).click();
+
+        //window.open(link, "_blank");
+        //window.open(link);
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     showTree() {

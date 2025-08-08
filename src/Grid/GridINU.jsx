@@ -116,13 +116,15 @@ export class GridINUClass extends GridINUBaseClass {
                         delete col._fieldEditObj;
                     }
                     grid.onClosePopup = () => {
+                        grid.cardIsShowing = false;
+                        grid.popupIsShowing = false;
+                        grid.isNewRecord = false;
+
                         for (let col of card.columns) {
                             delete col._fieldEditObj;
                         }
                     };
                     card.close = () => {
-                        grid.cardIsShowing = false;
-                        grid.popupIsShowing = false;
                         grid.onClosePopup();
                         grid.refreshState();
                     }
