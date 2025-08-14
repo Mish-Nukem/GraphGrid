@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import { BaseComponent } from './Base';
 import { Select } from './OuterComponents/Select';
 import { Modal } from './Modal';
-import { GridINU/*, GridINUClass*/ } from './GridINU';
+import { GridINU } from './GridINU';
 import { Images } from './Themes/Images';
 import DatePicker, { registerLocale } from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
@@ -44,7 +44,7 @@ export function FieldEdit(props) {
     fe.h = props.h || '1.7em';
     fe.selectH = props.selectH || '';
     fe.textareaH = props.textareaH || '2.1em';
-    //fe.margin = props.margin || '0 2px 2px 2px';
+    //fe.margin = props.margin;
 
     if (props.init) {
         props.init(fe);
@@ -117,9 +117,6 @@ export class FieldEditClass extends BaseComponent {
         fe.dateFormat = props.dateFormat || BaseComponent.dateFormat;
 
         fe.gridColumn = props.gridColumn;
-        //    fe.buttonClass = props.buttonClass || BaseComponent.theme.filterButtonClass || '';
-        //    fe.inputClass = props.inputClass || BaseComponent.theme.inputClass || '';
-        //    fe.clearButtonClass = props.clearButtonClass || BaseComponent.theme.clearButtonClass || '';
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     static _seq = 0;
@@ -135,10 +132,7 @@ export class FieldEditClass extends BaseComponent {
         let parsedDate;
         if (isDate && fe.value) {
             parsedDate = Moment(fe.value, fe.dateFormat);
-            if (parsedDate.isValid()) {
-                //fe.value = parsedDate.format(fe.datePickerDateFormat);
-            }
-            else {
+            if (!parsedDate.isValid()) {
                 parsedDate = '';
                 fe.value = '';
             }
@@ -248,8 +242,8 @@ export class FieldEditClass extends BaseComponent {
                                             showYearDropdown
                                             onSelect={(date) => {
                                                 const e = {};
-                                                fe.value = fe.text = Moment(date, fe.datePickerDateFormat).format(fe.dateFormat);//.format(fe.dateFormat);
-                                                e.value = e.text = Moment(date, fe.datePickerDateFormat).format(fe.dateFormat);//.format(fe.dateFormat);
+                                                fe.value = fe.text = Moment(date, fe.datePickerDateFormat).format(fe.dateFormat);
+                                                e.value = e.text = Moment(date, fe.datePickerDateFormat).format(fe.dateFormat);
                                                 fe.onChange(e);
                                             }}
                                             disabled={fe.disabled}
@@ -391,23 +385,6 @@ export class FieldEditClass extends BaseComponent {
         }
 
         fe.refreshState();
-
-        //    if (!GLObject.entityInfo[fe.column.entity]) {
-        //        const params = [
-        //            { key: 'entity', value: fe.column.entity },
-        //            { key: 'configUid', value: fe.column.entity + '_' },
-        //        ];
-
-        //        GLObject.dataGetter.get({ url: 'system/entityInfo', params: params }).then(
-        //            (eInfo) => {
-        //                GLObject.entityInfo[fe.column.entity] = eInfo;
-        //                fe.refreshState();
-        //            }
-        //        );
-        //    }
-        //    else {
-        //        fe.refreshState();
-        //    }
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     getValueFromCombobox(texts, changeGridValue) {
@@ -466,7 +443,6 @@ export class FieldEditClass extends BaseComponent {
                     hasMore: false,
                     additional: {
                         page: pageNum + 1,
-                        //node: fe
                     },
                 };
 
@@ -477,33 +453,32 @@ export class FieldEditClass extends BaseComponent {
         const params = [
             { key: 'filter', value: filter },
             { key: 'pageNumber', value: pageNum },
+            { key: 'entity', value: fe.selfEntity }
         ];
 
-        return fe.column.name ? new Promise((resolve) => {
-            params.push({ key: 'columns', value: /*fe.column.refNameField ||*/ fe.column.name });
-            params.push({ key: 'entity', value: fe.selfEntity });
-            //params.push({ key: 'entity', value: fe.column.entity });
+        return fe.column.name ?
+            new Promise((resolve) => {
+                params.push({ key: 'columns', value: fe.column.name });
 
-            GLObject.dataGetter.get({ url: 'system/getLookupValues', params: params }).then(
-                (res) => {
+                GLObject.dataGetter.get({ url: 'system/getLookupValues', params: params }).then(
+                    (res) => {
 
-                    const result = {
-                        options: res,
-                        hasMore: false,
-                        additional: {
-                            page: pageNum + 1,
-                            //node: fe
-                        },
-                    };
+                        const result = {
+                            options: res,
+                            hasMore: false,
+                            additional: {
+                                page: pageNum + 1,
+                            },
+                        };
 
-                    resolve(result);
-                });
-        })
+                        resolve(result);
+                    });
+            })
             :
             new Promise(function (resolve, reject) {
                 params.push({ key: 'pageSize', value: 100 });
 
-                GLObject.dataGetter.get({ url: fe.selfEntity + '/list', params: params }).then(
+                GLObject.dataGetter.get({ url: /*fe.selfEntity*/'dictionary' + '/list', params: params }).then(
                     (res) => {
                         if (res != null) {
 
@@ -512,7 +487,6 @@ export class FieldEditClass extends BaseComponent {
                                 hasMore: false,
                                 additional: {
                                     page: pageNum + 1,
-                                    //node: node
                                 },
                             };
                             for (let row of res.rows) {
@@ -526,8 +500,7 @@ export class FieldEditClass extends BaseComponent {
                         }
                     }
                 );
-            })
-            ;
+            });
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
 }

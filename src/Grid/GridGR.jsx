@@ -238,10 +238,6 @@ export class GridGRClass extends GridClass {
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     skipOnWaveVisit() {
-        //if (e.waveType == WaveType.refresh) {
-        //    if (!this.visible || this.status == NodeStatus.hidden) return true;
-        //    if (this.status == NodeStatus.filter && !this._selecting) return true;
-        //}
         return false;
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------

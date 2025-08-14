@@ -228,7 +228,8 @@ export class DDObjGridClass extends GridINUClass {
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     onClosePopup() {
         const grid = this;
-        grid.popupIsShowing = false;
+        super.onClosePopup();
+
         grid.fileSelecting = false;
         grid.fileViewing = false;
 

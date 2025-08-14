@@ -1,12 +1,12 @@
 ﻿import { useState, useEffect } from 'react';
 import { MainMenuClass } from '../../Grid/Pages/MainMenu';
 import { GLObject } from '../../Grid/GLObject';
-export function MainMenu(props) {
+export function PMMainMenu(props) {
     let menu = null;
 
     const [menuState, setState] = useState({ menu: menu, ind: 0 });
 
-    menu = menuState.menu || new MainMenuClass(props);
+    menu = menuState.menu || new PMMainMenuClass(props);
 
     if (props.init) {
         props.init(menu);
@@ -58,6 +58,8 @@ export class PMMainMenuClass extends MainMenuClass {
 
             GLObject.dataGetter.get({ url: 'system/getMainMenuItems', params: params }).then(
                 (result) => {
+                    result.unshift({ id: -1, action: 'logout', text: GLObject.serverType !== 0 ? "Выход (MSSQL)" : "Выход (PostgreSQL)" });
+
                     resolve(result);
                 });
         });

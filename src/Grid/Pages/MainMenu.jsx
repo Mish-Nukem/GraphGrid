@@ -52,7 +52,6 @@ export class MainMenuClass extends BaseComponent {
         menu.mainMenuItemClass = props.mainMenuItemClass || BaseComponent.theme.mainMenuItemClass;
 
         menu.showingItems = [];
-        //menu.translate = props.translate || ((text) => { return text; });
         menu.prepareMenu();
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -66,7 +65,7 @@ export class MainMenuClass extends BaseComponent {
         menu.selectedItems = {};
 
         for (let item of menu.menuItems) {
-            if (item.parent === undefined) {
+            if (item.parent === undefined || item.parent === '') {
                 item.level = 1;
                 menu.rootLevel.push(item);
             }
@@ -110,7 +109,7 @@ export class MainMenuClass extends BaseComponent {
                             title={!menu.collapsed ? menu.translate('Collapse') : menu.translate('Expand')}
                             className='menu-collapse-button'
                         >
-                            {menu.collapsed ? /*Images.images.caretDown() : Images.images.caretUp()*/Images.images.chevronDown(20, 10) : Images.images.chevronUp(20, 10)}
+                            {menu.collapsed ? Images.images.chevronDown(20, 10) : Images.images.chevronUp(20, 10)}
                         </button>
                         {
                             !menu.collapsed ?
@@ -164,7 +163,7 @@ export class MainMenuClass extends BaseComponent {
                                                             menu.refreshState();
                                                         }}
                                                         onItemMouseEnter={(e, childItem) => {
-                                                            if (menu.activeItems[childItem.id]/* && !childItem.items*/) return;
+                                                            if (menu.activeItems[childItem.id]) return;
 
                                                             menu.activeItems[childItem.id] = 1;
                                                             menu.showChildren(e, childItem);
@@ -172,7 +171,6 @@ export class MainMenuClass extends BaseComponent {
                                                         onMouseLeave={() => {
                                                             menu.isShowingDropdown = false;
                                                             setTimeout(() => {
-                                                                //menu.hideChildren(item);
                                                                 menu.closeDropdowns();
                                                             }, 100);
                                                         }}
@@ -209,7 +207,6 @@ export class MainMenuClass extends BaseComponent {
         if (item.items && item.items.length > 0) {
 
             menu.isShowingDropdown = true;
-            //menu.showingItems = item.level === 1 ? [] : menu.showingItems;
 
             const rect = e.target.getBoundingClientRect();
             item.x = parseInt(rect.x) + (item.level === 1 ? 0 : parseInt(rect.width));
@@ -219,11 +216,6 @@ export class MainMenuClass extends BaseComponent {
         else {
             menu.isShowingDropdown = item.level !== 1;
         }
-
-        //if (e.skipActivate) {
-        //    menu.refreshState();
-        //    return;
-        //}
 
         menu.showingItems = [];
         menu.activeItems = {};
@@ -285,7 +277,7 @@ export class MainMenuClass extends BaseComponent {
             menu.showChildren(e, item)
         }
         else {
-            menu.onMenuItemClick(e, item);
+            menu.onMenuItemClick(e, item, menu);
 
             menu.selectedItems = {};
             while (item) {

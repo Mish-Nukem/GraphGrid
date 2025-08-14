@@ -16,9 +16,6 @@ export function GLSettings(props) {
 
     sp.visible = props.visible !== undefined ? props.visible : sp.visible;
 
-    sp._selectedTheme = sp._selectedTheme || { value: GLObject.gridSettings.themeId || 0, label: GLObject.gridSettings.themeName || 'Тема по умолчанию' };
-    sp._selectedButtonSize = sp._selectedButtonSize || { value: GLObject.gridSettings.buttonSize || 0, label: GLObject.gridSettings.buttonSizeName || 'По умолчанию' };
-
     if (props.init) {
         props.init(sp);
     }
@@ -47,7 +44,11 @@ export class SettingsPageClass extends ModalClass {
         sp.opt.closeWhenEscape = true;
         sp.opt.resizable = true;
         sp.opt.isModal = true;
-        //sp.opt.dimensionsByContent = true;
+
+        sp.parent = props.parent;
+
+        sp._selectedTheme = sp._selectedTheme || { value: GLObject.gridSettings.themeId || 0, label: GLObject.gridSettings.themeName || sp.translate('Default theme') };
+        sp._selectedButtonSize = sp._selectedButtonSize || { value: GLObject.gridSettings.buttonSize || 0, label: GLObject.gridSettings.buttonSizeName || sp.translate('Small buttons') };
 
         sp.buttons = sp.getButtons();
     }
@@ -56,10 +57,9 @@ export class SettingsPageClass extends ModalClass {
         const sp = this;
         return (
             <div>
-
                 <>
                     <div className="graph-card-field">
-                        <span>{"Тема:"}</span>
+                        <span>{sp.translate('Theme') + ':'}</span>
                         <div className="field-edit">
                             <Select
                                 key={`themeSelect_${sp.id}_`}
@@ -70,8 +70,23 @@ export class SettingsPageClass extends ModalClass {
                                 height={sp.selectH}
                                 required={false}
                                 onChange={(e) => {
-                                    sp._selectedTheme = e || { value: 0, label: 'Тема по умолчанию' };
-                                    sp.refreshState();
+                                    sp._selectedTheme = e || { value: 0, label: sp.translate('Default theme') };
+                                    if (sp.parent) {
+                                        GLObject.gridSettings.themeId = sp._selectedTheme.value;
+                                        GLObject.gridSettings.themeName = sp._selectedTheme.label;
+
+                                        const isBootstrap = sp._selectedTheme.value !== 0;
+
+                                        BaseComponent.changeTheme(isBootstrap).then(() => {
+                                            sp.changeButtonSizes(isBootstrap);
+                                        });
+
+
+                                        sp.parent.refreshState()
+                                    }
+                                    else {
+                                        sp.refreshState();
+                                    }
                                 }}
                                 disabled={sp.disabled}
                                 gridColumn={'span 2'}
@@ -80,7 +95,7 @@ export class SettingsPageClass extends ModalClass {
                         </div>
                     </div>
                     <div className="graph-card-field">
-                        <span>{"Размер кнопок:"}</span>
+                        <span>{sp.translate('Buttons size') + ':'}</span>
                         <div className="field-edit">
                             <Select
                                 key={`buttSizeSelect_${sp.id}_`}
@@ -91,8 +106,18 @@ export class SettingsPageClass extends ModalClass {
                                 height={sp.selectH}
                                 required={false}
                                 onChange={(e) => {
-                                    sp._selectedButtonSize = e || { value: 0, label: 'По умолчанию' };
-                                    sp.refreshState();
+                                    sp._selectedButtonSize = e || { value: 0, label: sp.translate('Small buttons') };
+                                    if (sp.parent) {
+                                        GLObject.gridSettings.buttonSize = sp._selectedButtonSize.value;
+                                        GLObject.gridSettings.buttonSizeName = sp._selectedButtonSize.label;
+
+                                        sp.changeButtonSizes(sp._selectedTheme.value !== 0);
+
+                                        sp.parent.refreshState()
+                                    }
+                                    else {
+                                        sp.refreshState();
+                                    }
                                 }}
                                 disabled={sp.disabled}
                                 gridColumn={'span 2'}
@@ -107,13 +132,12 @@ export class SettingsPageClass extends ModalClass {
                         </div>
                     </div>
                     <div className="graph-card-field">
-                        <span>{"Server type:"}</span>
+                        <span>{sp.translate('Server type') + ':'}</span>
                         <div className="field-edit">
                             <span>{GLObject.serverType !== 0 ? "MSSQL" : "PostgreSQL"}</span>
                         </div>
                     </div>
                 </>
-
             </div>
         );
     }
@@ -126,7 +150,7 @@ export class SettingsPageClass extends ModalClass {
                 onclick: (e) => sp.applySettings(e),
             },
             {
-                title: 'Отменить',
+                title: sp.translate('Cancel'),
                 onclick: (e) => { sp.close(e); },
             },
         ];
@@ -146,41 +170,46 @@ export class SettingsPageClass extends ModalClass {
         const isBootstrap = sp._selectedTheme.value !== 0;
 
         BaseComponent.changeTheme(isBootstrap).then(() => {
-            if (isBootstrap) {
-                switch (+GLObject.gridSettings.buttonSize) {
-                    case 0:
-                        BaseComponent.theme.toolbarButtonsClass = 'btn btn-primary btn-sm';
-                        break;
-                    case 1:
-                        BaseComponent.theme.toolbarButtonsClass = 'btn btn-primary btn-md';
-                        break;
-                    case 2:
-                        BaseComponent.theme.toolbarButtonsClass = 'btn btn-primary btn-lg';
-                        break;
-                }
-            }
-            else {
-                switch (+GLObject.gridSettings.buttonSize) {
-                    case 0:
-                        BaseComponent.theme.toolbarButtonsClass = 'grid-toolbar-button';
-                        break;
-                    case 1:
-                        BaseComponent.theme.toolbarButtonsClass = 'grid-toolbar-button-md';
-                        break;
-                    case 2:
-                        BaseComponent.theme.toolbarButtonsClass = 'grid-toolbar-button-lg';
-                        break;
-                }
-            }
+            sp.changeButtonSizes(isBootstrap);
         });
 
         sp.close(e);
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
+    changeButtonSizes(isBootstrap) {
+        if (isBootstrap) {
+            switch (+GLObject.gridSettings.buttonSize) {
+                case 0:
+                    BaseComponent.theme.toolbarButtonsClass = 'btn btn-primary btn-sm';
+                    break;
+                case 1:
+                    BaseComponent.theme.toolbarButtonsClass = 'btn btn-primary btn-md';
+                    break;
+                case 2:
+                    BaseComponent.theme.toolbarButtonsClass = 'btn btn-primary btn-lg';
+                    break;
+            }
+        }
+        else {
+            switch (+GLObject.gridSettings.buttonSize) {
+                case 0:
+                    BaseComponent.theme.toolbarButtonsClass = 'grid-toolbar-button';
+                    break;
+                case 1:
+                    BaseComponent.theme.toolbarButtonsClass = 'grid-toolbar-button-md';
+                    break;
+                case 2:
+                    BaseComponent.theme.toolbarButtonsClass = 'grid-toolbar-button-lg';
+                    break;
+            }
+        }
+    }
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     getThemesList() {
+        const sp = this;
         return new Promise((resolve) => {
             const res = [
-                { value: 0, label: 'Тема по умолчанию' },
+                { value: 0, label: sp.translate('Default theme') },
                 { value: 1, label: 'Bootstrap' },
             ];
 
@@ -196,11 +225,12 @@ export class SettingsPageClass extends ModalClass {
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     getButtonSizesList() {
+        const sp = this;
         return new Promise((resolve) => {
             const res = [
-                { value: 0, label: 'По умолчанию' },
-                { value: 1, label: 'Средние' },
-                { value: 2, label: 'Большие' },
+                { value: 0, label: sp.translate('Small buttons') },
+                { value: 1, label: sp.translate('Medium buttons') },
+                { value: 2, label: sp.translate('Large buttons') },
             ];
 
             resolve({

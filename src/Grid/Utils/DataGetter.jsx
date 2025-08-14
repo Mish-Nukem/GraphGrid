@@ -69,8 +69,6 @@
                             mode: 'cors',
                             method: e.method || 'post',
                             headers: {},
-                            /*headers: { 'Content-Type': e.contentType || 'application/json' },*/
-                            //body: 
                         };
 
                         if (e.method !== 'get') {
@@ -106,8 +104,6 @@
                                 }
                                 else {
                                     resolve(response.json());
-                                    //	const js = response.json();
-                                    //	resolve(JSON.parse(js));
                                 }
                             })
                             .catch(error => {

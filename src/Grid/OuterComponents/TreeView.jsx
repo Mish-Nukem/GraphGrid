@@ -1,14 +1,10 @@
-﻿import React, { useState/*, useEffect, useCallback*/ } from 'react';
+﻿import React, { useState } from 'react';
 import { Images } from '../Themes/Images';
-//import { FaSquare, FaCheckSquare, FaMinusSquare } from "react-icons/fa";
-//import { IoMdArrowDropright } from "react-icons/io";
-import TreeView, { flattenTree } from "react-accessible-treeview";
+import TreeView from "react-accessible-treeview";
 import { Grid } from '../Grid';
-//import Tree from 'rc-tree';
-//import cx from "classnames";
+import { Translate } from '../Themes/Translate';
 export function RTreeView(props) {
     const [selectedIds, setSelectedIds] = useState([]);
-    //const [expandedIds, setExpandedIds] = useState([]);
 
     const selectedId = selectedIds && selectedIds.length ? selectedIds[0] : props.data.length > 1 ? props.data[1].id : null;
 
@@ -28,7 +24,6 @@ export function RTreeView(props) {
             for (let key in selectedNode.metadata) {
                 rows.push({ Key: key, Value: selectedNode.metadata[key] });
             }
-            //selectedNode ? selectedNode.metadata : [];
 
             if (rows != null) {
                 resolve(rows);
@@ -38,8 +33,12 @@ export function RTreeView(props) {
         });
     };
 
+    const translate = (text, context) => {
+        return Translate.translate(text, context);
+    }
+
     const GetColumns = () => {
-        return [{ name: 'Key', title: 'Параметр', w: 240 }, { name: 'Value', title: 'Значение', w: 240 }]
+        return [{ name: 'Key', title: translate('Parameter'), w: 240 }, { name: 'Value', title: translate('Value'), w: 240 }]
     }
 
     return (
@@ -55,8 +54,6 @@ export function RTreeView(props) {
                 togglableSelect
                 onSelect={(props) => console.log('onSelect callback: ', props)}
                 onNodeSelect={(props) => {
-                    //console.log('onNodeSelect callback: ', props);
-                    //selectedNode = props.element;
                     setSelectedIds([props.element.id]);
                 }}
                 nodeRenderer={({
@@ -64,12 +61,9 @@ export function RTreeView(props) {
                     isBranch,
                     isExpanded,
                     isSelected,
-                    isHalfSelected,
-                    isDisabled,
                     getNodeProps,
                     level,
                     handleSelect,
-                    handleExpand,
                 }) => {
                     return (
                         <div {...getNodeProps()}

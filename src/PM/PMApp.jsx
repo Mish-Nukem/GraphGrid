@@ -8,7 +8,7 @@ import appSettings from '../PM/PMSettings';
 import { DataGetter } from '../Grid/Utils/DataGetter';
 import { BaseComponent } from '../Grid/Base';
 import { PMGridCreator } from './PMGridClassCreator'
-import { MainMenu } from './Pages/MainMenu';
+import { PMMainMenu } from './Pages/MainMenu';
 import { GLObject } from '../Grid/GLObject';
 import { ReportParamsPage } from '../Reports/Pages/ReportParamsPage';
 import { GLSettings } from '../Grid/Pages/GLSettings';
@@ -27,7 +27,9 @@ function PMApp() {
     appSettings.APIurl = GLObject.serverType !== 0 ? appSettings.MSSQLAPIurl : appSettings.PostgreSQLAPIurl;
 
     // !!! раскомментрировать для отладки локально !!!
-    //appSettings.APIurl = appSettings.DebugAPIurl;
+    appSettings.isDubug = true;
+    appSettings.APIurl = appSettings.DebugAPIurl;
+    // !!! раскомментрировать для отладки локально !!!
 
     GLObject.dataGetter = GLObject.dataGetter || new DataGetter(appSettings);
     GLObject.gridCreator = GLObject.gridCreator || new PMGridCreator();
@@ -39,71 +41,67 @@ function PMApp() {
 
     GLObject.changeAPIurl = GLObject.changeAPIurl || function (serverType) {
         GLObject.serverType = serverType;
-        GLObject.dataGetter.APIurl = appSettings.APIurl = serverType !== 0 ? appSettings.MSSQLAPIurl : appSettings.PostgreSQLAPIurl;
+        if (appSettings.isDubug) {
+            GLObject.dataGetter.APIurl = appSettings.DebugAPIurl;
+        }
+        else {
+            GLObject.dataGetter.APIurl = appSettings.APIurl = serverType !== 0 ? appSettings.MSSQLAPIurl : appSettings.PostgreSQLAPIurl;
+        }
     };
 
-    const TEST = function (e) {
-        BaseComponent.changeTheme();
+    //const testMenuItems = [
+    //    { id: -1, text: 'Выход' },
+    //    { id: 0, text: 'Управление проектами' },
+    //    { id: 1, text: 'Управление проектами', parent: 0 },
+    //    { id: 2, text: 'Заказчики', parent: 0 },
+    //    { id: 3, text: 'Исполнители', parent: 0 },
+    //    { id: 4, text: 'Физические лица', parent: 0 },
+    //    { id: 5, text: 'Отчеты' },
+    //    { id: 6, text: 'Примеры отчетов', parent: 5 },
+    //    { id: 7, text: 'Карточка исполнителя.xls', parent: 6 },
+    //    { id: 8, text: 'Список выполненных заданий.xls', parent: 6 },
+    //    { id: 9, text: 'Список настроек обмена.xls', parent: 6 },
+    //    { id: 10, text: 'Карточка настройки обмена.xls', parent: 6 },
+    //    { id: 21, text: '1.xls', parent: 6 },
+    //    { id: 11, text: 'Обмен данными' },
+    //    { id: 12, text: 'Список настроек обмена данными', parent: 11 },
+    //    { id: 13, text: 'Управление системой' },
+    //    { id: 14, text: 'Справочники', parent: 13 },
+    //    { id: 16, text: 'Единицы измерения', parent: 14, entity: 'SEiEntity' },
+    //    { id: 17, text: 'Проект', parent: 14, entity: 'SrRProjectEntity' },
+    //    { id: 18, text: 'Статус', parent: 14, entity: 'SrRStatusEntity' },
+    //    { id: 19, text: 'Срочность', parent: 14, entity: 'SrRPromptnessEntity' },
+    //];
 
-        e.skipActivate = true;
-
-        setState({ menuObj: { id: GLObject.menuId } });
-    }
-
-    const testMenuItems = [
-        { id: -1, text: 'Выход' },
-        { id: 0, text: 'Управление проектами' },
-        { id: 1, text: 'Управление проектами', parent: 0 },
-        { id: 2, text: 'Заказчики', parent: 0 },
-        { id: 3, text: 'Исполнители', parent: 0 },
-        { id: 4, text: 'Физические лица', parent: 0 },
-        { id: 5, text: 'Отчеты' },
-        { id: 6, text: 'Примеры отчетов', parent: 5 },
-        { id: 7, text: 'Карточка исполнителя.xls', parent: 6 },
-        { id: 8, text: 'Список выполненных заданий.xls', parent: 6 },
-        { id: 9, text: 'Список настроек обмена.xls', parent: 6 },
-        { id: 10, text: 'Карточка настройки обмена.xls', parent: 6 },
-        { id: 21, text: '1.xls', parent: 6 },
-        { id: 11, text: 'Обмен данными' },
-        { id: 12, text: 'Список настроек обмена данными', parent: 11 },
-        { id: 13, text: 'Управление системой' },
-        { id: 14, text: 'Справочники', parent: 13 },
-        { id: 16, text: 'Единицы измерения', parent: 14, entity: 'SEiEntity' },
-        { id: 17, text: 'Проект', parent: 14, entity: 'SrRProjectEntity' },
-        { id: 18, text: 'Статус', parent: 14, entity: 'SrRStatusEntity' },
-        { id: 19, text: 'Срочность', parent: 14, entity: 'SrRPromptnessEntity' },
-        { id: 21, text: 'Настройки', parent: 13 },
-        //{ id: 22, text: '?' }
-
-    ];
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
-    const getTestApp = () => {
+    const getPMApp = () => {
         console.log('state == ' + state.menuObj.id);
-
-        const serverMenuItem = testMenuItems.find(function (item) {
-            return item.id === -1;
-        });
-        serverMenuItem.text = GLObject.serverType !== 0 ? "Выход (MSSQL)" : "Выход (PostgreSQL)";
 
         const menuItem = state.menuObj.menuItem || {};
         const entity = menuItem.entity || '';
-        const parent = menuItem.parent || '';
+        //const parent = menuItem.parent || '';
 
-        const parentItem = testMenuItems.find(function (item) {
+        const parentItem = state.menuObj.menu && state.menuObj.menu.menuItems ? state.menuObj.menu.menuItems.find(function (item) {
             return item.id === menuItem.parent;
-        });
+        }) : null;
 
         if (entity) {
             return (
-                <div className="div-with-grid">
-                    <GridINU uid={entity + '_dictionary'} entity={entity}></GridINU>
-                </div>
+                <>
+                    <div className="div-on-menu">
+                        <h3>{menuItem.text}</h3>
+                    </div>
+
+                    <div className="div-with-grid">
+                        <GridINU uid={entity + '_dictionary'} entity={entity} controller={'dictionary'}></GridINU>
+                    </div>
+                </>
             );
         }
 
-        if (parent === 6) {
+        if (state.menuObj.menuItem && state.menuObj.menuItem.action === 'acReports') {
             menuItem._reportParamsVisible = state.menuObj.id !== parentItem._lastItemId || menuItem._reportParamsVisible;
-            parentItem._lastItemId = state.menuObj.id;
+            parentItem._lastItemId = menuItem.id;
 
             parentItem.frmPos = parentItem.frmPos || { x: 210, y: 210 };
 
@@ -121,13 +119,13 @@ function PMApp() {
         }
 
         switch (state.menuObj.id) {
-            case -1:
+            case 'logout':
                 setState({ menuObj: { id: - 2 } });
 
                 break;
             case 0:
                 return <></>
-            case 1:
+            case 'acProjectManagement':
                 return (
                     <>
                         <div className="div-with-grid">
@@ -135,7 +133,7 @@ function PMApp() {
                         </div>
                     </>
                 );
-            case 2:
+            case 'acClients':
                 return (
                     <>
                         <div className="div-with-grid">
@@ -143,7 +141,7 @@ function PMApp() {
                         </div>
                     </>
                 );
-            case 3:
+            case 'acExecutors':
                 return (
                     <>
                         <div className="div-with-grid">
@@ -151,7 +149,7 @@ function PMApp() {
                         </div>
                     </>
                 );
-            case 4:
+            case 'acPhysPersons':
                 return (
                     <>
                         <div className="div-with-grid">
@@ -159,12 +157,12 @@ function PMApp() {
                         </div>
                     </>
                 );
-            case 5:
+            case 'acReports':
                 return (
                     <>
                     </>
                 );
-            case 12:
+            case 'acDataExchangeTuning':
                 return (
                     <>
                         <div className="div-with-grid">
@@ -172,27 +170,31 @@ function PMApp() {
                         </div>
                     </>
                 );
-            case 21:
-                menuItem._settingsVisible = parentItem && state.menuObj.id !== parentItem._lastItemId || menuItem._settingsVisible;
-                if (parentItem) {
-                    parentItem._lastItemId = state.menuObj.id;
-                }
+            //case 21:
+            //    menuItem._settingsVisible = parentItem && state.menuObj.id !== parentItem._lastItemId || menuItem._settingsVisible;
+            //    if (parentItem) {
+            //        parentItem._lastItemId = state.menuObj.id;
+            //    }
 
-                menuItem.frmPos = menuItem.frmPos || { x: 210, y: 210, w: 400, h: 310 };
+            //    menuItem.frmPos = menuItem.frmPos || { x: 210, y: 210, w: 400, h: 310 };
 
-                return (
-                    <GLSettings
-                        pos={menuItem.frmPos}
-                        visible={menuItem._settingsVisible}
-                        onClose={() => {
-                            menuItem._settingsVisible = false;
-                            setState({ menuObj: { id: GLObject.menuId } });
-                        }}
-                    ></GLSettings>
+            //    return (
+            //        <GLSettings
+            //            pos={menuItem.frmPos}
+            //            visible={menuItem._settingsVisible}
+            //            onClose={() => {
+            //                menuItem._settingsVisible = false;
+            //                setState({ menuObj: { id: GLObject.menuId } });
+            //            }}
+            //        ></GLSettings>
 
-                );
+            //    );
             default:
-                return null;
+                return (
+                    <h2>
+                        {state.menuObj.id + ". Не реализовано!"}
+                    </h2>
+                );
         }
     };
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -206,20 +208,20 @@ function PMApp() {
                 }}>
             </LoginPage> :
             <div >
-                <MainMenu
-                    menuItems={testMenuItems}
-                    onMenuItemClick={(e, item) => {
+                <PMMainMenu
+                    //menuItems={testMenuItems}
+                    onMenuItemClick={(e, item, menu) => {
                         if (item.onClick) {
-                            item.onClick(e, item);
+                            item.onClick(e, item, menu);
                             return;
                         }
 
-                        setState({ menuObj: { id: item.id, menuItem: item } });
+                        setState({ menuObj: { id: item.action, menuItem: item, menu: menu } });
                     }}
                 >
-                </MainMenu>
+                </PMMainMenu>
                 <div className="div-on-menu">
-                    {getTestApp()}
+                    {getPMApp()}
                 </div>
             </div>
     );

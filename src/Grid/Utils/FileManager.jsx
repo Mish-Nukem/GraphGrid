@@ -1,15 +1,16 @@
-﻿export class FileManager {
+﻿import { Translate } from '../Themes/Translate';
+export class FileManager {
     constructor(settings) {
         const fm = this;
 
         fm.settings = settings;
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
-    //Сохранить данные в файл (папка Загрузки браузера).
-    //content          - данные
-    //filename         - имя файла, если надо с нужным расширением
-    //fType            - тип данных. По умолчанию "application/octet-stream"
-    //noConvertTob64   - не конвертировать бинарные типы данных
+    // Сохранить данные в файл (папка Загрузки браузера).
+    // content          - данные
+    // filename         - имя файла, если надо с нужным расширением
+    // fType            - тип данных. По умолчанию "application/octet-stream"
+    // noConvertTob64   - не конвертировать бинарные типы данных
     SaveToFile = function (content, filename, fType, noConvertTob64) {
         if (content) {
             if (!filename)
@@ -58,7 +59,7 @@
             }
         }
         else
-            return "Не определены данные для сохранения."
+            return Translate.translate("No data defined to save.")
     };
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
 }

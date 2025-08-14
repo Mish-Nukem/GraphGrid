@@ -143,7 +143,7 @@ export class GridFLClass extends GridDBClass {
                                 type={'button'}
                                 disabled={grid.isEditing() ? 'disabled' : ''}
                                 onClick={() => grid.clearColumnFilter(col)}
-                            >×</button> /*: <></>*/
+                            >×</button> 
                         }
                     </>
                     : <></>}
@@ -158,19 +158,22 @@ export class GridFLClass extends GridDBClass {
             grid.getRows({ filters: grid.collectFilters(true), grid: grid, autocompleteColumn: grid._inputingColumn }).then(
                 rows => {
                     const res = [];
-                    let i = 0;
-                    for (let row of rows) {
-                        let txt = row[grid._inputingColumn.name] || String(row);
 
-                        if (grid._inputingColumn.type === 'date') {
-                            txt = Moment(txt).format(grid.dateFormat);
-                        } 
-                        else if(grid._inputingColumn.type === 'datetime') {
-                            txt = Moment(txt).format(grid.dateTimeFormat);
-                        } 
+                    if (grid._inputingColumn) {
+                        let i = 0;
+                        for (let row of rows) {
+                            let txt = row[grid._inputingColumn.name] || String(row);
 
-                        res.push({ id: i++, text: txt });
-                    };
+                            if (grid._inputingColumn.type === 'date') {
+                                txt = Moment(txt).format(grid.dateFormat);
+                            }
+                            else if (grid._inputingColumn.type === 'datetime') {
+                                txt = Moment(txt).format(grid.dateTimeFormat);
+                            }
+
+                            res.push({ id: i++, text: txt });
+                        };
+                    }
 
                     resolve(res);
                 }
@@ -300,39 +303,12 @@ export class GridFLClass extends GridDBClass {
         }, 150);
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
-    //onAutocompleteItemSelected(column, filter, e) {
-    //    const grid = this;
-    //    //if (grid._skipChange) return;
-    //    if (!column) return;
-
-    //    console.log('onAutocompleteItemSelected : ' + column.filter);
-
-    //    column.filter = filter;
-    //    if (e && e.target) {
-    //        grid._autocompleteRect = e.target.getBoundingClientRect();
-    //    }
-
-    //    //grid._skipAutocomplete = true;
-
-    //    if (grid.needRefresh()) {
-    //        //grid._skipAutocomplete = true;
-    //        grid.pageNumber = 1;
-    //        grid.selectedRowIndex = 0;
-    //        grid.refresh();
-    //    }
-    //}
-    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     onColumnFilterClick(col, e) {
         const grid = this;
 
         grid._inputingColumn = col;
         e.target.focus();
         setTimeout(() => {
-            //if (grid._skipAutocomplete) {
-            //    grid._skipAutocomplete = false;
-            //    return;
-            //}
-
             grid._autocompleteDropdown.items = [];
             grid._autocompleteRect = e.target.getBoundingClientRect();
 
@@ -360,8 +336,6 @@ export class GridFLClass extends GridDBClass {
 
             grid._autocompleteRect = elem ? elem.getBoundingClientRect() : e.target.getBoundingClientRect();
 
-            //grid._skipChange = true;
-
             grid.showAutocomplete(e);
         }, 100);
     }
@@ -370,7 +344,6 @@ export class GridFLClass extends GridDBClass {
         const grid = this;
 
         column.filter = '';
-        //column.prevFilter = '';
 
         grid.pageNumber = 1;
         grid.selectedRowIndex = 0;

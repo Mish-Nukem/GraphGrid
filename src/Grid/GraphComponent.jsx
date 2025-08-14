@@ -4,7 +4,6 @@ import { BaseComponent, NodeStatus, FilterType, log } from './Base';
 import { GraphClass } from './Graph';
 import { GridFL, GridFLClass } from './GridFL';
 import { GridINU, GridINUClass } from './GridINU';
-import { ClipLoader } from 'react-spinners';
 import { FieldEdit } from './FieldEdit';
 import { GLObject } from './GLObject';
 import { Images } from './Themes/Images';
@@ -63,7 +62,6 @@ export class GraphComponentClass extends BaseComponent {
         const gc = this;
 
         window._graphSeq = window._graphSeq || 0;
-        //window._graphDict = window._graphDict || {};
 
         gc.id = window._graphSeq++;
         gc.uid = props.uid || gc.id;
@@ -116,7 +114,7 @@ export class GraphComponentClass extends BaseComponent {
         }
 
         if (!gc.graph) {
-            return <div className='grid-loader'><ClipLoader size={15} /></div>;
+            return gc.Spinner();
         }
 
         const topFilters = [];
@@ -419,23 +417,7 @@ export class GraphComponentClass extends BaseComponent {
 
         fe.lookupIsShowing = false;
         gc.refreshState();
-        //gc.closeFilterWnd();
     }
-    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
-    //onGridRowDblClick(e, node, row) {
-    //    const gc = this;
-
-    //    if (+node.status === +NodeStatus.filter) {
-    //        if (!node.multi) {
-    //            gc.selectFilterValue(e);
-    //        }
-    //    }
-    //    else if (+node.status === +NodeStatus.grid) {
-    //        if (!node.viewRecordDisabled(e)) {
-    //            node.viewRecord(e);
-    //        }
-    //    }
-    //}
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     selectActiveTab(node, top) {
         const gc = this;
@@ -471,9 +453,6 @@ export class GraphComponentClass extends BaseComponent {
 
         node.visible = true;
         node._forceRefresh = true;
-        //if (!gc.isTop(node)) {
-        //    node.refresh();
-        //}
 
         gc.refreshState();
     }
@@ -576,7 +555,6 @@ export class GraphComponentClass extends BaseComponent {
 
             node.pageSize = 100;
             node.pageNumber = pageNum || 1;
-            //node.pageNumber = +e.Page || 1;
 
             ev.grid = node;
 
@@ -669,6 +647,8 @@ export class GraphComponentClass extends BaseComponent {
 
         grid._replaced = true;
         grid.graph = graph;
+
+        grid.parentComponent = gc;
 
         const obr = graph.nodesDict[grid.uid];
         grid.id = obr.id !== undefined ? obr.id : grid.id;
@@ -773,8 +753,6 @@ export class GraphComponentClass extends BaseComponent {
             }
         }
 
-        //grid.onRowDblClick = (e, row) => gc.onGridRowDblClick(e, grid, row);
-
         grid.remSetEditing = grid.setEditing;
         grid.setEditing = (value) => { grid.remSetEditing(value); gc.setEditing(grid, value); };
         grid.isEditing = () => { return gc.isEditing(); };
@@ -800,12 +778,12 @@ export class GraphComponentClass extends BaseComponent {
         for (let uid in gc.graph.nodesDict) {
             let node = gc.graph.nodesDict[uid];
 
+            node.parentComponent = gc;
+
             node.graph = gc.graph;
             gc.graph.nodeCount++;
 
             node.opt = node.opt || {};
-
-            //BaseComponent.theme.Apply(node);
 
             node.translate = node.translate || ((text) => { return text; });
 

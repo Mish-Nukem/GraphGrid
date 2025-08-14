@@ -87,6 +87,8 @@ export class PMGridClass extends GridINUClass {
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     onClosePopup() {
         const grid = this;
+        super.onClosePopup();
+
         delete grid.showingTestResult;
         delete grid.showingTree;
     }
@@ -100,7 +102,8 @@ export class PMGridClass extends GridINUClass {
                     grid._testResult = result;
                     grid.showingTestResult = true;
                     grid.popupIsShowing = true;
-                    grid.popupPos = grid.popupPos || { x: 100, y: 100, w: 200, h: 200 };
+                    grid.testPos = grid.testPos || { x: 100, y: 100, w: 200, h: 200 };
+                    grid.popupPos = grid.testPos;
                     grid.popupTitle = 'TEST';
 
                     Images._outerImagesDict['test'] = result;
@@ -157,7 +160,8 @@ export class PMGridClass extends GridINUClass {
 
                     grid.popupIsShowing = true;
                     grid.showingTree = true;
-                    grid.popupPos = grid.popupPos || { x: 100, y: 100, w: 800, h: 600 };
+                    grid.treePos = grid.treePos || { x: 100, y: 100, w: 800, h: 600 };
+                    grid.popupPos = grid.treePos;
                     grid.popupTitle = 'Дерево';
 
                     grid.refreshState();

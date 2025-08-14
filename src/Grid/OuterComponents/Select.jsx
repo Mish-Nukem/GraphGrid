@@ -1,27 +1,8 @@
-﻿import React, { useState/*, useEffect, useCallback*/ } from 'react';
-//import AsyncSelect from 'react-select';
+﻿import React, { useState } from 'react';
 import { AsyncPaginate } from 'react-select-async-paginate';
 export function Select(props) {
     const [value, setValue] = useState(props.value);
 
-    //if (value && !props.value
-    //    || !value && props.value
-    //    || value && value.length >= 0 && props.value && props.value.length >= 0 && props.value.length !== value.length) {
-
-    //    setValue(props.value);
-    //}
-    //else if (props.value && props.value.length > 0 && value && value.length > 0) {
-
-    //    for (let i = 0; i < props.value.length; i++) {
-    //        if (props.value[i].value !== value[i].value) {
-    //            setValue(props.value);
-    //            break;
-    //        }
-    //    }
-    //}
-    //else if (props.value && value && value.length > 0 && value[0] == null) {
-    //    setValue(props.value);
-    //}
     if (value !== props.value) {
         setValue(props.value);
     }
@@ -48,7 +29,6 @@ export function Select(props) {
             height: height,
             boxShadow: state.isFocused ? null : null,
             className: className,
-            /*className: props.inputClass || '',*/
         }),
 
         valueContainer: (base) => ({
@@ -62,7 +42,6 @@ export function Select(props) {
             ...base,
             margin: '0px',
             height: 'calc(' + height + ' - 4px)',
-            /*className: props.inputClass || '',*/
             className: className,
         }),
 

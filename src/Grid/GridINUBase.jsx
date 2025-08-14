@@ -61,6 +61,7 @@ export class GridINUBaseClass extends GridFLClass {
 
         const grid = this;
 
+        grid.controller = props.controller || props.entity;
         grid.entity = props.entity;
         grid.entityAdd = props.entityAdd;
 
@@ -99,14 +100,7 @@ export class GridINUBaseClass extends GridFLClass {
                     dimensionsByContent={grid.popupDimensionsByContent}
                     pos={grid.popupPos}
                     onClose={(e) => {
-                        if (grid.onClosePopup) {
-                            grid.onClosePopup(e);
-                        }
-                        grid.popupIsShowing = false;
-                        grid.popupTitle = '';
-                        delete grid.onClosePopup;
-                        delete grid.popupPos;
-
+                        grid.onClosePopup(e);
                         grid.refreshState();
                     }}
                 >
@@ -114,6 +108,12 @@ export class GridINUBaseClass extends GridFLClass {
                 :
                 <></>
         );
+    }
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
+    onClosePopup() {
+        const grid = this;
+        grid.popupIsShowing = false;
+        grid.popupTitle = '';
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     renderPopupContent() {
@@ -329,7 +329,7 @@ export class GridINUBaseClass extends GridFLClass {
                     }
                 }
 
-                GLObject.dataGetter.get({ url: grid.entity + '/' + (!e.autocompleteColumn ? 'list' : 'autocomplete'), params: params }).then(
+                GLObject.dataGetter.get({ url: grid.controller + '/' + (!e.autocompleteColumn ? 'list' : 'autocomplete'), params: params }).then(
                     (res) => {
                         if (res != null) {
                             if (+res.reqInd !== grid.reqInd) return;
@@ -352,15 +352,35 @@ export class GridINUBaseClass extends GridFLClass {
         });
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
+    getNewRow() {
+        const grid = this;
+
+        const params = [{ key: 'entity', value: grid.entity }];
+
+        return new Promise(function (resolve, reject) {
+            GLObject.dataGetter.get({ url: 'system/getNewRow', params: params }).then(
+                (res) => {
+                    if (res) {
+                        resolve(res);
+                    }
+                    else {
+                        reject(Error("Error getting new row"));
+                    }
+                }
+            );
+        });
+    }
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     deleteRow() {
         const grid = this;
 
         const params = [
+            { key: 'entity', value: grid.entity },
             { key: 'id', value: grid.selectedValue() || grid.selectedRow()[grid.keyField] },
         ];
 
         return new Promise(function (resolve, reject) {
-            GLObject.dataGetter.get({ url: grid.entity + '/delete', params: params }).then(
+            GLObject.dataGetter.get({ url: grid.controller + '/delete', params: params }).then(
                 (res) => {
                     if (res && String(res.resStr.toLowerCase()) === 'true') {
                         resolve(res.resStr);
@@ -394,6 +414,7 @@ export class GridINUBaseClass extends GridFLClass {
             { key: 'row', value: e.row },
             { key: 'upd', value: e.changedRow },
             { key: 'columns', value: grid.keyField },
+            { key: 'entity', value: grid.entity },
         ];
 
         if (!grid.isNewRecord) {
@@ -401,7 +422,7 @@ export class GridINUBaseClass extends GridFLClass {
         }
 
         return new Promise(function (resolve, reject) {
-            GLObject.dataGetter.get({ url: grid.entity + '/' + (grid.isNewRecord ? 'add' : 'update'), params: params }).then(
+            GLObject.dataGetter.get({ url: grid.controller + '/' + (grid.isNewRecord ? 'add' : 'update'), params: params }).then(
                 (res) => {
                     if (res && +res.resStr > 0) {
                         if (grid.isNewRecord) {
@@ -451,7 +472,6 @@ export class GridINUBaseClass extends GridFLClass {
 
         const gridInfo = {
             s: grid.pageSize,
-            /*p: grid.pageNumber*/
         };
 
         const params = [

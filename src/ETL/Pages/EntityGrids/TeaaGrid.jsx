@@ -25,7 +25,7 @@ export class TeaaGridClass extends GridINUClass {
         grid.cardIsShowing = true;
         grid.popupIsShowing = true;
         grid.popupTitle = grid.title;
-        grid.onClosePopup = grid.closeCard;
+        //grid.onClosePopup = grid.closeCard;
 
         grid.refreshState();
     }
@@ -168,12 +168,15 @@ export class TeaaGridClass extends GridINUClass {
             i++;
         }
 
-        grid.onClosePopup = () => {
-            grid.protocolIsShowing = false;
-            grid.reportRows = [];
-        };
-
         grid.refreshState();
+    }
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
+    onClosePopup() {
+        const grid = this;
+
+        super.onClosePopup();
+        grid.protocolIsShowing = false;
+        grid.reportRows = [];
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
 }

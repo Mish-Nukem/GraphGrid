@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import { GridINUBaseClass } from './GridINUBase';
 import { GLObject } from './GLObject';
+import { SettingsPageClass } from './Pages/GLSettings';
 import { Images } from './Themes/Images';
 import { NodeStatus } from './Base';
 import { CardINU } from './CardINU';
@@ -97,7 +98,7 @@ export class GridINUClass extends GridINUBaseClass {
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     renderPopupContent() {
         const grid = this;
-        return grid.cardIsShowing ? grid.renderCardContent() : super.renderPopupContent();
+        return grid.cardIsShowing ? grid.renderCardContent() : grid.settingsIsShowing ? grid.renderSettings() : super.renderPopupContent();
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     renderCardContent() {
@@ -115,15 +116,6 @@ export class GridINUClass extends GridINUBaseClass {
                     for (let col of card.columns) {
                         delete col._fieldEditObj;
                     }
-                    grid.onClosePopup = () => {
-                        grid.cardIsShowing = false;
-                        grid.popupIsShowing = false;
-                        grid.isNewRecord = false;
-
-                        for (let col of card.columns) {
-                            delete col._fieldEditObj;
-                        }
-                    };
                     card.close = () => {
                         grid.onClosePopup();
                         grid.refreshState();
@@ -132,6 +124,60 @@ export class GridINUClass extends GridINUBaseClass {
             >
             </CardINU>
         );
+    }
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
+    renderSettings() {
+        const grid = this;
+
+        const sp = new SettingsPageClass({ parent: grid.parentComponent || grid });
+        return sp.renderSettingsPage();
+    }
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
+    onSettingsItemClick(itemId) {
+        super.onSettingsItemClick(itemId);
+        const grid = this;
+
+        switch (String(itemId)) {
+            case '4':
+                grid.settingsIsShowing = true;
+                grid.popupIsShowing = true;
+
+                grid.settingsPos = grid.settingsPos || { x: 210, y: 210, w: 400, h: 310 };
+                grid.popupPos = grid.settingsPos;
+
+                grid.refreshState();
+                break;
+            default:
+        }
+    }
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
+    getGridSettingsList() {
+        const res = super.getGridSettingsList();
+
+        const grid = this;
+        if (!grid.filtersDisabled) {
+            res.push({ id: 4, text: grid.translate('Settings', 'grid-menu') });
+        }
+
+        return res;
+    }
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
+    onClosePopup() {
+        const grid = this;
+
+        super.onClosePopup();
+
+        grid.isNewRecord = false;
+
+        if (grid.cardIsShowing) {
+            grid.cardIsShowing = false;
+            for (let col of grid.columns) {
+                delete col._fieldEditObj;
+            }
+        }
+        else if (grid.settingsIsShowing) {
+            grid.settingsIsShowing = false;
+        }
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     renderCell(grid, col, row) {
@@ -386,14 +432,15 @@ export class GridINUClass extends GridINUBaseClass {
         grid.cardPos = grid.cardPos || { x: 110, y: 110, w: 800, h: 600 };
         grid.popupPos = grid.cardPos;
 
-        grid.cardRow = {};
-        grid.isNewRecord = true;
-        grid.cardIsShowing = true;
-        grid.popupIsShowing = true;
-        grid.popupTitle = grid.title;
-        grid.onClosePopup = grid.closeCard;
+        grid.getNewRow().then((newRow) => {
+            grid.cardRow = newRow;
+            grid.isNewRecord = true;
+            grid.cardIsShowing = true;
+            grid.popupIsShowing = true;
+            grid.popupTitle = grid.title;
 
-        grid.refreshState();
+            grid.refreshState();
+        });
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     addRecordDisabled(e) {
@@ -413,7 +460,6 @@ export class GridINUClass extends GridINUBaseClass {
         grid.cardIsShowing = true;
         grid.popupIsShowing = true;
         grid.popupTitle = grid.title;
-        grid.onClosePopup = grid.closeCard;
 
         grid.refreshState();
     }
@@ -447,7 +493,6 @@ export class GridINUClass extends GridINUBaseClass {
         grid.cardIsShowing = true;
         grid.popupIsShowing = true;
         grid.popupTitle = grid.title;
-        grid.onClosePopup = grid.closeCard;
 
         grid.refreshState();
     }
@@ -456,11 +501,6 @@ export class GridINUClass extends GridINUBaseClass {
         const grid = this;
         return !grid.allowView || grid.isEditing() || grid.selectedRowIndex === undefined || grid.selectedRowIndex < 0 || !grid.rows || grid.rows.length <= 0;
     }
-    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
-    //isRowSelected(row, rowInd) {
-    //    const node = this;
-    //    return node.value !== undefined && node.value !== '' ? row[node.keyField] === node.value : node.selectedRowIndex === rowInd;
-    //}
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     setPageSize(newSize) {
         const grid = this;
@@ -570,9 +610,7 @@ export class GridINUClass extends GridINUBaseClass {
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     TEST(e) {
-        //const grid = this;
-
-        //grid.saveColumnsConfig(e);
+        alert('test');
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     keyCellAdd(selected) {

@@ -3,7 +3,6 @@ import { renderToStaticMarkup } from 'react-dom/server';
 import { BaseComponent, log } from './Base';
 import { OverlayClass } from './Overlay';
 import Moment from 'moment';
-import { ClipLoader } from 'react-spinners';
 // ==================================================================================================================================================================
 export function Grid(props) {
     let grid = null;
@@ -39,13 +38,17 @@ export function Grid(props) {
 
         if (needGetRows && (grid.rows.length <= 0 || grid.columns.length <= 0)) {
 
+            grid._waitingRows = true;
             grid.getRows({ filters: grid.collectFilters(), grid: grid }).then(
                 rows => {
                     grid.rows = rows;
                     grid.afterGetRows();
                     grid.refreshState();
                 }
-            );
+            ).finally(() => {
+                grid._waitingRows = false;
+                grid.refreshState();
+            });;
         }
         else if (grid.columns.length <= 0 && grid.getColumns) {
             grid.prepareColumns().then(() => grid.refreshState());
@@ -72,6 +75,8 @@ export class GridClass extends BaseComponent {
         if (props.getRows) {
             grid.getRows = props.getRows;
         }
+
+        grid._waitingRows = true;
 
         grid.getColumns = props.getColumns || grid.getColumns;
 
@@ -102,8 +107,6 @@ export class GridClass extends BaseComponent {
         grid.opt.selectedRowClass = props.selectedRowClass || BaseComponent.theme.selectedRowClass || '';
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
-    static _seq = 0;
-    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     log(message, pref) {
         const grid = this;
         log(`${pref ? pref : `grid#${grid.id}`} : ` + message);
@@ -111,6 +114,7 @@ export class GridClass extends BaseComponent {
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     afterGetRows() {
         const grid = this;
+        grid._waitingRows = false;
         grid.log('getRows(). rows = ' + grid.rows.length + '. state = ' + grid.stateind);
 
         if (grid.totalRows === undefined && grid.pageSize <= 0) {
@@ -141,25 +145,9 @@ export class GridClass extends BaseComponent {
         }
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
-    //static applyTheme(grid) {
-    //    if (Theme !== undefined && !grid.themeApplied) {
-    //        grid.theme = grid.theme || new Theme();
-    //        grid.theme.applyTheme(grid);
-
-    //        if (NewTheme !== undefined) {
-    //            const newtheme = new NewTheme();
-    //            newtheme.applyTheme(grid);
-    //        }
-
-    //        grid.themeApplied = true;
-    //    }
-    //}
-    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     setupEvents() {
         const grid = this;
         grid.clearEvents = function () { }
-
-        //GridClass.applyTheme(grid);
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     calculatePagesCount() {
@@ -169,7 +157,7 @@ export class GridClass extends BaseComponent {
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     refresh() {
         const grid = this;
-        grid.ready = false;
+        grid._waitingRows = true;
 
         grid.getRows({ filters: grid.collectFilters(), grid: grid }).then(
             rows => {
@@ -177,7 +165,10 @@ export class GridClass extends BaseComponent {
                 grid.afterGetRows();
                 grid.refreshState();
             }
-        );
+        ).finally(() => {
+            grid._waitingRows = false;
+            grid.refreshState();
+        });
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     collectFilters() {
@@ -192,6 +183,8 @@ export class GridClass extends BaseComponent {
             if (col.visible === false) continue;
             w += col.w;
         }
+
+        grid._currW = w;
 
         grid.log('render()' + '. rows = ' + grid.rows.length + '. columns = ' + grid.columns.length + /*'. w = ' + w +*/ '. state = ' + grid.stateind);
         log(' -------------------------------------------------------------------------------------------------------------------------------------- ');
@@ -320,18 +313,16 @@ export class GridClass extends BaseComponent {
     renderBody() {
         const grid = this;
 
-        if (!grid.columns || !grid.rows) {
-            return <div key={`gridloader_${grid.id}_`}
-                className='grid-loader'
-            >
-                <ClipLoader size={15} />
-            </div>;
+        if (grid._waitingRows || !grid.columns || !grid.rows) {
+            return (
+                grid.Spinner(grid.id, Math.min(grid._currW, window.innerWidth))
+            );
         }
 
-        return (//onMouseDown={(e) => { e.detail === 2 ? grid.onRowDblClick(e, row) : grid.onSelectGridRow(e) }}
+        return (
             <tbody>
                 {
-                    grid.rows.map((row, rind) => {//${grid.stateind}_
+                    grid.rows.map((row, rind) => {
                         let selected = grid.isRowSelected(row, rind);
                         return (
                             <tr
@@ -386,8 +377,6 @@ export class GridClass extends BaseComponent {
         let val = row[col.name];
 
         if (col.type === 'date' && val) {
-            //const parsedDate = parse(val, grid.dateFormat, new Date());
-            //val = format(parsedDate, grid.dateFormat);
             val = Moment(val, grid.dateFormat).format(grid.dateFormat);
         }
 

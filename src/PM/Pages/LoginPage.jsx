@@ -1,7 +1,6 @@
 ﻿import { useState, useEffect } from 'react';
 import { BaseComponent } from '../../Grid/Base';
 import { GLObject } from '../../Grid/GLObject';
-import { ClipLoader } from 'react-spinners';
 export function LoginPage(props) {
     let loginForm = null;
 
@@ -91,17 +90,14 @@ export class loginFormClass extends BaseComponent {
                     <input className="login-form-item form-control" type="password" onChange={(e) => loginForm.password = e.target.value} value={loginForm.password}></input>
                     {
                         loginForm.isLogging ?
-                            <div className='grid-loader'>
-                                <ClipLoader
-                                    size={15}
-                                />
-                            </div>
+                            loginForm.Spinner()
                             :
-                            <button className="login-form-item btn btn-primary" onClick={() => {
-                                loginForm.isLogging = true;
-                                loginForm.refreshState();
-                                loginForm.tryLogin();
-                            }}>Login</button>
+                            <button className="login-form-item btn btn-primary"
+                                onClick={() => {
+                                    loginForm.isLogging = true;
+                                    loginForm.refreshState();
+                                    loginForm.tryLogin();
+                                }}>Login</button>
                     }
                 </div>
             </>

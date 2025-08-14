@@ -12,6 +12,6 @@
 
     static appSettings = {};
 
-    // 0 - PostgreSAL, 1 - MSSQL
+    // 0 - PostgreSQL, 1 - MSSQL
     static serverType = 0;
 }

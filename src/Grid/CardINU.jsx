@@ -214,7 +214,21 @@ export class CardINUClass extends GridINUBaseClass {
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     commitChangesNodeDisabled() {
         const card = this;
-        return !card.isEditing();
+        if (!card.isEditing()) return true;
+
+        let requiredColumnsFilled = true;
+
+        for (let col of card.columns) {
+            if (!col.required || col.readonly) continue;
+
+            let val = card.changedRow[col.name];
+            if (col.required && (val === undefined || val === '')) {
+                requiredColumnsFilled = false;
+                break;
+            }
+        }
+
+        return !requiredColumnsFilled;
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     rollbackChangesNodeDisabled() {
@@ -275,13 +289,13 @@ export class CardINUClass extends GridINUBaseClass {
         params.push({ key: 'f0', value: card.keyField + ' = ' + card.initialRow[card.keyField] });
 
         return new Promise(function (resolve, reject) {
-            GLObject.dataGetter.get({ url: card.entity + '/list', params: params }).then(
+            GLObject.dataGetter.get({ url: card.controller + '/list', params: params }).then(
                 (res) => {
                     if (res != null && res.rows && res.rows.length === 1) {
                         card.totalRows = res.count;
                         resolve(res.rows);
                     } else {
-                        reject(Error("Error getting rows"));
+                        reject(Error(card.translate('Error getting rows')));
                     }
                 }
             );

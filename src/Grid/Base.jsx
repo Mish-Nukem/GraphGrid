@@ -1,5 +1,6 @@
 ﻿import { DefaultGridTheme as Theme } from './Themes/DefaultGridTheme';
 import { Translate } from './Themes/Translate';
+import { ClipLoader } from 'react-spinners';
 export class BaseComponent {
 
     constructor() {
@@ -15,6 +16,17 @@ export class BaseComponent {
 
     translate(text, context) {
         return Translate.translate(text, context);
+    }
+
+    Spinner(id = -1, mw = -1) {
+        return (
+            <div key={`loader_${id}_`}
+                className='grid-loader'
+                style={{ minWidth: mw ? mw + "px"  : "" }}
+            >
+                <ClipLoader size={15}></ClipLoader>
+            </div>
+        )
     }
 
     static dateFormat = 'DD.MM.YYYY';
@@ -43,6 +55,7 @@ export class BaseComponent {
         })
     };
 }
+
 
 export function log(message) {
     if (!window._logEnabled) return;

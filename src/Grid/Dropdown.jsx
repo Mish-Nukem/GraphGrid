@@ -68,8 +68,6 @@ export class DropdownClass extends ModalClass {
         dd.opt.resizable = false;
         dd.opt.noPadding = true;
         dd.opt.hiddenOverlay = true;
-        //dd.opt.closeWhenMiss = !props.closeWhenMouseLeave;
-        //dd.opt.isModal = !props.closeWhenMouseLeave;
 
         dd.opt.onItemMouseEnter = props.onItemMouseEnter;
 
@@ -94,6 +92,10 @@ export class DropdownClass extends ModalClass {
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     renderDropdownContent() {
         const dd = this;
+
+        if (!dd.items || dd.waitingItems) {
+            return dd.Spinner(dd.id);
+        }
 
         return (
             <>
@@ -150,10 +152,30 @@ export class DropdownClass extends ModalClass {
         return super.render();
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
+    calcPos(e) {
+        const dd = this;
+
+        const rect = dd.getDimensionsByContent();
+        const parentRect = dd.opt.parentRect ? dd.opt.parentRect : { x: e.clientX, y: e.clientY, width: e.width || 0, height: e.height || 0 };
+
+        dd.opt.pos = {
+            x: parentRect.x,
+            y: parentRect.y + parseInt(parentRect.height),
+            w: Math.max(rect.w, parentRect.width),
+            h: rect.h
+        };
+
+        if (dd.maxW !== undefined) {
+            dd.opt.pos.w = Math.min(dd.opt.pos.w, dd.maxW);
+        }
+    }
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     popup(e) {
         const dd = this;
 
         function afterGetItems(newItems) {
+            dd.waitingItems = false;
+
             if (newItems && newItems.length > 0) {
                 dd.items.push(...newItems);
             }
@@ -162,33 +184,29 @@ export class DropdownClass extends ModalClass {
 
             dd.visible = dd.items.length > 0;
 
-            const rect = dd.getDimensionsByContent();
-
             if (dd.items.length <= 0 && !dd.opt.allowUserFilter) return;
 
-            const parentRect = dd.opt.parentRect ? dd.opt.parentRect : { x: e.clientX, y: e.clientY, width: e.width || 0, height: e.height || 0 };
-
-            dd.opt.pos = {
-                x: parentRect.x,
-                y: parentRect.y + parseInt(parentRect.height),
-                w: Math.max(rect.w, parentRect.width),
-                h: rect.h
-            };
-
-            if (dd.maxW !== undefined) {
-                dd.opt.pos.w = Math.min(dd.opt.pos.w, dd.maxW);
-            }
+            dd.calcPos(e);
             //log(' DropdownPos w = ' + dd.pos.w + ', h = ' + dd.pos.h);
 
             dd.refreshState();
         }
 
         if (!dd.lastPageNumber || dd.lastPageNumber !== dd.pageNumber || dd.items.length <= 0) {
+            dd.waitingItems = true;
+            dd.visible = true;
+            dd.calcPos(e);
+
+            dd.refreshState();
+
             dd.getItems({ filter: dd.filter, pageSize: dd.pageSize, pageNumber: dd.pageNumber }).then(
                 items => {
                     afterGetItems(items);
                 }
-            );
+            ).finally(() => {
+                dd.waitingItems = false;
+                dd.refreshState();
+            });
         }
         else {
             afterGetItems();
