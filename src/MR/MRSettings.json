@@ -1,0 +1,7 @@
+﻿{
+  "APIurl": "http://mr2.infomega.local:5154/api/",
+  "PostgreSQLAPIurl": "http://mr2.infomega.local:5154/api/",
+  "ORACLEAPIurl": "http://mr2.infomega.local:6162/api/",
+  "DebugAPIurl": "http://localhost:6162/api/",
+  "localAPIurl": "http://localhost/api/"
+}

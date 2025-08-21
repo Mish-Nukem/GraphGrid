@@ -1,6 +1,6 @@
-﻿import { GridINUClass } from '../../../Grid/GridINU';
-import { Images } from '../../../Grid/Themes/Images';
-import { GLObject } from '../../../Grid/GLObject';
+﻿import { GridINUClass } from '../../Grid/GridINU';
+//import { Images } from '../../Grid/Themes/Images';
+import { GLObject } from '../../Grid/GLObject';
 export class DDObjGridClass extends GridINUClass {
 
     constructor(props) {

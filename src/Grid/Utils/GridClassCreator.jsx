@@ -16,4 +16,9 @@ export class GridCreator {
             return new GridFLClass(props);
         }
     }
+
+    GetEntityController() {
+        return 'dictionary';
+    }
+
 }

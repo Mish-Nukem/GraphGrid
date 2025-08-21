@@ -109,6 +109,7 @@ export class GridINUClass extends GridINUBaseClass {
                 isNewRecord={grid.isNewRecord}
                 uid={(grid.uid || grid.id) + '_card_'}
                 entity={grid.entity}
+                controller={grid.controller}
                 keyField={grid.keyField}
                 init={(card) => {
                     card.visible = true;

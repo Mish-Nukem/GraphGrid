@@ -134,7 +134,7 @@ export class SettingsPageClass extends ModalClass {
                     <div className="graph-card-field">
                         <span>{sp.translate('Server type') + ':'}</span>
                         <div className="field-edit">
-                            <span>{GLObject.serverType !== 0 ? "MSSQL" : "PostgreSQL"}</span>
+                            <span>{GLObject.serverType === 2 ? "ORACLE" : GLObject.serverType === 1 ? "MSSQL" : "PostgreSQL"}</span>
                         </div>
                     </div>
                 </>

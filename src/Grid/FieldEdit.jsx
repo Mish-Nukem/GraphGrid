@@ -288,6 +288,7 @@ export class FieldEditClass extends BaseComponent {
                                     fe._selectedOptions = [];
 
                                     fe.onChange(e);
+                                    fe.refreshState();
                                 }}
                                 disabled={fe.disabled}
                             >
@@ -318,7 +319,6 @@ export class FieldEditClass extends BaseComponent {
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     renderLookupGrid() {
         const fe = this;
-        //const info = GLObject.entityInfo[fe.column.entity];
 
         return (
             fe.column.renderLookup ?
@@ -326,6 +326,7 @@ export class FieldEditClass extends BaseComponent {
                 :
                 <GridINU
                     entity={fe.column.entity}
+                    controller={GLObject.gridCreator.GetEntityController(fe.column)}
                     keyField={fe.column.refKeyField}
                     nameField={fe.column.refNameField}
                     activeRow={fe.value}

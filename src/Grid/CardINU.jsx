@@ -284,6 +284,7 @@ export class CardINUClass extends GridINUBaseClass {
         const params = [
             { key: 'pageSize', value: 1 },
             { key: 'pageNumber', value: 1 },
+            { key: 'entity', value: card.entity },
         ];
 
         params.push({ key: 'f0', value: card.keyField + ' = ' + card.initialRow[card.keyField] });

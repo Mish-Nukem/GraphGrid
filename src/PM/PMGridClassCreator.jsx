@@ -1,6 +1,6 @@
 ﻿import { GridINUClass } from '../Grid/GridINU';
 import { PMGridClass } from './Pages/EntityGrids/PMGrid';
-import { DDObjGridClass } from './Pages/EntityGrids/DDObjGrid';
+import { DDObjGridClass } from '../Common/Pages/DDObjGrid';
 import { GridCreator } from '../Grid/Utils/GridClassCreator'
 export class PMGridCreator extends GridCreator {
     constructor(props) {
@@ -19,4 +19,18 @@ export class PMGridCreator extends GridCreator {
 
         return super.CreateGridClass(props);
     }
+
+    GetEntityController(props) {
+        const entity = props.entity || '';
+
+        if (entity.toLowerCase() === 'srremarkentity') {
+            return entity;
+        }
+        else if (entity.toLowerCase() === 'ddobjectentity') {
+            return entity;
+        }
+
+        return super.GetEntityController(props);
+    }
+
 }

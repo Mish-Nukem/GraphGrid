@@ -372,6 +372,7 @@ export class GraphComponentClass extends BaseComponent {
                     graph={gc.graph}
                     uid={node.uid !== undefined ? node.uid : node.id}
                     entity={node.entity}
+                    controller={GLObject.gridCreator.GetEntityController(node)}
                     init={(grid) => gc.onGridInit(grid, node.title, status, top)}
                 >
                 </GridINU>
