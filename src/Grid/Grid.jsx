@@ -48,7 +48,7 @@ export function Grid(props) {
             ).finally(() => {
                 grid._waitingRows = false;
                 grid.refreshState();
-            });;
+            });
         }
         else if (grid.columns.length <= 0 && grid.getColumns) {
             grid.prepareColumns().then(() => grid.refreshState());
@@ -315,7 +315,7 @@ export class GridClass extends BaseComponent {
 
         if (grid._waitingRows || !grid.columns || !grid.rows) {
             return (
-                grid.Spinner(grid.id, Math.min(grid._currW, window.innerWidth))
+                grid.Spinner(grid.id, Math.min(Math.max(grid._currW, 100), window.innerWidth))
             );
         }
 
@@ -416,19 +416,21 @@ export class GridClass extends BaseComponent {
         function afterGetColumns() {
             grid.columns = grid.columns || [];
             grid.colDict = grid.colDict || {};
-            grid.columnsDefaultOrder = [];
 
             let id = 0;
             for (let col of grid.columns) {
                 col.id = id++;
                 col.title = col.title || col.name;
                 col.w = col.initW = col.w || 100;
-                col.minW = col.minW || 30;
+                col.minW = col.minW || 50;
                 col.grid = grid;
                 grid.colDict[col.id] = grid.colDict[col.name] = grid.colDict[col.name.toLowerCase()] = col;
             }
 
-            Object.assign(grid.columnsDefaultOrder, grid.columns);
+            if (!grid.columnsDefaultOrder) {
+                grid.columnsDefaultOrder = [];
+                Object.assign(grid.columnsDefaultOrder, grid.columns);
+            }
 
             delete grid._waitingColumns;
         }

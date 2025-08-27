@@ -123,7 +123,7 @@ export class GraphComponentClass extends BaseComponent {
         const lowGrids = [];
 
         const keys = Object.keys(gc.graph.nodesDict);
-        keys.sort(); 
+        keys.sort();
 
         for (let uid of keys) {
             let node = gc.graph.nodesDict[uid];
@@ -146,6 +146,9 @@ export class GraphComponentClass extends BaseComponent {
             }
         }
 
+        const topFilterWidth = topFilters.length <= 2 ? 400 : topFilters.length === 3 ? 300 : 250;
+        const lowFilterWidth = lowFilters.length <= 2 ? 400 : lowFilters.length === 3 ? 300 : 250;
+
         return (
             <>
                 <div key={`graphall_${gc.id}_`}>
@@ -155,7 +158,7 @@ export class GraphComponentClass extends BaseComponent {
                             <div
                                 key={`topFiltersMainDiv_${gc.id}_`}
                                 className="graph-filters-div"
-                                style={{ height: gc.topFiltersCollapsed ? '0' : ''  }}
+                                style={{ height: gc.topFiltersCollapsed ? '0' : '' }}
                             >
                                 <button
                                     key={`topFiltersCollapseButton_${gc.id}_`}
@@ -167,7 +170,11 @@ export class GraphComponentClass extends BaseComponent {
                                 </button>
                                 {
                                     !gc.topFiltersCollapsed ?
-                                        <div className="graph-filter-line" key={`filterstop_${gc.id}_`}>
+                                        <div
+                                            key={`filterstop_${gc.id}_`}
+                                            className="graph-filter-line"
+                                            style={{ gridTemplateColumns: `repeat(auto-fit, ${topFilterWidth}px)` }}
+                                        >
                                             {
                                                 topFilters.map((node) => { return gc.renderFilter(node, true) })
                                             }
@@ -206,7 +213,11 @@ export class GraphComponentClass extends BaseComponent {
                                 </button>
                                 {
                                     !gc.lowFiltersCollapsed ?
-                                        <div className="graph-filter-line" key={`filterslow_${gc.id}_`}>
+                                        <div
+                                            key={`filterslow_${gc.id}_`}
+                                            className="graph-filter-line" 
+                                            style={{ gridTemplateColumns: `repeat(auto-fit, ${lowFilterWidth}px)` }}
+                                        >
                                             {
                                                 lowFilters.map((node) => { return gc.renderFilter(node, false) })
                                             }
@@ -287,6 +298,7 @@ export class GraphComponentClass extends BaseComponent {
                     keyPref={node.id + '_filter_'}
                     column={node.filterColumn}
                     entity={node.entity}
+                    comboboxValues={node.comboboxValues}
                     value={node.multi ? node._selectedOptions : node.value}
                     text={isInput || isDate ? node.value : node.value !== undefined && node.value !== '' && node.selectedText ? node.selectedText() : ''}
                     findFieldEdit={() => { return node.filterColumn._fieldEditObj; }}
@@ -726,6 +738,10 @@ export class GraphComponentClass extends BaseComponent {
 
         grid.getRows = obr.getRows || grid.getRows;
 
+        if (!grid.entity && obr.rows && obr.rows.length > 0) {
+            grid.rows = obr.rows;
+        }
+
         grid.connectedToParents = true;
         grid.parents = obr.parents;
         for (let pid of grid.parents) {
@@ -788,6 +804,8 @@ export class GraphComponentClass extends BaseComponent {
 
             node.translate = node.translate || ((text) => { return text; });
 
+            let hasRowsAndColumns = node.columns && node.columns.length > 0 && node.rows && node.rows.length > 0;
+
             if (node._readonly !== undefined) {
                 node.readonly = node._readonly;
                 delete node._readonly;
@@ -808,11 +826,18 @@ export class GraphComponentClass extends BaseComponent {
                 }
             }
 
-            if (node.status === NodeStatus.filter && node.filterType === FilterType.combobox) {
+            if (hasRowsAndColumns && !node.entity) {
+                node.comboboxValues = [];
+                for (let row of node.rows) {
+                    node.comboboxValues.push({ value: row[node.keyField], label: row[node.nameField] });
+                }
+            }
+
+            if (node.status === NodeStatus.filter && node.filterType === FilterType.combobox && node.multi === undefined) {
                 node.multi = true;
             }
 
-            if (node.status === NodeStatus.filter && !node.entity && node.filterType === FilterType.combobox) {
+            if (node.status === NodeStatus.filter && node.filterType === FilterType.combobox && !node.entity && (!node.columns || node.columns.length <= 0) && (!node.rows || node.rows.length <= 0)) {
                 node.status = NodeStatus.hidden;
             }
         }

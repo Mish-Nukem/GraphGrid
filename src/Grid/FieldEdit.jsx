@@ -150,6 +150,7 @@ export class FieldEditClass extends BaseComponent {
                         width: fe.w ? fe.w : '',
                         maxWidth: fe.maxW ? fe.maxW : '',
                         margin: fe.margin,
+                        minHeight: fe.large ? '2.5em' : '',
                     }}
                 >
                     {
@@ -226,11 +227,11 @@ export class FieldEditClass extends BaseComponent {
                                             width: '100%',
                                             height: !fe.inputClass ? fe.h : '',
                                             minHeight: !fe.inputClass ? fe.h : '',
-                                            padding: '0',
+                                            padding: !fe.large ? '0' : '',
                                             gridColumn: noClear ? 'span 3' : 'span 2',
                                             overflowX: 'hidden',
                                         }}
-                                        className="datepicker-input"
+                                        className={fe.large ? 'datepicker-input-lg' : 'datepicker-input'}
                                     >
                                         <DatePicker
                                             selected={parsedDate}
@@ -281,7 +282,7 @@ export class FieldEditClass extends BaseComponent {
                             :
                             <button
                                 key={`fieldclear_${fe.id}_${fe.column.id}_`}
-                                className={`${fe.large ? 'graph-filter-button' : 'grid-cell-button'} ${fe.clearButtonClass || ''}`}
+                                className={`${fe.large ? 'graph-filter-clear' : 'grid-cell-button'} ${fe.clearButtonClass || ''}`}
                                 onClick={(e) => {
                                     e.value = e.text = '';
                                     fe.value = fe.text = '';
@@ -478,6 +479,7 @@ export class FieldEditClass extends BaseComponent {
             :
             new Promise(function (resolve, reject) {
                 params.push({ key: 'pageSize', value: 100 });
+                params.push({ key: 'columns', value: fe.column.refNameField });
 
                 GLObject.dataGetter.get({ url: /*fe.selfEntity*/'dictionary' + '/list', params: params }).then(
                     (res) => {

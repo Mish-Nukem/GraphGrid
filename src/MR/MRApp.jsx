@@ -28,8 +28,8 @@ function MRApp() {
     appSettings.APIurl = /*GLObject.serverType !== 0 ? appSettings.MSSQLAPIurl :*/ appSettings.ORACLEAPIurl;
 
     // !!! раскомментрировать для отладки локально !!!
-    //appSettings.isDubug = true;
-    //appSettings.APIurl = appSettings.DebugAPIurl;
+    appSettings.isDubug = true;
+    appSettings.APIurl = appSettings.DebugAPIurl;
     // !!! раскомментрировать для отладки локально !!!
 
     GLObject.dataGetter = GLObject.dataGetter || new DataGetter(appSettings);

@@ -1,4 +1,6 @@
-﻿export class DataGetter {
+﻿import { cache } from "react";
+
+export class DataGetter {
     constructor(settings, onError) {
         const dg = this;
 
@@ -11,7 +13,7 @@
         const dg = this;
         return new Promise(function (resolveRefresh, rejectRefresh) {
             if (!dg.rtoken) {
-                //rejectRefresh();
+                resolveRefresh();
                 return;
             }
 
@@ -39,6 +41,8 @@
                     else {
                         rejectRefresh('Unable to refresh token');
                     }
+                }).catch(ex => {
+                    rejectRefresh(ex);
                 });
         });
     }
@@ -48,82 +52,93 @@
 
         return new Promise(function (resolve, reject) {
             let refresh = false;
-            let isError = false;
             let errorText = '';
 
             function doRequest() {
-                return new Promise(function (/*resolveRequest, rejectRequest*/) {
-                    try {
-                        if (e.params) {
-                            const item = e.params.find((item) => String(item.key) === 'atoken');
+                return new Promise(() => {
+                    if (e.params) {
+                        const item = e.params.find((item) => String(item.key) === 'atoken');
 
-                            if (item) {
-                                item.value = dg.atoken;
-                            }
-                            else {
-                                e.params.push({ key: 'atoken', value: dg.atoken });
-                            }
+                        if (item) {
+                            item.value = dg.atoken;
                         }
-
-                        const fetchParams = {
-                            mode: 'cors',
-                            method: e.method || 'post',
-                            headers: {},
-                        };
-
-                        if (e.method !== 'get') {
-                            fetchParams.body = e.params ? JSON.stringify(e.params) : e.data || null;
+                        else {
+                            e.params.push({ key: 'atoken', value: dg.atoken });
                         }
+                    }
 
-                        if (e.contentType !== null) {
-                            fetchParams.headers['Content-Type'] = e.contentType || 'application/json';
-                        }
+                    const fetchParams = {
+                        mode: 'cors',
+                        method: e.method || 'post',
+                        headers: {},
+                    };
 
-                        fetch(dg.APIurl + e.url, fetchParams)
-                            .then((response) => {
-                                if (response.status === 500 || !response.ok) {
-                                    if (!refresh) {
-                                        refresh = true;
-                                        dg.refreshToken().then(() => {
-                                            doRequest().then((res) => resolve(res));
+                    if (e.method !== 'get') {
+                        fetchParams.body = e.params ? JSON.stringify(e.params) : e.data || null;
+                    }
+
+                    if (e.contentType !== null) {
+                        fetchParams.headers['Content-Type'] = e.contentType || 'application/json';
+                    }
+
+                    fetch(dg.APIurl + e.url, fetchParams)
+                        .then((response) => {
+                            if (response.status === 500 || !response.ok) {
+                                if (!refresh && e.url !== 'system/login') {
+                                    refresh = true;
+                                    dg.refreshToken().then(() => {
+                                        doRequest().then(res => {
+                                            resolve(res);
                                         }).catch(error => {
                                             reject(error);
                                             if (dg.onError) {
                                                 dg.onError(error);
                                             }
                                         });
-                                    }
-                                    else {
-                                        reject(response.statusText);
-                                    }
-                                    return;
-                                }
-
-                                if (e.type && e.type.toLowerCase() === 'text') {
-                                    resolve(response.text());
+                                    }).catch(error => {
+                                        reject(error);
+                                    });
                                 }
                                 else {
-                                    resolve(response.json());
+                                    response.text().then((txt) => {
+                                        reject(txt);
+                                    });
                                 }
-                            })
-                            .catch(error => {
-                                isError = true;
-                                errorText = `Error getting ${e.url}: ${error}`;
-                                reject(errorText);
-                            });
-                    }
-                    finally { /**/ }
-                });
+                                return;
+                            }
+
+                            if (e.type && e.type.toLowerCase() === 'text') {
+                                resolve(response.text());
+                            }
+                            else {
+                                resolve(response.json());
+                            }
+                        })
+                        .catch(error => {
+                            errorText = `Error getting ${e.url}: ${error}`;
+                            if (dg.onError) {
+                                dg.onError(error);
+                            }
+                            reject(errorText);
+                        });
+                },
+                    (error) => {
+                        reject(error);
+                        if (dg.onError) {
+                            dg.onError(error);
+                        }
+
+                    });
             }
 
-            try {
-                doRequest().then((res) => resolve(res));
-            }
-            finally {
-                if (isError && errorText) {
-                    alert(errorText);
+            doRequest().then(res => {
+                resolve(res);
+            }).catch(error => {
+                reject(error);
+                if (dg.onError) {
+                    dg.onError(error);
                 }
-            }
+            });
         })
     }
 }

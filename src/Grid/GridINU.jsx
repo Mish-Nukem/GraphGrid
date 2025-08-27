@@ -41,9 +41,11 @@ export function GridINU(props) {
 
             grid.getRows().then(
                 rows => {
+                    //setTimeout(() => {
                     grid.rows = rows;
                     grid.afterGetRows();
                     grid.refreshState();
+                    //}, 100000);
                 }
             );
         }
@@ -603,8 +605,8 @@ export class GridINUClass extends GridINUBaseClass {
             let pnode = grid.graph.nodesDict[puid];
             if (pnode.visible !== false && pnode.status === NodeStatus.grid) return true;
 
-            let link = grid.graph.linksDict[grid.id + '_' + pnode.id];
-            if (link.everLink) return true;
+            //let link = grid.graph.linksDict[grid.id + '_' + pnode.id];
+            //if (link.everLink && pnode.required && (pnode.value === undefined || pnode.value === '')) return true;
         }
 
         return false;
@@ -620,16 +622,30 @@ export class GridINUClass extends GridINUBaseClass {
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     resetColumnsOrderToDefault() {
-        super.resetColumnsOrderToDefault();
+        //    const grid = this;
+        //    delete GLObject.entityInfo[grid.entity];
+
+        //    grid.columns = [];
+        //    grid.colDict = {};
+
+        //    grid.prepareColumns(true).then(() => {
+        //        //super.resetColumnsOrderToDefault();
+
+        //        grid.saveColumnsConfig();
+        //        grid.refreshState();
+        //    })
 
         const grid = this;
+        super.resetColumnsOrderToDefault();
+
         grid.saveColumnsConfig();
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     resetColumnsWidthsToDefault() {
+        const grid = this;
+
         super.resetColumnsWidthsToDefault();
 
-        const grid = this;
         grid.saveColumnsConfig();
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------

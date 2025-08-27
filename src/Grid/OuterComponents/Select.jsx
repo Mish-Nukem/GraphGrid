@@ -29,6 +29,7 @@ export function Select(props) {
             height: height,
             boxShadow: state.isFocused ? null : null,
             className: className,
+            overflow: 'hidden',
         }),
 
         valueContainer: (base) => ({
@@ -53,6 +54,19 @@ export function Select(props) {
         indicatorsContainer: (base) => ({
             ...base,
             height: 'calc(' + height + ' - 4px)',
+            //padding: '8px 0',
+        }),
+
+        dropdownIndicator: (base) => ({
+            ...base,
+            //height: 'calc(' + height + ' - 4px)',
+            padding: '8px 0',
+        }),
+
+        clearIndicator: (base) => ({
+            ...base,
+            //height: 'calc(' + height + ' - 4px)',
+            padding: '8px 0',
         }),
 
         option: (base, state) => ({

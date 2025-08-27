@@ -120,7 +120,7 @@ export class GridINUBaseClass extends GridFLClass {
         return <></>;
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
-    async getEntityInfo() {
+    async getEntityInfo(noConfig) {
         const grid = this;
         if (!grid.entity) return null;
 
@@ -128,8 +128,11 @@ export class GridINUBaseClass extends GridFLClass {
 
         const params = [
             { key: 'entity', value: grid.entity },
-            { key: 'configUid', value: grid.getConfigUid() },
         ];
+
+        if (!noConfig) {
+            params.push({ key: 'configUid', value: grid.getConfigUid() });
+        }
 
         const entityInfo = await GLObject.dataGetter.get({ url: 'system/entityInfo', params: params });
         GLObject.entityInfo[grid.entity] = entityInfo;
@@ -231,11 +234,11 @@ export class GridINUBaseClass extends GridFLClass {
         return { name: name, sortable: true, filtrable: true };
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
-    async prepareColumns() {
+    async prepareColumns(noConfig) {
         const grid = this;
         if (grid._waitingColumns) return;
 
-        const entityInfo = await grid.getEntityInfo();
+        const entityInfo = await grid.getEntityInfo(noConfig);
 
         await super.prepareColumns().then(() => {
             for (let col of grid.columns) {
@@ -272,6 +275,16 @@ export class GridINUBaseClass extends GridFLClass {
             }
 
             grid.columns = newColumns;
+
+            if (entityInfo.columnsDefaultOrder) {
+                const dcols = String(entityInfo.columnsDefaultOrder).split(';');
+                grid.columnsDefaultOrder = [];
+                for (let colName of dcols) {
+                    let col = grid.colDict[colName];
+                    if (!col) continue;
+                    grid.columnsDefaultOrder.push(col);
+                }
+            }
         });
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -311,6 +324,11 @@ export class GridINUBaseClass extends GridFLClass {
         params.push({ key: 'reqInd', value: ++grid.reqInd });
 
         return new Promise(function (resolve, reject) {
+            if (!grid.entity && grid.rows && grid.rows.length > 0) {
+                resolve(grid.rows);
+                return;
+            }
+
             grid.getEntityInfo().then((entityInfo) => {
                 GLObject.entityInfo[grid.entity] = entityInfo;
 

@@ -136,13 +136,13 @@ export class MainMenuClass extends BaseComponent {
                                                         menu.showChildren(e, item);
                                                     }}
                                                     onMouseOut={() => {
-                                                        if (!menu.activeItems[item.id]) return;
-
-                                                        menu.isShowingDropdown = false;
-
                                                         setTimeout(() => {
+                                                            if (!menu.activeItems[item.id] || +menu.activeItems[item.id] > 1) return;
+
+                                                            menu.isShowingDropdown = false;
+
                                                             menu.closeDropdowns();
-                                                        }, 10);
+                                                        }, 300);
                                                     }}
                                                 >
                                                     {menu.translate(item.text)}
@@ -219,9 +219,10 @@ export class MainMenuClass extends BaseComponent {
 
         menu.showingItems = [];
         menu.activeItems = {};
+        let i = 1;
         while (item) {
             if (!e.skipActivate) {
-                menu.activeItems[item.id] = 1;
+                menu.activeItems[item.id] = i++;
             }
 
             if (item.items && item.items.length > 0) {

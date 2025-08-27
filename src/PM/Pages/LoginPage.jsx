@@ -62,7 +62,11 @@ export class loginFormClass extends BaseComponent {
                     loginForm.afterLogin(tokens);
                 }
             }
-        );
+        ).catch((reason) => {
+            loginForm.error = reason;
+            loginForm.isLogging = false;
+            loginForm.refreshState();
+        });
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     render() {
@@ -85,9 +89,9 @@ export class loginFormClass extends BaseComponent {
                         <option >MSSQL</option>
                     </select>
                     <span className="login-form-item">Login</span>
-                    <input className="login-form-item form-control" onChange={(e) => loginForm.login = e.target.value} value={loginForm.login}></input>
+                    <input className="login-form-item form-control" onChange={(e) => loginForm.login = e.target.value}></input>
                     <span className="login-form-item">Password</span>
-                    <input className="login-form-item form-control" type="password" onChange={(e) => loginForm.password = e.target.value} value={loginForm.password}></input>
+                    <input className="login-form-item form-control" type="password" onChange={(e) => loginForm.password = e.target.value}></input>
                     {
                         loginForm.isLogging ?
                             loginForm.Spinner()
@@ -95,10 +99,12 @@ export class loginFormClass extends BaseComponent {
                             <button className="login-form-item btn btn-primary"
                                 onClick={() => {
                                     loginForm.isLogging = true;
+                                    loginForm.error = '';
                                     loginForm.refreshState();
                                     loginForm.tryLogin();
                                 }}>Login</button>
                     }
+                    <span>{!loginForm.isLogging && loginForm.error ? "Ошибка: " + loginForm.error : ""}</span>
                 </div>
             </>
         );
