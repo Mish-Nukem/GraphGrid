@@ -573,6 +573,11 @@ tr.grid-selected-row > td {
     box-sizing: border-box;
 }
 
+.input-default-class-lg {
+    height: 2.2em;
+    box-sizing: border-box;
+}
+
 .select-default-class {
     height: 1.8em;
     box-sizing: border-box;

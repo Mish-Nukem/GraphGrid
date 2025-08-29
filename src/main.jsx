@@ -3,21 +3,21 @@ import { createRoot } from 'react-dom/client'
 import PMApp from './PM/PMApp';
 import MRApp from './MR/MRApp';
 import DebugApp from './Tests/DebugApp';
+import { GLObject } from './Grid/GLObject';
 
-let currentProject;
-currentProject = 'Debug';
-currentProject = 'PM';
-currentProject = 'MR';
+GLObject.isDebug = true;
+GLObject.projectID = 'PM';
+//GLObject.projectID = 'MR';
 
 createRoot(document.getElementById('root')).render(
     <>
-        {currentProject === 'Debug' ?
+        {GLObject.projectID === 'Debug' ?
             <DebugApp />
             :
-            currentProject === 'PM' ?
+            GLObject.projectID === 'PM' ?
                 <PMApp />
                 :
-                currentProject === 'MR' ?
+                GLObject.projectID === 'MR' ?
                     <MRApp />
                     :
                 <DebugApp />

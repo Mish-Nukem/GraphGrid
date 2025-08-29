@@ -25,11 +25,12 @@ function MRApp() {
     //"DebugAPIurl": "http://localhost:5152/api/",
     //"localAPIurl": "http://localhost/api/"
 
-    appSettings.APIurl = /*GLObject.serverType !== 0 ? appSettings.MSSQLAPIurl :*/ appSettings.ORACLEAPIurl;
+    appSettings.APIurl = appSettings.ORACLEAPIurl;
 
     // !!! раскомментрировать для отладки локально !!!
-    appSettings.isDubug = true;
-    appSettings.APIurl = appSettings.DebugAPIurl;
+    if (GLObject.isDebug) {
+        appSettings.APIurl = appSettings.DebugAPIurl;
+    }
     // !!! раскомментрировать для отладки локально !!!
 
     GLObject.dataGetter = GLObject.dataGetter || new DataGetter(appSettings);
@@ -42,11 +43,11 @@ function MRApp() {
 
     GLObject.changeAPIurl = GLObject.changeAPIurl || function (serverType) {
         GLObject.serverType = serverType;
-        if (appSettings.isDubug) {
+        if (GLObject.isDubug) {
             GLObject.dataGetter.APIurl = appSettings.DebugAPIurl;
         }
         else {
-            GLObject.dataGetter.APIurl = appSettings.APIurl = serverType !== 0 ? appSettings.MSSQLAPIurl : appSettings.PostgreSQLAPIurl;
+            GLObject.dataGetter.APIurl = appSettings.APIurl = GLObject.serverType !== 0 ? appSettings.MSSQLAPIurl : appSettings.PostgreSQLAPIurl;
         }
     };
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -98,6 +99,7 @@ function MRApp() {
             case 'logout':
                 setState({ menuObj: { id: - 2 } });
 
+                GLObject.user = '';
                 break;
             case 0:
                 return <></>

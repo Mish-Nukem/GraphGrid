@@ -33,4 +33,13 @@ export class PMGridCreator extends GridCreator {
         return super.GetEntityController(props);
     }
 
+    GetSchemeInfo(entity, schemeName) {
+        if (!entity) return null;
+
+        if (entity.toLowerCase() === 'srremarkentity') {
+            return { schemeName: 'Remarks_scheme', inSchemeUid: '05' };
+        }
+
+        return super.GetSchemeInfo(entity, schemeName);
+    }
 }

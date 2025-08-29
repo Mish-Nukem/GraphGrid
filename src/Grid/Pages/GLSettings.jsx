@@ -137,6 +137,12 @@ export class SettingsPageClass extends ModalClass {
                             <span>{GLObject.serverType === 2 ? "ORACLE" : GLObject.serverType === 1 ? "MSSQL" : "PostgreSQL"}</span>
                         </div>
                     </div>
+                    <div className="graph-card-field">
+                        <span>{sp.translate('User') + ':'}</span>
+                        <div className="field-edit">
+                            <span>{GLObject.user}</span>
+                        </div>
+                    </div>
                 </>
             </div>
         );

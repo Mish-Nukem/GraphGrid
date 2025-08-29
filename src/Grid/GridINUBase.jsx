@@ -264,6 +264,11 @@ export class GridINUBaseClass extends GridFLClass {
                 obrCol.asc = col.asc;
                 obrCol.desc = col.desc;
                 obrCol.sortInd = col.sortInd;
+
+                if (obrCol.entity) {
+                    obrCol.schemeInfo = GLObject.gridCreator.GetSchemeInfo(obrCol.entity, grid.graph ? grid.graph.schemeName : '');
+                }
+
                 newColumns.push(obrCol);
             }
 

@@ -34,6 +34,7 @@ export function FieldEdit(props) {
 
     fe.buttonClass = props.buttonClass || BaseComponent.theme.filterButtonClass || '';
     fe.inputClass = props.inputClass || BaseComponent.theme.inputClass || '';
+    fe.inputClassLG = props.inputClassLG || BaseComponent.theme.inputClassLG || '';
     fe.clearButtonClass = props.clearButtonClass || BaseComponent.theme.clearButtonClass || '';
     fe.selectClass = props.selectClass || BaseComponent.theme.selectClass || '';
     fe.datePickerDateFormat = props.datePickerDateFormat || 'dd.MM.yyyy';
@@ -51,7 +52,7 @@ export function FieldEdit(props) {
     }
 
     if (fe.multi) {
-        if (fe.value !== undefined && fe.value !== '' && fe._selectedOptions.length <= 0) {
+        if (fe.value !== undefined && fe.value !== null && typeof (fe.value) === 'object' && fe.value !== '' && fe._selectedOptions.length <= 0) {
             fe._selectedOptions = fe.value || [];
             const texts = [];
             fe.value = fe.getValueFromCombobox(texts);
@@ -98,10 +99,15 @@ export class FieldEditClass extends BaseComponent {
         }
 
         if (fe.multi) {
-            fe._selectedOptions = fe.value || [];
-            const texts = [];
-            fe.value = fe.getValueFromCombobox(texts);
-            fe.text = texts.join(', ');
+            fe._selectedOptions = [];
+            if (fe.value !== undefined && fe.value !== null && typeof (fe.value) === 'object') {
+                fe._selectedOptions = fe.value;
+            }
+            else {
+                const texts = [];
+                fe.value = fe.getValueFromCombobox(texts);
+                fe.text = texts.join(', ');
+            }
         }
         else {
             fe._selectedOptions = [];
@@ -116,6 +122,7 @@ export class FieldEditClass extends BaseComponent {
 
         fe.dateFormat = props.dateFormat || BaseComponent.dateFormat;
 
+        // просто разметка 'span 2' etc.
         fe.gridColumn = props.gridColumn;
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -255,11 +262,11 @@ export class FieldEditClass extends BaseComponent {
                                 :
                                 <textarea
                                     key={`fieldtextarea_${fe.id}_${fe.column.id}_`}
-                                    className={`${fe.inputClass || ''}`}
+                                    className={`${fe.large ? fe.inputClassLG : fe.inputClass}`}
                                     value={fe.value || ''}
                                     style={{
                                         width: '100%',
-                                        height: !fe.inputClass ? fe.textareaH : fe.h,
+                                        //height: !fe.inputClass ? fe.textareaH : fe.h,
                                         minHeight: !fe.inputClass ? fe.textareaH : fe.h,
                                         padding: '0',
                                         boxSizing: 'border-box',
@@ -306,7 +313,9 @@ export class FieldEditClass extends BaseComponent {
                             pos={fe.popupPos}
                             onClose={(e) => {
                                 fe.lookupIsShowing = false;
-                                delete fe.grid.value;
+                                if (fe.grid) {
+                                    delete fe.grid.value;
+                                }
                                 fe.refreshState();
                             }}
                         >
@@ -322,8 +331,10 @@ export class FieldEditClass extends BaseComponent {
         const fe = this;
 
         return (
-            fe.column.renderLookup ?
-                fe.column.renderLookup(fe)
+            //fe.column.renderLookup ?
+            //    fe.column.renderLookup(fe)
+            fe.column.schemeInfo ?
+                GLObject.gridCreator.renderSelectingGraph(fe.column)
                 :
                 <GridINU
                     entity={fe.column.entity}
@@ -379,7 +390,7 @@ export class FieldEditClass extends BaseComponent {
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     openLookupField(e) {
         const fe = this;
-        fe.popupPos = fe.popupPos || { x: 100, y: 100, w: 800, h: 600 };
+        fe.popupPos = fe.popupPos || { x: 100, y: 100, w: 1600, h: 900 };
 
         fe.lookupIsShowing = true;
         if (fe.ownerGrid) {
@@ -391,6 +402,8 @@ export class FieldEditClass extends BaseComponent {
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     getValueFromCombobox(texts, changeGridValue) {
         const fe = this;
+        //if (!fe.grid) return;
+
         texts = texts || [];
         changeGridValue = changeGridValue && fe.grid;
 

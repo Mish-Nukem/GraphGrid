@@ -27,8 +27,9 @@ function PMApp() {
     appSettings.APIurl = GLObject.serverType !== 0 ? appSettings.MSSQLAPIurl : appSettings.PostgreSQLAPIurl;
 
     // !!! раскомментрировать для отладки локально !!!
-    appSettings.isDubug = true;
-    appSettings.APIurl = appSettings.DebugAPIurl;
+    if (GLObject.isDebug) {
+        appSettings.APIurl = appSettings.DebugAPIurl;
+    }
     // !!! раскомментрировать для отладки локально !!!
 
     GLObject.dataGetter = GLObject.dataGetter || new DataGetter(appSettings);
@@ -41,11 +42,11 @@ function PMApp() {
 
     GLObject.changeAPIurl = GLObject.changeAPIurl || function (serverType) {
         GLObject.serverType = serverType;
-        if (appSettings.isDubug) {
+        if (GLObject.isDubug) {
             GLObject.dataGetter.APIurl = appSettings.DebugAPIurl;
         }
         else {
-            GLObject.dataGetter.APIurl = appSettings.APIurl = serverType !== 0 ? appSettings.MSSQLAPIurl : appSettings.PostgreSQLAPIurl;
+            GLObject.dataGetter.APIurl = appSettings.APIurl = GLObject.serverType !== 0 ? appSettings.MSSQLAPIurl : appSettings.PostgreSQLAPIurl;
         }
     };
 
@@ -122,6 +123,7 @@ function PMApp() {
             case 'logout':
                 setState({ menuObj: { id: - 2 } });
 
+                GLObject.user = '';
                 break;
             case 0:
                 return <></>

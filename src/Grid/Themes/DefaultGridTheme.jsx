@@ -12,6 +12,7 @@
         this.headerDivClass = ' ';
         this.selectedRowClass = 'table-active';
         this.inputClass = 'input-default-class';
+        this.inputClassLG = 'input-default-class-lg';
         this.selectClass = 'select-default-class';
 
         this.tabControlButtonClass = 'graph-tabcontrol-button';

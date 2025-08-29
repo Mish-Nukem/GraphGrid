@@ -332,8 +332,18 @@ export class ReportParamsPageClass extends ModalClass {
                     let savedParam = data[param.id];
                     if (!savedParam) continue;
 
-                    param.value = savedParam.value;
                     param.text = savedParam.label;
+                    if (!param.multi) {
+                        param.value = savedParam.value;
+                    }
+                    else {
+                        param.value = [];
+                        const varr = String(savedParam.value).split(',');
+                        const tarr = String(savedParam.label).split(',');
+                        for (let i = 0; i < varr.length; i++) {
+                            param.value.push({ value: varr[i], label: tarr[i] });
+                        }
+                    }
                 }
 
                 de.refreshState();

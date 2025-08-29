@@ -4,6 +4,7 @@ import { BaseComponent, NodeStatus, FilterType, log } from './Base';
 import { GraphClass } from './Graph';
 import { GridFL, GridFLClass } from './GridFL';
 import { GridINU, GridINUClass } from './GridINU';
+//import { GridCreator } from './Utils/GridClassCreator';
 import { FieldEdit } from './FieldEdit';
 import { GLObject } from './GLObject';
 import { Images } from './Themes/Images';
@@ -78,6 +79,7 @@ export class GraphComponentClass extends BaseComponent {
         };
 
         gc.selectingNodeUid = props.selectingNodeUid;
+        gc.selectingnodeMulti = props.selectingnodeMulti;
         gc.onSelectFilterValue = props.onSelectFilterValue;
         gc.nodeBeforeOpenCondition = props.nodeBeforeOpenCondition;
 
@@ -215,7 +217,7 @@ export class GraphComponentClass extends BaseComponent {
                                     !gc.lowFiltersCollapsed ?
                                         <div
                                             key={`filterslow_${gc.id}_`}
-                                            className="graph-filter-line" 
+                                            className="graph-filter-line"
                                             style={{ gridTemplateColumns: `repeat(auto-fit, ${lowFilterWidth}px)` }}
                                         >
                                             {
@@ -242,17 +244,6 @@ export class GraphComponentClass extends BaseComponent {
         )
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
-    renderSelectingGraph(selectingNode) {
-        const gc = this;
-        return <GraphComponent
-            uid={`${gc.uid}_select_${selectingNode.uid}_`}
-            schemeName={selectingNode.schemeName}
-            selectingNodeUid={selectingNode.inSchemeUid}
-            onSelectFilterValue={(e) => gc.selectFilterValue(e, selectingNode)}
-        >
-        </GraphComponent >;
-    }
-    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     renderFilter(node, top) {
         const gc = this;
 
@@ -265,8 +256,10 @@ export class GraphComponentClass extends BaseComponent {
         const isInput = node.filterType === FilterType.input;
         const isDate = node.filterType === FilterType.date;
 
-        if (!node.filterColumn) {
-            node.filterColumn = {
+        if (!node.fakeColumn) {
+            node.schemeInfo = GLObject.gridCreator.GetSchemeInfo(node.entity, gc.schemeName);
+
+            node.fakeColumn = {
                 refKeyField: node.keyField,
                 refNameField: node.nameField,
                 entity: node.entity,
@@ -274,11 +267,10 @@ export class GraphComponentClass extends BaseComponent {
                 type: isDate ? 'date' : isInput ? '' : 'lookup',
                 allowCombobox: true,
                 id: node.id,
+                schemeInfo: node.schemeInfo,
+                //onChange: (e) => gc.selectFilterValue(e, node),
+                multi: node.multi,
             };
-
-            if (node.schemeName) {
-                node.filterColumn.renderLookup = () => gc.renderSelectingGraph(node)
-            }
         }
 
         return (
@@ -296,17 +288,17 @@ export class GraphComponentClass extends BaseComponent {
 
                 <FieldEdit
                     keyPref={node.id + '_filter_'}
-                    column={node.filterColumn}
+                    column={node.fakeColumn}
                     entity={node.entity}
                     comboboxValues={node.comboboxValues}
                     value={node.multi ? node._selectedOptions : node.value}
                     text={isInput || isDate ? node.value : node.value !== undefined && node.value !== '' && node.selectedText ? node.selectedText() : ''}
-                    findFieldEdit={() => { return node.filterColumn._fieldEditObj; }}
+                    findFieldEdit={() => { return node.fakeColumn._fieldEditObj; }}
                     large={true}
                     multi={node.multi}
                     init={
                         (fe) => {
-                            node.filterColumn._fieldEditObj = fe;
+                            node.fakeColumn._fieldEditObj = fe;
 
                             if (node.multi) {
                                 fe._selectedOptions = node._selectedOptions;
@@ -321,7 +313,7 @@ export class GraphComponentClass extends BaseComponent {
                         }
                     }
                     onChange={(e) => {
-                        const fe = node.filterColumn._fieldEditObj;
+                        const fe = node.fakeColumn._fieldEditObj;
                         node.value = e.value;
                         node.text = e.text;
                         node._selectedOptions = fe._selectedOptions;
@@ -399,7 +391,7 @@ export class GraphComponentClass extends BaseComponent {
         );
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
-    selectFilterValue(e, node) {
+    /*selectFilterValue(e, node) {
         const gc = this;
         if (!node) return;
 
@@ -407,7 +399,7 @@ export class GraphComponentClass extends BaseComponent {
         const selectedText = e.selectedText || node.selectedText();
         const selectedValues = e.selectedValues || node.selectedValues();
 
-        const fe = node.filterColumn._fieldEditObj;
+        const fe = node.fakeColumn._fieldEditObj;
 
         node._selectedText = node.text = selectedText;
 
@@ -431,6 +423,7 @@ export class GraphComponentClass extends BaseComponent {
         fe.lookupIsShowing = false;
         gc.refreshState();
     }
+    */
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     selectActiveTab(node, top) {
         const gc = this;
@@ -696,6 +689,7 @@ export class GraphComponentClass extends BaseComponent {
         grid.inSchemeUid = obr.inSchemeUid;
 
         if (gc.selectingNodeUid === grid.uid) {
+            grid.multi = gc.selectingnodeMulti !== undefined ? gc.selectingnodeMulti : grid.multi;
             grid.isSelecting = true;
             grid.onSelectValue = () => {
                 gc.onSelectFilterValue({ selectedValue: grid.selectedValue(), selectedText: grid.selectedText(), selectedValues: grid.selectedValues() });

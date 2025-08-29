@@ -53,6 +53,7 @@
             'VALUE': 'Значение',
             'VIEW': 'Просмотр',
             'VIEW RECORD': 'Карточка',
+            'USER': 'Пользователь',
         };
         return dict[text.toUpperCase()] || text;
     }

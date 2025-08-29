@@ -59,6 +59,8 @@ export class loginFormClass extends BaseComponent {
                     GLObject.dataGetter.atoken = arr[0];
                     GLObject.dataGetter.rtoken = arr[1];
 
+                    GLObject.user = loginForm.login;
+
                     loginForm.afterLogin(tokens);
                 }
             }
