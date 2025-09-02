@@ -79,7 +79,8 @@ export class GraphComponentClass extends BaseComponent {
         };
 
         gc.selectingNodeUid = props.selectingNodeUid;
-        gc.selectingnodeMulti = props.selectingnodeMulti;
+        gc.selectingNodeMulti = props.selectingNodeMulti;
+        gc.selectingNodeValue = props.selectingNodeValue;
         gc.onSelectFilterValue = props.onSelectFilterValue;
         gc.nodeBeforeOpenCondition = props.nodeBeforeOpenCondition;
 
@@ -360,10 +361,19 @@ export class GraphComponentClass extends BaseComponent {
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     onGridInit(grid, title, status, top) {
+        const gc = this;
+
+        if (grid._grpahInitialized) return;
+        grid._grpahInitialized = true;
+
         grid.status = status;
         grid.visible = true;
         grid.isBottom = !top;
         grid.title = title;
+
+        if (gc.selectingNodeUid === grid.uid) {
+            grid.getSelectedRowIndex();
+        }
     };
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     renderGrid(node, status, top) {
@@ -689,11 +699,14 @@ export class GraphComponentClass extends BaseComponent {
         grid.inSchemeUid = obr.inSchemeUid;
 
         if (gc.selectingNodeUid === grid.uid) {
-            grid.multi = gc.selectingnodeMulti !== undefined ? gc.selectingnodeMulti : grid.multi;
+            grid.multi = gc.selectingNodeMulti !== undefined ? gc.selectingNodeMulti : grid.multi;
             grid.isSelecting = true;
             grid.onSelectValue = () => {
                 gc.onSelectFilterValue({ selectedValue: grid.selectedValue(), selectedText: grid.selectedText(), selectedValues: grid.selectedValues() });
             };
+            if (gc.selectingNodeValue) {
+                grid.value = gc.selectingNodeValue;
+            }
         }
         else {
             grid.onSelectValue = (e) => gc.selectFilterValue(e);
@@ -711,14 +724,14 @@ export class GraphComponentClass extends BaseComponent {
             grid.readonly = obr._readonly;
         }
 
-        if (obr.value !== undefined) {
+        if (obr.value !== undefined && obr.value !== '') {
             grid.value = obr.value;
         }
 
         if (obr._selectedOptions) {
             grid._selectedOptions = obr._selectedOptions;
 
-            if (grid.filterType === FilterType.combobox) {
+            if (grid.filterType === FilterType.combobox && grid._selectedOptions.length > 0) {
                 gc.getValueFromCombobox(grid, true);
             }
         }

@@ -6,8 +6,9 @@ import DebugApp from './Tests/DebugApp';
 import { GLObject } from './Grid/GLObject';
 
 GLObject.isDebug = true;
+
 GLObject.projectID = 'PM';
-//GLObject.projectID = 'MR';
+GLObject.projectID = 'MR';
 
 createRoot(document.getElementById('root')).render(
     <>

@@ -177,7 +177,7 @@ export class MainMenuClass extends BaseComponent {
                                                         items={item.items}
                                                         dimensionsByContent={true}
                                                         isModal={false}
-                                                        pos={{ x: item.x, y: item.y, minW: item.minW }}
+                                                        pos={{ x: item.x, y: item.y, minW: item.minW, maxX: item.maxX }}
                                                         init={(dd) => {
                                                             dd.activeItem = item.items.find(function (fitem) {
                                                                 return menu.selectedItems[fitem.id];
@@ -209,6 +209,11 @@ export class MainMenuClass extends BaseComponent {
             menu.isShowingDropdown = true;
 
             const rect = e.target.getBoundingClientRect();
+
+            if (item.level > 1 && rect.x + rect.width * 2 >= document.documentElement.clientWidth) {
+                item.maxX = parseInt(rect.x);
+            }
+
             item.x = parseInt(rect.x) + (item.level === 1 ? 0 : parseInt(rect.width));
             item.y = parseInt(rect.y) + (item.level === 1 ? parseInt(rect.height) : 0);
             item.minW = parseInt(rect.width);
@@ -226,7 +231,7 @@ export class MainMenuClass extends BaseComponent {
             }
 
             if (item.items && item.items.length > 0) {
-                menu.showingItems.push(item);
+                menu.showingItems.unshift(item);
             }
 
             item = menu.itemsDict[item.parent];

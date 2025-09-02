@@ -122,6 +122,9 @@ export class ModalClass extends BaseComponent {
             const rect = wnd.getDimensionsByContent(wnd.opt.margin, wnd.opt.padding);
             wnd.opt.pos.w = rect.w || wnd.opt.pos.w;
             wnd.opt.pos.h = rect.h || wnd.opt.pos.h;
+            if (wnd.opt.pos.maxX) {
+                wnd.opt.pos.x = (wnd.opt.pos.maxX - Math.max(wnd.opt.pos.w, parseInt(wnd.opt.pos.minW) || 0)) + 'px';
+            }
         }
 
         if (wnd.opt.isModal || wnd.opt.closeWhenMiss) {

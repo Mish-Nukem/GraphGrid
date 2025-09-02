@@ -61,6 +61,8 @@ export class ReportParamsPageClass extends ModalClass {
             de.nameReport = de.nameReport + '.xls';
         }
 
+        de.outerParamValues = props.outerParamValues;
+
         de.opt.closeWhenEscape = true;
         de.opt.resizable = true;
         de.opt.isModal = true;
@@ -363,10 +365,33 @@ export class ReportParamsPageClass extends ModalClass {
                 de.reportParams = data;
                 if (de.reportParams.length > 0) {
                     de.opt.title = 'Параметры отчета - ' + de.nameReport;
+
+                    if (de.outerParamValues) {
+                        de.applyOuterParamsValues();
+                    }
+
+                    for (let rp of de.reportParams) {
+                        if (!rp.entity) this.continue;
+
+                        rp.schemeInfo = GLObject.gridCreator.GetSchemeInfo(rp.entity, '');
+                    }
                 }
                 de.refreshState();
             }
         );
+    }
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
+    applyOuterParamsValues() {
+        const de = this;
+        for (let op of de.outerParamValues) {
+            if (!op.entity || !op.value) continue;
+
+            let rp = de.reportParams.find((item) => { return item.entity === op.entity; })
+            if (!rp) continue;
+
+            rp.value = op.value;
+            rp.text = op.text || op.value;
+        }
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     checkReportParams() {

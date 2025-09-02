@@ -193,10 +193,11 @@ export class GridINUBaseClass extends GridFLClass {
                         activeValue = parent.selectedValue();
                         break;
                     case NodeStatus.filter:
+                        activeValue = parent.value;
                         if (parent.filterType === FilterType.date) {
                             pref = 'date';
+                            activeValue = activeValue !== undefined && activeValue !== '' && String(activeValue)[0] !== '\'' ? '\'' + activeValue + '\'' : activeValue;
                         }
-                        activeValue = parent.value;
                         break;
                     default:
                         if (link.everLink) {

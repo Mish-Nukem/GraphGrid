@@ -167,8 +167,8 @@ export class FieldEditClass extends BaseComponent {
                                     !allowCombobox ?
                                         <input
                                             key={`fieldlookuptitle_${fe.id}_${fe.column.id}_`}
-                                            style={{
-                                                width: 'calc(100% - 4px)',
+                                            style={{//width: 'calc(100% - 4px)',
+                                                
                                                 gridColumn: noClear ? !fe.comboboxValues ? 'span 2' : 'span 3' : 'span 1',
                                                 overflowX: 'hidden',
                                                 height: !fe.inputClass ? fe.h : '',
@@ -176,7 +176,7 @@ export class FieldEditClass extends BaseComponent {
                                                 boxSizing: 'border-box',
                                             }}
                                             disabled={true}
-                                            className={fe.inputClass || ''}
+                                            className={fe.large ? fe.inputClassLG : fe.inputClass || ''}
                                             value={fe.text !== undefined ? fe.text : fe.value}
                                         >
                                         </input>

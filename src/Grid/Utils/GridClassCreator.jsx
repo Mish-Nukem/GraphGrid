@@ -28,7 +28,8 @@ export class GridCreator {
                 uid={`${fcolumn.id}_select_${fcolumn.entity}_`}
                 schemeName={fcolumn.schemeInfo.schemeName}
                 selectingNodeUid={fcolumn.schemeInfo.inSchemeUid}
-                selectingnodeMulti={fcolumn.multi}
+                selectingNodeMulti={fcolumn.multi}
+                selectingNodeValue={fcolumn.value}
                 onSelectFilterValue={(e) => {
                     const fe = fcolumn._fieldEditObj;
 
