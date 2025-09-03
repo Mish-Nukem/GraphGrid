@@ -54,7 +54,7 @@ export class ReportParamsPageClass extends ModalClass {
 
         de.nameReport = props.nameReport;
         de.reportParams = [];
-        de.opt.title = de.nameReport;
+        de.opt.title = props.title || de.nameReport;
 
         const parts = de.nameReport.split('.');
         if (parts[parts.length - 1] !== 'xls') {

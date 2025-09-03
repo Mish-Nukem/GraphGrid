@@ -3,19 +3,22 @@ import { Images } from '../../../Grid/Themes/Images';
 import { GLObject } from '../../../Grid/GLObject';
 import { FieldEdit } from '../../../Grid/FieldEdit';
 import { Dropdown } from '../../../Grid/Dropdown';
+import { MainMenu } from '../../../Grid/Pages/MainMenu';
 import { ReportParamsPage } from '../../../Reports/Pages/ReportParamsPage';
+import { BaseComponent } from '../../../Grid/Base';
 export class POAAGridClass extends GridINUClass {
 
-    render() {
+    render() { ////<MainMenu init={(dd) => { grid.reportsDropdown = dd; }} getItems={(e) => { return grid.getReportsList(e); }} onItemClick={(e) => { grid.showReport(e.itemId); }}></MainMenu>
         const grid = this;
         return (
             <>
                 {super.render()}
-                <Dropdown init={(dd) => { grid.reportsDropdown = dd; }} getItems={(e) => { return grid.getReportsList(e); }} onItemClick={(e) => { grid.showReport(e.itemId); }}></Dropdown>
+                
                 {
                     grid.isShowingTNReport ?
                         <ReportParamsPage
                             nameReport={grid.TNReportName}
+                            title={grid.TNReportTitle}
                             pos={grid.TNReportPos}
                             visible={grid.isShowingTNReport}
                             onClose={() => {
@@ -43,6 +46,28 @@ export class POAAGridClass extends GridINUClass {
             title: 'Отчеты',
             click: (e) => grid.showTNReporstList(e),
             img: Images.images.report,
+            render: () => {
+                return (
+                    <MainMenu
+                        allowCollapse={false}
+                        mainMenuItemClass={grid.opt.toolbarButtonsClass || BaseComponent.theme.toolbarButtonsClass}
+                        divClassName={''}
+                        init={(dd) => {
+                            if (grid.reportsDropdownInitialized) return;
+
+                            grid.reportsDropdownInitialized = true;
+                            grid.reportsDropdown = dd;
+                            dd.getMainMenuItems = grid.getReportsList;
+                        }}
+                        onMenuItemClick={(e, item) =>
+                        {
+                            grid.showReport(e, item);
+                        }}
+                    >
+                    </MainMenu>
+                );
+                //grid.reportsDropdown.render();
+            }
         };
 
         grid.buttons.push(btn);
@@ -61,16 +86,15 @@ export class POAAGridClass extends GridINUClass {
         grid.reportsDropdown.popup(e);
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
-    showReport(id) {
+    showReport(e, item) {
         const grid = this;
 
-        const menuItem = grid.reportsDropdown.items.find((item) => {
-            return item.id === id;
-        });
+        if (item.items) return;
 
         grid.TNReportPos = grid.TNReportPos || { x: 100, y: 100 };
         grid.isShowingTNReport = true;
-        grid.TNReportName = menuItem.text;
+        grid.TNReportName = item.action;
+        grid.TNReportTitle = item.text;
         grid.refreshState();
         //alert('Sowing report: ' + id);
     }
@@ -87,6 +111,8 @@ export class POAAGridClass extends GridINUClass {
                 (result) => {
                     if (result) {
                         grid.reportsList = result;
+                        grid.reportsList[0].img = Images.images.report;
+                        //grid.reportsList.push({ id: '-1', text: 'Отчеты', img: Images.images.report, items: result });
                         resolve(grid.reportsList);
 
                         grid.refreshState();

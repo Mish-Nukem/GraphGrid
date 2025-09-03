@@ -170,25 +170,28 @@ export class GridDBClass extends GridGRClass {
                         {
                             grid.buttons.map((button, ind) => {
                                 return (
-                                    <button
-                                        key={`toolbarbutton_${grid.id}_${button.id}_${ind}_`}
-                                        grid-toolbar-button={`${grid.id}_${button.id}_`}
-                                        className={`${button.class || grid.opt.toolbarButtonsClass || BaseComponent.theme.toolbarButtonsClass || 'grid-toolbar-button'}`}
-                                        style={{
-                                            width: button.w ? button.w : button.img ? '' : 'auto',
-                                            display: button.getVisible && !button.getVisible() ? 'none' : '',
-                                            padding: button.padding ? button.padding : '',
-                                        }}
-                                        title={grid.translate(button.title, 'grid-toolbar-button')}
-                                        disabled={button.getDisabled && button.getDisabled({ grid: grid }) || button.disabled ? 'disabled' : ''}
-                                        onClick={button.click ? (e) => {
-                                            e.grid = grid;
-                                            button.click(e);
-                                        } : grid.onButtonClick ? (e) => { grid.onButtonClick(e) } : null}
-                                    >
-                                        {button.img ? button.img() : ''}
-                                        {GLObject.gridSettings.buttonSize > 0 || !button.img ? grid.translate(button.label, 'grid-toolbar-button') || grid.translate(button.title, 'grid-toolbar-button') : ''}
-                                    </button>
+                                    button.render ?
+                                        button.render()
+                                        :
+                                        <button
+                                            key={`toolbarbutton_${grid.id}_${button.id}_${ind}_`}
+                                            grid-toolbar-button={`${grid.id}_${button.id}_`}
+                                            className={`${button.class || grid.opt.toolbarButtonsClass || BaseComponent.theme.toolbarButtonsClass || 'grid-toolbar-button'}`}
+                                            style={{
+                                                width: button.w ? button.w : button.img ? '' : 'auto',
+                                                display: button.getVisible && !button.getVisible() ? 'none' : '',
+                                                padding: button.padding ? button.padding : '',
+                                            }}
+                                            title={grid.translate(button.title, 'grid-toolbar-button')}
+                                            disabled={button.getDisabled && button.getDisabled({ grid: grid }) || button.disabled ? 'disabled' : ''}
+                                            onClick={button.click ? (e) => {
+                                                e.grid = grid;
+                                                button.click(e);
+                                            } : grid.onButtonClick ? (e) => { grid.onButtonClick(e) } : null}
+                                        >
+                                            {button.img ? button.img() : ''}
+                                            {GLObject.gridSettings.buttonSize > 0 || !button.img ? grid.translate(button.label, 'grid-toolbar-button') || grid.translate(button.title, 'grid-toolbar-button') : ''}
+                                        </button>
                                 );
                             })
                         }

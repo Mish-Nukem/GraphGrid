@@ -2,6 +2,7 @@
 import { Images } from '../Themes/Images';
 import { BaseComponent } from '../Base';
 import { Dropdown } from '../Dropdown';
+import { GLObject } from '../GLObject';
 export function MainMenu(props) {
     let menu = null;
 
@@ -12,6 +13,8 @@ export function MainMenu(props) {
     if (props.init) {
         props.init(menu);
     }
+
+    menu.mainMenuItemClass = props.mainMenuItemClass || BaseComponent.theme.mainMenuItemClass;
 
     menu.refreshState = function () {
         setState({ menu: menu, ind: menu.stateind++ });
@@ -46,10 +49,11 @@ export class MainMenuClass extends BaseComponent {
         const menu = this;
         menu.stateind = 0;
 
+        menu.divClassName = props.divClassName !== undefined ? props.divClassName : "main-menu-div";
+        menu.allowCollapse = props.allowCollapse !== undefined ? props.allowCollapse : true;
+
         menu.menuItems = props.menuItems;
         menu.onMenuItemClick = props.onMenuItemClick;
-
-        menu.mainMenuItemClass = props.mainMenuItemClass || BaseComponent.theme.mainMenuItemClass;
 
         menu.showingItems = [];
         menu.prepareMenu();
@@ -100,17 +104,22 @@ export class MainMenuClass extends BaseComponent {
                 <>
                     <div
                         key={`mainmenu_div_`}
-                        className="main-menu-div"
+                        className={menu.divClassName}
                         style={{ height: menu.collapsed ? '0' : '' }}
                     >
-                        <button
-                            key={`menucollapse_button_`}
-                            onClick={() => { menu.collapsed = !menu.collapsed; menu.refreshState(); }}
-                            title={!menu.collapsed ? menu.translate('Collapse') : menu.translate('Expand')}
-                            className='menu-collapse-button'
-                        >
-                            {menu.collapsed ? Images.images.chevronDown(20, 10) : Images.images.chevronUp(20, 10)}
-                        </button>
+                        {
+                            menu.allowCollapse ?
+                                <button
+                                    key={`menucollapse_button_`}
+                                    onClick={() => { menu.collapsed = !menu.collapsed; menu.refreshState(); }}
+                                    title={!menu.collapsed ? menu.translate('Collapse') : menu.translate('Expand')}
+                                    className='menu-collapse-button'
+                                >
+                                    {menu.collapsed ? Images.images.chevronDown(20, 10) : Images.images.chevronUp(20, 10)}
+                                </button>
+                                :
+                                <></>
+                        }
                         {
                             !menu.collapsed ?
                                 <>
@@ -135,7 +144,7 @@ export class MainMenuClass extends BaseComponent {
                                                         menu.activeItems[item.id] = 1;
                                                         menu.showChildren(e, item);
                                                     }}
-                                                    onMouseOut={() => {
+                                                    onMouseLeave={() => {
                                                         setTimeout(() => {
                                                             if (!menu.activeItems[item.id] || +menu.activeItems[item.id] > 1) return;
 
@@ -144,8 +153,10 @@ export class MainMenuClass extends BaseComponent {
                                                             menu.closeDropdowns();
                                                         }, 300);
                                                     }}
+                                                    style={{ minWidth: item.minW }}
                                                 >
-                                                    {menu.translate(item.text)}
+                                                    {item.img ? item.img() : ''}
+                                                    {GLObject.gridSettings.buttonSize > 0 || !item.img ? menu.translate(item.text) || menu.translate(item.text) : ''}
                                                 </button>
                                             );
                                         })

@@ -15,7 +15,7 @@
     // 0 - PostgreSQL, 1 - MSSQL, 2 - ORACLE
     static serverType = 0;
 
-    static isDebug = true;
+    static isDebug = false;
 
     static projectID = 'Debug';
 
