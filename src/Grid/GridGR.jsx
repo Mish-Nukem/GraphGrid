@@ -170,7 +170,7 @@ export class GridGRClass extends GridClass {
 
         const grid = this;
         const graph = grid.graph;
-        if (graph) {
+        if (graph && !graph._isMakingWave) {
 
             if (!grid.connectedToParents) {
                 grid.connectToParents();

@@ -84,22 +84,28 @@ export class GridDBClass extends GridGRClass {
     skipOnWaveVisit(e) {
         if (super.skipOnWaveVisit(e)) return true;
 
-        const grid = this;
-        if (e.waveType === WaveType.value) {
-            if (grid.status === NodeStatus.filter && !grid._selecting || grid.status === NodeStatus.hidden) {
-                grid.selectedRowIndex = -1;
-                if (grid.status === NodeStatus.filter) {
-                    grid.updateNodeControls(true);
-                    grid.graph.visitNodesByWave(e);
-                }
-                return true;
-            }
-        }
+        //const grid = this;
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     visitByWave(e) {
         const grid = this;
         if (grid.skipOnWaveVisit(e)) return;
+
+        if (e.waveType === WaveType.value) {
+//            if (grid.status === NodeStatus.filter && !grid._selecting || grid.status === NodeStatus.hidden) {
+                if (grid.status === NodeStatus.filter) {
+                    //grid.updateNodeControls(true);
+                    if (!grid._selecting) {
+                        grid.selectedRowIndex = -1;
+                    }
+                    grid.value = grid.text = '';
+                    grid._selectedOptions = [];
+                    //grid.graph.visitNodesByWave(e);
+                    return;
+                }
+                //return true;
+            //}
+        }
 
         grid.pageNumber = 1;
 

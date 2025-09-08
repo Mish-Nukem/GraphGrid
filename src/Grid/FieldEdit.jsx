@@ -26,6 +26,20 @@ export function FieldEdit(props) {
         fe = fe || new FieldEditClass(props);
     }
 
+    fe.column = props.column;
+    fe.selfEntity = props.entity;
+
+    fe.noCache = props.noCache;
+
+    fe.value = props.value || '';
+    fe.text = props.text || '';
+
+    fe.getFilters = props.getFilters;
+
+    fe._selectedOptions = props.selectedOptions || [];
+
+    fe.multi = props.multi;
+
     fe.id = props.keyPref || FieldEditClass._seq++;
 
     fe.disabled = props.disabled;
@@ -52,8 +66,13 @@ export function FieldEdit(props) {
     }
 
     if (fe.multi) {
-        if (fe.value !== undefined && fe.value !== null && typeof (fe.value) === 'object' && fe.value !== '' && fe._selectedOptions.length <= 0) {
-            fe._selectedOptions = fe.value || [];
+        //if (fe.value !== undefined && fe.value !== null && typeof (fe.value) === 'object' && fe.value !== '' && fe._selectedOptions.length <= 0) {
+        //    fe._selectedOptions = fe.value || [];
+        //    const texts = [];
+        //    fe.value = fe.getValueFromCombobox(texts);
+        //    fe.text = texts.join(', ');
+        //}
+        if ((fe.value === undefined || fe.value === '') && fe._selectedOptions && fe._selectedOptions.length > 0) {
             const texts = [];
             fe.value = fe.getValueFromCombobox(texts);
             fe.text = texts.join(', ');
@@ -86,35 +105,27 @@ export class FieldEditClass extends BaseComponent {
         fe.stateind = 0;
         fe.id = props.keyPref || FieldEditClass._seq++;
 
-        fe.column = props.column;
-        fe.selfEntity = props.entity;
-
-        fe.value = props.value || '';
-        fe.text = props.text || '';
-
-        fe.multi = props.multi;
-
         if (props.comboboxValues && props.comboboxValues.length > 0) {
             fe.comboboxValues = props.comboboxValues;
         }
 
-        if (fe.multi) {
-            fe._selectedOptions = [];
-            if (fe.value !== undefined && fe.value !== null && typeof (fe.value) === 'object') {
-                fe._selectedOptions = fe.value;
-            }
-            else {
-                const texts = [];
-                fe.value = fe.getValueFromCombobox(texts);
-                fe.text = texts.join(', ');
-            }
-        }
-        else {
-            fe._selectedOptions = [];
-            if (fe.value !== undefined && fe.value !== '') {
-                fe._selectedOptions.push({ value: fe.value, label: fe.text });
-            }
-        }
+        //if (fe.multi) {
+        //    fe._selectedOptions = [];
+        //    if (fe.value !== undefined && fe.value !== null && typeof (fe.value) === 'object') {
+        //        fe._selectedOptions = fe.value;
+        //    }
+        //    else {
+        //        const texts = [];
+        //        fe.value = fe.getValueFromCombobox(texts);
+        //        fe.text = texts.join(', ');
+        //    }
+        //}
+        //else {
+        //    fe._selectedOptions = [];
+        //    if (fe.value !== undefined && fe.value !== '') {
+        //        fe._selectedOptions.push({ value: fe.value, label: fe.text });
+        //    }
+        //}
 
         fe.onChange = props.onChange || (() => { });
 
@@ -191,6 +202,7 @@ export class FieldEditClass extends BaseComponent {
                                             gridColumn={noClear ? !fe.comboboxValues ? 'span 2' : 'span 3' : 'span 1'}
                                             isMulti={fe.multi}
                                             required={noClear}
+                                            cache={fe.noCache ? [FieldEditClass._seq++] : []}
                                             onChange={(e) => {
                                                 if (e === null) {
                                                     fe.onChange({ value: '', text: '' });
@@ -390,7 +402,7 @@ export class FieldEditClass extends BaseComponent {
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     openLookupField(e) {
         const fe = this;
-        fe.popupPos = fe.popupPos || { x: 100, y: 100, w: 1600, h: 900 };
+        fe.popupPos = fe.popupPos || { x: 100, y: 100, w: 1700, h: 900 };
 
         fe.lookupIsShowing = true;
         if (fe.ownerGrid) {
@@ -471,7 +483,7 @@ export class FieldEditClass extends BaseComponent {
             { key: 'entity', value: fe.selfEntity }
         ];
 
-        return fe.column.name ?
+        return fe.column.name && !fe.getFilters ?
             new Promise((resolve) => {
                 params.push({ key: 'columns', value: fe.column.name });
 
@@ -493,6 +505,20 @@ export class FieldEditClass extends BaseComponent {
             new Promise(function (resolve, reject) {
                 params.push({ key: 'pageSize', value: 100 });
                 params.push({ key: 'columns', value: fe.column.refNameField });
+
+                if (fe.getFilters) {
+                    const filters = fe.getFilters();
+
+                    let i = 0, j = 0;
+                    for (let cond of filters) {
+                        if (cond.type === 'column') {
+                            params.push({ key: 'f' + i++, value: cond.filter });
+                        }
+                        else if (cond.type === 'graphLink') {
+                            params.push({ key: 'c' + j++, value: cond.filter });
+                        }
+                    }
+                }
 
                 GLObject.dataGetter.get({ url: /*fe.selfEntity*/'dictionary' + '/list', params: params }).then(
                     (res) => {

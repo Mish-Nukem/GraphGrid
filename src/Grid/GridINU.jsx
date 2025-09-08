@@ -145,7 +145,7 @@ export class GridINUClass extends GridINUBaseClass {
                 grid.settingsIsShowing = true;
                 grid.popupIsShowing = true;
 
-                grid.settingsPos = grid.settingsPos || { x: 210, y: 210, w: 400, h: 310 };
+                grid.settingsPos = grid.settingsPos || { x: 210, y: 210, w: 400, h: 320 };
                 grid.popupPos = grid.settingsPos;
 
                 grid.refreshState();
@@ -357,12 +357,16 @@ export class GridINUClass extends GridINUBaseClass {
             title: grid.translate('Select value'),
             label: grid.translate('Select'),
             click: (e) => {
+                const row = grid.selectedRow();
                 if (!grid.multi) {
-                    const row = grid.selectedRow();
                     e.value = row[grid.keyField];
                     e.text = row[grid.nameField];
                 }
                 else {
+                    if (Object.keys(grid._selectedRows).length === 0) {
+                        grid._selectedRows[row[grid.keyField]] = row;
+                    }
+
                     const texts = [];
                     e.value = grid.selectedValues(texts);
                     e.text = texts.join(', ');
@@ -516,7 +520,7 @@ export class GridINUClass extends GridINUBaseClass {
         const grid = this;
         super.onSelectedRowChanged(e);
 
-        if (grid.allowEditGrid) {
+        if (grid.allowEditGrid && grid.refreshState) {
             grid.refreshState();
         }
     }

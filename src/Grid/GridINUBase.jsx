@@ -145,6 +145,8 @@ export class GridINUBaseClass extends GridFLClass {
 
             grid.pageSize = entityInfo.pageSize !== null && entityInfo.pageSize !== undefined ? entityInfo.pageSize : grid.pageSize;
             grid.pageNumber = entityInfo.pageNumber !== null && entityInfo.pageNumber !== undefined ? entityInfo.pageNumber : grid.pageNumber;
+
+            GLObject.DBInfo = entityInfo.DBInfo;
         }
 
         return entityInfo;
@@ -535,13 +537,40 @@ export class GridINUBaseClass extends GridFLClass {
 
         grid.selectedRowIndex = 0;
 
-        grid.getRows().then(
-            rows => {
-                grid.rows = rows;
-                grid.afterGetRows(e);
-                grid.refreshState();
+        if (grid.status === NodeStatus.grid && grid.visible === true) {
+            const isLast = e.list.length <= 0;
+            grid.getRows().then(
+                rows => {
+                    grid.graph._isMakingWave = true;
+
+                    grid.rows = rows;
+                    grid.afterGetRows(e);
+                    grid.refreshState();
+
+                    if (e.waveType === WaveType.value && isLast && e.afterAllVisited) {
+                        e.afterAllVisited();
+                    }
+
+                    grid.graph._isMakingWave = e.list.length > 0;
+                }
+            );
+        }
+        else {
+            grid.value = grid.text = '';
+            grid._selectedOptions = [];
+
+            if (grid.graph) {
+                grid.graph._isMakingWave = true;
+
+                grid.graph.visitNodesByWave(e);
+
+                if (e.waveType === WaveType.value && e.list.length <= 0 && e.afterAllVisited) {
+                    e.afterAllVisited();
+                }
+
+                grid.graph._isMakingWave = e.list.length > 0;
             }
-        );
+        }
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
 }

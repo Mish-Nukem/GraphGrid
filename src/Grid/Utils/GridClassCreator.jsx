@@ -28,8 +28,10 @@ export class GridCreator {
                 uid={`${fcolumn.id}_select_${fcolumn.entity}_`}
                 schemeName={fcolumn.schemeInfo.schemeName}
                 selectingNodeUid={fcolumn.schemeInfo.inSchemeUid}
-                selectingNodeMulti={fcolumn.multi}
-                selectingNodeValue={fcolumn.value}
+                //selectingNodeMulti={fcolumn.multi}
+                //selectingNodeValue={fcolumn.value}
+                selectingNodeObject={fcolumn}
+                prevGraph={fcolumn.prevGraph}
                 onSelectFilterValue={(e) => {
                     const fe = fcolumn._fieldEditObj;
 
@@ -40,6 +42,26 @@ export class GridCreator {
 
                     fe.onChange(e);
                 }}
+                /*
+                init={(gc) => {
+                    const selectingNode = gc.graph.nodesDict[fcolumn.schemeInfo.inSchemeUid];
+                    if (!selectingNode) return;
+
+                    const fe = fcolumn._fieldEditObj;
+
+                    selectingNode.value = fcolumn.value || '';
+                    selectingNode.text = fcolumn.text || '';
+                    selectingNode.multi = fcolumn.multi;
+
+                    for (let opt of fe._selectedOptions) {
+                        let fakeRow = {};
+                        fakeRow[fcolumn.refKeyField] = opt.value;
+                        fakeRow[fcolumn.refNameField] = opt.label;
+                        selectingNode._selectedRows[opt.value] = fakeRow;
+                    }
+
+                }}
+                */
             >
             </GraphComponent>
         );

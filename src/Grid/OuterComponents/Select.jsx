@@ -1,4 +1,4 @@
-﻿import React, { useState } from 'react';
+﻿import React, { useState/*, useEffect*/ } from 'react';
 import { AsyncPaginate } from 'react-select-async-paginate';
 export function Select(props) {
     const [value, setValue] = useState(props.value);
@@ -81,6 +81,11 @@ export function Select(props) {
         props.init();
     }
 
+    //useEffect(() => {
+    //    return () => {
+    //    }
+    //}, [props.parentFilters])
+
     return (
         <div
             style={{ gridColumn: props.gridColumn || '' }}
@@ -90,7 +95,8 @@ export function Select(props) {
                 value={!props.isMulti ? value : value && value.length > 0 ? value : ''}
                 isMulti={props.isMulti}
                 isClearable={!props.required}
-                cacheOptions
+                //cacheOptions
+                cacheUniqs={props.cache}
                 loadOptions={loadOptions}
                 additional={{
                     page: 1,

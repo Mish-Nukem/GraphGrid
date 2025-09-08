@@ -22,6 +22,9 @@ export function GraphComponent(props) {
         props.init(gc);
     }
 
+    gc.selectingNodeValue = props.selectingNodeValue;
+    gc.selectingNodeObject = props.selectingNodeObject;
+
     gc.refreshState = function () {
         setState({ graphComponent: gc, ind: gc.stateind++ });
     }
@@ -80,13 +83,14 @@ export class GraphComponentClass extends BaseComponent {
 
         gc.selectingNodeUid = props.selectingNodeUid;
         gc.selectingNodeMulti = props.selectingNodeMulti;
-        gc.selectingNodeValue = props.selectingNodeValue;
         gc.onSelectFilterValue = props.onSelectFilterValue;
         gc.nodeBeforeOpenCondition = props.nodeBeforeOpenCondition;
 
         gc.filterButtonClass = props.filterButtonClass;
         gc.filterInputClass = props.filterInputClass;
         gc.tabControlButtonClass = props.tabControlButtonClass;
+
+        gc.prevGraph = props.prevGraph;
 
         if (props.graph) {
             gc.prepareGraph(props.graph);
@@ -269,9 +273,16 @@ export class GraphComponentClass extends BaseComponent {
                 allowCombobox: true,
                 id: node.id,
                 schemeInfo: node.schemeInfo,
+                value: /*node.multi ? node._selectedOptions :*/ node.value,//node.value,
                 //onChange: (e) => gc.selectFilterValue(e, node),
+                _selectedOptions: node._selectedOptions || [],
                 multi: node.multi,
+                prevGraph: gc.graph,
             };
+        }
+        else {
+            node.fakeColumn.value = node.value;
+            node.fakeColumn._selectedOptions = node._selectedOptions;
         }
 
         return (
@@ -292,25 +303,30 @@ export class GraphComponentClass extends BaseComponent {
                     column={node.fakeColumn}
                     entity={node.entity}
                     comboboxValues={node.comboboxValues}
-                    value={node.multi ? node._selectedOptions : node.value}
+                    value={/*node.multi ? node._selectedOptions :*/ node.value}
+                    selectedOptions={node._selectedOptions}
                     text={isInput || isDate ? node.value : node.value !== undefined && node.value !== '' && node.selectedText ? node.selectedText() : ''}
                     findFieldEdit={() => { return node.fakeColumn._fieldEditObj; }}
                     large={true}
                     multi={node.multi}
+                    getFilters={() => {
+                        return node.collectFilters ? node.collectFilters() : [];
+                    }}
+                    noCache={true}
                     init={
                         (fe) => {
                             node.fakeColumn._fieldEditObj = fe;
 
-                            if (node.multi) {
-                                fe._selectedOptions = node._selectedOptions;
-                                const texts = [];
-                                fe.value = fe.getValueFromCombobox(texts);
-                                fe.text = texts.join(', ');
-                            }
-                            else {
-                                fe.value = node.value;
-                                fe.text = node.selectedText ? node.selectedText() : node._selectedText;
-                            }
+                            //    if (node.multi) {
+                            //        fe._selectedOptions = node._selectedOptions;
+                            //        const texts = [];
+                            //        fe.value = fe.getValueFromCombobox(texts);
+                            //        fe.text = texts.join(', ');
+                            //    }
+                            //    else {
+                            //        fe.value = node.value;
+                            //        fe.text = node.selectedText ? node.selectedText() : node._selectedText;
+                            //    }
                         }
                     }
                     onChange={(e) => {
@@ -319,9 +335,11 @@ export class GraphComponentClass extends BaseComponent {
                         node.text = e.text;
                         node._selectedOptions = fe._selectedOptions;
 
-                        gc.saveGraphConfig();
-
-                        gc.graph.triggerWave({ nodes: [node], withStartNodes: false });
+                        gc.graph.triggerWave({
+                            nodes: [node], withStartNodes: false, afterAllVisited: () => {
+                                gc.saveGraphConfig();
+                            }
+                        });
                         gc.refreshState();
                     }}
                     disabled={gc.isEditing()}
@@ -695,8 +713,12 @@ export class GraphComponentClass extends BaseComponent {
 
         grid.multi = obr.multi;
 
+        grid.isBottom = obr.isBottom;
+
         grid.schemeName = obr.schemeName;
         grid.inSchemeUid = obr.inSchemeUid;
+
+        grid.controller = GLObject.gridCreator.GetEntityController(grid);
 
         if (gc.selectingNodeUid === grid.uid) {
             grid.multi = gc.selectingNodeMulti !== undefined ? gc.selectingNodeMulti : grid.multi;
@@ -704,8 +726,24 @@ export class GraphComponentClass extends BaseComponent {
             grid.onSelectValue = () => {
                 gc.onSelectFilterValue({ selectedValue: grid.selectedValue(), selectedText: grid.selectedText(), selectedValues: grid.selectedValues() });
             };
-            if (gc.selectingNodeValue) {
-                grid.value = gc.selectingNodeValue;
+            if (gc.selectingNodeObject) {
+                const obj = gc.selectingNodeObject;
+                grid.value = obj.value;
+                if (obj.multi) {
+                    grid.multi = true;
+                    grid._selectedRows = {};
+                    //const arr = String(grid.value).split(',');
+                    for (let row of obj._selectedOptions) {
+                        let fr = {};
+                        fr[grid.keyField] = row.value;
+                        fr[grid.nameField] = row.label;
+                        grid._selectedRows[row.value] = fr;
+                    }
+                }
+            }
+            else {
+                grid.value = '';
+                grid._selectedRows = {};
             }
         }
         else {
@@ -799,6 +837,8 @@ export class GraphComponentClass extends BaseComponent {
 
         gc.graph.checkNeedTriggerWave = (node) => { return gc.checkNeedTriggerWave(node) };
 
+        gc.graph.nodeByEntity = {};
+
         for (let uid in gc.graph.nodesDict) {
             let node = gc.graph.nodesDict[uid];
 
@@ -808,6 +848,10 @@ export class GraphComponentClass extends BaseComponent {
             gc.graph.nodeCount++;
 
             node.opt = node.opt || {};
+
+            if (node.entity && !node._replaced) {
+                node = gc.replaceGrid({ graph: gc.graph, uid: node.uid, entity: node.entity });
+            }
 
             node.translate = node.translate || ((text) => { return text; });
 
@@ -824,11 +868,17 @@ export class GraphComponentClass extends BaseComponent {
                         gc.activeMaster = node.uid;
                         node.visible = true;
                     }
+                    else {
+                        node.visible = false;
+                    }
                 }
                 else {
                     if (gc.activeDetail === undefined) {
                         gc.activeDetail = node.uid;
                         node.visible = true;
+                    }
+                    else {
+                        node.visible = false;
                     }
                 }
             }
@@ -847,13 +897,45 @@ export class GraphComponentClass extends BaseComponent {
             if (node.status === NodeStatus.filter && node.filterType === FilterType.combobox && !node.entity && (!node.columns || node.columns.length <= 0) && (!node.rows || node.rows.length <= 0)) {
                 node.status = NodeStatus.hidden;
             }
+
+            if (node.status === NodeStatus.filter && node.entity) {
+                gc.graph.nodeByEntity[node.entity] = node;
+
+                if (gc.prevGraph && gc.prevGraph.nodeByEntity) {
+                    const sameNode = gc.prevGraph.nodeByEntity[node.entity];
+                    if (sameNode && sameNode.value) {
+                        node.value = sameNode.value;
+                        node.text = sameNode.text;
+                        node.comboboxValues = [];
+
+                        node._selectedOptions = [];
+                        for (let so of sameNode._selectedOptions) {
+                            node._selectedOptions.push(so);
+                        }
+
+                        if (sameNode.comboboxValues && sameNode.comboboxValues.length) {
+                            for (let cv of sameNode.comboboxValues) {
+                                node.comboboxValues.push(cv);
+                            }
+                        }
+                        else {
+                            node.comboboxValues.push({ value: sameNode.value, label: sameNode.text });
+                        }
+                    }
+                }
+            }
         }
 
         for (let lid in gc.graph.linksDict) {
             let link = gc.graph.linksDict[lid];
 
-            link.parent = link.parent ? gc.graph.nodesDict[link.parent] : link.parent;
-            link.child = link.child ? gc.graph.nodesDict[link.child] : link.child;
+            if (link.parent !== null && typeof link.parent !== 'object') {
+                link.parent = gc.graph.nodesDict[link.parent];
+            }
+
+            if (link.child !== null && typeof link.child !== 'object') {
+                link.child = gc.graph.nodesDict[link.child];
+            }
         }
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------

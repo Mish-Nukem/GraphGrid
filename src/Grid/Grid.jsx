@@ -684,7 +684,8 @@ export class GridClass extends BaseComponent {
         else {
             delim = delim || ',';
             const res = [];
-            for (let row in grid._selectedRows) {
+            for (let id in grid._selectedRows) {
+                let row = grid._selectedRows[id];
                 res.push(row[grid.nameField]);
             }
             return res.join(delim);
