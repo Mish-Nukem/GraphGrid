@@ -49,6 +49,7 @@ export class POAAGridClass extends GridINUClass {
             render: () => {
                 return (
                     <MainMenu
+                        key={`tb_${btn.id}_`}
                         allowCollapse={false}
                         mainMenuItemClass={grid.opt.toolbarButtonsClass || BaseComponent.theme.toolbarButtonsClass}
                         divClassName={''}

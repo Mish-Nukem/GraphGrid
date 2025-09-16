@@ -18,11 +18,11 @@ export class BaseComponent {
         return Translate.translate(text, context);
     }
 
-    Spinner(id = -1, mw = -1) {
+    Spinner(id = -1, minW = -1, maxW = -1) {
         return (
             <div key={`loader_${id}_`}
                 className='grid-loader'
-                style={{ minWidth: mw ? mw + "px"  : "" }}
+                style={{ minWidth: minW ? minW + "px" : "", maxWidth: maxW ? maxW + "px" : "" }}
             >
                 <ClipLoader size={15}></ClipLoader>
             </div>
@@ -55,7 +55,6 @@ export class BaseComponent {
         })
     };
 }
-
 
 export function log(message) {
     if (!window._logEnabled) return;

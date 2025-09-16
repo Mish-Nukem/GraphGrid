@@ -90,14 +90,6 @@ export class GridINUClass extends GridINUBaseClass {
         return this.visible;
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
-    render() {
-        return (
-            <>
-                {super.render()}
-            </>
-        )
-    }
-    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     renderPopupContent() {
         const grid = this;
         return grid.cardIsShowing ? grid.renderCardContent() : grid.settingsIsShowing ? grid.renderSettings() : super.renderPopupContent();
@@ -608,9 +600,6 @@ export class GridINUClass extends GridINUBaseClass {
         for (let puid of grid.parents) {
             let pnode = grid.graph.nodesDict[puid];
             if (pnode.visible !== false && pnode.status === NodeStatus.grid) return true;
-
-            //let link = grid.graph.linksDict[grid.id + '_' + pnode.id];
-            //if (link.everLink && pnode.required && (pnode.value === undefined || pnode.value === '')) return true;
         }
 
         return false;
@@ -626,19 +615,6 @@ export class GridINUClass extends GridINUBaseClass {
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     resetColumnsOrderToDefault() {
-        //    const grid = this;
-        //    delete GLObject.entityInfo[grid.entity];
-
-        //    grid.columns = [];
-        //    grid.colDict = {};
-
-        //    grid.prepareColumns(true).then(() => {
-        //        //super.resetColumnsOrderToDefault();
-
-        //        grid.saveColumnsConfig();
-        //        grid.refreshState();
-        //    })
-
         const grid = this;
         super.resetColumnsOrderToDefault();
 

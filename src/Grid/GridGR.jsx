@@ -103,7 +103,8 @@ export class GridGRClass extends GridClass {
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     log(message, pref) {
         const grid = this;
-        super.log(`${pref ? pref : `grid#${grid.uid ? grid.id + '(' + grid.uid + ')' : grid.id}`} ${grid.title || ''}: ` + message, ' ');
+        pref = pref || `grid#${grid.uid ? grid.id + '(' + grid.uid + ')' : grid.id} ${grid.title || ''}`;
+        super.log(`${pref}: ` + message, ' ');
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     clearEvents() {
@@ -229,8 +230,6 @@ export class GridGRClass extends GridClass {
 
                 let fo = { type: 'graphLink', filter: filter };
                 filters.push(fo);
-
-                //filters.push(filter);
             }
         }
 

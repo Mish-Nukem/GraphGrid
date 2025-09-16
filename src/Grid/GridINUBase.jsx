@@ -73,6 +73,8 @@ export class GridINUBaseClass extends GridFLClass {
 
         grid.activeRow = props.activeRow || '';
 
+        grid.refreshState = grid.refreshState || (() => { });
+
         grid.reqInd = 0;
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------

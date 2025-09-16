@@ -49,6 +49,8 @@ export class MainMenuClass extends BaseComponent {
         const menu = this;
         menu.stateind = 0;
 
+        menu.id = MainMenuClass._seq++;
+
         menu.divClassName = props.divClassName !== undefined ? props.divClassName : "main-menu-div";
         menu.allowCollapse = props.allowCollapse !== undefined ? props.allowCollapse : true;
 
@@ -58,6 +60,8 @@ export class MainMenuClass extends BaseComponent {
         menu.showingItems = [];
         menu.prepareMenu();
     }
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
+    static _seq = 0;
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     prepareMenu() {
         const menu = this;
@@ -103,14 +107,14 @@ export class MainMenuClass extends BaseComponent {
             menu.menuItems && menu.menuItems.length > 0 ?
                 <>
                     <div
-                        key={`mainmenu_div_`}
+                        key={`mainmenu_div_${menu.id}_`}
                         className={menu.divClassName}
                         style={{ height: menu.collapsed ? '0' : '' }}
                     >
                         {
                             menu.allowCollapse ?
                                 <button
-                                    key={`menucollapse_button_`}
+                                    key={`menucollapse_button_${menu.id}_`}
                                     onClick={() => { menu.collapsed = !menu.collapsed; menu.refreshState(); }}
                                     title={!menu.collapsed ? menu.translate('Collapse') : menu.translate('Expand')}
                                     className='menu-collapse-button'

@@ -81,30 +81,19 @@ export class GridDBClass extends GridGRClass {
         grid.sortColumns = [];
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
-    skipOnWaveVisit(e) {
-        if (super.skipOnWaveVisit(e)) return true;
-
-        //const grid = this;
-    }
-    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     visitByWave(e) {
         const grid = this;
         if (grid.skipOnWaveVisit(e)) return;
 
         if (e.waveType === WaveType.value) {
-//            if (grid.status === NodeStatus.filter && !grid._selecting || grid.status === NodeStatus.hidden) {
-                if (grid.status === NodeStatus.filter) {
-                    //grid.updateNodeControls(true);
-                    if (!grid._selecting) {
-                        grid.selectedRowIndex = -1;
-                    }
-                    grid.value = grid.text = '';
-                    grid._selectedOptions = [];
-                    //grid.graph.visitNodesByWave(e);
-                    return;
+            if (grid.status === NodeStatus.filter) {
+                if (!grid._selecting) {
+                    grid.selectedRowIndex = -1;
                 }
-                //return true;
-            //}
+                grid.value = grid.text = '';
+                grid._selectedOptions = [];
+                return;
+            }
         }
 
         grid.pageNumber = 1;

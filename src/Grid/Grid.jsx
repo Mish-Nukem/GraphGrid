@@ -107,9 +107,12 @@ export class GridClass extends BaseComponent {
         grid.opt.selectedRowClass = props.selectedRowClass || BaseComponent.theme.selectedRowClass || '';
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
+    static _seq = 0;
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     log(message, pref) {
         const grid = this;
-        log(`${pref ? pref : `grid#${grid.id}`} : ` + message);
+        pref = pref || `grid#${grid.id}`;
+        log(`${pref} : ` + message);
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     afterGetRows() {
@@ -315,7 +318,13 @@ export class GridClass extends BaseComponent {
 
         if (grid._waitingRows || !grid.columns || !grid.rows) {
             return (
-                grid.Spinner(grid.id, Math.min(Math.max(grid._currW, 100), window.innerWidth))
+                <tbody>
+                    <tr>
+                        <td colSpan={grid.columns ? grid.columns.length : 0} style={{ textAlign: "left" }}>
+                            {grid.Spinner(grid.id, Math.min(Math.max(grid._currW, 100), window.innerWidth), window.innerWidth)}
+                        </td>
+                    </tr>
+                </tbody>
             );
         }
 
@@ -799,7 +808,7 @@ export class GridClass extends BaseComponent {
 
         const initW = parseInt(getComputedStyle(th).width);
 
-        const shiftX = e.pageX;//e.clientX;
+        const shiftX = e.pageX;
         const columns = column.grid.columns;
 
         let otherColsW = 0;

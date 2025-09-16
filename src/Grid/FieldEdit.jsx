@@ -59,19 +59,12 @@ export function FieldEdit(props) {
     fe.h = props.h || '1.7em';
     fe.selectH = props.selectH || '';
     fe.textareaH = props.textareaH || '2.1em';
-    //fe.margin = props.margin;
 
     if (props.init) {
         props.init(fe);
     }
 
     if (fe.multi) {
-        //if (fe.value !== undefined && fe.value !== null && typeof (fe.value) === 'object' && fe.value !== '' && fe._selectedOptions.length <= 0) {
-        //    fe._selectedOptions = fe.value || [];
-        //    const texts = [];
-        //    fe.value = fe.getValueFromCombobox(texts);
-        //    fe.text = texts.join(', ');
-        //}
         if ((fe.value === undefined || fe.value === '') && fe._selectedOptions && fe._selectedOptions.length > 0) {
             const texts = [];
             fe.value = fe.getValueFromCombobox(texts);
@@ -167,7 +160,6 @@ export class FieldEditClass extends BaseComponent {
                         gridColumn: fe.gridColumn || '',
                         width: fe.w ? fe.w : '',
                         maxWidth: fe.maxW ? fe.maxW : '',
-                        margin: fe.margin,
                         minHeight: fe.large ? '2.5em' : '',
                     }}
                 >
@@ -414,7 +406,6 @@ export class FieldEditClass extends BaseComponent {
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     getValueFromCombobox(texts, changeGridValue) {
         const fe = this;
-        //if (!fe.grid) return;
 
         texts = texts || [];
         changeGridValue = changeGridValue && fe.grid;
