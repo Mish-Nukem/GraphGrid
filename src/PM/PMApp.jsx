@@ -42,7 +42,7 @@ function PMApp() {
 
     GLObject.changeAPIurl = GLObject.changeAPIurl || function (serverType) {
         GLObject.serverType = serverType;
-        if (GLObject.isDubug) {
+        if (GLObject.isDebug) {
             GLObject.dataGetter.APIurl = appSettings.DebugAPIurl;
         }
         else {

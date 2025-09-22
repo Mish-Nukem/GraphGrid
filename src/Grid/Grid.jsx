@@ -161,6 +161,7 @@ export class GridClass extends BaseComponent {
     refresh() {
         const grid = this;
         grid._waitingRows = true;
+        grid.refreshState();
 
         grid.getRows({ filters: grid.collectFilters(), grid: grid }).then(
             rows => {
@@ -254,6 +255,7 @@ export class GridClass extends BaseComponent {
                                             display: 'grid',
                                             gridTemplateColumns: 'calc(100% - 6px) 6px',
                                         }}
+                                        disabled={grid._waitingRows || col.disabled ? 'disabled' : ''}
                                     >
 
                                         <div
@@ -317,13 +319,33 @@ export class GridClass extends BaseComponent {
         const grid = this;
 
         if (grid._waitingRows || !grid.columns || !grid.rows) {
+            if (!grid.rows || grid.rows.length <= 0) {
+                //grid.rows.push({});
+            }
             return (
                 <tbody>
-                    <tr>
-                        <td colSpan={grid.columns ? grid.columns.length : 0} style={{ textAlign: "left" }}>
-                            {grid.Spinner(grid.id, Math.min(Math.max(grid._currW, 100), window.innerWidth), window.innerWidth)}
-                        </td>
-                    </tr>
+                    {
+                        grid.rows && grid.rows.length > 0 ?
+                            grid.rows.map((row, rind) => {
+                                return (
+                                    <tr key={`gridrowwait_${grid.id}_${rind}_`} className="grid-waiting" style={{ borderTop: "0", borderBottom: "0" }}>
+                                        {
+                                            <td colSpan={grid.columns ? grid.columns.length : 0} className="grid-waiting">
+                                                {rind === Math.floor(grid.rows.length / 2) ? grid.Spinner(grid.id, Math.min(Math.max(grid._currW, 100), window.innerWidth), window.innerWidth) : <span>&nbsp;</span>}
+                                            </td>
+                                        }
+                                    </tr>
+                                );
+                            })
+                            :
+                            <tr key={`gridrowwait_${grid.id}_0_`} >
+                                {
+                                    <td colSpan={grid.columns ? grid.columns.length : 0} className="grid-waiting">
+                                        {grid.Spinner(grid.id, Math.min(Math.max(grid._currW, 100), window.innerWidth), window.innerWidth)}
+                                    </td>
+                                }
+                            </tr>
+                    }
                 </tbody>
             );
         }

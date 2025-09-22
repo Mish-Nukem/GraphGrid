@@ -89,6 +89,7 @@ export function RTreeView(props) {
                             init={(grid) => {
                                 if (selectedId && (!grid._lastId || grid._lastId != selectedId)) {
                                     grid._lastId = selectedId;
+                                    grid.refreshState = grid.refreshState || (() => { });
                                     grid.refresh();
                                 }
                             }}

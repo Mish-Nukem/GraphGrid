@@ -5,7 +5,7 @@ import { FieldEdit } from '../../../Grid/FieldEdit';
 import { Dropdown } from '../../../Grid/Dropdown';
 import { MainMenu } from '../../../Grid/Pages/MainMenu';
 import { ReportParamsPage } from '../../../Reports/Pages/ReportParamsPage';
-import { BaseComponent } from '../../../Grid/Base';
+import { BaseComponent, NodeStatus } from '../../../Grid/Base';
 export class POAAGridClass extends GridINUClass {
 
     render() { ////<MainMenu init={(dd) => { grid.reportsDropdown = dd; }} getItems={(e) => { return grid.getReportsList(e); }} onItemClick={(e) => { grid.showReport(e.itemId); }}></MainMenu>
@@ -26,7 +26,7 @@ export class POAAGridClass extends GridINUClass {
                                 grid.TNReportName = '';
                                 grid.refreshState();
                             }}
-                            outerParamValues={[{ entity: 'TinuPointObservPoaaEntity', value: grid.selectedValue(), text: grid.selectedText() }]}
+                            outerParamValues={grid.outerReportParamValues || []}
                         >
                         </ReportParamsPage>
                         : <></>
@@ -60,10 +60,10 @@ export class POAAGridClass extends GridINUClass {
                             grid.reportsDropdown = dd;
                             dd.getMainMenuItems = grid.getReportsList;
                         }}
-                        onMenuItemClick={(e, item) =>
-                        {
+                        onMenuItemClick={(e, item) => {
                             grid.showReport(e, item);
                         }}
+                        getDisabled={() => { return grid._waitingRows; }}
                     >
                     </MainMenu>
                 );
@@ -96,6 +96,16 @@ export class POAAGridClass extends GridINUClass {
         grid.isShowingTNReport = true;
         grid.TNReportName = item.action;
         grid.TNReportTitle = item.text;
+
+        grid.outerReportParamValues = [{ entity: 'TinuPointObservPoaaEntity', value: grid.selectedValue(), text: grid.selectedText() }];
+
+        for (let id in grid.graph.nodesDict) {
+            let node = grid.graph.nodesDict[id];
+            if (node.status !== NodeStatus.filter || node.value === '' || node.value === undefined || !node.entity) continue;
+
+            grid.outerReportParamValues.push({ entity: node.entity, value: node.value, text: node.text || node.selectedText() || node.value });
+        }
+
         grid.refreshState();
         //alert('Sowing report: ' + id);
     }

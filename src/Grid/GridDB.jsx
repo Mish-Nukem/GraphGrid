@@ -276,6 +276,9 @@ export class GridDBClass extends GridGRClass {
             },
             img: Images.images.refresh,
             class: grid.pagerButtonsClass,
+            getDisabled: function () {
+                return grid._waitingRows;
+            },
         }
 
         grid.pagerButtons.push(refresh);
@@ -292,6 +295,9 @@ export class GridDBClass extends GridGRClass {
                 },
                 img: Images.images.settings,
                 class: grid.pagerButtonsClass,
+                getDisabled: function () {
+                    return grid._waitingRows;
+                },
             }
 
             grid.pagerButtons.push(settings);
@@ -309,7 +315,7 @@ export class GridDBClass extends GridGRClass {
                     grid.gotoFirstPage();
                 },
                 getDisabled: function () {
-                    return !grid.rows || grid.rows.length <= 0 || grid.pageNumber === 1;
+                    return grid._waitingRows || !grid.rows || grid.rows.length <= 0 || grid.pageNumber === 1;
                 },
                 img: Images.images.first,
                 class: grid.pagerButtonsClass,
@@ -327,7 +333,7 @@ export class GridDBClass extends GridGRClass {
                     grid.gotoPrevPage();
                 },
                 getDisabled: function () {
-                    return !grid.rows || grid.rows.length <= 0 || grid.pageNumber === 1;
+                    return grid._waitingRows || !grid.rows || grid.rows.length <= 0 || grid.pageNumber === 1;
                 },
                 img: Images.images.prev,
                 class: grid.pagerButtonsClass,
@@ -344,7 +350,7 @@ export class GridDBClass extends GridGRClass {
                 click: function (e) {
                 },
                 getDisabled: function () {
-                    return !grid.rows || grid.rows.length <= 1;
+                    return grid._waitingRows || !grid.rows || grid.rows.length <= 1;
                 },
                 render: function (button, bottom) {
                     return (
@@ -355,7 +361,7 @@ export class GridDBClass extends GridGRClass {
                             grid-pager-item={`${grid.id}_${button.id}_`}
                             className={`${button.class ? button.class : grid.opt.inputClass || BaseComponent.theme.inputClass || 'grid-pager-current'}`}
                             style={{ width: '3em', display: 'inline-block' }}
-                            disabled={grid.isEditing() ? 'disabled' : ''}
+                            disabled={grid._waitingRows || grid.isEditing() ? 'disabled' : ''}
                             onChange={function (e) {
                                 const newPage = +e.target.value;
 
@@ -404,7 +410,7 @@ export class GridDBClass extends GridGRClass {
                     grid.gotoNextPage();
                 },
                 getDisabled: function () {
-                    return !grid.rows || grid.rows.length <= 0 || grid.pageNumber === grid.pagesCount;
+                    return grid._waitingRows || !grid.rows || grid.rows.length <= 0 || grid.pageNumber === grid.pagesCount;
                 },
                 img: Images.images.next,
                 class: grid.pagerButtonsClass,
@@ -422,7 +428,7 @@ export class GridDBClass extends GridGRClass {
                     grid.gotoLastPage();
                 },
                 getDisabled: function () {
-                    return !grid.rows || grid.rows.length <= 0 || grid.pageNumber === grid.pagesCount;
+                    return grid._waitingRows || !grid.rows || grid.rows.length <= 0 || grid.pageNumber === grid.pagesCount;
                 },
                 img: Images.images.last,
                 class: grid.pagerButtonsClass,
@@ -445,7 +451,7 @@ export class GridDBClass extends GridGRClass {
                             className={`grid-pager-size ${button.class ? button.class : grid.opt.inputClass || BaseComponent.theme.inputClass || ''}`}
                             style={{ width: '4.5em', display: 'inline-block' }}
                             value={grid.pageSize}
-                            disabled={grid.isEditing() ? 'disabled' : ''}
+                            disabled={grid._waitingRows || grid.isEditing() ? 'disabled' : ''}
                             onChange={function (e) {
                                 grid.setPageSize(+e.target.value);
                             }}
@@ -520,12 +526,13 @@ export class GridDBClass extends GridGRClass {
             <>
                 <span
                     className={'grid-header-title'}
-                    style={{ cursor: col.sortable && !grid.isEditing() ? 'pointer' : '', gridColumn: !sortDir ? 'span 2' : '' }}
-                    onClick={(e) => grid.changeColumnSortOrder(col, e)}
+                    style={{ cursor: col.sortable && !grid._waitingRows && !grid.isEditing() ? 'pointer' : '', gridColumn: !sortDir ? 'span 2' : '', opacity: !grid._waitingRows && !grid.isEditing() ? "1" : "0.6" }}
+                    onClick={(e) => { if (!grid._waitingRows) grid.changeColumnSortOrder(col, e); }}
+                    disabled={grid._waitingRows || col.disabled ? 'disabled' : ''}
                 >
                     {title}
                 </span>
-                {sortDir ? <span className={'grid-header-sort-sign'}>{decodedString + (col.sortInd > 0 ? ` ${col.sortInd} ` : '')}</span> : ''}
+                {sortDir ? <span className={'grid-header-sort-sign'} style={{ opacity: !grid._waitingRows && !grid.isEditing() ? "1" : "0.6" }}>{decodedString + (col.sortInd > 0 ? ` ${col.sortInd} ` : '')}</span> : ''}
             </>
         );
     }

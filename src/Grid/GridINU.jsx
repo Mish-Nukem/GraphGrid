@@ -259,6 +259,7 @@ export class GridINUClass extends GridINUBaseClass {
                         (fe) => {
                             col._filterEditObj = fe;
                             fe.value = fe.text = col.filter;
+                            fe.disabled = grid._waitingRows || grid.isEditing();
                         }
                     }
                     onChange={(e) => {
@@ -409,7 +410,7 @@ export class GridINUClass extends GridINUBaseClass {
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     commitChangesDisabled(e) {
         const grid = this;
-        return !grid.isEditing();
+        return grid._waitingRows || !grid.isEditing();
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     rollbackChanges(e) {
@@ -422,7 +423,7 @@ export class GridINUClass extends GridINUBaseClass {
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     rollbackChangesDisabled(e) {
         const grid = this;
-        return !grid.isEditing();
+        return grid._waitingRows || !grid.isEditing();
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     addRecord(e) {
@@ -444,7 +445,7 @@ export class GridINUClass extends GridINUBaseClass {
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     addRecordDisabled(e) {
         const grid = this;
-        return !grid.allowAdd || grid.isEditing();
+        return grid._waitingRows || !grid.allowAdd || grid.isEditing();
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     copyRecord(e) {
@@ -465,7 +466,7 @@ export class GridINUClass extends GridINUBaseClass {
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     copyRecordDisabled(e) {
         const grid = this;
-        return !grid.allowCopy || grid.isEditing() || grid.selectedRowIndex === undefined || grid.selectedRowIndex < 0 || !grid.rows || grid.rows.length <= 0;
+        return grid._waitingRows || !grid.allowCopy || grid.isEditing() || grid.selectedRowIndex === undefined || grid.selectedRowIndex < 0 || !grid.rows || grid.rows.length <= 0;
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     deleteRecord(e) {
@@ -478,7 +479,7 @@ export class GridINUClass extends GridINUBaseClass {
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     deleteRecordDisabled(e) {
         const grid = this;
-        return !grid.allowDelete || grid.isEditing() || grid.selectedRowIndex === undefined || grid.selectedRowIndex < 0 || !grid.rows || grid.rows.length <= 0;
+        return grid._waitingRows || !grid.allowDelete || grid.isEditing() || grid.selectedRowIndex === undefined || grid.selectedRowIndex < 0 || !grid.rows || grid.rows.length <= 0;
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     viewRecord(e) {
@@ -498,7 +499,7 @@ export class GridINUClass extends GridINUBaseClass {
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     viewRecordDisabled(e) {
         const grid = this;
-        return !grid.allowView || grid.isEditing() || grid.selectedRowIndex === undefined || grid.selectedRowIndex < 0 || !grid.rows || grid.rows.length <= 0;
+        return grid._waitingRows || !grid.allowView || grid.isEditing() || grid.selectedRowIndex === undefined || grid.selectedRowIndex < 0 || !grid.rows || grid.rows.length <= 0;
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     setPageSize(newSize) {

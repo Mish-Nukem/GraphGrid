@@ -73,9 +73,7 @@
 }
 
     .grid-default > tr > td,
-    .grid-default > tbody > tr > td
-    /*,.grid-default > tbody > tr > th,
-    .grid-default > thead > tr > th*/ {
+    .grid-default > tbody > tr > td {
         border: solid;
         border-width: 0 1px 1px 1px;
         /*overflow-x: hidden;*/
@@ -85,6 +83,11 @@
         /*white-space-collapse: collapse;*/
     }
 
+        .grid-default > tr > td.grid-waiting,
+        .grid-default > tbody > tr > td.grid-waiting {
+            border-width: 0;
+            /*background-color: rgb(235, 235, 235);*/
+        }
 
     .grid-default > tbody > tr > th,
     .grid-default > thead > tr > th {
@@ -630,13 +633,13 @@ tr.grid-selected-row > td {
 }
 
 
-.datepicker-input,
-.datepicker-input > div.react-datepicker-wrapper,
-.datepicker-input > div > div.react-datepicker__input-container,
-.datepicker-input > div > div.react-datepicker__input-container input {
-    width: calc(100% - 0px);
-    /*height: 1.6em;*/
-}
+    .datepicker-input,
+    .datepicker-input > div.react-datepicker-wrapper,
+    .datepicker-input > div > div.react-datepicker__input-container,
+    .datepicker-input > div > div.react-datepicker__input-container input {
+        width: calc(100% - 0px);
+        /*height: 1.6em;*/
+    }
 
 .datepicker-filter,
 .datepicker-filter > div.react-datepicker-wrapper,

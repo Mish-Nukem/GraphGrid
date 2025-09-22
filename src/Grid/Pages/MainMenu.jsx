@@ -57,6 +57,8 @@ export class MainMenuClass extends BaseComponent {
         menu.menuItems = props.menuItems;
         menu.onMenuItemClick = props.onMenuItemClick;
 
+        menu.getDisabled = props.getDisabled;
+
         menu.showingItems = [];
         menu.prepareMenu();
     }
@@ -136,6 +138,7 @@ export class MainMenuClass extends BaseComponent {
                                                     className={(menu.mainMenuItemClass || '')
                                                         + (menu.activeItems[item.id] ? ' menu-item-selected' : ' menu-item')
                                                         + (menu.selectedItems[item.id] ? ' active' : '')}
+                                                    disabled={menu.getDisabled && menu.getDisabled({ item: item }) || item.disabled ? 'disabled' : ''}
                                                     onClick={(e) => menu.onItemClick(e, item.id)}
                                                     onMouseEnter={(e) => {
                                                         if (menu.activeItems[item.id]) {
