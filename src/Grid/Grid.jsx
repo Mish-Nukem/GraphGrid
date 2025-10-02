@@ -395,7 +395,7 @@ export class GridClass extends BaseComponent {
                                 <td
                                     key={`gridcell_${grid.id}_${rowInd}_${cind}_${grid.keyAdd()}_${row[grid.keyField]}_`}
                                 >
-                                    {grid.renderCell(grid, col, row, true)}
+                                    {grid.renderCell(grid, col, row)}
                                 </td>
                         );
                     })

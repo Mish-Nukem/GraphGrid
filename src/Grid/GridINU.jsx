@@ -175,8 +175,8 @@ export class GridINUClass extends GridINUBaseClass {
         }
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
-    renderCell(grid, col, row) {
-        if (!grid.allowEditGrid || col.readonly || row !== grid.selectedRow()) return super.renderCell(grid, col, row);
+    renderCell(grid, col, row, inPocket) {
+        if (inPocket || !grid.allowEditGrid || col.readonly || row !== grid.selectedRow()) return super.renderCell(grid, col, row);
 
         row = !grid.isEditing() || !grid.changedRow ? row : grid.changedRow;
 
