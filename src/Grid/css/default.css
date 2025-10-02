@@ -190,6 +190,27 @@ tr.grid-selected-row > td {
         margin: 5px 2px;
     }
 
+.grid-pocket-title {
+    display: flex;
+    justify-content: space-around;
+    font-weight: bold;
+}
+
+.grid-pocket-button {
+    height: 1.5em;
+    width: 1.5em;
+    border-radius: 3px;
+    border-width: 1px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+    .grid-pocket-button:hover:not(:disabled) {
+        background-color: lightgray;
+        cursor: pointer;
+    }
+
 .grid-pager-button {
     /*margin: 5px 2px;*/
     /*height: 28px;

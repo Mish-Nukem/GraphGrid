@@ -8,8 +8,8 @@ import { GLObject } from './Grid/GLObject';
 GLObject.isDebug = true;
 
 GLObject.projectID = 'Debug';
-GLObject.projectID = 'PM';
-GLObject.projectID = 'MR';
+//GLObject.projectID = 'PM';
+//GLObject.projectID = 'MR';
 
 createRoot(document.getElementById('root')).render(
     <>

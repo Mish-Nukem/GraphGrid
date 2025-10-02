@@ -356,8 +356,8 @@ export class GridINUClass extends GridINUBaseClass {
                     e.text = row[grid.nameField];
                 }
                 else {
-                    if (Object.keys(grid._selectedRows).length === 0) {
-                        grid._selectedRows[row[grid.keyField]] = row;
+                    if (Object.keys(grid._selectedRowsDict).length === 0) {
+                        grid._selectedRowsDict[row[grid.keyField]] = row;
                     }
 
                     const texts = [];

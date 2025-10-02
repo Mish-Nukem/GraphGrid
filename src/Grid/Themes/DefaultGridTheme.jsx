@@ -4,6 +4,7 @@
         this.pagerButtonsClass = 'grid-pager-button';
         this.toolbarClass = '';
         this.toolbarButtonsClass = 'grid-toolbar-button';
+        this.pocketButtonsClass = 'grid-pocket-button';
 
         this.pagerClass = 'mb-1 grid-pager-default';
 

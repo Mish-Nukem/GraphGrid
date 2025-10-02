@@ -57,7 +57,7 @@ export class GridCreator {
                         let fakeRow = {};
                         fakeRow[fcolumn.refKeyField] = opt.value;
                         fakeRow[fcolumn.refNameField] = opt.label;
-                        selectingNode._selectedRows[opt.value] = fakeRow;
+                        selectingNode._selectedRowsDict[opt.value] = fakeRow;
                     }
 
                 }}

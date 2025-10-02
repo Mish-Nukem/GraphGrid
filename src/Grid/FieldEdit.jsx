@@ -378,7 +378,7 @@ export class FieldEditClass extends BaseComponent {
                             let fakeRow = {};
                             fakeRow[fe.column.refKeyField] = opt.value;
                             fakeRow[fe.column.refNameField] = opt.label;
-                            lookupGrid._selectedRows[opt.value] = fakeRow;
+                            lookupGrid._selectedRowsDict[opt.value] = fakeRow;
                         }
 
                     }}
@@ -413,7 +413,7 @@ export class FieldEditClass extends BaseComponent {
         fe._selectedOptions = fe._selectedOptions || [];
         let arr = [];
         if (changeGridValue) {
-            fe.grid._selectedRows = {}
+            fe.grid._selectedRowsDict = {}
         }
 
         for (let opt of fe._selectedOptions) {
@@ -424,7 +424,7 @@ export class FieldEditClass extends BaseComponent {
                 let fakeRow = {};
                 fakeRow[fe.grid.keyField] = opt.value;
                 fakeRow[fe.grid.nameField] = opt.label;
-                fe.grid._selectedRows[opt.value] = fakeRow;
+                fe.grid._selectedRowsDict[opt.value] = fakeRow;
             }
         }
 

@@ -321,7 +321,7 @@ function DebugApp() {
                 return (
                     <>
                         <div className="div-with-grid">
-                            <GridDB getRows={GetFamily} buttons={GetButtons()} getColumns={GetFamilyColumns}></GridDB>
+                            <GridDB getRows={GetFamily} buttons={GetButtons()} getColumns={GetFamilyColumns} multi={true}></GridDB>
                         </div>
                     </>
                 );

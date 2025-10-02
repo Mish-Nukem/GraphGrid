@@ -530,9 +530,9 @@ export class GraphComponentClass extends BaseComponent {
                     so.o.push({ v: opt.value, t: opt.label });
                 }
             }
-            else if (node._selectedRows) {
-                for (let uid in node._selectedRows) {
-                    let row = node._selectedRows[uid];
+            else if (node._selectedRowsDict) {
+                for (let uid in node._selectedRowsDict) {
+                    let row = node._selectedRowsDict[uid];
                     so.o.push({ v: row[node.keyField], t: row[node.nameField] });
                 }
             }
@@ -619,7 +619,7 @@ export class GraphComponentClass extends BaseComponent {
         node._selectedOptions = node._selectedOptions || [];
         let arr = [];
         if (changeValue) {
-            node._selectedRows = {}
+            node._selectedRowsDict = {}
         }
 
         for (let opt of node._selectedOptions) {
@@ -628,7 +628,7 @@ export class GraphComponentClass extends BaseComponent {
                 let fakeRow = {};
                 fakeRow[node.keyField] = opt.value;
                 fakeRow[node.nameField] = opt.label;
-                node._selectedRows[opt.value] = fakeRow;
+                node._selectedRowsDict[opt.value] = fakeRow;
             }
         }
 
@@ -713,18 +713,18 @@ export class GraphComponentClass extends BaseComponent {
                 grid.value = obj.value;
                 if (obj.multi) {
                     grid.multi = true;
-                    grid._selectedRows = {};
+                    grid._selectedRowsDict = {};
                     for (let row of obj._selectedOptions) {
                         let fr = {};
                         fr[grid.keyField] = row.value;
                         fr[grid.nameField] = row.label;
-                        grid._selectedRows[row.value] = fr;
+                        grid._selectedRowsDict[row.value] = fr;
                     }
                 }
             }
             else {
                 grid.value = '';
-                grid._selectedRows = {};
+                grid._selectedRowsDict = {};
             }
         }
         //else {

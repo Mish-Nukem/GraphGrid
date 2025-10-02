@@ -1,7 +1,7 @@
 ﻿/* eslint-disable no-mixed-operators */
 import { useState, useEffect } from 'react';
 import { Images } from './Themes/Images';
-import { GridGRClass } from './GridGR';
+import { GridPKClass } from './GridPK';
 import { Dropdown } from './Dropdown';
 import { WaveType } from './Graph';
 import { NodeStatus } from './Base';
@@ -57,7 +57,7 @@ export function GridDB(props) {
     return (grid.render());
 }
 // ==================================================================================================================================================================
-export class GridDBClass extends GridGRClass {
+export class GridDBClass extends GridPKClass {
 
     constructor(props) {
         super(props);
@@ -79,6 +79,8 @@ export class GridDBClass extends GridGRClass {
         grid.opt.inputClass = props.inputClass;
 
         grid.sortColumns = [];
+
+        grid.multi = props.multi;
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     visitByWave(e) {
@@ -304,10 +306,30 @@ export class GridDBClass extends GridGRClass {
             grid.pagerButtonsDict[settings.id] = grid.pagerButtonsDict[settings.name] = settings;
         }
 
+        if (grid.multi) {
+            const pocket = {
+                id: 2,
+                name: 'pocket',
+                title: 'Pocket',
+                label: Images.images.pocket ? '' : 'Pocket',
+                click: function (e) {
+                    grid.switchGridPocket(e);
+                },
+                img: grid.pocketOpened ? Images.images.pocketOpened : Images.images.pocket,
+                class: grid.pagerButtonsClass,
+                getDisabled: function () {
+                    return grid._waitingRows;
+                },
+            }
+
+            grid.pagerButtons.push(pocket);
+            grid.pagerButtonsDict[pocket.id] = grid.pagerButtonsDict[pocket.name] = pocket;
+        }
+
         if (grid.pageSize > 0) {
 
             const first = {
-                id: 2,
+                id: 3,
                 name: 'first',
                 title: 'First',
                 label: Images.images.first ? '' : 'First',
@@ -325,7 +347,7 @@ export class GridDBClass extends GridGRClass {
             grid.pagerButtonsDict[first.id] = grid.pagerButtonsDict[first.name] = first;
 
             const prev = {
-                id: 3,
+                id: 4,
                 name: 'prev',
                 title: 'Prev',
                 label: Images.images.prev ? '' : 'Prev',
@@ -343,7 +365,7 @@ export class GridDBClass extends GridGRClass {
             grid.pagerButtonsDict[prev.id] = grid.pagerButtonsDict[prev.name] = prev;
 
             const curr = {
-                id: 4,
+                id: 5,
                 name: 'curr',
                 title: 'Current Page',
                 label: 'Current Page',
@@ -381,7 +403,7 @@ export class GridDBClass extends GridGRClass {
             grid.pagerButtonsDict[curr.id] = grid.pagerButtonsDict[curr.name] = curr;
 
             const pages = {
-                id: 5,
+                id: 6,
                 name: 'pages',
                 title: 'Total Pages',
                 label: 'Total Pages',
@@ -402,7 +424,7 @@ export class GridDBClass extends GridGRClass {
             grid.pagerButtonsDict[pages.id] = grid.pagerButtonsDict[pages.name] = pages;
 
             const next = {
-                id: 6,
+                id: 7,
                 name: 'next',
                 title: 'Next',
                 label: Images.images.next ? '' : 'Next',
@@ -420,7 +442,7 @@ export class GridDBClass extends GridGRClass {
             grid.pagerButtonsDict[next.id] = grid.pagerButtonsDict[next.name] = next;
 
             const last = {
-                id: 7,
+                id: 8,
                 name: 'last',
                 title: 'Last',
                 label: Images.images.last ? '' : 'Last',
@@ -438,7 +460,7 @@ export class GridDBClass extends GridGRClass {
             grid.pagerButtonsDict[last.id] = grid.pagerButtonsDict[last.name] = last;
 
             const pgsize = {
-                id: 8,
+                id: 9,
                 name: 'pgsize',
                 title: 'Page Size',
                 label: 'Page Size',
@@ -478,7 +500,7 @@ export class GridDBClass extends GridGRClass {
         }
 
         const rows = {
-            id: 9,
+            id: 10,
             name: 'rows',
             title: 'Total Rows',
             label: 'Total Rows',
@@ -507,6 +529,7 @@ export class GridDBClass extends GridGRClass {
         grid.pageSize = newSize;
         grid.pageNumber = 1;
         grid.selectedRowIndex = 0;
+        grid.checkPocketState();
         grid.refresh();
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -569,6 +592,77 @@ export class GridDBClass extends GridGRClass {
         grid.menuDropdown.opt.parentRect = elem ? elem.getBoundingClientRect() : e.target.getBoundingClientRect();
 
         grid.menuDropdown.popup(e);
+    }
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
+    checkPocketState() {
+        super.checkPocketState();
+
+        const grid = this;
+        if (!grid.multi) return;
+
+        grid.setPocketImage();
+    }
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
+    setPocketImage() {
+        const grid = this;
+        if (!grid.multi) return;
+
+        const pocket = grid.pagerButtonsDict['pocket'];
+        if (!pocket) return;
+
+        pocket.img = grid.pocketOpened ? Images.images.pocketOpened : Images.images.pocket;
+    }
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
+    switchGridPocket(e) {
+        const grid = this;
+        if (!grid.multi) return;
+
+        grid.pocketOpened = !grid.pocketOpened;
+
+        grid.setPocketImage();
+        grid.refreshState();
+    }
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
+    loadPocketRows() {
+        const grid = this;
+        super.loadPocketRows();
+
+        grid._sortColumns = [];
+        for (let col of grid.columns) {
+            if (col.sortInd !== undefined && col.sortInd !== null || col.asc || col.desc) {
+                grid._sortColumns.push(col);
+            }
+        }
+
+        if (grid._sortColumns.length > 0) {
+            grid._sortColumns.sort((a, b) => { return a.sortInd > b.sortInd ? 1 : -1 });
+        }
+        else {
+            grid._sortColumns.push({ name: grid.getKeyColumn(), asc: true });
+        }
+
+        //let sortCol = null;
+        //for (let col of grid.columns) {
+        //    if (col.asc || col.desc) {
+        //        sortCol = col;
+        //        break;
+        //    }
+        //}
+
+        //if (sortCol != null) {
+        //    this._selectedRows.sort(function (a, b) { return a[sortCol.name] > b[sortCol.name] ? (sortCol.asc ? 1 : -1) : (sortCol.asc ? -1 : 1); });
+        //}
+
+        grid._selectedRows.sort((a, b) => {
+            let lastCol;
+            for (let col of grid._sortColumns) {
+                if (a[col.name] === b[col.name]) continue;
+                lastCol = col;
+                break;
+            }
+            if (!lastCol) return 0;
+            return a[lastCol.name] > b[lastCol.name] ? (lastCol.asc ? 1 : -1) : (lastCol.asc ? -1 : 1);
+        });
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     onSettingsItemClick(itemId) {
@@ -662,6 +756,9 @@ export class GridDBClass extends GridGRClass {
         grid.refresh();
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
-    afterSortColumn(column) { }
+    afterSortColumn(column) {
+        const grid = this;
+        delete grid._selectedRows;
+    }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
 }

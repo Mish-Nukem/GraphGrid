@@ -280,7 +280,7 @@ export class Images {
         };
 
         images.report = (w, h) => {
-            const oi = Images._outerImagesDict['newImage'];
+            const oi = Images._outerImagesDict['report'];
             return (
                 oi ?
                     <div dangerouslySetInnerHTML={{ __html: oi }} className="image-container-div"></div>
@@ -288,6 +288,34 @@ export class Images {
                     <div className="image-container-div">
                         <svg xmlns="http://www.w3.org/2000/svg" width={w || "20"} height={h || "20"} fill="currentColor" viewBox="0 50 512 512">
                             <path d="M96 96C113.7 96 128 110.3 128 128L128 464C128 472.8 135.2 480 144 480L544 480C561.7 480 576 494.3 576 512C576 529.7 561.7 544 544 544L144 544C99.8 544 64 508.2 64 464L64 128C64 110.3 78.3 96 96 96zM192 160C192 142.3 206.3 128 224 128L416 128C433.7 128 448 142.3 448 160C448 177.7 433.7 192 416 192L224 192C206.3 192 192 177.7 192 160zM224 240L352 240C369.7 240 384 254.3 384 272C384 289.7 369.7 304 352 304L224 304C206.3 304 192 289.7 192 272C192 254.3 206.3 240 224 240zM224 352L480 352C497.7 352 512 366.3 512 384C512 401.7 497.7 416 480 416L224 416C206.3 416 192 401.7 192 384C192 366.3 206.3 352 224 352z" />
+                        </svg>
+                    </div>
+            )
+        };
+
+        images.pocket = (w, h) => {
+            const oi = Images._outerImagesDict['pocket'];
+            return (
+                oi ?
+                    <div dangerouslySetInnerHTML={{ __html: oi }} className="image-container-div"></div>
+                    :
+                    <div className="image-container-div">
+                        <svg xmlns="http://www.w3.org/2000/svg" width={w || "20"} height={h || "20"} fill="currentColor" viewBox="0 0 600 512">
+                            <path d="M465.4 192L431.1 144L209 144L174.7 192L465.4 192zM96 212.5C96 199.2 100.2 186.2 107.9 175.3L156.9 106.8C168.9 90 188.3 80 208.9 80L431 80C451.7 80 471.1 90 483.1 106.8L532 175.3C539.8 186.2 543.9 199.2 543.9 212.5L544 480C544 515.3 515.3 544 480 544L160 544C124.7 544 96 515.3 96 480L96 212.5z" />
+                        </svg>
+                    </div>
+            )
+        };
+
+        images.pocketOpened = (w, h) => {
+            const oi = Images._outerImagesDict['pocketOpened'];
+            return (
+                oi ?
+                    <div dangerouslySetInnerHTML={{ __html: oi }} className="image-container-div"></div>
+                    :
+                    <div className="image-container-div">
+                        <svg xmlns="http://www.w3.org/2000/svg" width={w || "20"} height={h || "20"} fill="currentColor" viewBox="0 0 600 512">
+                            <path d="M560.3 301.2C570.7 313 588.6 315.6 602.1 306.7C616.8 296.9 620.8 277 611 262.3L563 190.3C560.2 186.1 556.4 182.6 551.9 180.1L351.4 68.7C332.1 58 308.6 58 289.2 68.7L88.8 180C83.4 183 79.1 187.4 76.2 192.8L27.7 282.7C15.1 306.1 23.9 335.2 47.3 347.8L80.3 365.5L80.3 418.8C80.3 441.8 92.7 463.1 112.7 474.5L288.7 574.2C308.3 585.3 332.2 585.3 351.8 574.2L527.8 474.5C547.9 463.1 560.2 441.9 560.2 418.8L560.2 301.3zM320.3 291.4L170.2 208L320.3 124.6L470.4 208L320.3 291.4zM278.8 341.6L257.5 387.8L91.7 299L117.1 251.8L278.8 341.6z" />
                         </svg>
                     </div>
             )
