@@ -153,7 +153,7 @@ export class GraphComponentClass extends BaseComponent {
 
         return (
             <>
-                <div key={`graphall_${gc.id}_`}>
+                <div key={`graphAll_${gc.id}_`}>
                     {
                         topFilters.length <= 0 ? <></>
                             :
@@ -173,9 +173,9 @@ export class GraphComponentClass extends BaseComponent {
                                 {
                                     !gc.topFiltersCollapsed ?
                                         <div
-                                            key={`filterstop_${gc.id}_`}
+                                            key={`filtersTop_${gc.id}_`}
                                             className="graph-filter-line"
-                                            style={{ gridTemplateColumns: `repeat(auto-fit, ${topFilterWidth}px)` }}
+                                            style={{ gridTemplateColumns: `repeat(auto-fit, ${topFilterWidth}px)`, display: 'grid' }}
                                         >
                                             {
                                                 topFilters.map((node) => { return gc.renderFilter(node, true) })
@@ -186,12 +186,12 @@ export class GraphComponentClass extends BaseComponent {
                                 }
                             </div>
                     }
-                    <div className="graph-tabcontrol-buttons" key={`tabsstop_${gc.id}_`}>
+                    <div className="graph-tabcontrol-buttons" key={`tabsTop_${gc.id}_`}>
                         {
                             topGrids.map((node) => { return gc.renderGridTab(node, true) })
                         }
                     </div>
-                    <div className="graph-grid" key={`gridstop_${gc.id}_`}>
+                    <div className="graph-grid" key={`gridsTop_${gc.id}_`}>
                         {
                             gc.renderGridInGraph(gc.graph.nodesDict[gc.activeMaster], true)
                         }
@@ -216,7 +216,7 @@ export class GraphComponentClass extends BaseComponent {
                                 {
                                     !gc.lowFiltersCollapsed ?
                                         <div
-                                            key={`filterslow_${gc.id}_`}
+                                            key={`filtersLow_${gc.id}_`}
                                             className="graph-filter-line"
                                             style={{ gridTemplateColumns: `repeat(auto-fit, ${lowFilterWidth}px)` }}
                                         >
@@ -229,12 +229,12 @@ export class GraphComponentClass extends BaseComponent {
                                 }
                             </div>
                     }
-                    <div className="graph-tabcontrol-buttons" key={`tabsslow_${gc.id}_`}>
+                    <div className="graph-tabcontrol-buttons" key={`tabsLow_${gc.id}_`}>
                         {
                             lowGrids.map((node) => { return gc.renderGridTab(node, false) })
                         }
                     </div>
-                    <div className="graph-grid" key={`gridslow_${gc.id}_`}>
+                    <div className="graph-grid" key={`gridsLow_${gc.id}_`}>
                         {
                             gc.renderGridInGraph(gc.graph.nodesDict[gc.activeDetail], false)
                         }
@@ -282,10 +282,10 @@ export class GraphComponentClass extends BaseComponent {
         return (
             <div
                 className="graph-filter"
-                key={`fltrdiv_${node.id}_${gc.id}_`}
+                key={`filterDiv_${node.id}_${gc.id}_`}
             >
                 <span
-                    key={`fltrttl_${node.id}_${gc.id}_`}
+                    key={`filterTitle_${node.id}_${gc.id}_`}
                     className='graph-filter-title'
                 >
                     {node.title + (node.multi && node._selectedOptions && node._selectedOptions.length > 1 ? ` (${node._selectedOptions.length})` : '')}
@@ -340,7 +340,7 @@ export class GraphComponentClass extends BaseComponent {
         const isActive = top && node.uid === gc.activeMaster || !top && node.uid === gc.activeDetail;
         return (
             <button
-                key={`tabctrl_${node.id}_${gc.id}_`}
+                key={`tabcontrol_${node.id}_${gc.id}_`}
                 disabled={isActive || gc.isEditing() ? 'disabled' : ''}
                 className={gc.tabControlButtonClass || BaseComponent.theme.tabControlButtonClass || 'graph-tabcontrol-button'}
                 onClick={(e) => gc.selectActiveTab(node, top)}
@@ -705,8 +705,8 @@ export class GraphComponentClass extends BaseComponent {
         if (gc.selectingNodeUid === grid.uid) {
             grid.multi = gc.selectingNodeMulti !== undefined ? gc.selectingNodeMulti : grid.multi;
             grid.isSelecting = true;
-            grid.onSelectValue = () => {
-                gc.onSelectFilterValue({ selectedValue: grid.selectedValue(), selectedText: grid.selectedText(), selectedValues: grid.selectedValues() });
+            grid.onSelectValue = (e) => {
+                gc.onSelectFilterValue(e); //{ selectedValue: grid.selectedValue(), selectedText: grid.selectedText(), selectedValues: grid.selectedValues() }
             };
             if (gc.selectingNodeObject) {
                 const obj = gc.selectingNodeObject;

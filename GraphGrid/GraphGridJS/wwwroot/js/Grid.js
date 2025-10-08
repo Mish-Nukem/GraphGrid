@@ -105,8 +105,6 @@ export default class Grid {
 
         if (!this.columns) return;
 
-        const colClass = ``;
-
         let w = 0;
         let s = '<thead><tr>';
         for (let col of this.columns) {

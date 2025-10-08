@@ -178,32 +178,42 @@ export class GridClass extends BaseComponent {
     render() {
         const grid = this;
 
-        let w = 0;
-        for (let col of grid.columns) {
-            if (col.visible === false) continue;
-            w += col.w;
-        }
-
-        grid._currW = w;
+        grid.getGridWidth();
 
         grid.log(`render(). rows = ${grid.rows.length}. columns = ${grid.columns.length}. state = ${grid.stateind}`);
         log(' -------------------------------------------------------------------------------------------------------------------------------------- ');
 
         return (
             <div
-                key={`griddiv_${grid.id}_`}
-                style={{ overflowX: 'auto', overflowY: 'hidden' }}
+                key={`gridDiv_${grid.id}_`}
+                className="grid-div"
             >
                 <table
                     key={`grid_${grid.id}_`}
                     className={grid.opt.gridClass || BaseComponent.theme.gridClass || 'grid-default'}
-                    style={{ width: w + "px", tableLayout: 'fixed' }}
+                    style={{ width: grid._currW + "px", tableLayout: 'fixed' }}
                 >
                     {grid.renderHeader()}
                     {grid.renderBody()}
                 </table>
             </div>
         );
+    }
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
+    getGridWidth() {
+        const grid = this;
+        //if (grid._currW > 0) return grid._currW;
+
+        let w = 0;
+        for (let col of grid.columns) {
+            if (col.visible === false) continue;
+            w += col.w;
+        }
+
+        if (grid.multi) w += 20;
+
+        grid._currW = w;
+        return grid._currW;
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     keyAdd() {
@@ -213,6 +223,10 @@ export class GridClass extends BaseComponent {
     keyCellAdd() {
         const grid = this;
         return grid.stateind;
+    }
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
+    getHeaderGridTemplateColumns() {
+        return 'auto 8px';
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     renderHeader(columns, context) {
@@ -231,13 +245,12 @@ export class GridClass extends BaseComponent {
                         return (
                             col.visible === false ? <></> :
                                 <th
-                                    key={`headercell_${grid.id}_${col.id}_${col.w}_${ind}_${grid.keyAdd()}_`}
+                                    key={`headerCell_${grid.id}_${col.id}_${col.w}_${ind}_${grid.keyAdd()}_`}
                                     grid-header={`${grid.id}_${col.id}_${col.w}_`}
                                     className={`${grid.opt.columnClass ? grid.opt.columnClass : ''} grid-header-th`}
                                     style={{ /*position: "sticky", top: 0,*/
                                         width: col.w + "px",
                                         overflow: "hidden",
-                                        verticalAlign: "top",
                                     }}
                                     onMouseDown={(e) => grid.mouseDownColumnDrag(e, col)}
                                     onMouseEnter={(e) => grid.mouseOverColumnDrag(e, col)}
@@ -249,19 +262,26 @@ export class GridClass extends BaseComponent {
                                             overflow: "hidden",
                                             verticalAlign: "top",
                                             display: 'grid',
-                                            gridTemplateColumns: 'calc(100% - 6px) 6px',
+                                            gridTemplateColumns: 'calc(100% - 2px) 2px',
                                         }}
                                         disabled={grid._waitingRows || col.disabled ? 'disabled' : ''}
                                     >
 
                                         <div
                                             className={`grid-header-div-default ${grid.opt.headerDivClass || 'grid-header-div'}`}
+                                            style={{
+                                                display: 'grid',
+                                                gridTemplateColumns: grid.getHeaderGridTemplateColumns(col),
+                                                alignItems: 'center',
+                                                gridTemplateRows: 'auto auto',
+                                                gridAutoFlow: 'row',
+                                            }}
                                         >
                                             {grid.renderHeaderCell(col, context)}
                                         </div>
                                         <div //style={{ position: "absolute", right: "-6px", top: "-1px", cursor: "e-resize", height: "100%", width: "12px", zIndex: (grid.opt.zInd + 1) }}
                                             grid-rsz-x={`${grid.id}_${col.id}`}
-                                            style={{ position: "static", /*right: "-6px", top: "-1px",*/ cursor: "e-resize", height: "100%", width: "12px", zIndex: (grid.opt.zInd + 1) }}
+                                            style={{ position: "relative", /*right: "-6px", top: "-1px",*/ cursor: "e-resize", height: "100%", width: "12px", left: "0px", zIndex: (grid.opt.zInd + 1) }}
                                             onMouseDown={(e) => { e.detail === 2 ? grid.mouseResizerDoubleClick(e, col) : grid.mouseResizerClick(e, col) }}
                                         >
                                         </div>
@@ -278,10 +298,10 @@ export class GridClass extends BaseComponent {
         const grid = this;
         return (
             <th
-                key={`headercell_${grid.id}_select_${grid.keyAdd()}_`}
+                key={`headerCellSelectAll_${grid.id}_${grid.keyAdd()}_`}
                 grid-header={`${grid.id}_select_`}
                 className={`${grid.opt.columnClass ? grid.opt.columnClass : ''} grid-header-th`}
-                style={{ position: "sticky", top: 0, width: "1.3em", overflow: "hidden", verticalAlign: "top" }}
+                style={{ position: "sticky", top: 0, width: "20px", overflow: "hidden", verticalAlign: "top" }}
             >
                 <input type='checkbox'
                     className={`grid-select-checkbox`}
@@ -296,7 +316,7 @@ export class GridClass extends BaseComponent {
         const grid = this;
         return (
             <td
-                key={`gridcell_${grid.id}_${rind}_select_${grid.keyAdd()}_`}
+                key={`gridCellSelect_${grid.id}_${rind}_${grid.keyAdd()}_`}
             >
                 <input type='checkbox'
                     className={`grid-select-checkbox`}
@@ -321,7 +341,7 @@ export class GridClass extends BaseComponent {
                         grid.rows && grid.rows.length > 0 ?
                             grid.rows.map((row, rind) => {
                                 return (
-                                    <tr key={`gridrowwait_${grid.id}_${rind}_`} className="grid-waiting" style={{ borderTop: "0", borderBottom: "0" }}>
+                                    <tr key={`gridRowWait_${grid.id}_${rind}_`} className="grid-waiting" style={{ borderTop: "0", borderBottom: "0" }}>
                                         {
                                             <td colSpan={grid.columns ? grid.columns.length : 0} className="grid-waiting">
                                                 {rind === Math.floor(grid.rows.length / 2) ? grid.Spinner(grid.id, Math.min(Math.max(grid._currW, 100), window.innerWidth), window.innerWidth) : <span>&nbsp;</span>}
@@ -331,7 +351,7 @@ export class GridClass extends BaseComponent {
                                 );
                             })
                             :
-                            <tr key={`gridrowwait_${grid.id}_0_`} >
+                            <tr key={`gridRowWait_${grid.id}_0_`} >
                                 {
                                     <td colSpan={grid.columns ? grid.columns.length : 0} className="grid-waiting">
                                         {grid.Spinner(grid.id, Math.min(Math.max(grid._currW, 100), window.innerWidth), window.innerWidth)}
@@ -350,7 +370,7 @@ export class GridClass extends BaseComponent {
                         let selected = grid.isRowSelected(row, rind);
                         return (
                             <tr
-                                key={`gridrow_${grid.id}_${rind}_${row[grid.keyField]}_${grid.keyAdd()}_${grid.keyCellAdd(selected)}_`}
+                                key={`gridRow_${grid.id}_${rind}_${row[grid.keyField]}_${grid.keyAdd()}_${grid.keyCellAdd(selected)}_`}
                                 className={selected ? `grid-selected-row ${grid.opt.selectedRowClass || ''}` : ''}
 
                                 onDoubleClick={(e) => {
@@ -362,7 +382,7 @@ export class GridClass extends BaseComponent {
                                     e.stopPropagation();
                                 }}
                             >
-                                {grid.renderRow(row, rind)}
+                                {grid.renderRow(row, rind, selected)}
                             </tr>
                         );
                     })
@@ -383,7 +403,7 @@ export class GridClass extends BaseComponent {
         return grid.selectedRowIndex === rowInd;
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
-    renderRow(row, rowInd) {
+    renderRow(row, rowInd, selected) {
         const grid = this;
         return (
             <>
@@ -393,9 +413,9 @@ export class GridClass extends BaseComponent {
                         return (
                             col.visible === false ? <></> :
                                 <td
-                                    key={`gridcell_${grid.id}_${rowInd}_${cind}_${grid.keyAdd()}_${row[grid.keyField]}_`}
+                                    key={`gridCell_${grid.id}_${rowInd}_${cind}_${grid.keyAdd()}_${row[grid.keyField]}_`}
                                 >
-                                    {grid.renderCell(grid, col, row)}
+                                    {grid.renderCell(grid, col, row, selected)}
                                 </td>
                         );
                     })
@@ -814,6 +834,7 @@ export class GridClass extends BaseComponent {
         const newW = contentSize + 12;//Math.max(column.w, contentSize);
 
         if (newW !== initW) {
+            grid._currW = grid._currW - column.w + newW;
             column.w = newW;
             grid.afterResizeColumn(column);
             grid.refreshState();
@@ -832,13 +853,8 @@ export class GridClass extends BaseComponent {
         const initW = parseInt(getComputedStyle(th).width);
 
         const shiftX = e.pageX;
-        const columns = column.grid.columns;
 
-        let otherColsW = 0;
-        for (let col of columns) {
-            if (col === column || col.visible === false) continue;
-            otherColsW += col.w;
-        }
+        let otherColsW = grid._currW - column.w;
 
         const div = e.target.parentElement;
 
@@ -852,12 +868,14 @@ export class GridClass extends BaseComponent {
                 column.w = (!column.maxW || w <= column.maxW) && (!column.minW || w >= column.minW) ? w : column.w;
 
                 if (column.w !== prevW) {
+                    grid._currW = otherColsW + column.w;
+
                     gridElement.style.width = '';
 
                     th.style.width = column.w + 'px';
                     div.style.width = column.w + 'px';
 
-                    gridElement.style.width = (otherColsW + column.w) + 'px';
+                    gridElement.style.width = grid._currW + 'px';
                 }
             }
         }

@@ -39,6 +39,7 @@ export function GridINU(props) {
 
             grid._forceRefresh = false;
 
+            grid._waitingRows = true;
             grid.getRows().then(
                 rows => {
                     //setTimeout(() => {
@@ -47,7 +48,10 @@ export function GridINU(props) {
                     grid.refreshState();
                     //}, 100000);
                 }
-            );
+            ).finally(() => {
+                grid._waitingRows = false;
+                grid.refreshState();
+            });
         }
         else if (grid.columns.length <= 0 && grid.getColumns) {
             grid.prepareColumns().then(() => grid.refreshState());;
@@ -175,8 +179,8 @@ export class GridINUClass extends GridINUBaseClass {
         }
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
-    renderCell(grid, col, row, inPocket) {
-        if (inPocket || !grid.allowEditGrid || col.readonly || row !== grid.selectedRow()) return super.renderCell(grid, col, row);
+    renderCell(grid, col, row, selected, inPocket) {
+        if (inPocket || !grid.allowEditGrid || col.readonly || row !== grid.selectedRow()) return super.renderCell(grid, col, row, selected);
 
         row = !grid.isEditing() || !grid.changedRow ? row : grid.changedRow;
 
@@ -253,7 +257,7 @@ export class GridINUClass extends GridINUBaseClass {
                     text={col.filter}
                     findFieldEdit={() => { return col._filterEditObj; }}
                     gridColumn={'span 2'}
-                    w={'calc(100% + 2px)'}
+                    w={'calc(100% - 2px)'}
                     divContainerClass={'grid-header-content'}
                     init={
                         (fe) => {
@@ -349,24 +353,7 @@ export class GridINUClass extends GridINUBaseClass {
             name: 'selectValue',
             title: grid.translate('Select value'),
             label: grid.translate('Select'),
-            click: (e) => {
-                const row = grid.selectedRow();
-                if (!grid.multi) {
-                    e.value = row[grid.keyField];
-                    e.text = row[grid.nameField];
-                }
-                else {
-                    if (Object.keys(grid._selectedRowsDict).length === 0) {
-                        grid._selectedRowsDict[row[grid.keyField]] = row;
-                    }
-
-                    const texts = [];
-                    e.value = grid.selectedValues(texts);
-                    e.text = texts.join(', ');
-                }
-
-                grid.onSelectValue(e);
-            },
+            click: (e) => grid.selectRecord(e),
             img: Images.images.selectFilterValue,
             getVisible: () => { return grid.isSelecting },
         });
@@ -375,6 +362,31 @@ export class GridINUClass extends GridINUBaseClass {
         for (let btn of grid.buttons) {
             grid._buttonsDict[btn.name] = btn;
         }
+    }
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
+    selectRecord(e) {
+        const grid = this;
+        const row = grid.selectedRow();
+        delete grid._selectedRows;
+
+        if (!grid.multi || !grid.pocketOpened) {
+            e.value = row[grid.keyField];
+            e.text = row[grid.nameField];
+            e.values = [{ value: e.value, label: e.text }];
+        }
+        else {
+            e.multi = true;
+            if (Object.keys(grid._selectedRowsDict).length === 0) {
+                grid._selectedRowsDict[row[grid.keyField]] = row;
+            }
+
+            const texts = [];
+            e.value = grid.selectedValue();
+            e.text = texts.join(', ');
+            e.values = grid.selectedValues(texts);
+        }
+
+        grid.onSelectValue(e);
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     onRowDblClick(e, row) {
@@ -439,8 +451,54 @@ export class GridINUClass extends GridINUBaseClass {
             grid.popupIsShowing = true;
             grid.popupTitle = grid.title;
 
+            grid.fillRefFieldsFromGraph();
+
             grid.refreshState();
         });
+    }
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
+    fillRefFieldsFromGraph() {
+        const grid = this;
+        if (!grid.graph || !grid.parents || grid.parents.length <= 0 || !grid.entity) return;
+
+        const entityInfo = GLObject.entityInfo[grid.entity];
+        if (!entityInfo) return;
+
+        for (let col of entityInfo.columns) {
+            if (!col.entity || col.type !== 'lookup') continue;
+
+            for (let parNodeUid of grid.parents) {
+                let parNode = grid.graph.nodesDict[parNodeUid];
+
+                if (parNode && parNode.entity === col.entity) {
+
+                    let parentValue, parentText;
+                    if (parNode.status === NodeStatus.filter) {
+                        if (parNode._selectedOptions && parNode._selectedOptions.length > 0) {
+                            parentValue = parNode._selectedOptions[0].value;
+                            parentText = parNode._selectedOptions[0].label;
+                        }
+                        else if (parNode.value !== undefined && parNode.value !== '') {
+                            parentValue = String(parNode.value).split(',')[0];
+                            parentText = parNode.text ? String(parNode.text).split(',')[0] : parentValue;
+                        }
+                    }
+                    else if (parNode.status === NodeStatus.grid) {
+                        const srow = parNode.selectedRow();
+                        if (!srow) break;
+
+                        parentValue = srow[parNode.keyField];
+                        parentText = srow[parNode.nameField];
+                    }
+
+                    if (parentValue == undefined || parentValue === '') break;
+
+                    grid.cardRow[col.name] = parentText;
+                    grid.cardRow[col.keyField] = parentValue;
+                    break;
+                }
+            }
+        }
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     addRecordDisabled(e) {

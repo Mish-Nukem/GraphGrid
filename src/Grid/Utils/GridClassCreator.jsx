@@ -34,10 +34,11 @@ export class GridCreator {
                 prevGraph={fcolumn.prevGraph}
                 onSelectFilterValue={(e) => {
                     const fe = fcolumn._fieldEditObj;
+                    fe._selectedOptions = e.values;
 
-                    e.value = e.selectedValue;
-                    e.text = e.selectedText;
-                    fe._selectedOptions = e.selectedValues;
+                    //e.value = e.selectedValue;
+                    //e.text = e.selectedText;
+                    //fe._selectedOptions = e.selectedValues;
                     fe.lookupIsShowing = false;
 
                     fe.onChange(e);

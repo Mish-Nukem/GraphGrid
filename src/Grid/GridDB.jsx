@@ -37,13 +37,17 @@ export function GridDB(props) {
 
         if (needGetRows && (grid.rows.length <= 0 || grid.columns.length <= 0)) {
 
+            grid._waitingRows = true;
             grid.getRows({ filters: grid.collectFilters(), grid: grid }).then(
                 rows => {
                     grid.rows = rows;
                     grid.afterGetRows();
                     grid.refreshState();
                 }
-            );
+            ).finally(() => {
+                grid._waitingRows = false;
+                grid.refreshState();
+            });
         }
         else if (grid.columns.length <= 0 && grid.getColumns) {
             grid.prepareColumns().then(() => grid.refreshState());;
@@ -141,15 +145,15 @@ export class GridDBClass extends GridPKClass {
             false ?
                 <div
 
-                    key={`gridtoolbardiv_${grid.id}_`}
+                    key={`gridToolbarDiv_${grid.id}_`}
                     className={grid.opt.toolbarClass || BaseComponent.theme.toolbarClass || 'toolbar-default'}
                 >
                     {
                         grid.buttons.map((button, ind) => {
                             return (
-                                button.getVisible && !button.getVisible() ? <span key={`toolbarbutton_${grid.id}_${button.id}_${ind}_`}></span> :
+                                button.getVisible && !button.getVisible() ? <span key={`toolbarEmpty_${grid.id}_${button.id}_${ind}_`}></span> :
                                     <button
-                                        key={`toolbarbutton_${grid.id}_${button.id}_${ind}_`}
+                                        key={`toolbarButton_${grid.id}_${button.id}_${ind}_`}
                                     ></button>
                             )
                         })
@@ -161,7 +165,7 @@ export class GridDBClass extends GridPKClass {
                 grid.buttons.length <= 0 ? <></> :
                     <div
 
-                        key={`gridtoolbardiv_${grid.id}_`}
+                        key={`gridToolbarDiv_${grid.id}_`}
                         className={grid.opt.toolbarClass || 'toolbar-default'}
                     >
                         {
@@ -171,7 +175,7 @@ export class GridDBClass extends GridPKClass {
                                         button.render()
                                         :
                                         <button
-                                            key={`toolbarbutton_${grid.id}_${button.id}_${ind}_`}
+                                            key={`toolbarButton_${grid.id}_${button.id}_${ind}_`}
                                             grid-toolbar-button={`${grid.id}_${button.id}_`}
                                             className={`${button.class || grid.opt.toolbarButtonsClass || BaseComponent.theme.toolbarButtonsClass || 'grid-toolbar-button'}`}
                                             style={{
@@ -206,7 +210,7 @@ export class GridDBClass extends GridPKClass {
         return (
             grid.pagerButtons.length <= 0 || bottom && !grid.allowBottomPager ? <></> :
                 <div
-                    key={`pagerdiv_${bottom ? 'bottom' : 'top'}_${grid.id}_`}
+                    key={`pagerDiv_${bottom ? 'bottom' : 'top'}_${grid.id}_`}
                     className={grid.opt.pagerClass || BaseComponent.theme.pagerClass || 'grid-pager-default'}
                 >
                     {
@@ -483,7 +487,7 @@ export class GridDBClass extends GridPKClass {
                                     return (
                                         <option
                                             value={+size}
-                                            key={`pagesize_${grid.id}_${ind}_`}
+                                            key={`pageSize_${grid.id}_${ind}_`}
                                         >
                                             {size}
                                         </option>
@@ -533,6 +537,10 @@ export class GridDBClass extends GridPKClass {
         grid.refresh();
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
+    getHeaderGridTemplateColumns(col) {
+        return col.sortInd === undefined ? 'auto 8px' : 'auto 18px';
+    }
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     renderHeaderCell(col, context) {
         const grid = this;
         if (grid.sortDisabled) {
@@ -549,7 +557,11 @@ export class GridDBClass extends GridPKClass {
             <>
                 <span
                     className={'grid-header-title'}
-                    style={{ cursor: col.sortable && !grid._waitingRows && !grid.isEditing() ? 'pointer' : '', gridColumn: !sortDir ? 'span 2' : '', opacity: !grid._waitingRows && !grid.isEditing() ? "1" : "0.6" }}
+                    style={{
+                        cursor: col.sortable && !grid._waitingRows && !grid.isEditing() ? 'pointer' : '',
+                        gridColumn: !sortDir ? 'span 2' : '', opacity: !grid._waitingRows && !grid.isEditing() ? "1" : "0.6",
+                        whiteSpace: 'nowrap'
+                    }}
                     onClick={(e) => { if (!grid._waitingRows) grid.changeColumnSortOrder(col, e); }}
                     disabled={grid._waitingRows || col.disabled ? 'disabled' : ''}
                 >

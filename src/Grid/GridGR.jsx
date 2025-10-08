@@ -31,13 +31,17 @@ export function GridGR(props) {
 
         if (needGetRows && (grid.rows.length <= 0 || grid.columns.length <= 0)) {
 
+            grid._waitingRows = true;
             grid.getRows({ filters: grid.collectFilters(), grid: grid }).then(
                 rows => {
                     grid.rows = rows;
                     grid.afterGetRows();
                     grid.refreshState();
                 }
-            );
+            ).finally(() => {
+                grid._waitingRows = false;
+                grid.refreshState();
+            });
         }
         else if (grid.columns.length <= 0 && grid.getColumns) {
             grid.prepareColumns().then(() => grid.refreshState());;
@@ -247,13 +251,19 @@ export class GridGRClass extends GridClass {
 
         grid.selectedRowIndex = 0;
 
+        grid._waitingRows = true;
+        grid.refreshState();
+
         grid.getRows({ filters: grid.collectFilters(), grid: grid }).then(
             rows => {
                 grid.rows = rows;
                 grid.afterGetRows(e);
                 grid.refreshState();
             }
-        );
+        ).finally(() => {
+            grid._waitingRows = false;
+            grid.refreshState();
+        });
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     afterGetRows(e) {

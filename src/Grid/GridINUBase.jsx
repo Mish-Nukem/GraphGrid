@@ -35,13 +35,17 @@ export function GridINUBase(props) {
 
         if (needGetRows && (grid.rows.length <= 0 || grid.columns.length <= 0)) {
 
+            grid._waitingRows = true;
             grid.getRows().then(
                 rows => {
                     grid.rows = rows;
                     grid.afterGetRows();
                     grid.refreshState();
                 }
-            );
+            ).finally(() => {
+                grid._waitingRows = false;
+                grid.refreshState();
+            });
         }
         else if (grid.columns.length <= 0 && grid.getColumns) {
             grid.prepareColumns().then(() => grid.refreshState());;
@@ -260,6 +264,7 @@ export class GridINUBaseClass extends GridFLClass {
             grid._savedConfigApplied = true;
 
             const newColumns = [];
+            grid._currW = 0;
             for (let col of entityInfo.columns) {
                 let obrCol = grid.colDict[col.name];
                 if (!obrCol) continue;
@@ -272,6 +277,10 @@ export class GridINUBaseClass extends GridFLClass {
 
                 if (obrCol.entity) {
                     obrCol.schemeInfo = GLObject.gridCreator.GetSchemeInfo(obrCol.entity, grid.graph ? grid.graph.schemeName : '');
+                }
+
+                if (obrCol.visible) {
+                    grid._currW += obrCol.w;
                 }
 
                 newColumns.push(obrCol);
@@ -541,7 +550,9 @@ export class GridINUBaseClass extends GridFLClass {
 
         if (grid.status === NodeStatus.grid && grid.visible === true) {
             const isLast = e.list.length <= 0;
-            grid.getRows().then(
+
+            grid._waitingRows = true;
+            grid.getRows({ filters: grid.collectFilters(), grid: grid }).then(
                 rows => {
                     grid.graph._isMakingWave = true;
 
@@ -555,7 +566,10 @@ export class GridINUBaseClass extends GridFLClass {
 
                     grid.graph._isMakingWave = e.list.length > 0;
                 }
-            );
+            ).finally(() => {
+                grid._waitingRows = false;
+                grid.refreshState();
+            });
         }
         else {
             grid.value = grid.text = '';

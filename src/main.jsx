@@ -5,10 +5,10 @@ import MRApp from './MR/MRApp';
 import DebugApp from './Tests/DebugApp';
 import { GLObject } from './Grid/GLObject';
 
-GLObject.isDebug = true;
+//GLObject.isDebug = true;
 
 GLObject.projectID = 'Debug';
-//GLObject.projectID = 'PM';
+GLObject.projectID = 'PM';
 //GLObject.projectID = 'MR';
 
 createRoot(document.getElementById('root')).render(

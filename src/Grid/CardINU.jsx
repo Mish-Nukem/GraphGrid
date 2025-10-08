@@ -85,12 +85,12 @@ export class CardINUClass extends GridINUBaseClass {
         return (
             <>
                 <div className='graph-card-toolbar'
-                    key={`cardtoolbardiv_${card.id}_`}
+                    key={`cardToolbarDiv_${card.id}_`}
                 >
                     {super.renderToolbar()}
                 </div>
                 <div className="graph-card-div"
-                    key={`cardbodydiv_${card.id}_`}
+                    key={`cardBodyDiv_${card.id}_`}
                 >
                     {
                         card.columns.map((col) => { return card.renderField(col) })
@@ -112,10 +112,10 @@ export class CardINUClass extends GridINUBaseClass {
 
         return (
             <div className="graph-card-field"
-                key={`cardlookupdiv_${card.id}_${col.id}_`}
+                key={`cardLookupDiv_${card.id}_${col.id}_`}
             >
                 <span
-                    key={`cardlookuptitle_${card.id}_${col.id}_`}
+                    key={`cardLookupTitle_${card.id}_${col.id}_`}
                     style={{ gridColumn: 'span 3', width: 'calc(100% - 4px)' }}
                 >
                     {col.title || col.name}
@@ -156,8 +156,8 @@ export class CardINUClass extends GridINUBaseClass {
                             card.changedRow[col.name] = e.text;
                             if (!card.isEditing()) {
                                 card.setEditing(true);
-                                card.refreshState();
                             }
+                            card.refreshState();
                         }
                         else {
                             card.changedRow[col.name] = e.value;

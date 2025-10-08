@@ -115,6 +115,7 @@ export class DropdownClass extends ModalClass {
                                     key={`dropdownitem_${dd.id}_${item.id}_${ind}_`}
                                     title={dd.translate(item.title || item.text)}
                                     className={dd.menuItemClass + (dd.activeItem === item ? ' active' : '')}
+                                    style={{ listStyleType: 'none' }}
                                     onClick={(e) => dd.onItemClick(e, item.id)}
                                     onMouseEnter={(e) => {
                                         if (!dd.opt.onItemMouseEnter) return;
@@ -136,6 +137,7 @@ export class DropdownClass extends ModalClass {
                                     key={`dropdownitem_$${dd.id}_append_`}
                                     title={dd.translate('load more records')}
                                     className={dd.menuItemClass}
+                                    style={{ listStyleType: 'none' }}
                                     onClick={(e) => dd.onItemClick(e, 'append')}
                                 >
                                     ${dd.translate('more...')}

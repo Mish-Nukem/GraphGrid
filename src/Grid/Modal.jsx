@@ -165,7 +165,10 @@ export class ModalClass extends BaseComponent {
                             display: "flex",
                             flexDirection: "column",
                             justifyContent: "space-between",
-                            position: "fixed"
+                            position: "fixed",
+                            overflow: 'hidden',
+                            backgroundColor: 'white',
+                            border: '1px solid',
                         }
                     }
                     className="modal-window-wnd"
@@ -177,7 +180,7 @@ export class ModalClass extends BaseComponent {
                         key={`window_${wnd.id}_body_`}
                         wnd-body={1}
                         className={wnd.opt.bodyClass}
-                        style={{ padding: wnd.opt.noPadding ? '0' : '' }}
+                        style={{ padding: wnd.opt.noPadding ? '0' : '', overflow: 'auto', height: '100%' }}
                     >
                         {wnd.renderContent(wnd)}
                     </div>
@@ -195,12 +198,13 @@ export class ModalClass extends BaseComponent {
                 key={`window_${wnd.id}_header_`}
                 wnd-header={1}
                 className={wnd.opt.headerClass}
+                style={{ display: 'flex', flexWrap: 'nowrap', justifyContent: 'space-between' }}
                 onMouseDown={(e) => wnd.mouseDownDrag(e)}
             >
                 <h4 className={wnd.opt.titleClass}>
                     {wnd.opt.title || ''}
                 </h4>
-                <button wnd-btn={`close_${wnd.id}_`} type="button" className="close" style={{ color: "black" }} onClick={() => wnd.close()}>×</button>
+                <button wnd-btn={`close_${wnd.id}_`} type="button" className="close" style={{ color: "black", lineHeight: '1', fontWeight: '21px', border: 'none' }} onClick={() => wnd.close()}>×</button>
             </div>
         )
     }
@@ -458,8 +462,8 @@ export class ModalClass extends BaseComponent {
         const cs = getComputedStyle(elem);
         const [initW, initH] = [parseInt(cs.width), parseInt(cs.height)];
 
-        const shiftX = e.target.hasAttribute('wnd-rsz-x') || e.target.hasAttribute('wnd-rsz-xy') ? e.clientX : -1;
-        const shiftY = e.target.hasAttribute('wnd-rsz-y') || e.target.hasAttribute('wnd-rsz-xy') ? e.clientY : -1;
+        const shiftX = e.target.hasAttribute('wnd-rsz-x') || e.target.hasAttribute('wnd-rsz-xy') ? e.pageX : -1;
+        const shiftY = e.target.hasAttribute('wnd-rsz-y') || e.target.hasAttribute('wnd-rsz-xy') ? e.pageY : -1;
 
         resize(e.pageX, e.pageY);
         // -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  

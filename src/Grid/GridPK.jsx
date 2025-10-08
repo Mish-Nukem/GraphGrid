@@ -86,7 +86,7 @@ export class GridPKClass extends GridGRClass {
             !grid.pocketOpened ? <></>
                 :
                 <th
-                    key={`headercell_${grid.id}_select_${grid.keyAdd()}_`}
+                    key={`headerCellSelect_${grid.id}_${grid.keyAdd()}_`}
                     grid-header={`${grid.id}_select_`}
                     className={`${grid.opt.columnClass ? grid.opt.columnClass : ''} grid-header-th`}
                     style={{ position: "sticky", top: 0, width: "1.3em", overflow: "hidden", verticalAlign: "top" }}
@@ -94,7 +94,7 @@ export class GridPKClass extends GridGRClass {
                     {
                         !grid._allRowsOnPageSelected ?
                             <button
-                                className={grid.opt.pocketButtonsClass || 'grid-pocket-button'}
+                                className={(grid.opt.pocketButtonsClass || 'grid-pocket-button') + ' grid-pocket-button-all'}
                                 onClick={(e) => grid.selectAllRows(e)}
                             >
                                 {'+'}
@@ -112,7 +112,7 @@ export class GridPKClass extends GridGRClass {
             !grid.pocketOpened ? <></>
                 :
                 <td
-                    key={`gridcell_${grid.id}_${rind}_select_${grid.keyAdd()}_`}
+                    key={`gridCellSelect_${grid.id}_${rind}_${grid.keyAdd()}_`}
                 >
                     {
                         grid._selectedRowsDict[row[grid.keyField]] === undefined ?
@@ -135,7 +135,7 @@ export class GridPKClass extends GridGRClass {
             !grid.pocketOpened ? <></>
                 :
                 <td
-                    key={`gridcell_${grid.id}_${rind}_clear_${grid.keyAdd()}_`}
+                    key={`gridCellClear_${grid.id}_${rind}_${grid.keyAdd()}_`}
                 >
                     <button
                         className={grid.opt.pocketButtonsClass || 'grid-pocket-button'}
@@ -170,7 +170,7 @@ export class GridPKClass extends GridGRClass {
                             >
                                 {hasPocketRows ?
                                     <button
-                                        className={grid.opt.pocketButtonsClass || 'grid-pocket-button'}
+                                        className={(grid.opt.pocketButtonsClass || 'grid-pocket-button') + ' grid-pocket-button-all'}
                                         onClick={(e) => grid.clearPocket(e)}
                                     >
                                         {'-'}
@@ -214,7 +214,7 @@ export class GridPKClass extends GridGRClass {
         const grid = this;
         return (
             <>
-                {grid.multi ? grid.renderPocketClearColumn(row, rowInd, true) : <></>}
+                {grid.multi ? grid.renderPocketClearColumn(row, rowInd) : <></>}
                 {
                     grid.columns.map((col, cind) => {
                         return (
@@ -222,7 +222,7 @@ export class GridPKClass extends GridGRClass {
                                 <td
                                     key={`gridPocketCell_${grid.id}_${rowInd}_${cind}_${grid.keyAdd()}_${row[grid.keyField]}_`}
                                 >
-                                    {grid.renderCell(grid, col, row, true)}
+                                    {grid.renderCell(grid, col, row, false, true)}
                                 </td>
                         );
                     })

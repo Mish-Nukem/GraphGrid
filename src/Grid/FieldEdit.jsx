@@ -102,24 +102,6 @@ export class FieldEditClass extends BaseComponent {
             fe.comboboxValues = props.comboboxValues;
         }
 
-        //if (fe.multi) {
-        //    fe._selectedOptions = [];
-        //    if (fe.value !== undefined && fe.value !== null && typeof (fe.value) === 'object') {
-        //        fe._selectedOptions = fe.value;
-        //    }
-        //    else {
-        //        const texts = [];
-        //        fe.value = fe.getValueFromCombobox(texts);
-        //        fe.text = texts.join(', ');
-        //    }
-        //}
-        //else {
-        //    fe._selectedOptions = [];
-        //    if (fe.value !== undefined && fe.value !== '') {
-        //        fe._selectedOptions.push({ value: fe.value, label: fe.text });
-        //    }
-        //}
-
         fe.onChange = props.onChange || (() => { });
 
         fe.large = props.large;
@@ -152,12 +134,14 @@ export class FieldEditClass extends BaseComponent {
         return (
             <>
                 <div
-                    key={`fieldeditdiv_${fe.id}_${fe.column.id}_`}
+                    key={`fieldEditDiv_${fe.id}_${fe.column.id}_`}
                     className={fe.divContainerClass ? fe.divContainerClass : fe.large ? 'field-edit' : isLookup || isDate ? 'grid-cell-lookup' : 'grid-cell-edit'}
                     style={{
                         border: 'none',
                         height: !fe.inputClass ? fe.h : '',
+                        display: 'grid',
                         gridColumn: fe.gridColumn || '',
+                        gridTemplateColumns: fe.large ? 'calc(100% - 4.4em) 2.2em 2.2em' : 'calc(100% - 3em) 1.5em 1.5em',
                         width: fe.w ? fe.w : '',
                         maxWidth: fe.maxW ? fe.maxW : '',
                         minHeight: fe.large ? '2.5em' : '',
@@ -169,7 +153,7 @@ export class FieldEditClass extends BaseComponent {
                                 {
                                     !allowCombobox ?
                                         <input
-                                            key={`fieldlookuptitle_${fe.id}_${fe.column.id}_`}
+                                            key={`fieldLookupTitle_${fe.id}_${fe.column.id}_`}
                                             style={{//width: 'calc(100% - 4px)',
                                                 
                                                 gridColumn: noClear ? !fe.comboboxValues ? 'span 2' : 'span 3' : 'span 1',
@@ -185,7 +169,7 @@ export class FieldEditClass extends BaseComponent {
                                         </input>
                                         :
                                         <Select
-                                            key={`fieldlookupselect_${fe.id}_${fe.column.id}_`}
+                                            key={`fieldLookupSelect_${fe.id}_${fe.column.id}_`}
                                             inputClass={fe.inputClass || ''}
                                             className={fe.selectClass || ''}
                                             value={fe._selectedOptions}
@@ -216,8 +200,9 @@ export class FieldEditClass extends BaseComponent {
                                 {
                                     !fe.comboboxValues ?
                                         <button
-                                            key={`fieldlookupbtn_${fe.id}_${fe.column.id}_`}
+                                            key={`fieldLookupButton_${fe.id}_${fe.column.id}_`}
                                             className={`${fe.large ? 'graph-filter-button' : 'grid-cell-button'} ${fe.large ? fe.buttonClass : ''}`}
+                                            style={{ width: !fe.large ? '1.6em' : '', height: !fe.large ? '1.6em' : '' }}
                                             onClick={(e) => {
                                                 fe.openLookupField(e);
                                             }}
@@ -233,7 +218,7 @@ export class FieldEditClass extends BaseComponent {
                             isDate ?
                                 <>
                                     <div
-                                        key={`fielddatediv_${fe.id}_${fe.column.id}_`}
+                                        key={`fieldDateDiv_${fe.id}_${fe.column.id}_`}
                                         style={{
                                             width: '100%',
                                             height: !fe.inputClass ? fe.h : '',
@@ -265,7 +250,7 @@ export class FieldEditClass extends BaseComponent {
                                 </>
                                 :
                                 <textarea
-                                    key={`fieldtextarea_${fe.id}_${fe.column.id}_`}
+                                    key={`fieldTextarea_${fe.id}_${fe.column.id}_`}
                                     className={`${fe.large ? fe.inputClassLG : fe.inputClass}`}
                                     value={fe.value || ''}
                                     style={{
@@ -292,8 +277,9 @@ export class FieldEditClass extends BaseComponent {
                         noClear || fe.column.readonly ? <></>
                             :
                             <button
-                                key={`fieldclear_${fe.id}_${fe.column.id}_`}
+                                key={`fieldClearButton_${fe.id}_${fe.column.id}_`}
                                 className={`${fe.large ? 'graph-filter-clear' : 'grid-cell-button'} ${fe.clearButtonClass || ''}`}
+                                style={{ width: !fe.large ? '1.6em' : '', height: !fe.large ? '1.6em' : '' }}
                                 onClick={(e) => {
                                     e.value = e.text = '';
                                     fe.value = fe.text = '';
@@ -349,7 +335,7 @@ export class FieldEditClass extends BaseComponent {
                     multi={fe.multi}
                     findGrid={() => { return fe.grid; }}
                     onSelectValue={(e) => {
-                        if (fe.multi) {
+                        if (fe.multi && e.multi) {
                             const texts = [];
                             fe._selectedOptions = e.value;
 
@@ -372,15 +358,18 @@ export class FieldEditClass extends BaseComponent {
                     init={(lookupGrid) => {
                         if (!lookupGrid.value || fe.value && fe.value !== lookupGrid.value) {
                             fe.onLookupGridInit(lookupGrid);
-                        }
 
-                        for (let opt of fe._selectedOptions) {
-                            let fakeRow = {};
-                            fakeRow[fe.column.refKeyField] = opt.value;
-                            fakeRow[fe.column.refNameField] = opt.label;
-                            lookupGrid._selectedRowsDict[opt.value] = fakeRow;
+                            delete lookupGrid._selectedRows;
+                            if (fe.value) {
+                                lookupGrid._selectedRowsDict = {};
+                                for (let opt of fe._selectedOptions) {
+                                    let fakeRow = {};
+                                    fakeRow[fe.column.refKeyField] = opt.value;
+                                    fakeRow[fe.column.refNameField] = opt.label;
+                                    lookupGrid._selectedRowsDict[opt.value] = fakeRow;
+                                }
+                            }
                         }
-
                     }}
                     onClose={() => {
                         if (fe.ownerGrid) {

@@ -300,7 +300,7 @@ export class Images {
                     <div dangerouslySetInnerHTML={{ __html: oi }} className="image-container-div"></div>
                     :
                     <div className="image-container-div">
-                        <svg xmlns="http://www.w3.org/2000/svg" width={w || "20"} height={h || "20"} fill="currentColor" viewBox="0 0 600 512">
+                        <svg xmlns="http://www.w3.org/2000/svg" width={w || "20"} height={h || "20"} fill="currentColor" viewBox="0 40 600 512">
                             <path d="M465.4 192L431.1 144L209 144L174.7 192L465.4 192zM96 212.5C96 199.2 100.2 186.2 107.9 175.3L156.9 106.8C168.9 90 188.3 80 208.9 80L431 80C451.7 80 471.1 90 483.1 106.8L532 175.3C539.8 186.2 543.9 199.2 543.9 212.5L544 480C544 515.3 515.3 544 480 544L160 544C124.7 544 96 515.3 96 480L96 212.5z" />
                         </svg>
                     </div>
@@ -314,7 +314,7 @@ export class Images {
                     <div dangerouslySetInnerHTML={{ __html: oi }} className="image-container-div"></div>
                     :
                     <div className="image-container-div">
-                        <svg xmlns="http://www.w3.org/2000/svg" width={w || "20"} height={h || "20"} fill="currentColor" viewBox="0 0 600 512">
+                        <svg xmlns="http://www.w3.org/2000/svg" width={w || "20"} height={h || "20"} fill="currentColor" viewBox="0 40 600 512">
                             <path d="M560.3 301.2C570.7 313 588.6 315.6 602.1 306.7C616.8 296.9 620.8 277 611 262.3L563 190.3C560.2 186.1 556.4 182.6 551.9 180.1L351.4 68.7C332.1 58 308.6 58 289.2 68.7L88.8 180C83.4 183 79.1 187.4 76.2 192.8L27.7 282.7C15.1 306.1 23.9 335.2 47.3 347.8L80.3 365.5L80.3 418.8C80.3 441.8 92.7 463.1 112.7 474.5L288.7 574.2C308.3 585.3 332.2 585.3 351.8 574.2L527.8 474.5C547.9 463.1 560.2 441.9 560.2 418.8L560.2 301.3zM320.3 291.4L170.2 208L320.3 124.6L470.4 208L320.3 291.4zM278.8 341.6L257.5 387.8L91.7 299L117.1 251.8L278.8 341.6z" />
                         </svg>
                     </div>

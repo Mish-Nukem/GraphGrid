@@ -86,7 +86,9 @@ export class OverlayClass extends BaseComponent {
                             left: ovl.opt.pos.x,
                             opacity: ovl.opt.opacity ? ovl.opt.opacity : ovl.opt.isHidden ? 0 : 0.2,
                             zIndex: ovl.opt.zInd,
-                            backgroundColor: !ovl.opt.isHidden ? 'black' : ''
+                            backgroundColor: !ovl.opt.isHidden ? 'black' : '',
+                            display: 'flex',
+                            position: 'fixed',
                         }
                     }
                     className="overlay-default"

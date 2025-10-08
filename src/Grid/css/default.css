@@ -66,6 +66,11 @@
     justify-content: space-between;
 }
 
+.grid-div {
+    overflow-x: auto;
+    overflow-y: hidden;
+}
+
 .grid-default {
     border-collapse: collapse;
     table-layout: fixed !important;
@@ -111,12 +116,13 @@
 
 .grid-header-th {
     background-color: white;
+    vertical-align: top;
 }
 
 .grid-header-div-default {
     user-select: none;
     display: grid;
-    grid-template-columns: auto 18px;
+    grid-template-columns: auto 8px;
     grid-template-rows: auto auto;
     grid-auto-flow: row;
     align-items: center;
@@ -156,7 +162,7 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    margin-left: 8px;
+    margin-left: -3px;
     /*margin: 0 2px;*/
 }
 
@@ -175,10 +181,10 @@
     background-color: lightgray;
 }
 
-tr.grid-selected-row > td {
+/*tr.grid-selected-row > td {
     padding: 0.01em;
 }
-
+*/
 .grid-pager-default {
     display: flex;
     align-content: center;
@@ -197,19 +203,25 @@ tr.grid-selected-row > td {
 }
 
 .grid-pocket-button {
-    height: 1.5em;
-    width: 1.5em;
+    height: 18px;
+    width: 20px;
     border-radius: 3px;
     border-width: 1px;
     display: flex;
+    justify-content: center;
+    font-size: large;
     align-items: center;
-    justify-content: space-between;
+    padding: 0.01px;
 }
 
     .grid-pocket-button:hover:not(:disabled) {
         background-color: lightgray;
         cursor: pointer;
     }
+
+.grid-pocket-button-all.grid-pocket-button {
+    font-weight: bold;
+}
 
 .grid-pager-button {
     /*margin: 5px 2px;*/
@@ -393,7 +405,7 @@ tr.grid-selected-row > td {
 .grid-col-filter {
     height: 2em;
     margin: 2px;
-    width: calc(100% + 2px);
+    width: calc(100% - 4px);
     padding: 0 2px;
     box-sizing: border-box;
 }

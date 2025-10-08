@@ -34,13 +34,17 @@ export function GridFL(props) {
 
         if (needGetRows && (grid.rows.length <= 0 || grid.columns.length <= 0)) {
 
+            grid._waitingRows = true;
             grid.getRows({ filters: grid.collectFilters(), grid: grid }).then(
                 rows => {
                     grid.rows = rows;
                     grid.afterGetRows();
                     grid.refreshState();
                 }
-            );
+            ).finally(() => {
+                grid._waitingRows = false;
+                grid.refreshState();
+            });
         }
         else if (grid.columns.length <= 0 && grid.getColumns) {
             grid.prepareColumns().then(() => grid.refreshState());;
@@ -120,11 +124,11 @@ export class GridFLClass extends GridDBClass {
                 {col.filtrable && context !== 'fake' ?
                     <>
                         <input
-                            key={`colfilter_${grid.id}_${col.id}_`}
+                            key={`colFilter_${grid.id}_${col.id}_`}
                             className={`grid-col-filter ${grid.opt.inputClass || BaseComponent.theme.inputClass || ''}`}
                             value={col.filter !== undefined ? col.filter : ''}
                             title={col.filter !== undefined ? col.filter : ''}
-                            style={{ gridColumn: !hasFilter ? 'span 2' : '' }}
+                            style={{ gridColumn: !hasFilter ? 'span 2' : '', width: 'calc(100% - 2px)' }}
                             grid-col-filter={`${grid.id}_${col.id}_`}
                             onChange={(e) => { grid.onColumnFilterChanging(col, e.target.value, e) }}
                             onClick={(e) => { grid.onColumnFilterClick(col, e); }}
@@ -137,7 +141,7 @@ export class GridFLClass extends GridDBClass {
                         </input>
                         {
                             <button
-                                key={`colfilterClear_${grid.id}_${col.id}_`}
+                                key={`colFilterClear_${grid.id}_${col.id}_`}
                                 className={"grid-filter-clear"}
                                 style={{ color: 'black', display: hasFilter ? '' : 'none' }}
                                 type={'button'}
