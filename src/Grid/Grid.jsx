@@ -258,11 +258,12 @@ export class GridClass extends BaseComponent {
                                 >
                                     <div
                                         style={{ /*position: "sticky", top: 0,*/
-                                            width: col.w + "px",
+                                            /*width: col.w + "px",*/
                                             overflow: "hidden",
                                             verticalAlign: "top",
                                             display: 'grid',
-                                            gridTemplateColumns: 'calc(100% - 2px) 2px',
+                                            gridTemplateColumns: 'calc(100% - 6px) 6px',
+                                            marginRight: '-4px',
                                         }}
                                         disabled={grid._waitingRows || col.disabled ? 'disabled' : ''}
                                     >
@@ -823,7 +824,7 @@ export class GridClass extends BaseComponent {
         fakeDiv.className = '';
 
         for (let row of grid.rows) {
-            fakeDiv.innerHTML = renderToStaticMarkup(grid.renderCell(grid, column, row));
+            fakeDiv.innerHTML = renderToStaticMarkup(grid.renderCell(grid, column, row, false));
             contentSize = Math.max(contentSize, parseInt(getComputedStyle(fakeDiv).width));
         }
 
@@ -856,7 +857,7 @@ export class GridClass extends BaseComponent {
 
         let otherColsW = grid._currW - column.w;
 
-        const div = e.target.parentElement;
+        //const div = e.target.parentElement;
 
         let resizing;
         // -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  
@@ -873,7 +874,7 @@ export class GridClass extends BaseComponent {
                     gridElement.style.width = '';
 
                     th.style.width = column.w + 'px';
-                    div.style.width = column.w + 'px';
+                    //div.style.width = column.w + 'px';
 
                     gridElement.style.width = grid._currW + 'px';
                 }

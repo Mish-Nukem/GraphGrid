@@ -86,6 +86,7 @@ export class GraphComponentClass extends BaseComponent {
         gc.tabControlButtonClass = props.tabControlButtonClass;
 
         gc.prevGraph = props.prevGraph;
+        gc.prevGrid = props.prevGrid;
 
         if (props.graph) {
             gc.prepareGraph(props.graph);
@@ -400,40 +401,6 @@ export class GraphComponentClass extends BaseComponent {
                 </GridFL>
         );
     }
-    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
-    /*selectFilterValue(e, node) {
-        const gc = this;
-        if (!node) return;
-
-        node.value = e.selectedValue || node.selectedValue();
-        const selectedText = e.selectedText || node.selectedText();
-        const selectedValues = e.selectedValues || node.selectedValues();
-
-        const fe = node.fakeColumn._fieldEditObj;
-
-        node._selectedText = node.text = selectedText;
-
-        node._selectedOptions = selectedValues;
-
-        if (node.multi) {
-            fe._selectedOptions = selectedValues;
-            const texts = [];
-            fe.value = fe.getValueFromCombobox(texts);
-            fe.text = texts.join(', ');
-        }
-        else {
-            fe.value = node.value;
-            fe.text = node.selectedText ? node.selectedText() : node._selectedText;
-        }
-
-        gc.saveGraphConfig();
-
-        gc.graph.triggerWave({ nodes: [node], withStartNodes: false });
-
-        fe.lookupIsShowing = false;
-        gc.refreshState();
-    }
-    */
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     selectActiveTab(node, top) {
         const gc = this;
@@ -820,6 +787,8 @@ export class GraphComponentClass extends BaseComponent {
 
         gc.graph.nodeByEntity = {};
 
+        const prevGridSelectedRow = gc.prevGrid ? gc.prevGrid.selectedRow() : undefined;
+
         for (let uid in gc.graph.nodesDict) {
             let node = gc.graph.nodesDict[uid];
 
@@ -901,6 +870,24 @@ export class GraphComponentClass extends BaseComponent {
                         }
                         else {
                             node.comboboxValues.push({ value: sameNode.value, label: sameNode.text });
+                        }
+                    }
+                }
+                else if (prevGridSelectedRow) {
+
+                    if (node.status !== NodeStatus.filter) continue;
+
+                    node.value = node.text = '';
+
+                    for (let pcol of gc.prevGrid.columns) {
+                        if (pcol.entity === node.entity) {
+                            let val = prevGridSelectedRow[pcol.name];
+                            if (val !== undefined && val !== '') {
+                                node.value = prevGridSelectedRow[pcol.keyField];
+                                node.text = prevGridSelectedRow[pcol.name];
+                                node._selectedOptions = [{ value: node.value, label: node.text }];
+                                break;
+                            }
                         }
                     }
                 }

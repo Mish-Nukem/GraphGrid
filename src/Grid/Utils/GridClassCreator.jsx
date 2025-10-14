@@ -28,41 +28,20 @@ export class GridCreator {
                 uid={`${fcolumn.id}_select_${fcolumn.entity}_`}
                 schemeName={fcolumn.schemeInfo.schemeName}
                 selectingNodeUid={fcolumn.schemeInfo.inSchemeUid}
-                //selectingNodeMulti={fcolumn.multi}
-                //selectingNodeValue={fcolumn.value}
                 selectingNodeObject={fcolumn}
                 prevGraph={fcolumn.prevGraph}
+                prevGrid={fcolumn.grid}
                 onSelectFilterValue={(e) => {
                     const fe = fcolumn._fieldEditObj;
                     fe._selectedOptions = e.values;
-
-                    //e.value = e.selectedValue;
-                    //e.text = e.selectedText;
-                    //fe._selectedOptions = e.selectedValues;
+                    e.fe = fe;
                     fe.lookupIsShowing = false;
+                    if (fcolumn.grid) {
+                        fcolumn.grid._clicksDisabled = false;
+                    }
 
                     fe.onChange(e);
                 }}
-                /*
-                init={(gc) => {
-                    const selectingNode = gc.graph.nodesDict[fcolumn.schemeInfo.inSchemeUid];
-                    if (!selectingNode) return;
-
-                    const fe = fcolumn._fieldEditObj;
-
-                    selectingNode.value = fcolumn.value || '';
-                    selectingNode.text = fcolumn.text || '';
-                    selectingNode.multi = fcolumn.multi;
-
-                    for (let opt of fe._selectedOptions) {
-                        let fakeRow = {};
-                        fakeRow[fcolumn.refKeyField] = opt.value;
-                        fakeRow[fcolumn.refNameField] = opt.label;
-                        selectingNode._selectedRowsDict[opt.value] = fakeRow;
-                    }
-
-                }}
-                */
             >
             </GraphComponent>
         );

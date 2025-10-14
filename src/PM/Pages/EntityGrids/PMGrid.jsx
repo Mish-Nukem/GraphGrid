@@ -10,6 +10,18 @@ export class PMGridClass extends GridINUClass {
 
     //    const grid = this;
     //}
+    async prepareColumns() {
+        const grid = this;
+        if (grid._waitingColumns) return;
+
+        await super.prepareColumns().then(() => {
+
+            const favCol = grid.colDict['IsFavorite'];
+            if (favCol) {
+                favCol.filtrable = false;
+            }
+        });
+    }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     renderPopupContent() {
         const grid = this;
@@ -25,7 +37,7 @@ export class PMGridClass extends GridINUClass {
                 super.renderPopupContent();
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
-    renderCell(grid, col, row) {
+    renderCell(grid, col, row, selected) {
         if (col.name.toLowerCase() === 'isfavorite' && col.type !== 'lookup') {
             col.type = 'lookup';
             col.readonly = false;
@@ -34,7 +46,7 @@ export class PMGridClass extends GridINUClass {
             col.keyField = col.name;
             col.comboboxValues = [{ value: 'Д', label: 'Д' }, { value: 'Н', label: 'Н' }];
         }
-        return super.renderCell(grid, col, row);
+        return super.renderCell(grid, col, row, selected);
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     addToolbarButtons() {
@@ -48,6 +60,9 @@ export class PMGridClass extends GridINUClass {
             title: grid.translate('Tree'),
             click: (e) => grid.showTree(e),
             img: Images.images.folderTree,
+            getDisabled: () => {
+                return grid.isEditing() || grid._waitingRows;
+            },
         };
 
         grid.buttons.push(btn);
@@ -60,6 +75,8 @@ export class PMGridClass extends GridINUClass {
             click: (e) => grid.gotoLink(e),
             img: Images.images.link,
             getDisabled: () => {
+                if (grid.isEditing() || grid._waitingRows) return true;
+
                 const row = grid.selectedRow();
 
                 if (!row || !grid.colDict) return true;
@@ -79,6 +96,9 @@ export class PMGridClass extends GridINUClass {
             title: grid.translate('TEST'),
             click: (e) => grid.showTestResult(e),
             img: Images.images.test,
+            getDisabled: () => {
+                return grid.isEditing() || grid._waitingRows;
+            },
         };
 
         grid.buttons.push(btn);

@@ -134,7 +134,7 @@ export class GridFLClass extends GridDBClass {
                             onClick={(e) => { grid.onColumnFilterClick(col, e); }}
                             onInput={(e) => { grid.onColumnFilterInput(col, e) }}
                             autoFocus={needFocus}
-                            disabled={grid._waitingRows || grid.isEditing() ? 'disabled' : '' }
+                            disabled={grid._waitingRows || grid.isEditing() ? 'disabled' : ''}
                             onBlur={(e) => { grid.onColumnFocusLost(col, col.filter, e); }}
                             autoComplete="off"
                         >
@@ -147,10 +147,15 @@ export class GridFLClass extends GridDBClass {
                                 type={'button'}
                                 disabled={grid._waitingRows || grid.isEditing() ? 'disabled' : ''}
                                 onClick={() => grid.clearColumnFilter(col)}
-                            >×</button> 
+                            >×</button>
                         }
                     </>
-                    : <></>}
+                    :
+                    <>
+                        {context !== 'fake' ? <span className={grid.opt.inputClass || BaseComponent.theme.inputClass || ''}>&nbsp;</span> : <></>}
+                    </>
+
+                }
             </>
         );
     }
@@ -374,6 +379,10 @@ export class GridFLClass extends GridDBClass {
         }
 
         return false;
+    }
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
+    getHeaderGridTemplateColumns(col) {
+        return col.sortInd === undefined && (col.filter === undefined || col.filter === '') ? 'auto 8px' : 'auto 18px';
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     getGridSettingsList() {

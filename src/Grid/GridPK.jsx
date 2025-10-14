@@ -89,7 +89,7 @@ export class GridPKClass extends GridGRClass {
                     key={`headerCellSelect_${grid.id}_${grid.keyAdd()}_`}
                     grid-header={`${grid.id}_select_`}
                     className={`${grid.opt.columnClass ? grid.opt.columnClass : ''} grid-header-th`}
-                    style={{ position: "sticky", top: 0, width: "1.3em", overflow: "hidden", verticalAlign: "top" }}
+                    style={{ position: "sticky", top: 0, width: "1.3em", overflow: "hidden", verticalAlign: "top", padding: "2px 0 0 0" }}
                 >
                     {
                         !grid._allRowsOnPageSelected ?
@@ -113,6 +113,7 @@ export class GridPKClass extends GridGRClass {
                 :
                 <td
                     key={`gridCellSelect_${grid.id}_${rind}_${grid.keyAdd()}_`}
+                    style={{ padding: "2px 0 0 0" }}
                 >
                     {
                         grid._selectedRowsDict[row[grid.keyField]] === undefined ?
@@ -136,6 +137,7 @@ export class GridPKClass extends GridGRClass {
                 :
                 <td
                     key={`gridCellClear_${grid.id}_${rind}_${grid.keyAdd()}_`}
+                    style={{ padding: "2px 0 0 0" }}
                 >
                     <button
                         className={grid.opt.pocketButtonsClass || 'grid-pocket-button'}
@@ -166,7 +168,7 @@ export class GridPKClass extends GridGRClass {
                             <td
                                 key={`gridPocketSysCol_${grid.id}_`}
                                 className={`${grid.opt.columnClass ? grid.opt.columnClass : ''} grid-header-th`}
-                                style={{ position: "sticky", top: 0, width: "1.5em", overflow: "hidden", verticalAlign: "top" }}
+                                style={{ position: "sticky", top: 0, width: "1.5em", overflow: "hidden", verticalAlign: "top", padding: "2px 0 0 0" }}
                             >
                                 {hasPocketRows ?
                                     <button
@@ -222,7 +224,7 @@ export class GridPKClass extends GridGRClass {
                                 <td
                                     key={`gridPocketCell_${grid.id}_${rowInd}_${cind}_${grid.keyAdd()}_${row[grid.keyField]}_`}
                                 >
-                                    {grid.renderCell(grid, col, row, false, true)}
+                                    {grid.renderCell(grid, col, row, false)}
                                 </td>
                         );
                     })

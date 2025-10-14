@@ -179,8 +179,8 @@ export class GridINUClass extends GridINUBaseClass {
         }
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
-    renderCell(grid, col, row, selected, inPocket) {
-        if (inPocket || !grid.allowEditGrid || col.readonly || row !== grid.selectedRow()) return super.renderCell(grid, col, row, selected);
+    renderCell(grid, col, row, selected) {
+        if (!grid.allowEditGrid || col.readonly || !selected) return super.renderCell(grid, col, row);
 
         row = !grid.isEditing() || !grid.changedRow ? row : grid.changedRow;
 
@@ -199,6 +199,8 @@ export class GridINUClass extends GridINUBaseClass {
                         grid.changedRow = {};
                         Object.assign(grid.changedRow, grid.selectedRow());
                     }
+
+                    fe.ownerGrid = grid;
 
                     const lrow = !grid.isEditing() ? grid.selectedRow() : grid.changedRow;
 
@@ -223,8 +225,8 @@ export class GridINUClass extends GridINUBaseClass {
                     grid.changedRow[col.name] = e.text;
                     if (!grid.isEditing()) {
                         grid.setEditing(true);
-                        grid.refreshState();
                     }
+                    e.fe.refreshState();
                 }
                 else {
                     grid.changedRow[col.name] = e.value;
@@ -382,8 +384,8 @@ export class GridINUClass extends GridINUBaseClass {
 
             const texts = [];
             e.value = grid.selectedValue();
-            e.text = texts.join(', ');
             e.values = grid.selectedValues(texts);
+            e.text = texts.join(', ');
         }
 
         grid.onSelectValue(e);
@@ -514,6 +516,9 @@ export class GridINUClass extends GridINUBaseClass {
 
         grid.cardRow = {};
         Object.assign(grid.cardRow, grid.selectedRow());
+
+        grid.cardRow[grid.keyField] = '';
+
         grid.isNewRecord = true;
         grid.cardIsShowing = true;
         grid.popupIsShowing = true;

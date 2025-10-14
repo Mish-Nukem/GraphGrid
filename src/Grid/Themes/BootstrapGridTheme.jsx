@@ -12,8 +12,9 @@ export class BootstrapTheme {
         this.headerDivClass = ' ';
         this.selectedRowClass = 'table-active';
         this.inputClass = 'form-control form-control-sm';
+        this.inputClassLG = 'form-control form-control-sm';
 
-        this.tabControlButtonClass = 'btn btn-primary btn-sm';
+        this.tabControlButtonClass = 'btn btn-outline-secondary btn-sm';
 
         this.menuClass = 'list-group';
         this.menuItemClass = 'list-group-item list-group-item-action list-group-item-light';
