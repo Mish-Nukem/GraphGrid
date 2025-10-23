@@ -19,7 +19,9 @@ export class DDObjGridClass extends GridINUClass {
             alert('Не определены ID объекта и номер класса!');
         }
 
-        grid.fileSelectPos = grid.fileSelectPos || { x: 110, y: 110, w: 300, h: 200 };
+        const shift = (grid.level + 1) * 20;
+
+        grid.fileSelectPos = grid.fileSelectPos || { x: 100 + shift, y: 100 + shift, w: 300, h: 200 };
         grid.popupPos = grid.fileSelectPos;
 
         grid.popupIsShowing = true;
@@ -48,7 +50,9 @@ export class DDObjGridClass extends GridINUClass {
 
                 grid.previewData = data;
 
-                grid.fileViewPos = grid.fileViewPos || { x: 110, y: 110, w: 300, h: 200 };
+                const shift = (grid.level + 1) * 20;
+
+                grid.fileViewPos = grid.fileViewPos || { x: 100 + shift, y: 100 + shift, w: 300, h: 200 };
                 grid.popupPos = grid.fileViewPos;
 
                 grid.popupIsShowing = true;
@@ -81,7 +85,7 @@ export class DDObjGridClass extends GridINUClass {
 
         const classNode = grid.graph.nodesDict['10'];
         const remarksNode = grid.graph.nodesDict['05'];
-        if (!classNode || !remarksNode || remarksNode.selectedValue() === undefined) return false;
+        if (!classNode || !remarksNode || remarksNode.selectedValue() == null) return false;
 
         grid.numClass = classNode.value;
         grid.DDObjectId = remarksNode.selectedValue();

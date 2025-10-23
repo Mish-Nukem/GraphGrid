@@ -1,33 +1,28 @@
-﻿import { useState, useEffect } from 'react';
+﻿import { useState/*, useEffect*/ } from 'react';
 import { ModalClass } from '../Modal';
 import { Select } from '../OuterComponents/Select';
 import { GLObject } from '../GLObject';
 import { BaseComponent } from '../Base';
 
 export function GLSettings(props) {
-    let sp = null;
+    const [pageState, setState] = useState(null);
 
-    const [pageState, setState] = useState({ settings: sp, ind: 0 });
+    let sp = pageState || new SettingsPageClass(props);
 
-    sp = pageState.settings;
-    if (!sp) {
-        sp = sp || new SettingsPageClass(props);
-    }
-
-    sp.visible = props.visible !== undefined ? props.visible : sp.visible;
+    sp.visible = props.visible != null ? props.visible : sp.visible;
 
     if (props.init) {
         props.init(sp);
     }
 
     sp.refreshState = function () {
-        setState({ settings: sp, ind: sp.stateind++ });
+        setState(sp); //{ settings: sp, ind: ++sp.stateind }
     }
 
-    useEffect(() => {
-        return () => {
-        }
-    }, [sp])
+    //useEffect(() => {
+    //    return () => {
+    //    }
+    //}, [sp])
 
     return (sp.render());
 }
@@ -39,7 +34,7 @@ export class SettingsPageClass extends ModalClass {
         const sp = this;
         sp.renderContent = sp.renderSettingsPage;
 
-        sp.visible = props.visible !== undefined ? props.visible : false;
+        sp.visible = props.visible != null ? props.visible : false;
 
         sp.opt.closeWhenEscape = true;
         sp.opt.resizable = true;
@@ -51,6 +46,13 @@ export class SettingsPageClass extends ModalClass {
         sp._selectedButtonSize = sp._selectedButtonSize || { value: GLObject.gridSettings.buttonSize || 0, label: GLObject.gridSettings.buttonSizeName || sp.translate('Small buttons') };
 
         sp.buttons = sp.getButtons();
+    }
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
+    static _seq = 0;
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
+    render() {
+        const sp = this;
+        return sp.renderSettingsPage();
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     renderSettingsPage() {
@@ -81,8 +83,11 @@ export class SettingsPageClass extends ModalClass {
                                             sp.changeButtonSizes(isBootstrap);
                                         });
 
-
-                                        sp.parent.refreshState()
+                                        //sp.parent.refreshState(true);
+                                        setTimeout(() => {
+                                            sp.refreshState();
+                                            sp.parent.refreshState();
+                                        }, 1000);
                                     }
                                     else {
                                         sp.refreshState();
@@ -98,13 +103,15 @@ export class SettingsPageClass extends ModalClass {
                         <span>{sp.translate('Buttons size') + ':'}</span>
                         <div className="field-edit">
                             <Select
-                                key={`buttSizeSelect_${sp.id}_`}
+                                key={`buttnSizeSelect_${sp.id}_${sp.parent ? sp.parent.stateind : ''}_`}
                                 inputClass={sp.inputClass || ''}
                                 className={sp.selectClass || ''}
                                 value={sp._selectedButtonSize}
                                 getOptions={(filter, pageNum) => sp.getButtonSizesList(filter, pageNum)}
                                 height={sp.selectH}
                                 required={false}
+                                cacheUniq={sp.parent ? sp.parent.stateind : 0}
+                                cache={[SettingsPageClass._seq++]}
                                 onChange={(e) => {
                                     sp._selectedButtonSize = e || { value: 0, label: sp.translate('Small buttons') };
                                     if (sp.parent) {
@@ -113,7 +120,8 @@ export class SettingsPageClass extends ModalClass {
 
                                         sp.changeButtonSizes(sp._selectedTheme.value !== 0);
 
-                                        sp.parent.refreshState()
+                                        sp.refreshState();
+                                        sp.parent.refreshState();
                                     }
                                     else {
                                         sp.refreshState();
@@ -214,10 +222,14 @@ export class SettingsPageClass extends ModalClass {
     getThemesList() {
         const sp = this;
         return new Promise((resolve) => {
-            const res = [
+            let res = [
                 { value: 0, label: sp.translate('Default theme') },
                 { value: 1, label: 'Bootstrap' },
             ];
+
+            res = res.filter(
+                (option) => sp._selectedTheme.value !== option.value
+            );
 
             resolve({
                 options: res,
@@ -230,20 +242,24 @@ export class SettingsPageClass extends ModalClass {
         });
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
-    getButtonSizesList() {
+    getButtonSizesList(_, pageNum) {
         const sp = this;
         return new Promise((resolve) => {
-            const res = [
+            let res =[
                 { value: 0, label: sp.translate('Small buttons') },
                 { value: 1, label: sp.translate('Medium buttons') },
                 { value: 2, label: sp.translate('Large buttons') },
             ];
 
+            res = res.filter(
+                (option) => sp._selectedButtonSize.value !== option.value
+            );
+
             resolve({
                 options: res,
                 hasMore: false,
                 additional: {
-                    page: 1
+                    page: pageNum + 1
                 },
             });
 

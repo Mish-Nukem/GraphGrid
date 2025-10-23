@@ -79,9 +79,9 @@ export class GraphClass {
 
         if (graph._isMakingWave || !e.nodes || e.nodes.length <= 0) return;
 
-        if (e.waveType === undefined) e.waveType = WaveType.value;
-        if (e.withStartNodes === undefined) e.withStartNodes = true;
-        if (e.moveType === undefined) e.moveType = MoveType.fromParent;
+        if (e.waveType == null) e.waveType = WaveType.value;
+        if (e.withStartNodes == null) e.withStartNodes = true;
+        if (e.moveType == null) e.moveType = MoveType.fromParent;
 
         e.list = [];
 

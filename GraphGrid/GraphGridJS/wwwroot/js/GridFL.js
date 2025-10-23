@@ -13,9 +13,9 @@ export default class GridFL extends Grid {
             res += `<span class="grid-header-sort-sign">${sortDir}</span>`;
         }
         if (col.filtrable && context != 'fake') {
-            const hasFilter = col.filter !== undefined && col.filter !== '';
+            const hasFilter = col.filter != null && col.filter !== '';
             res += `
-                    <input value="${col.filter !== undefined ? col.filter : ''}"  title="${col.filter !== undefined ? col.filter : ''}" grid-col-filter="${grid.id}_${col.id}_" 
+                    <input value="${hasFilter ? col.filter : ''}"  title="${hasFilter ? col.filter : ''}" grid-col-filter="${grid.id}_${col.id}_" 
                         class="grid-col-filter ${grid.opt.filterInputClass || ''}" style="${!hasFilter ? 'grid-column: span 2;' : ''}">
                 `;
 

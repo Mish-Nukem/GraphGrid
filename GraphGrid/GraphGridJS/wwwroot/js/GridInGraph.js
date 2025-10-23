@@ -81,7 +81,7 @@ export default class GridInGraph extends Grid {
 
             if (link.content.applyLink) {
                 let filter = link.content.applyLink(link.parent);
-                if (filter === undefined) continue;
+                if (filter == null) continue;
 
                 filters.push(filter);
             }

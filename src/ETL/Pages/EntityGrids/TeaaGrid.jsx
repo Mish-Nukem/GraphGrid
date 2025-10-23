@@ -18,7 +18,9 @@ export class TeaaGridClass extends GridINUClass {
     viewRecord() {
         const grid = this;
 
-        grid.cardPos = grid.cardPos || { x: 110, y: 110, w: 800, h: 600 };
+        const shift = (grid.level + 1) * 20;
+
+        grid.cardPos = grid.cardPos || { x: 100 + shift, y: 100 + shift, w: 800, h: 600 };
         grid.popupPos = grid.cardPos;
 
         grid.cardRow = grid.selectedRow();
@@ -45,6 +47,7 @@ export class TeaaGridClass extends GridINUClass {
         return (
             <GraphComponent
                 uid={`${grid.graph.uid}_select_${grid.uid}_`}
+                level={grid.level + 1}
                 schemeName={'TuningCardScheme'}
                 nodeBeforeOpenCondition={{ '2': `ID_TUNING_EXCH_TEAA in (${grid.selectedValue()})` }}
             >
@@ -81,6 +84,7 @@ export class TeaaGridClass extends GridINUClass {
             <GraphComponent
                 uid={`${grid.graph.uid}_exportProtocol_${grid.uid}_`}
                 graph={grid.exportProtocolGraph}
+                level={grid.level + 1}
             >
             </GraphComponent>
         );
@@ -98,7 +102,9 @@ export class TeaaGridClass extends GridINUClass {
 
         if (!grid._dataExchangePageVisible || !row) return <></>;
 
-        grid.exchPos = grid.exchPos || { x: 210, y: 210 };
+        const shift = (grid.level + 1) * 20;
+
+        grid.exchPos = grid.exchPos || { x: 200 + shift, y: 200 + shift };
 
         return (
             <DataExchangePage
@@ -107,6 +113,7 @@ export class TeaaGridClass extends GridINUClass {
                 edType={row['ID_TUNING_EXCH_TYPE_TEAA']}
                 nameExchange={row['ID_TUNING_DATASF_TEAA_NAME']}
                 visible={grid._dataExchangePageVisible}
+                level={grid.level + 1}
                 init={(de) => {
                     de.visible = grid._dataExchangePageVisible;
                     de.showProtocol = (rows) => { grid.showExportProtocol(rows); };
@@ -143,7 +150,9 @@ export class TeaaGridClass extends GridINUClass {
         grid.protocolIsShowing = true;
         grid._dataExchangePageVisible = false;
 
-        grid.reportPos = grid.reportPos || { x: 110, y: 110, w: 800, h: 600 };
+        const shift = (grid.level + 1) * 20;
+
+        grid.reportPos = grid.reportPos || { x: 100 + shift, y: 100 + shift, w: 800, h: 600 };
         grid.popupPos = grid.reportPos;
         grid.popupTitle = 'Протокол экспорта';
 

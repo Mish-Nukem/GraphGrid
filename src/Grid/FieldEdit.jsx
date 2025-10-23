@@ -36,7 +36,7 @@ export function FieldEdit(props) {
 
     fe.getFilters = props.getFilters;
 
-    fe._selectedOptions = props.selectedOptions || [];
+    fe._selectedOptions = props.selectedOptions || fe._selectedOptions || [];
 
     fe.multi = props.multi;
 
@@ -65,13 +65,13 @@ export function FieldEdit(props) {
     }
 
     if (fe.multi) {
-        if ((fe.value === undefined || fe.value === '') && fe._selectedOptions && fe._selectedOptions.length > 0) {
+        if ((fe.value == null || fe.value === '') && fe._selectedOptions && fe._selectedOptions.length > 0) {
             const texts = [];
             fe.value = fe.getValueFromCombobox(texts);
             fe.text = texts.join(', ');
         }
     }
-    else if (fe.value !== undefined && fe.value !== '' && (!fe._selectedOptions || fe._selectedOptions.length <= 0 || fe._selectedOptions[0].value !== fe.value)) {
+    else if (fe.value != null && fe.value !== '' && (!fe._selectedOptions || fe._selectedOptions.length <= 0 || fe._selectedOptions[0].value !== fe.value)) {
         fe._selectedOptions = [{ value: fe.value, label: fe.text }];
     }
 
@@ -119,7 +119,7 @@ export class FieldEditClass extends BaseComponent {
 
         const isLookup = fe.column.type === 'lookup' && !fe.column.readonly;
         const isDate = fe.column.type === 'date' && !fe.column.readonly;
-        const noClear = fe.column.required || fe.column.readonly || (fe.multi ? fe._selectedOptions.length <= 0 : fe.value === undefined || fe.value === '');
+        const noClear = fe.column.required || fe.column.readonly || (fe.multi ? fe._selectedOptions.length <= 0 : fe.value == null || fe.value === '');
         const allowCombobox = fe.column.allowCombobox;
 
         let parsedDate;
@@ -141,10 +141,10 @@ export class FieldEditClass extends BaseComponent {
                         height: !fe.inputClass ? fe.h : '',
                         display: 'grid',
                         gridColumn: fe.gridColumn || '',
-                        gridTemplateColumns: fe.large ? (isDate ? 'calc(100% - 2.2em) 2.2em' : 'calc(100% - 4.4em) 2.2em 2.2em') : (isDate ? 'calc(100% - 1.4em) 1.4em' : 'calc(100% - 2.8em) 1.4em 1.4em'), //calc(100% - 2.8em)
+                        gridTemplateColumns: fe.large ? (isDate ? 'calc(100% - 2.2em) 2.2em' : 'calc(100% - 5.1em) 2.2em 2.2em') : (isDate ? 'calc(100% - 1.3em) 1.4em' : 'calc(100% - 2.8em) 1.4em 1.4em'), //calc(100% - 2.8em)
                         maxWidth: fe.maxW ? fe.maxW : '',
                         minHeight: fe.large ? '2.5em' : '',
-                        columnGap: fe.large ? '4px' : '2px',
+                        columnGap: fe.large ? '0.2em' : '',
                         alignItems: 'center',
                         //width: fe.w ? fe.w : `calc(100% - ${isDate ? '2' : '4'}px)`,
                     }}
@@ -156,7 +156,8 @@ export class FieldEditClass extends BaseComponent {
                                     !allowCombobox ?
                                         <input
                                             key={`fieldLookupTitle_${fe.id}_${fe.column.id}_`}
-                                            style={{//width: 'calc(100% - 4px)',
+                                            style={{
+                                                width: 'calc(100% - 1px)',
                                                 gridColumn: noClear ? !fe.comboboxValues ? 'span 2' : 'span 3' : 'span 1',
                                                 overflowX: 'hidden',
                                                 height: !fe.large ? '1.6em' : '2.2em',
@@ -166,12 +167,12 @@ export class FieldEditClass extends BaseComponent {
                                             }}
                                             disabled={true}
                                             className={fe.large ? fe.inputClassLG : fe.inputClass || ''}
-                                            value={fe.value === undefined || fe.value === '' ? '' : fe.text !== undefined && fe.text !== '' ? fe.text : fe.value}
+                                            value={fe.value == null || fe.value === '' ? '' : fe.text != null && fe.text !== '' ? fe.text : fe.value}
                                         >
                                         </input>
                                         :
                                         <Select
-                                            key={`fieldLookupSelect_${fe.id}_${fe.column.id}_`}
+                                            key={`fieldLookupSelect_${fe.id}_${fe.column.id}_${fe.value}_`}
                                             inputClass={fe.inputClass || ''}
                                             className={fe.selectClass || ''}
                                             value={fe._selectedOptions}
@@ -222,7 +223,7 @@ export class FieldEditClass extends BaseComponent {
                                     <div
                                         key={`fieldDateDiv_${fe.id}_${fe.column.id}_`}
                                         style={{
-                                            width: '100%',
+                                            width: fe.w || '100%',
                                             height: !fe.inputClass ? fe.h : '',
                                             minHeight: !fe.inputClass ? fe.h : '',
                                             padding: !fe.large ? '0' : '',
@@ -258,7 +259,7 @@ export class FieldEditClass extends BaseComponent {
                                     className={`${fe.large ? fe.inputClassLG : fe.inputClass}`}
                                     value={fe.value || ''}
                                     style={{
-                                        width: '100%',
+                                        width: 'calc(100% - 1px)',
                                         //height: !fe.inputClass ? fe.textareaH : fe.h,
                                         minHeight: !fe.inputClass ? fe.textareaH : fe.h,
                                         height: !fe.large ? '1.8em' : '2.2em',
@@ -306,7 +307,7 @@ export class FieldEditClass extends BaseComponent {
                     fe.lookupIsShowing ?
                         <Modal
                             title={fe.column.title}
-                            renderContent={() => { return fe.renderLookupGrid(); }}
+                            renderContent={(wnd) => { return fe.renderLookupGrid(wnd); }}
                             pos={fe.popupPos}
                             onClose={(e) => {
                                 fe.lookupIsShowing = false;
@@ -327,7 +328,7 @@ export class FieldEditClass extends BaseComponent {
         )
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
-    renderLookupGrid() {
+    renderLookupGrid(wnd) {
         const fe = this;
 
         return (
@@ -343,10 +344,12 @@ export class FieldEditClass extends BaseComponent {
                     nameField={fe.column.refNameField}
                     activeRow={fe.value}
                     multi={fe.multi}
+                    level={fe.level + 1}
                     findGrid={() => { return fe.grid; }}
                     onSelectValue={(e) => {
+                        fe._selectedOptions = e.values || [];
+;
                         fe.value = e.value;
-                        fe._selectedOptions = e.values;
                         fe.text = e.text;
 
                         e.fe = fe;
@@ -387,7 +390,10 @@ export class FieldEditClass extends BaseComponent {
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     openLookupField(e) {
         const fe = this;
-        fe.popupPos = fe.popupPos || { x: 100, y: 100, w: 1700, h: 900 };
+
+        const shift = (fe.level + 1) * 20;
+
+        fe.popupPos = fe.popupPos || { x: 100 + shift, y: 100 + shift, w: 1700, h: 900 };
 
         fe.lookupIsShowing = true;
         if (fe.ownerGrid) {
@@ -444,13 +450,22 @@ export class FieldEditClass extends BaseComponent {
         grid.isSelecting = true;
     };
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
+    removeSelectedValuesFromList(list) {
+        const fe = this;
+        if (!fe._selectedOptions || fe._selectedOptions.length <= 0 || !list || list.length <= 0) return list;
+
+        return list.filter(
+            (option) => !fe._selectedOptions.some((selected) => selected.value === option.value)
+        );
+    }
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     getLookupValues(filter, pageNum) {
         const fe = this;
 
         if (fe.comboboxValues) {
             return new Promise((resolve) => {
                 const result = {
-                    options: fe.comboboxValues,
+                    options: fe.removeSelectedValuesFromList(fe.comboboxValues),
                     hasMore: false,
                     additional: {
                         page: pageNum + 1,
@@ -475,7 +490,7 @@ export class FieldEditClass extends BaseComponent {
                     (res) => {
 
                         const result = {
-                            options: res,
+                            options: fe.removeSelectedValuesFromList(res),
                             hasMore: false,
                             additional: {
                                 page: pageNum + 1,
@@ -519,6 +534,8 @@ export class FieldEditClass extends BaseComponent {
                                 result.options.push({ value: row[fe.column.refKeyField], label: row[fe.column.refNameField] });
                             }
                             result.hasMore = 100 * res.pageNum < res.count;
+
+                            result.options = fe.removeSelectedValuesFromList(result.options);
 
                             resolve(result);
                         } else {

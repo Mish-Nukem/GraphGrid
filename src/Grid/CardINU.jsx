@@ -11,7 +11,7 @@ export function CardINU(props) {
 
     card = gridState.grid;
     let needGetRows = false;
-    if (!card || card.uid !== props.uid && props.uid !== undefined) {
+    if (!card || card.uid !== props.uid && props.uid != null) {
         card = null;
         if (props.findGrid) {
             card = props.findGrid(props);
@@ -31,7 +31,7 @@ export function CardINU(props) {
     useEffect(() => {
         card.setupEvents();
 
-        if (needGetRows && card.selectedRow() === undefined) {
+        if (needGetRows && card.selectedRow() == null) {
 
             card.getRows().then(
                 rows => {
@@ -105,8 +105,8 @@ export class CardINUClass extends GridINUBaseClass {
         const card = this;
         let row = card.changedRow;
         let value = col.type === 'lookup' ? row[col.keyField] : row[col.name];
-        value = value !== undefined ? value : '';
-        if (col.type === undefined || col.type === null) {
+        value = value != null ? value : '';
+        if (col.type == null) {
             col.type = '';
         }
 
@@ -128,6 +128,7 @@ export class CardINUClass extends GridINUBaseClass {
                     text={row[col.name]}
                     findFieldEdit={() => { return col._fieldEditObj; }}
                     large={true}
+                    level={card.level}
                     comboboxValues={col.comboboxValues}
                     init={
                         (fe) => {
@@ -140,7 +141,7 @@ export class CardINUClass extends GridINUBaseClass {
 
                             col._fieldEditObj = fe;
                             fe.value = col.type === 'lookup' ? row[col.keyField] : row[col.name];
-                            fe.value = fe.value !== undefined ? fe.value : '';
+                            fe.value = fe.value != null ? fe.value : '';
 
                             fe.text = row[col.name];
                         }
@@ -222,7 +223,7 @@ export class CardINUClass extends GridINUBaseClass {
             if (!col.required || col.readonly) continue;
 
             let val = card.changedRow[col.name];
-            if (col.required && (val === undefined || val === '')) {
+            if (col.required && (val == null || val === '')) {
                 requiredColumnsFilled = false;
                 break;
             }

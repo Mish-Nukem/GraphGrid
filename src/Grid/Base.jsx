@@ -3,7 +3,10 @@ import { Translate } from './Themes/Translate';
 import { ClipLoader } from 'react-spinners';
 export class BaseComponent {
 
-    constructor() {
+    constructor(props) {
+
+        this.level = props.level || 0;
+
         //window._logEnabled = true;
         if (!BaseComponent.theme) {
             BaseComponent.theme = new Theme();
@@ -35,7 +38,7 @@ export class BaseComponent {
     static useBootstrap = false;
     static changeTheme = (val) => {
         return new Promise(function (resolve) {
-            if (val !== undefined) {
+            if (val != null) {
                 BaseComponent.useBootstrap = val;
             }
             else {

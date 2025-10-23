@@ -14,9 +14,9 @@ export default class Modal {
 
         this.drawBody = options.drawBody;
 
-        this.drawHeader = options.drawHeader !== undefined ? options.drawHeader : this.drawHeader;
+        this.drawHeader = options.drawHeader != null ? options.drawHeader : this.drawHeader;
 
-        this.drawFooter = options.drawFooter !== undefined ? options.drawFooter : this.drawFooter;
+        this.drawFooter = options.drawFooter != null ? options.drawFooter : this.drawFooter;
 
         if (this.opt.footerButtons) {
             this.buttonsDict = {};

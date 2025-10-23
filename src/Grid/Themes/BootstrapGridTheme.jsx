@@ -2,7 +2,7 @@
 // ==================================================================================================================================================================
 export class BootstrapTheme {
     constructor() {
-        this.pagerButtonsClass = 'btn btn-primary btn-sm';
+        this.pagerButtonsClass = 'btn btn-outline-secondary btn-sm';
         this.toolbarButtonsClass = 'btn btn-primary btn-sm';
 
         this.pagerClass = 'mb-1 grid-pager-default';

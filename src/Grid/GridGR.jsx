@@ -9,7 +9,7 @@ export function GridGR(props) {
 
     grid = gridState.grid;
     let needGetRows = false;
-    if (!grid || grid.uid !== props.uid && props.uid !== undefined) {
+    if (!grid || grid.uid !== props.uid && props.uid != null) {
         grid = null;
         if (props.findGrid) {
             grid = props.findGrid(props);
@@ -95,13 +95,13 @@ export class GridGRClass extends GridClass {
                 grid.graph.needCheckIntegrity = true;
             }
 
-            grid.uid = props.uid !== undefined ? props.uid : grid.id;
+            grid.uid = props.uid != null ? props.uid : grid.id;
             graph.nodeCount++;
             graph.nodesDict[grid.uid] = grid;
 
         }
         else {
-            grid.uid = props.uid !== undefined ? props.uid : grid.id;
+            grid.uid = props.uid != null ? props.uid : grid.id;
         }
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -230,7 +230,7 @@ export class GridGRClass extends GridClass {
 
             if (link.content.applyLink) {
                 let filter = link.content.applyLink(link);
-                if (filter === undefined || filter === '') continue;
+                if (filter == null || filter === '') continue;
 
                 let fo = { type: 'graphLink', filter: filter };
                 filters.push(fo);

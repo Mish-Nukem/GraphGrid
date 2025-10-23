@@ -1,4 +1,6 @@
 ﻿//import { StrictMode } from 'react'
+import './Grid/css/default.css';
+import { BaseComponent } from './Grid/Base';
 import { createRoot } from 'react-dom/client'
 import PMApp from './PM/PMApp';
 import MRApp from './MR/MRApp';

@@ -15,7 +15,7 @@ export function GridDB(props) {
 
     grid = gridState.grid;
     let needGetRows = false;
-    if (!grid || grid.uid !== props.uid && props.uid !== undefined) {
+    if (!grid || grid.uid !== props.uid && props.uid != null) {
         grid = null;
         if (props.findGrid) {
             grid = props.findGrid(props);
@@ -538,7 +538,7 @@ export class GridDBClass extends GridPKClass {
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     getHeaderGridTemplateColumns(col) {
-        return col.sortInd === undefined ? 'auto 8px' : 'auto 18px';
+        return col.sortInd == null ? 'auto 8px' : 'auto 18px';
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     renderHeaderCell(col, context) {
@@ -556,7 +556,7 @@ export class GridDBClass extends GridPKClass {
         return (
             <>
                 <span
-                    className={'grid-header-title'}
+                    className={`grid-header-title ${col.sortable ? 'grid-header-title-sortable' : ''}`}
                     style={{
                         cursor: col.sortable && !grid._waitingRows && !grid.isEditing() ? 'pointer' : '',
                         gridColumn: !sortDir ? 'span 2' : '', opacity: !grid._waitingRows && !grid.isEditing() ? "1" : "0.6",
@@ -641,7 +641,7 @@ export class GridDBClass extends GridPKClass {
 
         grid._sortColumns = [];
         for (let col of grid.columns) {
-            if (col.sortInd !== undefined && col.sortInd !== null || col.asc || col.desc) {
+            if (col.sortInd != null && col.sortInd !== null || col.asc || col.desc) {
                 grid._sortColumns.push(col);
             }
         }
@@ -717,7 +717,7 @@ export class GridDBClass extends GridPKClass {
         let nextInd = 1;
         if (e.shiftKey) {
             for (let col of grid.columns) {
-                if (col.sortInd !== undefined && col.sortInd !== null) {
+                if (col.sortInd != null && col.sortInd !== null) {
                     nextInd++;
                 }
                 else if (col.asc || col.desc) {

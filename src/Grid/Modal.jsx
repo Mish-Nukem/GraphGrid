@@ -48,7 +48,7 @@ export class ModalClass extends BaseComponent {
 
         wnd.opt.pos = props.pos || { x: 0, y: 0, w: '100%', h: '100%' };
 
-        wnd.opt.isModal = props.isModal !== undefined ? props.isModal : true;
+        wnd.opt.isModal = props.isModal != null ? props.isModal : true;
 
         wnd.opt.closeWhenClick = props.closeWhenClick;
         wnd.opt.closeWhenEscape = props.closeWhenEscape;
@@ -58,8 +58,8 @@ export class ModalClass extends BaseComponent {
         wnd.opt.onMouseEnter = props.onMouseEnter;
         wnd.opt.onMouseLeave = props.onMouseLeave;
 
-        wnd.opt.resizable = props.resizable !== undefined ? props.resizable : true;
-        wnd.opt.draggable = props.draggable !== undefined ? props.draggable : true;
+        wnd.opt.resizable = props.resizable != null ? props.resizable : true;
+        wnd.opt.draggable = props.draggable != null ? props.draggable : true;
 
         wnd.opt.hiddenOverlay = props.hiddenOverlay;
 
@@ -103,7 +103,7 @@ export class ModalClass extends BaseComponent {
             }
         }
 
-        wnd.visible = props.visible !== undefined ? props.visible : true;
+        wnd.visible = props.visible != null ? props.visible : true;
 
         wnd.stateind = 0;
     }

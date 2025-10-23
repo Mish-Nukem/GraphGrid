@@ -72,15 +72,16 @@
 }
 
 .grid-default {
-    border-collapse: collapse;
+    /*border-collapse: collapse;*/
     table-layout: fixed !important;
+    border-spacing: 0;
     /*border: solid 1px;*/
 }
 
     .grid-default > tr > td,
     .grid-default > tbody > tr > td {
         border: solid;
-        border-width: 0 1px 1px 1px;
+        border-width: 0 0 1px 1px;
         /*overflow-x: hidden;*/
         white-space: nowrap;
         text-overflow: clip;
@@ -88,16 +89,22 @@
         /*white-space-collapse: collapse;*/
     }
 
+        .grid-default > tr > td:last-child,
+        .grid-default > tbody > tr > td:last-child {
+            border-width: 0 1px 1px 1px;
+        }
+
         .grid-default > tr > td.grid-waiting,
         .grid-default > tbody > tr > td.grid-waiting {
             border-width: 0;
             /*background-color: rgb(235, 235, 235);*/
         }
 
-    .grid-default > tbody > tr > th,
+    .grid-default > tr > th,
     .grid-default > thead > tr > th {
         background-color: white;
-        border: solid 1px;
+        border: solid;
+        border-width: 1px 0 1px 1px;
         /*border: none;*/
         /*box-shadow: inset 1px 0 0 0 gray, inset -1px -1px 0 0 gray;*/
         /*box-shadow: inset 0 -1px 0 0 gray;*/
@@ -106,6 +113,12 @@
         text-overflow: clip;
         /*vertical-align: middle;*/
     }
+
+        .grid-default > tr > th:last-child,
+        .grid-default > thead > tr > th:last-child {
+            border-width: 1px;
+        }
+
 
 .grid-header-div {
     border: none;
@@ -406,6 +419,10 @@
     margin: 2px 4px;
 }
 
+    .grid-header-title.grid-header-title-sortable:hover {
+        color: gray; /*#0026ff; /*#0d6efd;*/
+    }
+
 .div-on-menu {
     margin: 10px;
 }
@@ -417,7 +434,7 @@
 .grid-col-filter {
     height: 2em;
     margin: 2px;
-    width: calc(100% - 4px);
+    width: calc(100% - 4px) !important;
     padding: 0 2px;
     box-sizing: border-box;
 }
@@ -430,7 +447,7 @@
     align-items: center;
     align-content: center;
     white-space: nowrap;
-    width: calc(100% - 4px);
+    width: calc(100% - 0.2em);
 }
 
 .grid-cell-edit {
@@ -503,7 +520,7 @@
     align-content: center;
     overflow-x: auto;
     column-gap: 1em;
-    margin-left: 10px;
+    margin-left: -10px;
 }
 
 .graph-filter {
@@ -743,10 +760,15 @@
     border-radius: 2px;
     cursor: pointer;
     white-space: nowrap;
+    padding: 0 6px;
 }
 
     .menu-item:hover {
         background-color: lightgray;
+    }
+
+    .menu-item.active {
+        padding: 0 1px;
     }
 
 .menu-item-selected {
@@ -755,7 +777,12 @@
     border-radius: 2px;
     cursor: pointer;
     white-space: nowrap;
+    padding: 0 6px;
 }
+
+    .menu-item-selected.active {
+        padding: 0 1px;
+    }
 
 .menu-collapse-button {
     display: flex;

@@ -1,4 +1,4 @@
-﻿import '../Grid/css/default.css';
+﻿//import '../Grid/css/default.css';
 import { useState } from 'react';
 import TestData from '../Tests/TestData';
 import { Grid } from '../Grid/Grid';

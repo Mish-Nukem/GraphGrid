@@ -13,7 +13,7 @@ export function GridINUBase(props) {
 
     grid = gridState.grid;
     let needGetRows = false;
-    if (!grid || grid.uid !== props.uid && props.uid !== undefined) {
+    if (!grid || grid.uid !== props.uid && props.uid != null) {
         grid = null;
         if (props.findGrid) {
             grid = props.findGrid(props);
@@ -102,9 +102,11 @@ export class GridINUBaseClass extends GridFLClass {
             grid.popupIsShowing ?
                 <Modal
                     title={grid.popupTitle}
-                    renderContent={() => { return grid.renderPopupContent() }}
+                    level={grid.level + 1}
+                    renderContent={(wnd) => { return grid.renderPopupContent(wnd) }}
                     dimensionsByContent={grid.popupDimensionsByContent}
                     pos={grid.popupPos}
+                    closeWhenEscape={grid.popupCloseWhenEscape}
                     onClose={(e) => {
                         grid.onClosePopup(e);
                         grid.refreshState();
@@ -119,6 +121,7 @@ export class GridINUBaseClass extends GridFLClass {
     onClosePopup() {
         const grid = this;
         grid.popupIsShowing = false;
+        grid.popupCloseWhenEscape = false;
         grid.popupTitle = '';
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -144,13 +147,13 @@ export class GridINUBaseClass extends GridFLClass {
         GLObject.entityInfo[grid.entity] = entityInfo;
 
         if (entityInfo) {
-            grid.allowEditGrid = grid.allowEditGrid !== undefined ? grid.allowEditGrid : entityInfo.allowEdit;
+            grid.allowEditGrid = grid.allowEditGrid != null ? grid.allowEditGrid : entityInfo.allowEdit;
             grid.allowView = entityInfo.allowView;
             grid.allowAdd = grid.allowCopy = entityInfo.allowAdd;
             grid.allowDelete = entityInfo.allowDelete;
 
-            grid.pageSize = entityInfo.pageSize !== null && entityInfo.pageSize !== undefined ? entityInfo.pageSize : grid.pageSize;
-            grid.pageNumber = entityInfo.pageNumber !== null && entityInfo.pageNumber !== undefined ? entityInfo.pageNumber : grid.pageNumber;
+            grid.pageSize = entityInfo.pageSize !== null && entityInfo.pageSize != null ? entityInfo.pageSize : grid.pageSize;
+            grid.pageNumber = entityInfo.pageNumber !== null && entityInfo.pageNumber != null ? entityInfo.pageNumber : grid.pageNumber;
 
             GLObject.DBInfo = entityInfo.DBInfo;
         }
@@ -204,7 +207,7 @@ export class GridINUBaseClass extends GridFLClass {
                         activeValue = parent.value;
                         if (parent.filterType === FilterType.date) {
                             pref = 'date';
-                            activeValue = activeValue !== undefined && activeValue !== '' && String(activeValue)[0] !== '\'' ? '\'' + activeValue + '\'' : activeValue;
+                            activeValue = activeValue != null && activeValue !== '' && String(activeValue)[0] !== '\'' ? '\'' + activeValue + '\'' : activeValue;
                         }
                         break;
                     default:
@@ -251,7 +254,7 @@ export class GridINUBaseClass extends GridFLClass {
 
         await super.prepareColumns().then(() => {
             for (let col of grid.columns) {
-                if (col._readonly !== undefined) {
+                if (col._readonly != null) {
                     col.readonly = col._readonly;
                     delete col._readonly;
                 }
@@ -501,7 +504,7 @@ export class GridINUBaseClass extends GridFLClass {
             let scol = { n: col.name, w: col.w };
             if (col.visible === false) scol.v = '0';
             if (col.asc) scol.s = '1'; else if (col.desc) scol.s = '0';
-            if (col.sortInd !== undefined) scol.i = col.sortInd;
+            if (col.sortInd != null) scol.i = col.sortInd;
             savingColumns.push(scol);
         }
 

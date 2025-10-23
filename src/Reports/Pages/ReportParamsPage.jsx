@@ -21,7 +21,7 @@ export function ReportParamsPage(props) {
 
     de.inputRef = inputRef;
 
-    de.visible = props.visible !== undefined ? props.visible : de.visible;
+    de.visible = props.visible != null ? props.visible : de.visible;
 
     if (props.init) {
         props.init(de);
@@ -50,7 +50,7 @@ export class ReportParamsPageClass extends ModalClass {
         const de = this;
         de.renderContent = de.renderReportParamsPage;
 
-        de.visible = props.visible !== undefined ? props.visible : false;
+        de.visible = props.visible != null ? props.visible : false;
 
         de.nameReport = props.nameReport;
         de.reportParams = [];
@@ -72,6 +72,10 @@ export class ReportParamsPageClass extends ModalClass {
         de.continue = ' ';
         de.isRunning = false;
 
+        de._fakePrevGraph = {
+            nodeByEntity: {}
+        };
+
         de.buttons = de.getButtons();
 
         //de.edId = props.edId;
@@ -80,8 +84,8 @@ export class ReportParamsPageClass extends ModalClass {
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     renderReportParamsPage() {
         const de = this;
-        const canDelete = de._selectedConfig !== undefined && de._selectedConfig.value;
-        const canSave = de._selectedConfig === undefined || !de._selectedConfig.saved || de._selectedConfig.changed;
+        const canDelete = de._selectedConfig != null && de._selectedConfig.value;
+        const canSave = de._selectedConfig == null || !de._selectedConfig.saved || de._selectedConfig.changed;
         return (
             <div>
                 {
@@ -91,9 +95,12 @@ export class ReportParamsPageClass extends ModalClass {
                         <>
                             <div className="graph-card-field">
                                 <span>{"Конфигурация:"}</span>
-                                <div className="field-edit"                            >
+                                <div
+                                    className="field-edit"
+                                    style={{ gridTemplateColumns: 'calc(100% - 5.2em) 2.2em 2.2em', columnGap: '4px' }}
+                                >
                                     <Select
-                                        key={`configselect_${de.id}_`}
+                                        key={`configSelect_${de.id}_${de._selectedConfig ? de._selectedConfig.value : ''}_`}
                                         inputClass={de.inputClass || ''}
                                         className={de.selectClass || ''}
                                         value={de._selectedConfig}
@@ -105,6 +112,7 @@ export class ReportParamsPageClass extends ModalClass {
                                             de._selectedConfig = e || { value: null, label: de.translate('New configuration') };
                                             if (de._selectedConfig.value) {
                                                 de.getConfig();
+                                                de.refreshState();
                                             }
                                             else {
                                                 de.refreshState();
@@ -128,7 +136,7 @@ export class ReportParamsPageClass extends ModalClass {
                                             <button
                                                 className="graph-filter-button"
                                                 onClick={() => de.deleteConfig()}
-                                                disabled={de.disabled || de._selectedConfig === undefined}
+                                                disabled={de.disabled || de._selectedConfig == null}
                                             >
                                                 {Images.images.deleteRecord()}
                                             </button>
@@ -176,23 +184,51 @@ export class ReportParamsPageClass extends ModalClass {
                     column={param}
                     value={param.value}
                     text={param.text}
+                    selectedOptions={param.values}
                     entity={param.entity}
                     findFieldEdit={() => { return param._fieldEditObj; }}
                     large={true}
                     comboboxValues={param.comboboxValues}
                     required={param.required}
                     multi={param.multi}
+                    level={de.level}
                     init={
                         (fe) => {
                             param._fieldEditObj = fe;
-                            fe.value = param.value !== undefined ? param.value : '';
-                            fe.text = param.text;
+
+                            if (param.multi) {
+                                fe.selectedOptions = param.values || [];
+                                const arr = [];
+                                for (let so of fe.selectedOptions) {
+                                    arr.push(so.value);
+                                }
+                                fe.value = arr.join(',');
+                                fe.text = param.text;
+                            }
+                            else {
+                                fe.value = param.value != null ? param.value : '';
+                                fe.text = param.text;
+                            }
                         }
                     }
                     onChange={(e) => {
                         param.value = e.value;
                         param.text = e.text;
-                        de._selectedConfig = de._selectedConfig === undefined || de._selectedConfig === null ? { value: -1, label: de.translate('New configuration') } : de._selectedConfig;
+                        param.values = e.values || [];
+
+                        const fakeNode = de._fakePrevGraph.nodeByEntity[param.entity];
+                        if (fakeNode) {
+                            fakeNode.value = param.value;
+                            fakeNode.text = param.text;
+                            if (param.value == null || param.value === '') {
+                                fakeNode._selectedOptions = [];
+                            }
+                            else {
+                                fakeNode._selectedOptions = param.values.length > 0 ? param.values : [{ value: param.value, label: param.text || param.value }];
+                            }
+                        }
+
+                        de._selectedConfig = de._selectedConfig == null ? { value: -1, label: de.translate('New configuration') } : de._selectedConfig;
                         de._selectedConfig.changed = true;
 
                         de.clearChildrenParams(param.id);
@@ -212,6 +248,7 @@ export class ReportParamsPageClass extends ModalClass {
 
             if (param.parentParams.indexOf(paramId) >= 0) {
                 param.value = param.text = '';
+                param.values = [];
             }
         }
     }
@@ -255,7 +292,9 @@ export class ReportParamsPageClass extends ModalClass {
                 (data) => {
                     const res = [];
                     for (let cfg of data) {
-                        if (cfg === '' || cfg === undefined) continue;
+                        if (cfg === '' || cfg == null) continue;
+
+                        if (de._selectedConfig && de._selectedConfig.value == cfg) continue;
 
                         res.push({ value: cfg, label: cfg });
                     }
@@ -272,9 +311,25 @@ export class ReportParamsPageClass extends ModalClass {
         });
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
+    deleteConfig() {
+        const de = this;
+        if (de._selectedConfig == null || !de._selectedConfig.saved) return;
+
+        const params = [];
+        params.push({ key: 'reportName', value: de.nameReport });
+        params.push({ key: 'configName', value: de._selectedConfig.label });
+
+        GLObject.dataGetter.get({ url: 'reports/deleteConfig', params: params }).then(
+            () => {
+                delete de._selectedConfig;
+                de.refreshState();
+            }
+        );
+    }
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     saveConfig() {
         const de = this;
-        if (de._selectedConfig === undefined) return;
+        if (de._selectedConfig == null) return;
 
         if (!de._selectedConfig.saved) {
             de._selectedConfig.label = prompt(de.translate('Enter configuration name')) || de._selectedConfig.label;
@@ -282,7 +337,12 @@ export class ReportParamsPageClass extends ModalClass {
 
         const paramsValues = {};
         for (let param of de.reportParams) {
-            paramsValues[param.id] = { value: param.value, label: param.text };
+            if (!param.multi) {
+                paramsValues[param.id] = [{ value: param.value, label: param.text }];
+            }
+            else {
+                paramsValues[param.id] = param.values;
+            }
         }
 
         const params = [];
@@ -300,25 +360,9 @@ export class ReportParamsPageClass extends ModalClass {
         );
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
-    deleteConfig() {
-        const de = this;
-        if (de._selectedConfig === undefined || !de._selectedConfig.saved) return;
-
-        const params = [];
-        params.push({ key: 'reportName', value: de.nameReport });
-        params.push({ key: 'configName', value: de._selectedConfig.label });
-
-        GLObject.dataGetter.get({ url: 'reports/deleteConfig', params: params }).then(
-            () => {
-                delete de._selectedConfig;
-                de.refreshState();
-            }
-        );
-    }
-    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     getConfig() {
         const de = this;
-        if (de._selectedConfig === undefined || !de._selectedConfig.label) return;
+        if (de._selectedConfig == null || !de._selectedConfig.label) return;
 
         const params = [];
         params.push({ key: 'reportName', value: de.nameReport });
@@ -332,20 +376,46 @@ export class ReportParamsPageClass extends ModalClass {
 
                 for (let param of de.reportParams) {
                     let savedParam = data[param.id];
-                    if (!savedParam) continue;
+                    param.values = savedParam || [];
+                    if (!savedParam || savedParam.length <= 0) continue;
 
-                    param.text = savedParam.label;
                     if (!param.multi) {
-                        param.value = savedParam.value;
+                        if (Array.isArray(param.values)) {
+                            param.value = param.values[0].value;
+                            param.text = param.values[0].label;
+                        }
+                        else if (typeof param.values === 'object') {
+                            param.value = param.values.value;
+                            param.text = param.values.label;
+                        }
+                        param.values = [{ value: param.value, label: param.text }];
                     }
                     else {
                         param.value = [];
-                        const varr = String(savedParam.value).split(',');
-                        const tarr = String(savedParam.label).split(',');
-                        for (let i = 0; i < varr.length; i++) {
-                            param.value.push({ value: varr[i], label: tarr[i] });
+                        const varr = [];
+                        const tarr = [];
+                        if (Array.isArray(param.values)) {
+                            for (let itm of param.values) {
+                                varr.push(itm.value);
+                                tarr.push(itm.label);
+
+                                param.value = varr.join(',');
+                                param.text = tarr.join(', ');
+                            }
+                        }
+                        else if (typeof param.values === 'object') {
+                            param.value = param.values.value;
+                            param.text = param.values.label;
+                            param.values = [{ value: param.value, label: param.text }];
                         }
                     }
+
+                    const fakeNode = de._fakePrevGraph.nodeByEntity[param.entity];
+                    if (!fakeNode) continue;
+
+                    fakeNode.value = param.value;
+                    fakeNode.text = param.text;
+                    fakeNode._selectedOptions = param.values || [{ value: param.value, label: param.text }];
                 }
 
                 de.refreshState();
@@ -371,9 +441,12 @@ export class ReportParamsPageClass extends ModalClass {
                     }
 
                     for (let rp of de.reportParams) {
-                        if (!rp.entity) this.continue;
+                        if (!rp.entity) continue;
 
                         rp.schemeInfo = GLObject.gridCreator.GetSchemeInfo(rp.entity, '');
+
+                        de._fakePrevGraph.nodeByEntity[rp.entity] = { };
+                        rp.prevGraph = de._fakePrevGraph;
                     }
                 }
                 de.refreshState();
@@ -398,7 +471,7 @@ export class ReportParamsPageClass extends ModalClass {
         const de = this;
         let errorParams = [];
         for (let param of de.reportParams) {
-            if (param.required && param.value === undefined) {
+            if (param.required && param.value == null) {
                 errorParams.push(param.name);
             }
         }

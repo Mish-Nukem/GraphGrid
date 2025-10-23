@@ -24,7 +24,8 @@ export function GraphComponent(props) {
     gc.selectingNodeValue = props.selectingNodeValue;
     gc.selectingNodeObject = props.selectingNodeObject;
 
-    gc.refreshState = function () {
+    gc.refreshState = function (full) {
+        gc._fullRefresh = full != null;
         setState({ graphComponent: gc, ind: gc.stateind++ });
     }
 
@@ -59,6 +60,8 @@ export class GraphComponentClass extends BaseComponent {
         super(props);
 
         const gc = this;
+
+        gc.stateind = 0;
 
         window._graphSeq = window._graphSeq || 0;
 
@@ -152,6 +155,11 @@ export class GraphComponentClass extends BaseComponent {
         const topFilterWidth = topFilters.length <= 2 ? 400 : topFilters.length === 3 ? 300 : 250;
         const lowFilterWidth = lowFilters.length <= 2 ? 400 : lowFilters.length === 3 ? 300 : 250;
 
+        if (gc._fullRefresh) {
+            delete gc._fullRefresh;
+            return <></>;
+        }
+
         return (
             <>
                 <div key={`graphAll_${gc.id}_`}>
@@ -161,7 +169,7 @@ export class GraphComponentClass extends BaseComponent {
                             <div
                                 key={`topFiltersMainDiv_${gc.id}_`}
                                 className="graph-filters-div"
-                                style={{ height: gc.topFiltersCollapsed ? '0' : '' }}
+                                style={{ height: gc.topFiltersCollapsed ? '' : '', display: 'grid', gridTemplateColumns: '2.2em auto', alignItems: 'center', columnGap: '0.2em' }}
                             >
                                 <button
                                     key={`topFiltersCollapseButton_${gc.id}_`}
@@ -176,7 +184,7 @@ export class GraphComponentClass extends BaseComponent {
                                         <div
                                             key={`filtersTop_${gc.id}_`}
                                             className="graph-filter-line"
-                                            style={{ gridTemplateColumns: `repeat(auto-fit, ${topFilterWidth}px)`, display: 'grid' }}
+                                            style={{ gridTemplateColumns: `repeat(auto-fit, ${topFilterWidth}px)`, columnGap: '1em', display: 'grid' }}
                                         >
                                             {
                                                 topFilters.map((node) => { return gc.renderFilter(node, true) })
@@ -204,7 +212,7 @@ export class GraphComponentClass extends BaseComponent {
                             <div
                                 key={`lowFiltersMainDiv_${gc.id}_`}
                                 className="graph-filters-div"
-                                style={{ height: gc.lowFiltersCollapsed ? '0' : '' }}
+                                style={{ height: gc.lowFiltersCollapsed ? '0' : '', display: 'grid', gridTemplateColumns: '2.2em auto', alignItems: 'center', columnGap: '0.2em' }}
                             >
                                 <button
                                     key={`lowFiltersCollapseButton_${gc.id}_`}
@@ -277,7 +285,7 @@ export class GraphComponentClass extends BaseComponent {
         }
         else {
             node.fakeColumn.value = node.value;
-            node.fakeColumn._selectedOptions = node._selectedOptions;
+            node.fakeColumn._selectedOptions = node._selectedOptions || [];
         }
 
         return (
@@ -299,7 +307,7 @@ export class GraphComponentClass extends BaseComponent {
                     comboboxValues={node.comboboxValues}
                     value={node.value}
                     selectedOptions={node._selectedOptions}
-                    text={isInput || isDate ? node.value : node.value !== undefined && node.value !== '' && node.selectedText ? node.selectedText() : ''}
+                    text={isInput || isDate ? node.value : node.value != null && node.value !== '' && node.selectedText ? node.selectedText() : ''}
                     findFieldEdit={() => { return node.fakeColumn._fieldEditObj; }}
                     large={true}
                     multi={node.multi}
@@ -307,6 +315,7 @@ export class GraphComponentClass extends BaseComponent {
                         return node.collectFilters ? node.collectFilters() : [];
                     }}
                     noCache={true}
+                    level={gc.level}
                     init={
                         (fe) => {
                             node.fakeColumn._fieldEditObj = fe;
@@ -316,7 +325,7 @@ export class GraphComponentClass extends BaseComponent {
                         const fe = node.fakeColumn._fieldEditObj;
                         node.value = e.value;
                         node.text = e.text;
-                        node._selectedOptions = fe._selectedOptions;
+                        node._selectedOptions = fe._selectedOptions || [];
 
                         gc.graph.triggerWave({
                             nodes: [node], withStartNodes: false, afterAllVisited: () => {
@@ -385,7 +394,7 @@ export class GraphComponentClass extends BaseComponent {
                 <GridINU
                     findGrid={(props) => gc.replaceGrid(props)}
                     graph={gc.graph}
-                    uid={node.uid !== undefined ? node.uid : node.id}
+                    uid={node.uid != null ? node.uid : node.id}
                     entity={node.entity}
                     controller={GLObject.gridCreator.GetEntityController(node)}
                     init={(grid) => gc.onGridInit(grid, node.title, status, top)}
@@ -395,7 +404,7 @@ export class GraphComponentClass extends BaseComponent {
                 <GridFL
                     findGrid={(props) => gc.replaceGrid(props)}
                     graph={gc.graph}
-                    uid={node.uid !== undefined ? node.uid : node.id}
+                    uid={node.uid != null ? node.uid : node.id}
                     init={(grid) => gc.onGridInit(grid, node.title, status, top)}
                 >
                 </GridFL>
@@ -489,7 +498,7 @@ export class GraphComponentClass extends BaseComponent {
         let savingData = {};
         for (let uid in gc.graph.nodesDict) {
             let node = gc.graph.nodesDict[uid];
-            if (node.value === undefined || node.value === '') continue;
+            if (node.value == null || node.value === '') continue;
 
             let so = { u: node.uid, v: node.value, o: [] };
             if (node._selectedOptions) {
@@ -528,7 +537,7 @@ export class GraphComponentClass extends BaseComponent {
         return new Promise((resolve) => {
             const ev = { filters: [] };
 
-            if (filter !== undefined && filter !== '') {
+            if (filter != null && filter !== '') {
                 ev.filters = [`${node.nameField} starts ${filter}`];
             }
 
@@ -562,7 +571,7 @@ export class GraphComponentClass extends BaseComponent {
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     isTop(node) {
-        return node.isBottom === undefined || node.isBottom === false;
+        return node.isBottom == null || node.isBottom === false;
     };
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     isEditing() {
@@ -634,14 +643,16 @@ export class GraphComponentClass extends BaseComponent {
         grid.parentComponent = gc;
 
         const obr = graph.nodesDict[grid.uid];
-        grid.id = obr.id !== undefined ? obr.id : grid.id;
+        grid.id = obr.id != null ? obr.id : grid.id;
+
+        grid.level = obr.level;
 
         grid.uid = obr.uid;
         grid.title = obr.title || grid.title;
         grid.nameField = obr.nameField || grid.nameField;
         grid.keyField = obr.keyField || grid.keyField;
 
-        grid.pageSize = obr.pageSize !== undefined && obr.pageSize !== null ? obr.pageSize : grid.pageSize;
+        grid.pageSize = obr.pageSize != null ? obr.pageSize : grid.pageSize;
 
         graph.nodesDict[grid.uid] = grid;
 
@@ -670,7 +681,7 @@ export class GraphComponentClass extends BaseComponent {
         grid.controller = GLObject.gridCreator.GetEntityController(grid);
 
         if (gc.selectingNodeUid === grid.uid) {
-            grid.multi = gc.selectingNodeMulti !== undefined ? gc.selectingNodeMulti : grid.multi;
+            grid.multi = gc.selectingNodeMulti != null ? gc.selectingNodeMulti : grid.multi;
             grid.isSelecting = true;
             grid.onSelectValue = (e) => {
                 gc.onSelectFilterValue(e); //{ selectedValue: grid.selectedValue(), selectedText: grid.selectedText(), selectedValues: grid.selectedValues() }
@@ -698,24 +709,24 @@ export class GraphComponentClass extends BaseComponent {
         //    grid.onSelectValue = (e) => gc.selectFilterValue(e);
         //}
 
-        if (obr.status !== undefined) {
+        if (obr.status != null) {
             grid.status = obr.status;
         }
 
-        if (obr.filterType !== undefined) {
+        if (obr.filterType != null) {
             grid.filterType = obr.filterType;
         }
 
-        if (obr._readonly !== undefined) {
+        if (obr._readonly != null) {
             grid.readonly = obr._readonly;
         }
 
-        if (obr.value !== undefined && obr.value !== '') {
+        if (obr.value != null && obr.value !== '') {
             grid.value = obr.value;
         }
 
         if (obr._selectedOptions) {
-            grid._selectedOptions = obr._selectedOptions;
+            grid._selectedOptions = obr._selectedOptions || [];
 
             if (grid.filterType === FilterType.combobox && grid._selectedOptions.length > 0) {
                 gc.getValueFromCombobox(grid, true);
@@ -751,7 +762,7 @@ export class GraphComponentClass extends BaseComponent {
         if (!graph.nodeCount) {
             graph.nodeCount = 0;
             for (let uid in graph.nodesDict) {
-                if (graph.nodesDict[uid] !== undefined) graph.nodeCount++
+                if (graph.nodesDict[uid] != null) graph.nodeCount++
             }
         }
 
@@ -777,7 +788,7 @@ export class GraphComponentClass extends BaseComponent {
         gc.graph.nodesDict = obrGraph.nodesDict;
         gc.graph.linksDict = obrGraph.linksDict;
 
-        if (obrGraph.uid !== undefined) {
+        if (obrGraph.uid != null) {
             gc.graph.uid = obrGraph.uid;
         }
 
@@ -807,14 +818,16 @@ export class GraphComponentClass extends BaseComponent {
 
             let hasRowsAndColumns = node.columns && node.columns.length > 0 && node.rows && node.rows.length > 0;
 
-            if (node._readonly !== undefined) {
+            if (node._readonly != null) {
                 node.readonly = node._readonly;
                 delete node._readonly;
             }
 
             if (node.status === NodeStatus.grid) {
+                node.level = gc.level || 0;
+
                 if (gc.isTop(node)) {
-                    if (gc.activeMaster === undefined) {
+                    if (gc.activeMaster == null) {
                         gc.activeMaster = node.uid;
                         node.visible = true;
                     }
@@ -823,7 +836,7 @@ export class GraphComponentClass extends BaseComponent {
                     }
                 }
                 else {
-                    if (gc.activeDetail === undefined) {
+                    if (gc.activeDetail == null) {
                         gc.activeDetail = node.uid;
                         node.visible = true;
                     }
@@ -831,6 +844,9 @@ export class GraphComponentClass extends BaseComponent {
                         node.visible = false;
                     }
                 }
+            }
+            else {
+                node.level = (gc.level || 0) + 1;
             }
 
             if (hasRowsAndColumns && !node.entity) {
@@ -840,7 +856,7 @@ export class GraphComponentClass extends BaseComponent {
                 }
             }
 
-            if (node.status === NodeStatus.filter && node.filterType === FilterType.combobox && node.multi === undefined) {
+            if (node.status === NodeStatus.filter && node.filterType === FilterType.combobox && node.multi == null) {
                 node.multi = true;
             }
 
@@ -863,13 +879,15 @@ export class GraphComponentClass extends BaseComponent {
                             node._selectedOptions.push(so);
                         }
 
-                        if (sameNode.comboboxValues && sameNode.comboboxValues.length) {
-                            for (let cv of sameNode.comboboxValues) {
-                                node.comboboxValues.push(cv);
+                        if (node._selectedOptions.length <= 0) {
+                            if (sameNode.comboboxValues && sameNode.comboboxValues.length) {
+                                for (let cv of sameNode.comboboxValues) {
+                                    node.comboboxValues.push(cv);
+                                }
                             }
-                        }
-                        else {
-                            node.comboboxValues.push({ value: sameNode.value, label: sameNode.text });
+                            else {
+                                node.comboboxValues.push({ value: sameNode.value, label: sameNode.text });
+                            }
                         }
                     }
                 }
@@ -882,7 +900,7 @@ export class GraphComponentClass extends BaseComponent {
                     for (let pcol of gc.prevGrid.columns) {
                         if (pcol.entity === node.entity) {
                             let val = prevGridSelectedRow[pcol.name];
-                            if (val !== undefined && val !== '') {
+                            if (val != null && val !== '') {
                                 node.value = prevGridSelectedRow[pcol.keyField];
                                 node.text = prevGridSelectedRow[pcol.name];
                                 node._selectedOptions = [{ value: node.value, label: node.text }];
@@ -919,7 +937,7 @@ export class GraphComponentClass extends BaseComponent {
 
             node.value = obr.v || node.value;
             if (obr.o && obr.o.length > 0) {
-                node._selectedOptions = obr.o;
+                node._selectedOptions = obr.o || [];
             }
 
             if (node.value && obr.t) {

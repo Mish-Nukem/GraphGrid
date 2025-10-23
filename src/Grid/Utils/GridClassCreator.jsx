@@ -28,12 +28,17 @@ export class GridCreator {
                 uid={`${fcolumn.id}_select_${fcolumn.entity}_`}
                 schemeName={fcolumn.schemeInfo.schemeName}
                 selectingNodeUid={fcolumn.schemeInfo.inSchemeUid}
-                selectingNodeObject={fcolumn}
+                selectingNodeObject={fcolumn._fieldEditObj}
                 prevGraph={fcolumn.prevGraph}
                 prevGrid={fcolumn.grid}
+                level={fcolumn._fieldEditObj ? fcolumn._fieldEditObj.level + 1 : 1}
                 onSelectFilterValue={(e) => {
                     const fe = fcolumn._fieldEditObj;
-                    fe._selectedOptions = e.values;
+                    fe._selectedOptions = e.values || [];
+
+                    fe.value = e.value;
+                    fe.text = e.text;
+
                     e.fe = fe;
                     fe.lookupIsShowing = false;
                     if (fcolumn.grid) {

@@ -41,7 +41,7 @@ export class DataExchangePageClass extends ModalClass {
         const de = this;
         de.renderContent = de.renderDataExchangePage;
 
-        de.visible = props.visible !== undefined ? props.visible : false;
+        de.visible = props.visible != null ? props.visible : false;
 
         de.edId = props.edId;
         de.edType = props.edType;

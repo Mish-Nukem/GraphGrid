@@ -1,6 +1,7 @@
-﻿import '../Grid/css/default.css';
+﻿//import '../Grid/css/default.css';
 import { useState } from 'react';
 import PMTest from './PMTest';
+import { GridFL } from '../Grid/GridFL';
 import { GridINU } from '../Grid/GridINU';
 import { GraphComponent } from '../Grid/GraphComponent';
 import { LoginPage } from '../PM/Pages/LoginPage';
@@ -12,6 +13,7 @@ import { PMMainMenu } from './Pages/MainMenu';
 import { GLObject } from '../Grid/GLObject';
 import { ReportParamsPage } from '../Reports/Pages/ReportParamsPage';
 import { GLSettings } from '../Grid/Pages/GLSettings';
+import Versions from '../Grid/Versions';
 function PMApp() {
     const [state, setState] = useState({ menuObj: { id: - 2 } });
 
@@ -39,6 +41,8 @@ function PMApp() {
     GLObject.appSettings = appSettings;
 
     GLObject.menuId = state.menuObj.id;
+
+    GLObject.versionObj = GLObject.versionObj || new Versions();
 
     GLObject.changeAPIurl = GLObject.changeAPIurl || function (serverType) {
         GLObject.serverType = serverType;
@@ -104,13 +108,14 @@ function PMApp() {
             menuItem._reportParamsVisible = state.menuObj.id !== parentItem._lastItemId || menuItem._reportParamsVisible;
             parentItem._lastItemId = menuItem.id;
 
-            parentItem.frmPos = parentItem.frmPos || { x: 210, y: 210 };
+            parentItem.frmPos = parentItem.frmPos || { x: 200, y: 200 };
 
             return (
                 <ReportParamsPage
                     nameReport={menuItem.text}
                     pos={parentItem.frmPos}
                     visible={menuItem._reportParamsVisible}
+                    level={1}
                     onClose={() => {
                         menuItem._reportParamsVisible = false;
                         setState({ menuObj: { id: GLObject.menuId } });
@@ -127,6 +132,14 @@ function PMApp() {
                 break;
             case 0:
                 return <></>
+            case 'about':
+                return (
+                    <>
+                        <div className="div-with-grid">
+                            <GridFL getRows={(e) => { return GLObject.versionObj.getRows(e) }} getColumns={GLObject.versionObj.getColumns} multi={true}></GridFL>
+                        </div>
+                    </>
+                );
             case 'acProjectManagement':
                 return (
                     <>

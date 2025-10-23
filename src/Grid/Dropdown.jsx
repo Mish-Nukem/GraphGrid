@@ -167,7 +167,7 @@ export class DropdownClass extends ModalClass {
             h: rect.h
         };
 
-        if (dd.maxW !== undefined) {
+        if (dd.maxW != null) {
             dd.opt.pos.w = Math.min(dd.opt.pos.w, dd.maxW);
         }
     }

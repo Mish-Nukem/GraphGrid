@@ -20,4 +20,6 @@
     static projectID = 'Debug';
 
     static user = '';
+
+    static versionNum = 'v1.0.0';
 }

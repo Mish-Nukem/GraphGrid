@@ -12,7 +12,7 @@ export function GridFL(props) {
 
     grid = gridState.grid;
     let needGetRows = false;
-    if (!grid || grid.uid !== props.uid && props.uid !== undefined) {
+    if (!grid || grid.uid !== props.uid && props.uid != null) {
         grid = null;
         if (props.findGrid) {
             grid = props.findGrid(props);
@@ -110,7 +110,7 @@ export class GridFLClass extends GridDBClass {
             return super.renderHeaderCell(col, context);
         }
 
-        const hasFilter = col.filtrable && context !== 'fake' && col.filter !== undefined && col.filter !== '';
+        const hasFilter = col.filtrable && context !== 'fake' && col.filter != null && col.filter !== '';
 
         const needFocus = grid._autoFocusColumn === col;
         if (needFocus) {
@@ -126,9 +126,9 @@ export class GridFLClass extends GridDBClass {
                         <input
                             key={`colFilter_${grid.id}_${col.id}_`}
                             className={`grid-col-filter ${grid.opt.inputClass || BaseComponent.theme.inputClass || ''}`}
-                            value={col.filter !== undefined ? col.filter : ''}
-                            title={col.filter !== undefined ? col.filter : ''}
-                            style={{ gridColumn: !hasFilter ? 'span 2' : '', width: 'calc(100% - 2px)' }}
+                            value={col.filter != null ? col.filter : ''}
+                            title={col.filter != null ? col.filter : ''}
+                            style={{ gridColumn: !hasFilter ? 'span 2' : '', width: 'calc(100% - 4px)' }}
                             grid-col-filter={`${grid.id}_${col.id}_`}
                             onChange={(e) => { grid.onColumnFilterChanging(col, e.target.value, e) }}
                             onClick={(e) => { grid.onColumnFilterClick(col, e); }}
@@ -152,12 +152,29 @@ export class GridFLClass extends GridDBClass {
                     </>
                     :
                     <>
-                        {context !== 'fake' ? <span className={grid.opt.inputClass || BaseComponent.theme.inputClass || ''}>&nbsp;</span> : <></>}
+                        {/*context !== 'fake' ? <span className={grid.opt.inputClass || BaseComponent.theme.inputClass || ''}>&nbsp;</span> : <></>*/}
                     </>
 
                 }
             </>
         );
+    }
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
+    afterGetColumns() {
+        super.afterGetColumns();
+
+        const grid = this;
+        grid.hasColumnFilter = false;
+        for (let col of grid.columns) {
+            if (col.filtrable) {
+                grid.hasColumnFilter = true;
+                break;
+            }
+        }
+    }
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
+    getHeaderMinHeight() {
+        return !this.hasColumnFilter ? '1em' : '3em';
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     getAutocomleteItems() {
@@ -197,7 +214,7 @@ export class GridFLClass extends GridDBClass {
         let fo;
 
         for (let col of grid.columns) {
-            if (!col.filtrable || col.filter === undefined || col.filter === '') continue;
+            if (!col.filtrable || col.filter == null || col.filter === '') continue;
 
             fo = { type: 'column', filter: `${col.name} = ${col.filter}` };
             filters.push(fo);
@@ -207,7 +224,7 @@ export class GridFLClass extends GridDBClass {
             }
         }
 
-        if (grid.beforeOpen !== undefined && grid.beforeOpen !== '') {
+        if (grid.beforeOpen != null && grid.beforeOpen !== '') {
             fo = { type: 'graphLink', filter: grid.beforeOpen };
             filters.push(fo);
         }
@@ -382,7 +399,7 @@ export class GridFLClass extends GridDBClass {
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     getHeaderGridTemplateColumns(col) {
-        return col.sortInd === undefined && (col.filter === undefined || col.filter === '') ? 'auto 8px' : 'auto 18px';
+        return col.sortInd == null && (col.filter == null || col.filter === '') ? 'auto 8px' : 'auto 18px';
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     getGridSettingsList() {

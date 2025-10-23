@@ -60,7 +60,7 @@ export class OverlayClass extends BaseComponent {
 
         ovl.renderChild = props.renderChild || function () { return null };
 
-        ovl.visible = props.visible !== undefined ? props.visible : true;
+        ovl.visible = props.visible != null ? props.visible : true;
 
         ovl.stateind = 0;
     }

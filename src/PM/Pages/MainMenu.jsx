@@ -59,6 +59,7 @@ export class PMMainMenuClass extends MainMenuClass {
             GLObject.dataGetter.get({ url: 'system/getMainMenuItems', params: params }).then(
                 (result) => {
                     result.unshift({ id: -1, action: 'logout', text: GLObject.serverType !== 0 ? "Выход (MSSQL)" : "Выход (PostgreSQL)" });
+                    result.unshift({ id: -2, action: 'about', text: GLObject.versionNum });
 
                     resolve(result);
                 });

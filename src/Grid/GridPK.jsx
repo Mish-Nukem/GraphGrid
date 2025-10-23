@@ -9,7 +9,7 @@ export function GridPK(props) {
 
     grid = gridState.grid;
     let needGetRows = false;
-    if (!grid || grid.uid !== props.uid && props.uid !== undefined) {
+    if (!grid || grid.uid !== props.uid && props.uid != null) {
         grid = null;
         if (props.findGrid) {
             grid = props.findGrid(props);
@@ -116,7 +116,7 @@ export class GridPKClass extends GridGRClass {
                     style={{ padding: "2px 0 0 0" }}
                 >
                     {
-                        grid._selectedRowsDict[row[grid.keyField]] === undefined ?
+                        grid._selectedRowsDict[row[grid.keyField]] == null ?
                             < button
                                 className={grid.opt.pocketButtonsClass || 'grid-pocket-button'}
                                 onClick={(e) => grid.selectRow(e, row)}
@@ -289,7 +289,7 @@ export class GridPKClass extends GridGRClass {
         grid._allRowsOnPageSelected = true;
 
         for (let row of grid.rows) {
-            if (grid._selectedRowsDict[row[keyColumn]] === undefined) {
+            if (grid._selectedRowsDict[row[keyColumn]] == null) {
                 grid._allRowsOnPageSelected = false;
                 break;
             }

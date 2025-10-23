@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { GridINUBaseClass } from './GridINUBase';
 import { GLObject } from './GLObject';
-import { SettingsPageClass } from './Pages/GLSettings';
+import { GLSettings, SettingsPageClass } from './Pages/GLSettings';
 import { Images } from './Themes/Images';
 import { NodeStatus } from './Base';
 import { CardINU } from './CardINU';
@@ -15,7 +15,7 @@ export function GridINU(props) {
 
     grid = gridState.grid;
     let needGetRows = false;
-    if (!grid || grid.uid !== props.uid && props.uid !== undefined) {
+    if (!grid || grid.uid !== props.uid && props.uid != null) {
         grid = null;
         if (props.findGrid) {
             grid = props.findGrid(props);
@@ -94,9 +94,9 @@ export class GridINUClass extends GridINUBaseClass {
         return this.visible;
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
-    renderPopupContent() {
+    renderPopupContent(wnd) {
         const grid = this;
-        return grid.cardIsShowing ? grid.renderCardContent() : grid.settingsIsShowing ? grid.renderSettings() : super.renderPopupContent();
+        return grid.cardIsShowing ? grid.renderCardContent(wnd) : grid.settingsIsShowing ? grid.renderSettings(wnd) : super.renderPopupContent(wnd);
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     renderCardContent() {
@@ -109,6 +109,7 @@ export class GridINUClass extends GridINUBaseClass {
                 entity={grid.entity}
                 controller={grid.controller}
                 keyField={grid.keyField}
+                level={grid.level + 1}
                 init={(card) => {
                     card.visible = true;
                     card.columns = grid.columns;
@@ -128,8 +129,16 @@ export class GridINUClass extends GridINUBaseClass {
     renderSettings() {
         const grid = this;
 
-        const sp = new SettingsPageClass({ parent: grid.parentComponent || grid });
-        return sp.renderSettingsPage();
+        return (
+            <GLSettings
+                parent={grid.parentComponent || grid}
+                level={grid.level + 1}
+            >
+            </GLSettings>
+        );
+
+        //grid._spc = grid._spc || new SettingsPageClass({ parent: grid.parentComponent || grid, level: grid.level + 1 });
+        //return grid._spc.renderSettingsPage();
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     onSettingsItemClick(itemId) {
@@ -141,8 +150,12 @@ export class GridINUClass extends GridINUBaseClass {
                 grid.settingsIsShowing = true;
                 grid.popupIsShowing = true;
 
-                grid.settingsPos = grid.settingsPos || { x: 210, y: 210, w: 400, h: 320 };
+                const shift = (grid.level + 1) * 20;
+
+                grid.settingsPos = grid.settingsPos || { x: 200 + shift, y: 200 + shift, w: 400, h: 320 };
                 grid.popupPos = grid.settingsPos;
+
+                grid.popupCloseWhenEscape = true;
 
                 grid.refreshState();
                 break;
@@ -180,7 +193,7 @@ export class GridINUClass extends GridINUBaseClass {
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     renderCell(grid, col, row, selected) {
-        if (!grid.allowEditGrid || col.readonly || !selected) return super.renderCell(grid, col, row);
+        if (!grid.allowEditGrid && !col.allowVerticalResize || /*col.readonly ||*/ !selected) return super.renderCell(grid, col, row);
 
         row = !grid.isEditing() || !grid.changedRow ? row : grid.changedRow;
 
@@ -193,6 +206,7 @@ export class GridINUClass extends GridINUBaseClass {
             findFieldEdit={() => { return col._fieldEditObj; }}
             selectH={'1.4em'}
             comboboxValues={col.comboboxValues}
+            level={grid.level}
             init={
                 (fe) => {
                     if (grid.isEditing() && !grid.changedRow) {
@@ -209,7 +223,7 @@ export class GridINUClass extends GridINUBaseClass {
                     fe.text = lrow[col.name];
 
                     fe._selectedOptions = [];
-                    if (fe.value !== undefined && fe.value !== '') {
+                    if (fe.value != null && fe.value !== '') {
                         fe._selectedOptions.push({ value: fe.value, label: fe.text });
                     }
                 }
@@ -259,8 +273,9 @@ export class GridINUClass extends GridINUBaseClass {
                     text={col.filter}
                     findFieldEdit={() => { return col._filterEditObj; }}
                     gridColumn={'span 2'}
-                    w={'calc(100% - 2px)'}
+                    w={'calc(100% - 3px)'}
                     divContainerClass={'grid-header-content'}
+                    level={grid.level}
                     init={
                         (fe) => {
                             col._filterEditObj = fe;
@@ -443,7 +458,9 @@ export class GridINUClass extends GridINUBaseClass {
     addRecord(e) {
         const grid = this;
 
-        grid.cardPos = grid.cardPos || { x: 110, y: 110, w: 800, h: 600 };
+        const shift = (grid.level + 1) * 20;
+
+        grid.cardPos = grid.cardPos || { x: 100 + shift, y: 100 + shift, w: 800, h: 600 };
         grid.popupPos = grid.cardPos;
 
         grid.getNewRow().then((newRow) => {
@@ -480,7 +497,7 @@ export class GridINUClass extends GridINUBaseClass {
                             parentValue = parNode._selectedOptions[0].value;
                             parentText = parNode._selectedOptions[0].label;
                         }
-                        else if (parNode.value !== undefined && parNode.value !== '') {
+                        else if (parNode.value != null && parNode.value !== '') {
                             parentValue = String(parNode.value).split(',')[0];
                             parentText = parNode.text ? String(parNode.text).split(',')[0] : parentValue;
                         }
@@ -493,7 +510,7 @@ export class GridINUClass extends GridINUBaseClass {
                         parentText = srow[parNode.nameField];
                     }
 
-                    if (parentValue == undefined || parentValue === '') break;
+                    if (parentValue == null || parentValue === '') break;
 
                     grid.cardRow[col.name] = parentText;
                     grid.cardRow[col.keyField] = parentValue;
@@ -511,7 +528,9 @@ export class GridINUClass extends GridINUBaseClass {
     copyRecord(e) {
         const grid = this;
 
-        grid.cardPos = grid.cardPos || { x: 110, y: 110, w: 800, h: 600 };
+        const shift = (grid.level + 1) * 20;
+
+        grid.cardPos = grid.cardPos || { x: 100 + shift, y: 100 + shift, w: 800, h: 600 };
         grid.popupPos = grid.cardPos;
 
         grid.cardRow = {};
@@ -529,7 +548,7 @@ export class GridINUClass extends GridINUBaseClass {
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     copyRecordDisabled(e) {
         const grid = this;
-        return grid._waitingRows || !grid.allowCopy || grid.isEditing() || grid.selectedRowIndex === undefined || grid.selectedRowIndex < 0 || !grid.rows || grid.rows.length <= 0;
+        return grid._waitingRows || !grid.allowCopy || grid.isEditing() || grid.selectedRowIndex == null || grid.selectedRowIndex < 0 || !grid.rows || grid.rows.length <= 0;
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     deleteRecord(e) {
@@ -542,13 +561,15 @@ export class GridINUClass extends GridINUBaseClass {
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     deleteRecordDisabled(e) {
         const grid = this;
-        return grid._waitingRows || !grid.allowDelete || grid.isEditing() || grid.selectedRowIndex === undefined || grid.selectedRowIndex < 0 || !grid.rows || grid.rows.length <= 0;
+        return grid._waitingRows || !grid.allowDelete || grid.isEditing() || grid.selectedRowIndex == null || grid.selectedRowIndex < 0 || !grid.rows || grid.rows.length <= 0;
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     viewRecord(e) {
         const grid = this;
 
-        grid.cardPos = grid.cardPos || { x: 110, y: 110, w: 800, h: 600 };
+        const shift = (grid.level + 1) * 20;
+
+        grid.cardPos = grid.cardPos || { x: 100 + shift, y: 100 + shift, w: 800, h: 600 };
         grid.popupPos = grid.cardPos;
 
         grid.cardRow = grid.selectedRow();
@@ -562,7 +583,7 @@ export class GridINUClass extends GridINUBaseClass {
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     viewRecordDisabled(e) {
         const grid = this;
-        return grid._waitingRows || !grid.allowView || grid.isEditing() || grid.selectedRowIndex === undefined || grid.selectedRowIndex < 0 || !grid.rows || grid.rows.length <= 0;
+        return grid._waitingRows || !grid.allowView || grid.isEditing() || grid.selectedRowIndex == null || grid.selectedRowIndex < 0 || !grid.rows || grid.rows.length <= 0;
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     setPageSize(newSize) {
@@ -583,7 +604,7 @@ export class GridINUClass extends GridINUBaseClass {
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     getSelectedRowIndex() {
         const grid = this;
-        if (grid.value === undefined || grid.value === '') return;
+        if (grid.value == null || grid.value === '') return;
 
         let i = 0;
         for (let row of grid.rows) {
@@ -593,6 +614,11 @@ export class GridINUClass extends GridINUBaseClass {
             }
             i++;
         }
+    }
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
+    getGridMaxHeight() {
+        const grid = this;
+        return grid.frozenHeader ? grid.children && grid.children.length > 0 || grid.parents && grid.parents.length > 0 ? '40vh' : '80vh' : '';
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     async canLeaveRow(rowIndex) {
@@ -714,9 +740,9 @@ export class GridINUClass extends GridINUBaseClass {
         const grid = this;
         let res = super.selectedText(delim);
 
-        if (res !== undefined && res !== '') return res;
+        if (res != null && res !== '') return res;
 
-        if (grid.status === NodeStatus.filter && grid.value !== undefined && grid.value !== '' && grid._selectedText !== undefined && grid._selectedText !== '') return grid._selectedText;
+        if (grid.status === NodeStatus.filter && grid.value != null && grid.value !== '' && grid._selectedText != null && grid._selectedText !== '') return grid._selectedText;
 
         return res;
     }

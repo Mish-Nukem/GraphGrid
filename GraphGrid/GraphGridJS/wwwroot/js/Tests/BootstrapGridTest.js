@@ -14,12 +14,12 @@ function passRow(grid, row, autocompleteColumn) {
     if (!grid.columns) return true;
 
     for (let col of grid.columns) {
-        if (!col.filtrable || (col.filter === undefined || col.filter == '') && !autocompleteColumn) continue;
+        if (!col.filtrable || (col.filter == null || col.filter == '') && !autocompleteColumn) continue;
 
         const cellValue = String(row[col.name]).toLowerCase();
         if (cellValue == '') return false;
 
-        const filter = col.filter === undefined || col.filter == '' ? '' : col.filter.toLowerCase();
+        const filter = col.filter == null || col.filter == '' ? '' : col.filter.toLowerCase();
 
         if (filter != '') {
             if (autocompleteColumn) {
@@ -124,7 +124,7 @@ function createGrid() {
         ],
     //    drawCell: function (column, row) {
     //        let val = row[column.name];
-    //        val = val !== undefined ? val : '';
+    //        val = val != null ? val : '';
     //        return (<span>${val}</span>)
     //    }
     });

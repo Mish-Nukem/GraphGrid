@@ -11,7 +11,7 @@ export function Grid(props) {
 
     grid = gridState.grid;
     let needGetRows = false;
-    if (!grid || grid.uid !== props.uid && props.uid !== undefined) {
+    if (!grid || grid.uid !== props.uid && props.uid != null) {
         grid = null;
         if (props.findGrid) {
             grid = props.findGrid(props);
@@ -99,6 +99,7 @@ export class GridClass extends BaseComponent {
 
         grid.stateind = 0;
 
+        grid.frozenHeader = props.frozenHeader == null ? true : props.frozenHeader;
         grid.opt.selectedRowClass = props.selectedRowClass || BaseComponent.theme.selectedRowClass || '';
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -122,7 +123,7 @@ export class GridClass extends BaseComponent {
         grid._waitingRows = false;
         grid.log(`afterGetRows(). rows = ${grid.rows.length}. state = ${grid.stateind}`);
 
-        if (grid.totalRows === undefined && grid.pageSize <= 0) {
+        if (grid.totalRows == null && grid.pageSize <= 0) {
             grid.totalRows = grid.rows && grid.rows.length ? grid.rows.length : 0;
         }
 
@@ -139,7 +140,7 @@ export class GridClass extends BaseComponent {
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     getSelectedRowIndex() {
         const grid = this;
-        if (grid.selectedRowIndex === undefined || grid.selectedRowIndex < 0) {
+        if (grid.selectedRowIndex == null || grid.selectedRowIndex < 0) {
             grid.selectedRowIndex = 0;
         }
     }
@@ -187,6 +188,7 @@ export class GridClass extends BaseComponent {
             <div
                 key={`gridDiv_${grid.id}_`}
                 className="grid-div"
+                style={{ maxHeight: grid.getGridMaxHeight(), overflowY: grid.frozenHeader ? 'auto' : 'hidden' }}
             >
                 <table
                     key={`grid_${grid.id}_`}
@@ -198,6 +200,10 @@ export class GridClass extends BaseComponent {
                 </table>
             </div>
         );
+    }
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
+    getGridMaxHeight() {
+        return this.frozenHeader ? '40vh' : '';
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     getGridWidth() {
@@ -229,6 +235,10 @@ export class GridClass extends BaseComponent {
         return 'auto 8px';
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
+    getHeaderMinHeight() {
+        return '1em';
+    }
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     renderHeader(columns, context) {
         const grid = this;
         columns = columns || grid.columns;
@@ -248,7 +258,10 @@ export class GridClass extends BaseComponent {
                                     key={`headerCell_${grid.id}_${col.id}_${col.w}_${ind}_${grid.keyAdd()}_`}
                                     grid-header={`${grid.id}_${col.id}_${col.w}_`}
                                     className={`${grid.opt.columnClass ? grid.opt.columnClass : ''} grid-header-th`}
-                                    style={{ /*position: "sticky", top: 0,*/
+                                    style={{
+                                        position: grid.frozenHeader ? "sticky" : "inherit",
+                                        top: grid.frozenHeader ? 0 : undefined,
+                                        zIndex: grid.frozenHeader ? 1 : undefined,
                                         width: col.w + "px",
                                         overflow: "hidden",
                                     }}
@@ -263,7 +276,7 @@ export class GridClass extends BaseComponent {
                                             verticalAlign: "top",
                                             display: 'grid',
                                             gridTemplateColumns: 'calc(100% - 6px) 6px',
-                                            marginRight: '-4px',
+                                            /*marginRight: '-5px',*/
                                         }}
                                         disabled={grid._waitingRows || col.disabled ? 'disabled' : ''}
                                     >
@@ -273,16 +286,26 @@ export class GridClass extends BaseComponent {
                                             style={{
                                                 display: 'grid',
                                                 gridTemplateColumns: grid.getHeaderGridTemplateColumns(col),
-                                                alignItems: 'center',
-                                                gridTemplateRows: 'auto auto',
+                                                alignItems: 'center', //'start',//
+                                                gridTemplateRows: '1.5em auto',
                                                 gridAutoFlow: 'row',
+                                                width: 'calc(100% + 8px)',
                                             }}
                                         >
                                             {grid.renderHeaderCell(col, context)}
                                         </div>
                                         <div //style={{ position: "absolute", right: "-6px", top: "-1px", cursor: "e-resize", height: "100%", width: "12px", zIndex: (grid.opt.zInd + 1) }}
                                             grid-rsz-x={`${grid.id}_${col.id}`}
-                                            style={{ position: "relative", /*right: "-6px", top: "-1px",*/ cursor: "e-resize", height: "100%", width: "12px", left: "0px", zIndex: (grid.opt.zInd + 1) }}
+                                            style={{
+                                                position: "relative",
+                                                minHeight: grid.getHeaderMinHeight(col),
+                                                cursor: "e-resize",
+                                                height: "100%",
+                                                /*width: "12px",*/
+                                                width: "6px",
+                                                left: "0px",
+                                                zIndex: (grid.opt.zInd + 1)
+                                            }}
                                             onMouseDown={(e) => { e.detail === 2 ? grid.mouseResizerDoubleClick(e, col) : grid.mouseResizerClick(e, col) }}
                                         >
                                         </div>
@@ -322,7 +345,7 @@ export class GridClass extends BaseComponent {
                 <input type='checkbox'
                     className={`grid-select-checkbox`}
                     onChange={(e) => grid.selectRow(e, row)}
-                    checked={grid._selectedRowsDict[row[grid.keyField]] !== undefined}
+                    checked={grid._selectedRowsDict[row[grid.keyField]] != null}
                 />
             </td>
         );
@@ -345,7 +368,7 @@ export class GridClass extends BaseComponent {
                                     <tr key={`gridRowWait_${grid.id}_${rind}_`} className="grid-waiting" style={{ borderTop: "0", borderBottom: "0" }}>
                                         {
                                             <td colSpan={grid.columns ? grid.columns.length : 0} className="grid-waiting">
-                                                {rind === Math.floor(grid.rows.length / 2) ? grid.Spinner(grid.id, Math.min(Math.max(grid._currW, 100), window.innerWidth), window.innerWidth) : <span>&nbsp;</span>}
+                                                {rind === Math.min(Math.floor(grid.rows.length / 2), 10) ? grid.Spinner(grid.id, Math.min(Math.max(grid._currW, 100), window.innerWidth), window.innerWidth) : <span>&nbsp;</span>}
                                             </td>
                                         }
                                     </tr>
@@ -432,7 +455,31 @@ export class GridClass extends BaseComponent {
             val = Moment(val, grid.dateFormat).format(grid.dateFormat);
         }
 
-        return (<span className='grid-cell'>{val !== undefined ? val : ''}</span>);
+        if (col.allowVerticalResize) {
+            return (
+                <div style={{ display: 'flex' }}>
+                    <textarea
+                        key={`cellTextarea_${col.id}_`}
+                        className={col.inputClass}
+                        value={val != null ? val : ''}
+                        style={{
+                            width: 'calc(100% - 1px)',
+                            minHeight: !col.inputClass ? col.textareaH : col.h,
+                            height: '1.8em',
+                            padding: '0',
+                            boxSizing: 'border-box',
+                            gridColumn: 'span 3',
+                            resize: 'vertical',
+                            overflow: 'hidden',
+                        }}
+                        readOnly={true}
+                    >
+                    </textarea>
+                </div>
+            );
+        }
+
+        return (<span className='grid-cell'>{val != null ? val : ''}</span>);
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     getColumns() {
@@ -458,6 +505,29 @@ export class GridClass extends BaseComponent {
         return { name: name };
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
+    afterGetColumns() {
+        const grid = this;
+        grid.columns = grid.columns || [];
+        grid.colDict = grid.colDict || {};
+
+        let id = 0;
+        for (let col of grid.columns) {
+            col.id = id++;
+            col.title = col.title || col.name;
+            col.w = col.initW = col.w || 100;
+            col.minW = col.minW || 50;
+            col.grid = grid;
+            grid.colDict[col.id] = grid.colDict[col.name] = grid.colDict[col.name.toLowerCase()] = col;
+        }
+
+        if (!grid.columnsDefaultOrder) {
+            grid.columnsDefaultOrder = [];
+            Object.assign(grid.columnsDefaultOrder, grid.columns);
+        }
+
+        delete grid._waitingColumns;
+    }
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     async prepareColumns() {
         const grid = this;
 
@@ -465,34 +535,12 @@ export class GridClass extends BaseComponent {
 
         grid._waitingColumns = true;
 
-        function afterGetColumns() {
-            grid.columns = grid.columns || [];
-            grid.colDict = grid.colDict || {};
-
-            let id = 0;
-            for (let col of grid.columns) {
-                col.id = id++;
-                col.title = col.title || col.name;
-                col.w = col.initW = col.w || 100;
-                col.minW = col.minW || 50;
-                col.grid = grid;
-                grid.colDict[col.id] = grid.colDict[col.name] = grid.colDict[col.name.toLowerCase()] = col;
-            }
-
-            if (!grid.columnsDefaultOrder) {
-                grid.columnsDefaultOrder = [];
-                Object.assign(grid.columnsDefaultOrder, grid.columns);
-            }
-
-            delete grid._waitingColumns;
-        }
-
         if (grid.getColumns && (!grid.columns || grid.columns.length <= 0)) {
             grid.columns = await grid.getColumns();
-            afterGetColumns();
+            grid.afterGetColumns();
         }
         else {
-            afterGetColumns();
+            grid.afterGetColumns();
         }
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -700,7 +748,7 @@ export class GridClass extends BaseComponent {
     selectedRow() {
         const grid = this;
 
-        if (grid.selectedRowIndex === undefined || !grid.rows || grid.rows.length <= 0 || grid.selectedRowIndex < 0 || grid.selectedRowIndex >= grid.rows.length) return;
+        if (grid.selectedRowIndex == null || !grid.rows || grid.rows.length <= 0 || grid.selectedRowIndex < 0 || grid.selectedRowIndex >= grid.rows.length) return;
 
         return grid.rows[grid.selectedRowIndex];
     }
@@ -712,7 +760,7 @@ export class GridClass extends BaseComponent {
         if (!grid.multi) {
             const row = grid.selectedRow();
 
-            return row !== undefined ? row[keyColumn] : '';
+            return row != null ? row[keyColumn] : '';
         }
         else {
             delim = delim || ',';
@@ -731,7 +779,7 @@ export class GridClass extends BaseComponent {
 
         if (!grid.multi) {
             const row = grid.selectedRow();
-            return row !== undefined ? row[grid.nameField] : '';
+            return row != null ? row[grid.nameField] : '';
         }
         else {
             delim = delim || ',';
@@ -757,7 +805,7 @@ export class GridClass extends BaseComponent {
         if (!grid.multi) {
             const row = grid.selectedRow();
 
-            return row !== undefined ? [{ value: row[keyColumn], label: row[grid.nameField] }] : [];
+            return row != null ? [{ value: row[keyColumn], label: row[grid.nameField] }] : [];
         }
         else {
             const res = [];
@@ -828,7 +876,7 @@ export class GridClass extends BaseComponent {
             contentSize = Math.max(contentSize, parseInt(getComputedStyle(fakeDiv).width));
         }
 
-        if (column.maxW !== undefined) {
+        if (column.maxW != null) {
             contentSize = Math.min(contentSize, +column.maxW);
         }
 

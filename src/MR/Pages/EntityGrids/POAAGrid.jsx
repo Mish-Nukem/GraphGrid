@@ -1,8 +1,8 @@
 ﻿import { GridINUClass } from '../../../Grid/GridINU';
 import { Images } from '../../../Grid/Themes/Images';
 import { GLObject } from '../../../Grid/GLObject';
-import { FieldEdit } from '../../../Grid/FieldEdit';
-import { Dropdown } from '../../../Grid/Dropdown';
+//import { FieldEdit } from '../../../Grid/FieldEdit';
+//import { Dropdown } from '../../../Grid/Dropdown';
 import { MainMenu } from '../../../Grid/Pages/MainMenu';
 import { ReportParamsPage } from '../../../Reports/Pages/ReportParamsPage';
 import { BaseComponent, NodeStatus } from '../../../Grid/Base';
@@ -21,6 +21,7 @@ export class POAAGridClass extends GridINUClass {
                             title={grid.TNReportTitle}
                             pos={grid.TNReportPos}
                             visible={grid.isShowingTNReport}
+                            level={grid.level + 1}
                             onClose={() => {
                                 grid.isShowingTNReport = false;
                                 grid.TNReportName = '';
@@ -92,7 +93,9 @@ export class POAAGridClass extends GridINUClass {
 
         if (item.items) return;
 
-        grid.TNReportPos = grid.TNReportPos || { x: 100, y: 100 };
+        const shift = (grid.level + 1) * 20;
+
+        grid.TNReportPos = grid.TNReportPos || { x: 100 + shift, y: 100 + shift };
         grid.isShowingTNReport = true;
         grid.TNReportName = item.action;
         grid.TNReportTitle = item.text;
@@ -101,7 +104,7 @@ export class POAAGridClass extends GridINUClass {
 
         for (let id in grid.graph.nodesDict) {
             let node = grid.graph.nodesDict[id];
-            if (node.status !== NodeStatus.filter || node.value === '' || node.value === undefined || !node.entity) continue;
+            if (node.status !== NodeStatus.filter || node.value === '' || node.value == null || !node.entity) continue;
 
             grid.outerReportParamValues.push({ entity: node.entity, value: node.value, text: node.text || node.selectedText() || node.value });
         }

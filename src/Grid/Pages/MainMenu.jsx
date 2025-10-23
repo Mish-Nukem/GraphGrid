@@ -51,8 +51,8 @@ export class MainMenuClass extends BaseComponent {
 
         menu.id = MainMenuClass._seq++;
 
-        menu.divClassName = props.divClassName !== undefined ? props.divClassName : "main-menu-div";
-        menu.allowCollapse = props.allowCollapse !== undefined ? props.allowCollapse : true;
+        menu.divClassName = props.divClassName != null ? props.divClassName : "main-menu-div";
+        menu.allowCollapse = props.allowCollapse != null ? props.allowCollapse : true;
 
         menu.menuItems = props.menuItems;
         menu.onMenuItemClick = props.onMenuItemClick;
@@ -75,7 +75,7 @@ export class MainMenuClass extends BaseComponent {
         menu.selectedItems = {};
 
         for (let item of menu.menuItems) {
-            if (item.parent === undefined || item.parent === '') {
+            if (item.parent == null || item.parent === '') {
                 item.level = 1;
                 menu.rootLevel.push(item);
             }
@@ -87,10 +87,10 @@ export class MainMenuClass extends BaseComponent {
             found = false;
 
             for (let item of menu.menuItems) {
-                if (item.level !== undefined) continue;
+                if (item.level != null) continue;
 
                 let parentItem = menu.itemsDict[item.parent];
-                if (!parentItem || parentItem.level === undefined) continue;
+                if (!parentItem || parentItem.level == null) continue;
 
                 found = true;
 
@@ -232,9 +232,11 @@ export class MainMenuClass extends BaseComponent {
                 item.maxX = parseInt(rect.x);
             }
 
-            item.x = parseInt(rect.x) + (item.level === 1 ? 0 : parseInt(rect.width));
-            item.y = parseInt(rect.y) + (item.level === 1 ? parseInt(rect.height) : 0);
-            item.minW = parseInt(rect.width);
+            if (item.minW == null || item.minW <= 0) {
+                item.x = parseInt(rect.x) + (item.level === 1 ? 0 : parseInt(rect.width));
+                item.y = parseInt(rect.y) + (item.level === 1 ? parseInt(rect.height) : 0);
+                item.minW = parseInt(rect.width);
+            }
         }
         else {
             menu.isShowingDropdown = item.level !== 1;
