@@ -75,7 +75,16 @@ export class loginFormClass extends BaseComponent {
         const loginForm = this;
         return (
             <>
-                <div className="login-form" style={{ width: '400px' }}>
+                <div className="login-form" style={{ width: '400px', display: 'grid' }}>
+                    <div>
+                        <span className="login-form-item">Disable css</span>
+                        <input type='checkbox' checked={GLObject.disableCss}
+                            onChange={() => {
+                                GLObject.disableCss = !GLObject.disableCss;
+                                loginForm.refreshState();
+                            }}>
+                        </input>
+                    </div>
                     <span className="login-form-item">Server Type</span>
                     <select
                         onChange={(e) => {

@@ -201,7 +201,7 @@ export class ModalClass extends BaseComponent {
                 style={{ display: 'flex', flexWrap: 'nowrap', justifyContent: 'space-between' }}
                 onMouseDown={(e) => wnd.mouseDownDrag(e)}
             >
-                <h4 className={wnd.opt.titleClass}>
+                <h4 className={wnd.opt.titleClass} style={{ margin: '0.5em 0 0.5em 1.5em' }}>
                     {wnd.opt.title || ''}
                 </h4>
                 <button wnd-btn={`close_${wnd.id}_`} type="button" className="close" style={{ color: "black", lineHeight: '1', fontWeight: '21px', border: 'none' }} onClick={() => wnd.close()}>×</button>

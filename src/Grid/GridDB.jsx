@@ -176,12 +176,12 @@ export class GridDBClass extends GridPKClass {
                                         :
                                         <button
                                             key={`toolbarButton_${grid.id}_${button.id}_${ind}_`}
-                                            grid-toolbar-button={`${grid.id}_${button.id}_`}
                                             className={`${button.class || grid.opt.toolbarButtonsClass || BaseComponent.theme.toolbarButtonsClass || 'grid-toolbar-button'}`}
                                             style={{
                                                 width: button.w ? button.w : button.img ? '' : 'auto',
                                                 display: button.getVisible && !button.getVisible() ? 'none' : '',
                                                 padding: button.padding ? button.padding : '',
+                                                margin: '5px 2px',
                                             }}
                                             title={grid.translate(button.title, 'grid-toolbar-button')}
                                             disabled={button.getDisabled && button.getDisabled({ grid: grid }) || button.disabled ? 'disabled' : ''}
@@ -212,6 +212,7 @@ export class GridDBClass extends GridPKClass {
                 <div
                     key={`pagerDiv_${bottom ? 'bottom' : 'top'}_${grid.id}_`}
                     className={grid.opt.pagerClass || BaseComponent.theme.pagerClass || 'grid-pager-default'}
+                    style={{ display: 'flex', alignItems: 'center' }}
                 >
                     {
                         grid.pagerButtons.map((button, ind) => {
@@ -224,6 +225,7 @@ export class GridDBClass extends GridPKClass {
                                         title={grid.translate(button.title, 'grid-pager-button')}
                                         disabled={grid.isEditing() || button.getDisabled && button.getDisabled({ grid: grid }) || button.disabled ? 'disabled' : ''}
                                         onClick={button.click ? button.click : null}
+                                        style={{ margin: '5px 2px' }}
                                     >
                                         {button.img ? button.img() : ''}
                                         {button.label ? grid.translate(button.label, 'grid-pager-button') : ''}
@@ -386,7 +388,7 @@ export class GridDBClass extends GridPKClass {
                             value={grid.pageNumber}
                             grid-pager-item={`${grid.id}_${button.id}_`}
                             className={`${button.class ? button.class : grid.opt.inputClass || BaseComponent.theme.inputClass || 'grid-pager-current'}`}
-                            style={{ width: '3em', display: 'inline-block' }}
+                            style={{ width: '3em', height: '2em', display: 'inline-block', margin: '0 2px' }}
                             disabled={grid._waitingRows || grid.isEditing() ? 'disabled' : ''}
                             onChange={function (e) {
                                 const newPage = +e.target.value;
@@ -475,7 +477,7 @@ export class GridDBClass extends GridPKClass {
                             title={grid.translate(button.title, 'grid-pager-button')}
                             grid-pager-item={`${grid.id}_${button.id}_`}
                             className={`grid-pager-size ${button.class ? button.class : grid.opt.inputClass || BaseComponent.theme.inputClass || ''}`}
-                            style={{ width: '4.5em', display: 'inline-block' }}
+                            style={{ width: '4.5em', height: '2em', display: 'inline-block', margin: '0 2px' }}
                             value={grid.pageSize}
                             disabled={grid._waitingRows || grid.isEditing() ? 'disabled' : ''}
                             onChange={function (e) {
@@ -514,6 +516,7 @@ export class GridDBClass extends GridPKClass {
                         className={'grid-pager-total'}
                         title={grid.translate(button.title, 'grid-pager-button')}
                         key={`pager_${bottom ? 'bottom' : 'top'}_${grid.id}_${button.id}_`}
+                        style={{ margin: '5px 2px' }}
                     >
                         {`${grid.translate('total rows', 'pager-button')} ${grid.totalRows >= 0 ? grid.totalRows : '0'}`}
                     </span>
@@ -560,7 +563,8 @@ export class GridDBClass extends GridPKClass {
                     style={{
                         cursor: col.sortable && !grid._waitingRows && !grid.isEditing() ? 'pointer' : '',
                         gridColumn: !sortDir ? 'span 2' : '', opacity: !grid._waitingRows && !grid.isEditing() ? "1" : "0.6",
-                        whiteSpace: 'nowrap'
+                        whiteSpace: 'nowrap',
+                        overflowX: 'hidden',
                     }}
                     onClick={(e) => { if (!grid._waitingRows) grid.changeColumnSortOrder(col, e); }}
                     disabled={grid._waitingRows || col.disabled ? 'disabled' : ''}

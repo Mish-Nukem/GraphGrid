@@ -13,7 +13,7 @@ export class POAAGridClass extends GridINUClass {
         return (
             <>
                 {super.render()}
-                
+
                 {
                     grid.isShowingTNReport ?
                         <ReportParamsPage
@@ -47,6 +47,7 @@ export class POAAGridClass extends GridINUClass {
             title: 'Отчеты',
             click: (e) => grid.showTNReporstList(e),
             img: Images.images.report,
+            //getDisabled: () => { return grid._waitingRows || grid.isEditing(); },
             render: () => {
                 return (
                     <MainMenu
@@ -64,7 +65,7 @@ export class POAAGridClass extends GridINUClass {
                         onMenuItemClick={(e, item) => {
                             grid.showReport(e, item);
                         }}
-                        getDisabled={() => { return grid._waitingRows; }}
+                        getDisabled={() => { return grid._waitingRows || grid.isEditing(); }}
                     >
                     </MainMenu>
                 );

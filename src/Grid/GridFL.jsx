@@ -128,7 +128,7 @@ export class GridFLClass extends GridDBClass {
                             className={`grid-col-filter ${grid.opt.inputClass || BaseComponent.theme.inputClass || ''}`}
                             value={col.filter != null ? col.filter : ''}
                             title={col.filter != null ? col.filter : ''}
-                            style={{ gridColumn: !hasFilter ? 'span 2' : '', width: 'calc(100% - 4px)' }}
+                            style={{ gridColumn: !hasFilter ? 'span 2' : '', width: 'calc(100% - 10px)' }}
                             grid-col-filter={`${grid.id}_${col.id}_`}
                             onChange={(e) => { grid.onColumnFilterChanging(col, e.target.value, e) }}
                             onClick={(e) => { grid.onColumnFilterClick(col, e); }}
@@ -143,7 +143,7 @@ export class GridFLClass extends GridDBClass {
                             <button
                                 key={`colFilterClear_${grid.id}_${col.id}_`}
                                 className={"grid-filter-clear"}
-                                style={{ color: 'black', display: hasFilter ? '' : 'none' }}
+                                style={{ color: 'black', display: hasFilter ? 'flex' : 'none', justifyContent: 'center', alignItems: 'center', width: '8px' }}
                                 type={'button'}
                                 disabled={grid._waitingRows || grid.isEditing() ? 'disabled' : ''}
                                 onClick={() => grid.clearColumnFilter(col)}
@@ -399,7 +399,7 @@ export class GridFLClass extends GridDBClass {
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     getHeaderGridTemplateColumns(col) {
-        return col.sortInd == null && (col.filter == null || col.filter === '') ? 'auto 8px' : 'auto 18px';
+        return col.sortInd == null /*&& (col.filter == null || col.filter === '')*/ ? 'auto 18px' : 'auto 18px';
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     getGridSettingsList() {

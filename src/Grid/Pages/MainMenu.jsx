@@ -3,6 +3,7 @@ import { Images } from '../Themes/Images';
 import { BaseComponent } from '../Base';
 import { Dropdown } from '../Dropdown';
 import { GLObject } from '../GLObject';
+import { renderToStaticMarkup } from 'react-dom/server';
 export function MainMenu(props) {
     let menu = null;
 
@@ -60,7 +61,10 @@ export class MainMenuClass extends BaseComponent {
         menu.getDisabled = props.getDisabled;
 
         menu.showingItems = [];
-        menu.prepareMenu();
+
+        if (menu.menuItems && menu.menuItems.length > 0) {
+            menu.prepareMenu();
+        }
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     static _seq = 0;
@@ -78,6 +82,7 @@ export class MainMenuClass extends BaseComponent {
             if (item.parent == null || item.parent === '') {
                 item.level = 1;
                 menu.rootLevel.push(item);
+
             }
             menu.itemsDict[item.id] = item;
         }
@@ -100,6 +105,31 @@ export class MainMenuClass extends BaseComponent {
                 item.level = parentItem.level + 1;
             }
         }
+    }
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
+    setRootLevelItemsWidth() {
+        const menu = this;
+        for (let item of menu.rootLevel) {
+            if (item.minW == null) {
+                item.minW = menu.getRootLevelItemWidth(item);
+            }
+        }
+    }
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
+    getRootLevelItemWidth(item) {
+        const menu = this;
+        let res = 0;
+        const fakeDiv = document.createElement('div');
+        fakeDiv.style.opacity = 0;
+        fakeDiv.style.position = 'fixed';
+        fakeDiv.style.height = 'auto';
+        fakeDiv.className = menu.divClassName;
+        fakeDiv.innerHTML = renderToStaticMarkup(menu.renderRootLevelItem(item, 0));
+        document.body.append(fakeDiv);
+        const rect = getComputedStyle(fakeDiv);
+        res = parseInt(rect.width) + 2;//(item.img ? 6 : 2);
+        fakeDiv.remove();
+        return res;
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     render() {
@@ -131,41 +161,7 @@ export class MainMenuClass extends BaseComponent {
                                 <>
                                     {
                                         menu.rootLevel.map((item, ind) => {
-                                            return (
-                                                <button
-                                                    key={`menurootitem_${menu.id}_${item.id}_${ind}_`}
-                                                    title={menu.translate(item.title || item.text)}
-                                                    className={(menu.mainMenuItemClass || '')
-                                                        + (menu.activeItems[item.id] ? ' menu-item-selected' : ' menu-item')
-                                                        + (menu.selectedItems[item.id] ? ' active' : '')}
-                                                    disabled={menu.getDisabled && menu.getDisabled({ item: item }) || item.disabled ? 'disabled' : ''}
-                                                    onClick={(e) => menu.onItemClick(e, item.id)}
-                                                    onMouseEnter={(e) => {
-                                                        if (menu.activeItems[item.id]) {
-                                                            setTimeout(() => {
-                                                                menu.closeDropdowns(e, item.id);
-                                                            }, 10);
-                                                            return;
-                                                        }
-
-                                                        menu.activeItems[item.id] = 1;
-                                                        menu.showChildren(e, item);
-                                                    }}
-                                                    onMouseLeave={() => {
-                                                        setTimeout(() => {
-                                                            if (!menu.activeItems[item.id] || +menu.activeItems[item.id] > 1) return;
-
-                                                            menu.isShowingDropdown = false;
-
-                                                            menu.closeDropdowns();
-                                                        }, 300);
-                                                    }}
-                                                    style={{ minWidth: item.minW }}
-                                                >
-                                                    {item.img ? item.img() : ''}
-                                                    {GLObject.gridSettings.buttonSize > 0 || !item.img ? menu.translate(item.text) || menu.translate(item.text) : ''}
-                                                </button>
-                                            );
+                                            return menu.renderRootLevelItem(item, ind);
                                         })
                                     }
                                     {
@@ -219,6 +215,46 @@ export class MainMenuClass extends BaseComponent {
         );
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
+    renderRootLevelItem(item, ind) {
+        const menu = this;
+
+        return (
+            <button
+                key={`menurootitem_${menu.id}_${item.id}_${ind}_`}
+                title={menu.translate(item.title || item.text)}
+                className={(menu.mainMenuItemClass || '')
+                    + (menu.activeItems[item.id] ? ' menu-item-root-selected' : ' menu-item-root')
+                    + (menu.selectedItems[item.id] ? ' active' : '')}
+                disabled={menu.getDisabled && menu.getDisabled({ item: item }) || item.disabled ? 'disabled' : ''}
+                onClick={(e) => menu.onItemClick(e, item.id)}
+                onMouseEnter={(e) => {
+                    if (menu.activeItems[item.id]) {
+                        setTimeout(() => {
+                            menu.closeDropdowns(e, item.id);
+                        }, 10);
+                        return;
+                    }
+
+                    menu.activeItems[item.id] = 1;
+                    menu.showChildren(e, item);
+                }}
+                onMouseLeave={() => {
+                    setTimeout(() => {
+                        if (!menu.activeItems[item.id] || +menu.activeItems[item.id] > 1) return;
+
+                        menu.isShowingDropdown = false;
+
+                        menu.closeDropdowns();
+                    }, 300);
+                }}
+                style={{ minWidth: item.minW, whiteSpace: 'nowrap' }}
+            >
+                {item.img ? item.img() : ''}
+                {menu.translate(item.text)}
+            </button>
+        );
+    }
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     showChildren(e, item) {
         const menu = this;
 
@@ -233,10 +269,11 @@ export class MainMenuClass extends BaseComponent {
             }
 
             if (item.minW == null || item.minW <= 0) {
-                item.x = parseInt(rect.x) + (item.level === 1 ? 0 : parseInt(rect.width));
-                item.y = parseInt(rect.y) + (item.level === 1 ? parseInt(rect.height) : 0);
                 item.minW = parseInt(rect.width);
             }
+
+            item.x = parseInt(rect.x) + (item.level === 1 ? 0 : parseInt(rect.width));
+            item.y = parseInt(rect.y) + (item.level === 1 ? parseInt(rect.height) : 0);
         }
         else {
             menu.isShowingDropdown = item.level !== 1;
@@ -319,6 +356,16 @@ export class MainMenuClass extends BaseComponent {
     getMainMenuItems() {
         const menu = this;
         return new Promise((resolve) => { resolve(menu.menuItems); });
+    }
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
+    renderImage(name) {
+        return () => {
+            if (!Images._outerImagesDict || !Images._outerImagesDict[name]) return <></>;
+
+            return (
+                <div dangerouslySetInnerHTML={{ __html: Images._outerImagesDict[name] }} className="image-container-div"></div>
+            )
+        };
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     setupEvents() { }

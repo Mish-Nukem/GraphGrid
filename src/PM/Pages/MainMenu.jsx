@@ -1,6 +1,7 @@
 ﻿import { useState, useEffect } from 'react';
 import { MainMenuClass } from '../../Grid/Pages/MainMenu';
 import { GLObject } from '../../Grid/GLObject';
+import Versions from '../../Grid/Versions';
 export function PMMainMenu(props) {
     let menu = null;
 
@@ -46,8 +47,30 @@ export class PMMainMenuClass extends MainMenuClass {
         menu.stateind = 0;
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
+    prepareMenu() {
+        const menu = this;
+        super.prepareMenu();
+
+        for (let item of menu.menuItems) {
+            menu.setItemImage(item);
+        }
+
+        menu.setRootLevelItemsWidth();
+    }
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     render() {
         return super.render();
+    }
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
+    setItemImage(item) {
+        const menu = this;
+        if (!item || !item.action && item.level == 1 || item.img) return;
+
+        switch (item.action) {
+            case 'logout':
+                item.img = menu.renderImage('exit');
+                break;
+        }
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     getMainMenuItems() {
@@ -59,7 +82,7 @@ export class PMMainMenuClass extends MainMenuClass {
             GLObject.dataGetter.get({ url: 'system/getMainMenuItems', params: params }).then(
                 (result) => {
                     result.unshift({ id: -1, action: 'logout', text: GLObject.serverType !== 0 ? "Выход (MSSQL)" : "Выход (PostgreSQL)" });
-                    result.unshift({ id: -2, action: 'about', text: GLObject.versionNum });
+                    result.unshift({ id: -2, action: 'about', text: Versions.LastVersion });
 
                     resolve(result);
                 });

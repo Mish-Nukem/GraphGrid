@@ -21,5 +21,5 @@
 
     static user = '';
 
-    static versionNum = 'v1.0.0';
+    static disableCss = false;
 }

@@ -60,8 +60,6 @@
     }
 
 .overlay-default {
-    display: flex;
-    position: fixed;
     flex-direction: column;
     justify-content: space-between;
 }
@@ -214,6 +212,12 @@
     font-weight: bold;
 }
 
+.grid-pocket-button-div {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
 .grid-pocket-button {
     height: 18px;
     width: 20px;
@@ -251,6 +255,11 @@
     .grid-pager-button:hover:not(:disabled) {
         background-color: lightgray;
         cursor: pointer;
+    }
+
+    .grid-pager-button:disabled {
+        filter: grayscale(1.0);
+        opacity: 0.2;
     }
 
 .toolbar-default {
@@ -298,6 +307,11 @@
     .grid-toolbar-button:hover:not(:disabled) {
         cursor: pointer;
         background-color: lightgray;
+    }
+
+    .grid-toolbar-button:disabled, .grid-toolbar-button-md:disabled, .grid-toolbar-button-lg:disabled {
+        filter: grayscale(1.0);
+        opacity: 0.2;
     }
 
 .grid-toolbar-button-md {
@@ -755,23 +769,45 @@
             background-color: lightgray;
         }
 
-.menu-item {
-    border-width: 1px;
-    border-radius: 2px;
+.menu-item, .menu-item-selected, .menu-item-root, .menu-item-root-selected {
     cursor: pointer;
-    white-space: nowrap;
     padding: 0 6px;
+    /*width: auto;*/
+    border-radius: 3px;
+    border-width: 1px;
+    /*min-width: 6em;*/
+    margin: 4px;
+    overflow: hidden;
 }
 
-    .menu-item:hover {
+.menu-item, .menu-item-selected {
+    display: grid;
+    grid-template-columns: 2em auto;
+    justify-content: start;
+    align-items: center;
+}
+
+.menu-item-root, .menu-item-root-selected {
+    display: flex;
+    justify-content: start;
+    flex-wrap: nowrap;
+    align-items: center;
+    height: 2em;
+}
+
+    .menu-item-root > div.image-container-div, .menu-item-root-selected > div.image-container-div {
+        margin-right: 4px;
+    }
+
+    .menu-item-root:hover {
         background-color: lightgray;
     }
 
-    .menu-item.active {
+    .menu-item-root.active {
         padding: 0 1px;
     }
 
-.menu-item-selected {
+.menu-item-root-selected {
     background-color: lightgray;
     border-width: 1px;
     border-radius: 2px;
@@ -780,7 +816,7 @@
     padding: 0 6px;
 }
 
-    .menu-item-selected.active {
+    .menu-item-root-selected.active {
         padding: 0 1px;
     }
 

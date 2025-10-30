@@ -89,16 +89,18 @@ export class GridPKClass extends GridGRClass {
                     key={`headerCellSelect_${grid.id}_${grid.keyAdd()}_`}
                     grid-header={`${grid.id}_select_`}
                     className={`${grid.opt.columnClass ? grid.opt.columnClass : ''} grid-header-th`}
-                    style={{ position: "sticky", top: 0, width: "1.3em", overflow: "hidden", verticalAlign: "top", padding: "2px 0 0 0" }}
+                    style={{ position: "sticky", top: 0, width: "1.3em", overflow: "hidden", verticalAlign: "top"/*, padding: "2px 0 0 0"*/ }}
                 >
                     {
                         !grid._allRowsOnPageSelected ?
-                            <button
-                                className={(grid.opt.pocketButtonsClass || 'grid-pocket-button') + ' grid-pocket-button-all'}
-                                onClick={(e) => grid.selectAllRows(e)}
-                            >
-                                {'+'}
-                            </button>
+                            <div className="grid-pocket-button-div">
+                                <button
+                                    className={(grid.opt.pocketButtonsClass || 'grid-pocket-button') + ' grid-pocket-button-all'}
+                                    onClick={(e) => grid.selectAllRows(e)}
+                                >
+                                    {'+'}
+                                </button>
+                            </div>
                             :
                             <></>
                     }
@@ -113,16 +115,18 @@ export class GridPKClass extends GridGRClass {
                 :
                 <td
                     key={`gridCellSelect_${grid.id}_${rind}_${grid.keyAdd()}_`}
-                    style={{ padding: "2px 0 0 0" }}
+                    //style={{ padding: "2px 0 0 0" }}
                 >
                     {
                         grid._selectedRowsDict[row[grid.keyField]] == null ?
-                            < button
-                                className={grid.opt.pocketButtonsClass || 'grid-pocket-button'}
-                                onClick={(e) => grid.selectRow(e, row)}
-                            >
-                                {'+'}
-                            </button>
+                            <div className="grid-pocket-button-div">
+                                <button
+                                    className={grid.opt.pocketButtonsClass || 'grid-pocket-button'}
+                                    onClick={(e) => grid.selectRow(e, row)}
+                                >
+                                    {'+'}
+                                </button>
+                            </div>
                             :
                             <></>
                     }
@@ -137,14 +141,16 @@ export class GridPKClass extends GridGRClass {
                 :
                 <td
                     key={`gridCellClear_${grid.id}_${rind}_${grid.keyAdd()}_`}
-                    style={{ padding: "2px 0 0 0" }}
+                    //style={{ padding: "2px 0 0 0" }}
                 >
-                    <button
-                        className={grid.opt.pocketButtonsClass || 'grid-pocket-button'}
-                        onClick={(e) => grid.unselectRow(e, row)}
-                    >
-                        {'-'}
-                    </button>
+                    <div className="grid-pocket-button-div">
+                        <button
+                            className={grid.opt.pocketButtonsClass || 'grid-pocket-button'}
+                            onClick={(e) => grid.unselectRow(e, row)}
+                        >
+                            {'-'}
+                        </button>
+                    </div>
                 </td>
         );
     }
@@ -168,15 +174,17 @@ export class GridPKClass extends GridGRClass {
                             <td
                                 key={`gridPocketSysCol_${grid.id}_`}
                                 className={`${grid.opt.columnClass ? grid.opt.columnClass : ''} grid-header-th`}
-                                style={{ position: "sticky", top: 0, width: "1.5em", overflow: "hidden", verticalAlign: "top", padding: "2px 0 0 0" }}
+                                style={{ position: "sticky", top: 0, width: "1.5em", overflow: "hidden", verticalAlign: "top"/*, padding: "2px 0 0 0"*/ }}
                             >
                                 {hasPocketRows ?
-                                    <button
-                                        className={(grid.opt.pocketButtonsClass || 'grid-pocket-button') + ' grid-pocket-button-all'}
-                                        onClick={(e) => grid.clearPocket(e)}
-                                    >
-                                        {'-'}
-                                    </button>
+                                    <div className="grid-pocket-button-div">
+                                        <button
+                                            className={(grid.opt.pocketButtonsClass || 'grid-pocket-button') + ' grid-pocket-button-all'}
+                                            onClick={(e) => grid.clearPocket(e)}
+                                        >
+                                            {'-'}
+                                        </button>
+                                    </div>
                                     :
                                     <></>
                                 }

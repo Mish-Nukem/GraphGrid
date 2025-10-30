@@ -86,6 +86,7 @@ export class CardINUClass extends GridINUBaseClass {
             <>
                 <div className='graph-card-toolbar'
                     key={`cardToolbarDiv_${card.id}_`}
+                    style={{ margin: '0 1em' }}
                 >
                     {super.renderToolbar()}
                 </div>
@@ -113,6 +114,7 @@ export class CardINUClass extends GridINUBaseClass {
         return (
             <div className="graph-card-field"
                 key={`cardLookupDiv_${card.id}_${col.id}_`}
+                style={{ margin: '0 1em 0.5em 1em' }}
             >
                 <span
                     key={`cardLookupTitle_${card.id}_${col.id}_`}

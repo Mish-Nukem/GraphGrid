@@ -15,6 +15,8 @@
         });
     }
 
+    static LastVersion = 'v1.0.4';
+
     getVersions(e) {
         const versionRows = [
             { Id: 1, Version: '1.0.0', App: 'React Grid', Description: 'Начальная версия.', Date: '21/10/2025' },
@@ -22,6 +24,21 @@
                 Id: 2, Version: '1.0.1', App: 'React Grid',
                 Description: ` 1. При расширении колонок теперь легче нащупать границы колонок.\n 2. Добавлена зависимость параметров отчетов друг от друга.\n 3. Появилась возможность рисовать ячейки с изменяемым по высоте размером.`,
                 Date: '23/10/2025'
+            },
+            {
+                Id: 3, Version: '1.0.2', App: 'React Grid',
+                Description: `Добавлен режим "без CSS", в котором css на странице полностью отсутствует.`,
+                Date: '24/10/2025'
+            },
+            {
+                Id: 4, Version: '1.0.3', App: 'MR',
+                Description: `В проект "Мирный" добавлены PNG-картинки на кнопки гридов и в главное меню.`,
+                Date: '29/10/2025'
+            },
+            {
+                Id: 5, Version: '1.0.4', App: 'React Grid',
+                Description: `В главном меню исправлена ширина корневых пунктов.`,
+                Date: '30/10/2025'
             },
             //{ Id: 3, Version: '1.0.1', App: 'React Grid', Description: 'Вторая версия.', Date: '21/10/2025' },
         ];
@@ -87,8 +104,8 @@
         return [
             { name: 'Id', sortable: true, filtrable: true, w: 60, desc: 1 },
             { name: 'Version', title: '№ Версии', sortable: true, filtrable: true, w: 90 },
-            { name: 'App', title: 'Приложение', sortable: true, filtrable: true, w: 150 },
-            { name: 'Description', title: 'Описание', sortable: true, filtrable: true, w: 300, allowVerticalResize: true },
+            { name: 'App', title: 'Приложение', sortable: true, filtrable: true, w: 140 },
+            { name: 'Description', title: 'Описание', sortable: true, filtrable: true, w: 500, allowVerticalResize: true },
             { name: 'Date', title: 'Дата', sortable: true, filtrable: true, w: 90 }
         ]
     }

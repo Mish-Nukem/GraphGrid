@@ -273,7 +273,7 @@ export class GridINUClass extends GridINUBaseClass {
                     text={col.filter}
                     findFieldEdit={() => { return col._filterEditObj; }}
                     gridColumn={'span 2'}
-                    w={'calc(100% - 3px)'}
+                    w={'calc(100% - 1px)'}
                     divContainerClass={'grid-header-content'}
                     level={grid.level}
                     init={

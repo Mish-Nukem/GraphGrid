@@ -259,7 +259,7 @@ export class FieldEditClass extends BaseComponent {
                                     className={`${fe.large ? fe.inputClassLG : fe.inputClass}`}
                                     value={fe.value || ''}
                                     style={{
-                                        width: 'calc(100% - 1px)',
+                                        width: 'calc(100% - 2px)',
                                         //height: !fe.inputClass ? fe.textareaH : fe.h,
                                         minHeight: !fe.inputClass ? fe.textareaH : fe.h,
                                         height: !fe.large ? '1.8em' : '2.2em',

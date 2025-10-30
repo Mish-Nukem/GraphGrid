@@ -219,6 +219,14 @@ function PMApp() {
                 afterLogin={(tokens) => {
                     if (!tokens) return;
 
+                    if (!GLObject.disableCss) {
+                        //const link = document.createElement('link');
+                        //link.rel = 'stylesheet';
+                        //link.href = '../Grid/css/default.css';
+                        //document.head.appendChild(link);
+                        import('../Grid/css/default.css');
+                    }
+
                     setState({ menuObj: { id: 0 } });
                 }}>
             </LoginPage> :

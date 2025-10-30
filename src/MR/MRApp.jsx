@@ -11,6 +11,7 @@ import { MRMainMenu } from './Pages/MainMenu';
 import { GLObject } from '../Grid/GLObject';
 import { ReportParamsPage } from '../Reports/Pages/ReportParamsPage';
 import Versions from '../Grid/Versions';
+import { Images } from '../Grid/Themes/Images';
 function MRApp() {
     const [state, setState] = useState({ menuObj: { id: - 2 } });
 
@@ -1004,14 +1005,37 @@ function MRApp() {
         }
     };
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
+    let images24 = {};
+    const ChangeImage = (from, to) => {
+        to = to || from;
+        Images._outerImagesDict[from] = `<img src="data:image/png;base64,${images24[to]}"/>`;
+    }
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     return (
         state.menuObj.id < -1 ?
             <LoginPage
                 afterLogin={(tokens) => {
                     if (!tokens) return;
 
-                    setState({ menuObj: { id: 0 } });
-                }}>
+                    if (!GLObject.disableCss) {
+                        import('../Grid/css/default.css');
+                    }
+
+                    GLObject.dataGetter.get({ url: 'system/getImages24', params: [] }).then(
+                        (res) => {
+                            images24 = res;
+
+                            Images._outerImagesDict = Images._outerImagesDict || {};
+
+                            for (let n in images24) {
+                                Images._outerImagesDict[n] = `<img src="data:image/png;base64,${images24[n]}"/>`;
+                            }
+
+                            setState({ menuObj: { id: 0 } });
+                        }
+                    );
+                }}
+            >
             </LoginPage>
             :
             <div >

@@ -463,7 +463,7 @@ export class GridClass extends BaseComponent {
                         className={col.inputClass}
                         value={val != null ? val : ''}
                         style={{
-                            width: 'calc(100% - 1px)',
+                            width: 'calc(100% - 0px)',
                             minHeight: !col.inputClass ? col.textareaH : col.h,
                             height: '1.8em',
                             padding: '0',
@@ -471,6 +471,7 @@ export class GridClass extends BaseComponent {
                             gridColumn: 'span 3',
                             resize: 'vertical',
                             overflow: 'hidden',
+                            border: '0',
                         }}
                         readOnly={true}
                     >
@@ -479,7 +480,7 @@ export class GridClass extends BaseComponent {
             );
         }
 
-        return (<span className='grid-cell'>{val != null ? val : ''}</span>);
+        return (<span className='grid-cell' style={{ display: 'block', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'clip' }}>{val != null ? val : ''}</span>);
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     getColumns() {

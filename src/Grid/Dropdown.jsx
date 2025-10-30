@@ -105,7 +105,7 @@ export class DropdownClass extends ModalClass {
                 <ul
                     key={`dropdown_${dd.id}_`}
                     className={`dropdown-ul ${dd.menuClass || ''}`}
-                    style={{ overflowX: 'hidden' }}
+                    style={{ overflowX: 'hidden', padding: '0', margin: '0' }}
                 >
                     {
                         dd.items.map((item, ind) => {
@@ -115,15 +115,36 @@ export class DropdownClass extends ModalClass {
                                     key={`dropdownitem_${dd.id}_${item.id}_${ind}_`}
                                     title={dd.translate(item.title || item.text)}
                                     className={dd.menuItemClass + (dd.activeItem === item ? ' active' : '')}
-                                    style={{ listStyleType: 'none' }}
+                                    style={{
+                                        listStyleType: 'none',
+                                        display: 'flex',
+                                        justifyContent: 'start',
+                                        flexWrap: 'nowrap',
+                                        alignItems: 'center',
+                                        paddingRight: item.items && item.items.length > 0 ? '' : '1em',
+                                        height: '1.5em',
+                                    }}
                                     onClick={(e) => dd.onItemClick(e, item.id)}
                                     onMouseEnter={(e) => {
                                         if (!dd.opt.onItemMouseEnter) return;
                                         dd.opt.onItemMouseEnter(e, item);
                                     }}
                                 >
-                                    {dd.translate(item.text)}
-                                    {item.items && item.items.length > 0 ? <div>{Images.images.next(20, 10)}</div> : ''}
+                                    <div style={{ width: '2em' }}>
+                                        {item.img ? item.img() : ''}
+                                    </div>
+                                    <div
+                                        style={{
+                                            display: 'flex',
+                                            justifyContent: 'space-between',
+                                            flexWrap: 'nowrap',
+                                            alignItems: 'center',
+                                            width: '100%',
+                                        }}
+                                    >
+                                        <span>{dd.translate(item.text)}</span>
+                                        {item.items && item.items.length > 0 ? Images.images.next(20, 10) : ''}
+                                    </div>
                                 </li>
                             );
                         })
@@ -137,7 +158,7 @@ export class DropdownClass extends ModalClass {
                                     key={`dropdownitem_$${dd.id}_append_`}
                                     title={dd.translate('load more records')}
                                     className={dd.menuItemClass}
-                                    style={{ listStyleType: 'none' }}
+                                    style={{ listStyleType: 'none', display: 'flex', flexWrap: 'nowrap' }}
                                     onClick={(e) => dd.onItemClick(e, 'append')}
                                 >
                                     ${dd.translate('more...')}
