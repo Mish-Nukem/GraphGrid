@@ -56,11 +56,16 @@ export class POAAGridClass extends GridINUClass {
                         mainMenuItemClass={grid.opt.toolbarButtonsClass || BaseComponent.theme.toolbarButtonsClass}
                         divClassName={''}
                         init={(dd) => {
+                            dd.noRootText = GLObject.gridSettings.buttonSize == null || GLObject.gridSettings.buttonSize == 0;
+
                             if (grid.reportsDropdownInitialized) return;
 
                             grid.reportsDropdownInitialized = true;
                             grid.reportsDropdown = dd;
                             dd.getMainMenuItems = grid.getReportsList;
+
+                            dd.noRootAutoWidth = true;
+                            dd.outerRootCSS = true;
                         }}
                         onMenuItemClick={(e, item) => {
                             grid.showReport(e, item);

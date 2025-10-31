@@ -15,7 +15,7 @@
         });
     }
 
-    static LastVersion = 'v1.0.4';
+    static LastVersion = 'v1.0.5';
 
     getVersions(e) {
         const versionRows = [
@@ -40,8 +40,14 @@
                 Description: `В главном меню исправлена ширина корневых пунктов.`,
                 Date: '30/10/2025'
             },
-            //{ Id: 3, Version: '1.0.1', App: 'React Grid', Description: 'Вторая версия.', Date: '21/10/2025' },
+            {
+                Id: 6, Version: '1.0.5', App: 'MR',
+                Description: `В проект "Мирный" добавлена возможность выбирать размеры картинок (16, 24 и 32).`,
+                Date: '31/10/2025'
+            },
         ];
+
+        // Не забываем менять LastVersion выше !!!
 
         if (e.autocompleteColumn) {
             e.grid._autocomplDict = {};

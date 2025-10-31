@@ -12,6 +12,7 @@ import { GLObject } from '../Grid/GLObject';
 import { ReportParamsPage } from '../Reports/Pages/ReportParamsPage';
 import Versions from '../Grid/Versions';
 import { Images } from '../Grid/Themes/Images';
+import { GLSettings } from '../Grid/Pages/GLSettings';
 function MRApp() {
     const [state, setState] = useState({ menuObj: { id: - 2 } });
 
@@ -124,6 +125,14 @@ function MRApp() {
                     <>
                         <div className="div-with-grid">
                             <GraphComponent uid={state.menuObj.id} schemeName=""></GraphComponent>
+                        </div>
+                    </>
+                );
+            case 'SelectColors_Main':
+                return (
+                    <>
+                        <div className="div-with-grid" style={{ width: '500px' }}>
+                            <GLSettings></GLSettings>
                         </div>
                     </>
                 );
@@ -1021,15 +1030,30 @@ function MRApp() {
                         import('../Grid/css/default.css');
                     }
 
-                    GLObject.dataGetter.get({ url: 'system/getImages24', params: [] }).then(
+                    GLObject.dataGetter.get({ url: 'system/getImages', params: [] }).then(
                         (res) => {
-                            images24 = res;
+                            GLObject._outerImages = res;
 
                             Images._outerImagesDict = Images._outerImagesDict || {};
 
-                            for (let n in images24) {
-                                Images._outerImagesDict[n] = `<img src="data:image/png;base64,${images24[n]}"/>`;
+                            GLObject.changeImagesSizes = () => {
+                                for (let n in GLObject._outerImages.images16) {
+                                    Images._outerImagesDict[n] = `<img src="data:image/png;base64,${GLObject._outerImages.images16[n]}"/>`;
+                                }
+
+                                if (GLObject.gridSettings.buttonSize == 1) {
+                                    for (let n in GLObject._outerImages.images24) {
+                                        Images._outerImagesDict[n] = `<img src="data:image/png;base64,${GLObject._outerImages.images24[n]}"/>`;
+                                    }
+                                }
+                                else if (GLObject.gridSettings.buttonSize == 2) {
+                                    for (let n in GLObject._outerImages.images32) {
+                                        Images._outerImagesDict[n] = `<img src="data:image/png;base64,${GLObject._outerImages.images32[n]}"/>`;
+                                    }
+                                }
                             }
+
+                            GLObject.changeImagesSizes();
 
                             setState({ menuObj: { id: 0 } });
                         }

@@ -5,9 +5,9 @@ import { GLObject } from '../GLObject';
 import { BaseComponent } from '../Base';
 
 export function GLSettings(props) {
-    const [pageState, setState] = useState(null);
+    const [pageState, setState] = useState({ settings: null, ind: 0 });
 
-    let sp = pageState || new SettingsPageClass(props);
+    let sp = pageState.settings || new SettingsPageClass(props);
 
     sp.visible = props.visible != null ? props.visible : sp.visible;
 
@@ -16,7 +16,8 @@ export function GLSettings(props) {
     }
 
     sp.refreshState = function () {
-        setState(sp); //{ settings: sp, ind: ++sp.stateind }
+        //++sp.stateind;
+        setState({ settings: sp, ind: ++sp.stateind }); //{ settings: sp, ind: ++sp.stateind }
     }
 
     //useEffect(() => {
@@ -64,7 +65,7 @@ export class SettingsPageClass extends ModalClass {
                         <span>{sp.translate('Theme') + ':'}</span>
                         <div className="field-edit">
                             <Select
-                                key={`themeSelect_${sp.id}_`}
+                                key={`themeSelect_${sp.id}_${sp.stateind}_`}
                                 inputClass={sp.inputClass || ''}
                                 className={sp.selectClass || ''}
                                 value={sp._selectedTheme}
@@ -73,11 +74,11 @@ export class SettingsPageClass extends ModalClass {
                                 required={false}
                                 onChange={(e) => {
                                     sp._selectedTheme = e || { value: 0, label: sp.translate('Default theme') };
+                                    const isBootstrap = sp._selectedTheme.value !== 0;
+
                                     if (sp.parent) {
                                         GLObject.gridSettings.themeId = sp._selectedTheme.value;
                                         GLObject.gridSettings.themeName = sp._selectedTheme.label;
-
-                                        const isBootstrap = sp._selectedTheme.value !== 0;
 
                                         BaseComponent.changeTheme(isBootstrap).then(() => {
                                             sp.changeButtonSizes(isBootstrap);
@@ -90,6 +91,10 @@ export class SettingsPageClass extends ModalClass {
                                         }, 1000);
                                     }
                                     else {
+                                        BaseComponent.changeTheme(isBootstrap).then(() => {
+                                            sp.changeButtonSizes(isBootstrap);
+                                        });
+
                                         sp.refreshState();
                                     }
                                 }}
@@ -103,7 +108,7 @@ export class SettingsPageClass extends ModalClass {
                         <span>{sp.translate('Buttons size') + ':'}</span>
                         <div className="field-edit">
                             <Select
-                                key={`buttnSizeSelect_${sp.id}_${sp.parent ? sp.parent.stateind : ''}_`}
+                                key={`buttnSizeSelect_${sp.id}_${sp.parent ? sp.parent.stateind : sp.stateind}_`}
                                 inputClass={sp.inputClass || ''}
                                 className={sp.selectClass || ''}
                                 value={sp._selectedButtonSize}
@@ -124,6 +129,10 @@ export class SettingsPageClass extends ModalClass {
                                         sp.parent.refreshState();
                                     }
                                     else {
+                                        GLObject.gridSettings.buttonSize = sp._selectedButtonSize.value;
+                                        GLObject.gridSettings.buttonSizeName = sp._selectedButtonSize.label;
+
+                                        sp.changeButtonSizes(sp._selectedTheme.value !== 0);
                                         sp.refreshState();
                                     }
                                 }}
@@ -183,6 +192,10 @@ export class SettingsPageClass extends ModalClass {
 
         const isBootstrap = sp._selectedTheme.value !== 0;
 
+        if (GLObject.changeImagesSizes) {
+            GLObject.changeImagesSizes();
+        }
+
         BaseComponent.changeTheme(isBootstrap).then(() => {
             sp.changeButtonSizes(isBootstrap);
         });
@@ -217,6 +230,10 @@ export class SettingsPageClass extends ModalClass {
                     break;
             }
         }
+
+        if (GLObject.changeImagesSizes) {
+            GLObject.changeImagesSizes();
+        }
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     getThemesList() {
@@ -227,9 +244,9 @@ export class SettingsPageClass extends ModalClass {
                 { value: 1, label: 'Bootstrap' },
             ];
 
-            res = res.filter(
-                (option) => sp._selectedTheme.value !== option.value
-            );
+            //res = res.filter(
+            //    (option) => sp._selectedTheme.value !== option.value
+            //);
 
             resolve({
                 options: res,
@@ -251,9 +268,9 @@ export class SettingsPageClass extends ModalClass {
                 { value: 2, label: sp.translate('Large buttons') },
             ];
 
-            res = res.filter(
-                (option) => sp._selectedButtonSize.value !== option.value
-            );
+            //res = res.filter(
+            //    (option) => sp._selectedButtonSize.value !== option.value
+            //);
 
             resolve({
                 options: res,

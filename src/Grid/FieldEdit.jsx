@@ -465,7 +465,7 @@ export class FieldEditClass extends BaseComponent {
         if (fe.comboboxValues) {
             return new Promise((resolve) => {
                 const result = {
-                    options: fe.removeSelectedValuesFromList(fe.comboboxValues),
+                    options: fe.comboboxValues,//fe.removeSelectedValuesFromList(fe.comboboxValues),
                     hasMore: false,
                     additional: {
                         page: pageNum + 1,

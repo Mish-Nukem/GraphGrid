@@ -108,10 +108,10 @@ export class MRMainMenuClass extends MainMenuClass {
                 item.img = menu.renderImage('');
                 break;
             case 'SelectColors_Main':
-                item.img = menu.renderImage('InterfaceSettings');
+                item.img = menu.renderImage('Управление_системой_Настройки_интерфейса');
                 break;
             case 'acChangePassword':
-                item.img = menu.renderImage('ChangePassword');
+                item.img = menu.renderImage('Управление_системой__Смена_пароля');
                 break;
                 
             //case 'acAddPropertys':
@@ -243,193 +243,192 @@ export class MRMainMenuClass extends MainMenuClass {
                 item.img = menu.renderImage(''); 
                 break;
             case 'acSearchByBarcodeSM':
-                item.img = menu.renderImage('SearchByBarcodeSM'); 
+                item.img = menu.renderImage('Гидрогеология_Опробование_Штрихкодирование_Найти_по_штрихкоду'); 
                 break;
             case 'acListIMK':
-                item.img = menu.renderImage('ListIMK');
+                item.img = menu.renderImage('Кернохранилище_ИМК');
                 break;
             case 'acSmStorageSample':
-                item.img = menu.renderImage('SmStorageSample'); 
+                item.img = menu.renderImage('Кернохранилище_Образцы'); 
                 break;
             case 'acSmStorageCore':
-                item.img = menu.renderImage('SmStorageCore'); 
+                item.img = menu.renderImage('Кернохранилище_Керн'); 
                 break;
             case 'acDocumentSys':
-                item.img = menu.renderImage('DocumentSys'); 
+                item.img = menu.renderImage('Документы_Документы'); 
                 break;
             case 'acMovementsList':
-                item.img = menu.renderImage('MovementsList'); 
+                item.img = menu.renderImage('Управление_работами_Учет_приборов_Перемещения'); 
                 break;
             case 'acRepairsList':
-                item.img = menu.renderImage('RepairsList'); 
+                item.img = menu.renderImage('Управление_работами_Учет_приборов_Ремонты'); 
                 break;
             case 'acMustersList':
-                item.img = menu.renderImage('MustersList'); 
+                item.img = menu.renderImage('Управление_работами_Учет_приборов_Поверки'); 
                 break;
             case 'acGearsList':
-                item.img = menu.renderImage('GearsList'); 
+                item.img = menu.renderImage('Управление_работами_Учет_приборов_Приборы'); 
                 break;
             case 'Ac_ListRestTampPort':
-                item.img = menu.renderImage('ListRestTampPort'); 
+                item.img = menu.renderImage('Управление_работами_Заявки_Восстановление_и_ликвидация_скважин'); 
                 break;
             case 'ac_ListRequestsVn':
-                item.img = menu.renderImage('ListRequestsVn'); 
+                item.img = menu.renderImage('Управление_работами_Заявки_Выноска'); 
                 break;
             case 'ac_ListRequestsPr':
-                item.img = menu.renderImage('ListRequestsPr'); 
+                item.img = menu.renderImage('Управление_работами_Заявки_Привязка'); 
                 break;
             case 'acListRequestsGis':
-                item.img = menu.renderImage('ListRequestsGis'); 
+                item.img = menu.renderImage('Управление_работами_Заявки_ГИС'); 
                 break;
             case 'acCallWorkfactPOFM':
-                item.img = menu.renderImage('CallWorkfactPOFM'); 
+                item.img = menu.renderImage('Управление_работами_Выполнение_работ'); 
                 break;
             case 'acRWCP_coord':
                 item.img = menu.renderImage(''); 
                 break;
             case 'acCoordinate_Epic':
-                item.img = menu.renderImage('OrdinatesEpic'); 
+                item.img = menu.renderImage('Координаты_объектов_Точечные_Эпицентры'); 
                 break;
             case 'acPOAA_coord':
-                item.img = menu.renderImage('OrdinatesPOAA'); 
+                item.img = menu.renderImage('Координаты_объектов_Точечные_Точки_наблюдений'); 
                 break;
             case 'acRWRP_coord':
                 item.img = menu.renderImage(''); 
                 break;
             case 'acLNCM_coord':
-                item.img = menu.renderImage('OrdinatesLinear'); 
+                item.img = menu.renderImage('Координаты_объектов_Линейные'); 
                 break;
             case 'acANAA_coord':
-                item.img = menu.renderImage('OrdinatesANAA'); 
+                item.img = menu.renderImage('Координаты_объектов_Площадные_Аномалии'); 
                 break;
             case 'acGDGD_coord':
-                item.img = menu.renderImage('OrdinatesGDGD'); 
+                item.img = menu.renderImage('Координаты_объектов_Площадные_Месторождения'); 
                 break;
             case 'acLCSE_coord':
-                item.img = menu.renderImage('OrdinatesLCSE'); 
+                item.img = menu.renderImage('Координаты_объектов_Площадные_Лицензии'); 
                 break;
             case 'acGRNA_coord':
-                item.img = menu.renderImage('OrdinatesGRNA'); 
+                item.img = menu.renderImage('Координаты_объектов_Площадные_Участки'); 
                 break;
             case 'acOBWA_coord':
-                item.img = menu.renderImage('OrdinatesOBWA'); 
+                item.img = menu.renderImage('Координаты_объектов_Площадные_Объекты_работ'); 
                 break;
             case 'acWorkAct':
-                item.img = menu.renderImage('WorkAct'); 
+                item.img = menu.renderImage('Документы_Лабораторные_акты'); 
                 break;
             case 'VS_DispatcherPetrophysics':
-                item.img = menu.renderImage('DispatcherPetrophysics'); 
+                item.img = menu.renderImage('Лаборатории_Петрофизика'); 
                 break;
             case 'VS_DispatcherPetrograph':
-                item.img = menu.renderImage('DispatcherPetrograph'); 
+                item.img = menu.renderImage('Лаборатории_Петрография'); 
                 break;
             case 'acListGas':
                 item.img = menu.renderImage(''); 
                 break;
             case 'acListGas_Delphi':
-                item.img = menu.renderImage('ListGas_Delphi'); 
+                item.img = menu.renderImage('Лаборатории_Микрозонд_Шашки'); 
                 break;
             case 'VS_ListAssayMzn_Asrl':
-                item.img = menu.renderImage('ListAssayMzn_Asrl'); 
+                item.img = menu.renderImage('Лаборатории_Микрозонд_Пробы'); 
                 break;
             case 'VS_DispatcherGeochemist':
-                item.img = menu.renderImage('DispatcherGeochemist'); 
+                item.img = menu.renderImage('Лаборатории_Геохимия_Пробы'); 
                 break;
             case 'acMineralogistProcessing':
-                item.img = menu.renderImage('MineralogistProcessing'); 
+                item.img = menu.renderImage('Лаборатории_Минералогия_Обработка_минералогом_по_штрихкоду'); 
                 break;
             case 'acMinLabAssistantProcessing':
-                item.img = menu.renderImage('MinLabAssistantProcessing'); 
+                item.img = menu.renderImage('Лаборатории_Минералогия_Обработка_лаборантом_по_штрихкоду'); 
                 break;
             case 'acSearchByBarcodeMnlAssay':
             case 'acSearchByBarcodeAssayCat':
             case 'acSearchByBarcodeGhlAssay':
-                
-                item.img = menu.renderImage('SearchByBarcodeASSA'); 
+                item.img = menu.renderImage('Поиски_и_Разведка_Опробование_Штрихкодирование_Найти_по_штрихкоду'); 
                 break;
             case 'VS_DispatcherMineralogy':
-                item.img = menu.renderImage('DispatcherMineralogy'); 
+                item.img = menu.renderImage('Лаборатории_Минералогия_Пробы'); 
                 break;
             case 'VS_List_Journal_Prob':
-                item.img = menu.renderImage('JournalASSA'); 
+                item.img = menu.renderImage('Поиски_и_Разведка_Опробование_Журналы_проб'); 
                 break;
             case 'acMoveAssay':
-                item.img = menu.renderImage('MoveASSA'); 
+                item.img = menu.renderImage('Поиски_и_Разведка_Опробование_Штрихкодирование_Перемещение_проб'); 
                 break;
             case 'acSendAcceptCatalog':
-                item.img = menu.renderImage('SendAcceptASSA'); 
+                item.img = menu.renderImage('Поиски_и_Разведка_Опробование_Штрихкодирование_Отправка_прием_проб_сканирование'); 
                 break;
             case 'ac_List_Catalog_Prob':
-                item.img = menu.renderImage('CatalogASSA'); 
+                item.img = menu.renderImage('Поиски_и_Разведка_Опробование_Каталоги_проб'); 
                 break;
             case 'ac_List_Prob':
-                item.img = menu.renderImage('ListASSA');
+                item.img = menu.renderImage('Поиски_и_Разведка_Опробование_Список_проб');
                 break;
             case 'RWGI_CALC_CUBE':
-                item.img = menu.renderImage('RwgiCalcCube'); 
+                item.img = menu.renderImage('Геофизика_РВГИ_Расчеты_3D_куба'); 
                 break;
             case 'RWGI_CALC_RAY':
-                item.img = menu.renderImage('RwgiCalcRay'); 
+                item.img = menu.renderImage('Геофизика_РВГИ_Расчеты_2D_лучей_просвечивания'); 
                 break;
             case 'acRwgiMetering':
-                item.img = menu.renderImage('RwgiMetering'); 
+                item.img = menu.renderImage('Геофизика_РВГИ_Измерения'); 
                 break;
             case 'acRwgiGround':
-                item.img = menu.renderImage('RwgiGround'); 
+                item.img = menu.renderImage('Геофизика_РВГИ_Участок'); 
                 break;
             case 'PoGwsTlviewer':
-                item.img = menu.renderImage('PoGwsTlviewer'); 
+                item.img = menu.renderImage('Геофизика_ГИС_Телевьювер'); 
                 break;
             case 'AcListPoGwsCollector':
-                item.img = menu.renderImage('ListPoGwsCollector'); 
+                item.img = menu.renderImage('Геофизика_ГИС_Коллекторы'); 
                 break;
             case 'VS_Epicentre':
-                item.img = menu.renderImage('Epicentre'); 
+                item.img = menu.renderImage('Геофизика_Эпицентры'); 
                 break;
             case 'ANAA_Call_VS':
-                item.img = menu.renderImage('ANAA'); 
+                item.img = menu.renderImage('Геофизика_Аномалии'); 
                 break;
             case 'acListGis':
-                item.img = menu.renderImage('ListGIS'); 
+                item.img = menu.renderImage('Геофизика_ГИС_Список_ГИС'); 
                 break;
             case 'acPoExperFiltWork':
-                item.img = menu.renderImage('PoExperFiltWork'); 
+                item.img = menu.renderImage('Гидрогеология_ОФР'); 
                 break;
             case 'MONITOR_INVESTIG':
-                item.img = menu.renderImage('MONITOR_INVESTIG'); 
+                item.img = menu.renderImage('Гидрогеология_Режимные_наблюдения'); 
                 break;
             case 'AQ_MONITORING_GRID':
-                item.img = menu.renderImage('AQ_MONITORING'); 
+                item.img = menu.renderImage('Гидрогеология_ВК_и_Режимные_сети'); 
                 break;
             case 'VS_JournalDocum':
                 item.img = menu.renderImage(''); 
                 break;
             case 'VS_TN':
-                item.img = menu.renderImage('POAA');
+                item.img = menu.renderImage('Поиски_и_Разведка_Точки_наблюдений');
                 break;
             case 'VS_GdLevel':
-                item.img = menu.renderImage('GdLevel');
+                item.img = menu.renderImage('Обеспечение_работ_Месторождения_Горизонты');
                 break;
             case 'VS_GdGeolBlock':
-                item.img = menu.renderImage('GdGeolBlock');
+                item.img = menu.renderImage('Обеспечение_работ_Месторождения_Блоки');
                 break;
             case 'VS_GdOreBody':
-                item.img = menu.renderImage('GdOreBody');
+                item.img = menu.renderImage('Обеспечение_работ_Месторождения_Рудные_тела');
                 break;
             case 'VS_GdGeolDeposit':
-                item.img = menu.renderImage('GdGeolDeposit');
+                item.img = menu.renderImage('Обеспечение_работ_Месторождения_Месторождения');
                 break;
             case 'VS_ListLine':
-                item.img = menu.renderImage('LNCM');
+                item.img = menu.renderImage('Обеспечение_работ_Линии_маршруты_наблюдений');
                 break;
             case 'VS_Object_Grna':
-                item.img = menu.renderImage('GRNA');
+                item.img = menu.renderImage('Обеспечение_работ_Участки');
                 break;
             case 'VS_Object_Works':
-                item.img = menu.renderImage('OBWA');
+                item.img = menu.renderImage('Обеспечение_работ_Объекты_работ');
                 break;
             case 'VS_License_Call':
-                item.img = menu.renderImage('LCNE');
+                item.img = menu.renderImage('Обеспечение_работ_Лицензии');
                 break;
             case 'acObwaCoords':
                 item.img = menu.renderImage(''); 
@@ -456,72 +455,72 @@ export class MRMainMenuClass extends MainMenuClass {
                     case 'VS_GdOreBody':
                     case 'VS_GdGeolBlock':
                     case 'VS_GdLevel':
-                        item.img = menu.renderImage('GDGD');
+                        item.img = menu.renderImage('Обеспечение_работ_Месторождения');
                         break;
                     case 'ac_List_Prob':
                     case 'ac_List_Catalog_Prob':
                     case 'VS_List_Journal_Prob':
-                        item.img = menu.renderImage('ASSA');
+                        item.img = menu.renderImage('Поиски_и_Разведка_Опробование');
                         break;
                     case 'acSendAcceptCatalog':
                     case 'acSearchByBarcodeMnlAssay':
                     case 'acMoveAssay':
                     case 'acMinLabAssistantProcessing':
                     case 'acMineralogistProcessing':
-                        item.img = menu.renderImage('BarcodeASSA');
+                        item.img = menu.renderImage('Поиски_и_Разведка_Опробование_Штрихкодирование');
                         break;
                     case 'acListGis':
-                        item.img = menu.renderImage('GIS');
+                        item.img = menu.renderImage('Геофизика_ГИС');
                         break;
                     case 'acRwgiGround':
-                        item.img = menu.renderImage('RWGI');
+                        item.img = menu.renderImage('Геофизика_РВГИ');
                         break;
                     case 'acRWCP_coord':
                     case 'acRWRP_coord':
-                        item.img = menu.renderImage('Ordinates');
+                        item.img = menu.renderImage('Геофизика_РВГИ_Координаты');
                         break;
                     case 'VS_DispatcherMineralogy':
-                        item.img = menu.renderImage('Mineralogy');
+                        item.img = menu.renderImage('Лаборатории_Минералогия');
                         break;
                     case 'VS_DispatcherGeochemist':
-                        item.img = menu.renderImage('Geochemy');
+                        item.img = menu.renderImage('Лаборатории_Геохимия');
                         break;
                     case 'VS_ListAssayMzn_Asrl':
                     case 'acListGas_Delphi':
-                        item.img = menu.renderImage('Microzond');
+                        item.img = menu.renderImage('Лаборатории_Микрозонд');
                         break;
                     case 'acOBWA_coord':
                     case 'acGRNA_coord':
                     case 'acLCSE_coord':
                     case 'acGDGD_coord':
                     case 'acANAA_coord':
-                        item.img = menu.renderImage('OrdinatesArea');
+                        item.img = menu.renderImage('Координаты_объектов_Площадные');
                         break;
                     case 'acCoordinate_Epic':
                     case 'acPOAA_coord':
-                        item.img = menu.renderImage('OrdinatesPoint');
+                        item.img = menu.renderImage('Координаты_объектов_Точечные');
                         break;
                     case 'Ac_ListRestTampPort':
                     case 'ac_ListRequestsVn':
                     case 'ac_ListRequestsPr':
                     case 'acListRequestsGis':
-                        item.img = menu.renderImage('ListRequests');
+                        item.img = menu.renderImage('Управление_работами_Заявки');
                         break;
                     case 'acGearsList':
                     case 'acMovementsList':
                     case 'acRepairsList':
                     case 'acMustersList':
-                        item.img = menu.renderImage('Gears');
+                        item.img = menu.renderImage('Управление_работами_Учет_приборов');
                         break;
                     case 'acLayerProject':
                     case 'ac_MMPM':
-                        item.img = menu.renderImage('LayerMaps');
+                        item.img = menu.renderImage('Карты_отчеты_Разрезы_и_карты');
                         break;
                     case 'acQueryBuilder':
-                        item.img = menu.renderImage('QueryBuilder');
+                        item.img = menu.renderImage('Карты_отчеты_Запросы_к_базе_данных');
                         break;
                     case 'acFuncInterpreter':
-                        item.img = menu.renderImage('Reports');
+                        item.img = menu.renderImage('Карты_отчеты_Отчеты');
                         break;
                     case 'acChangeData':
                     case 'ac_export_grid':
@@ -535,19 +534,19 @@ export class MRMainMenuClass extends MainMenuClass {
                     case 'acExportGroupUsers':
                     case 'acImportUserLightPS':
                     case 'acExportUserLightPS':
-                        item.img = menu.renderImage('DataExchange');
+                        item.img = menu.renderImage('Управление_системой_Обмен_данными');
                         break;
                     case 'acAnalysisTuning':
-                        item.img = menu.renderImage('Dictionaries');
+                        item.img = menu.renderImage('Управление_системой_Справочники');
                         break;
                     case 'acConstrXMLSchemeForms':
-                        item.img = menu.renderImage('UserTables');
+                        item.img = menu.renderImage('Управление_системой_Пользовательские_таблицы');
                         break;
                     case 'ac_USOB':
                     case 'ac_log_scheme':
                     case 'Call_BRCD':
                     case 'acDescrForImpGetter':
-                        item.img = menu.renderImage('SystemAdministration');
+                        item.img = menu.renderImage('Управление_системой__Администрирование_системы');
                         break;
                     //case null: case '': case undefined:
                     //    if (!item.items[0].items || item.items[0].items.length <= 0) return;

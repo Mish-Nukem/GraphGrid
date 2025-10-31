@@ -109,6 +109,8 @@ export class MainMenuClass extends BaseComponent {
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     setRootLevelItemsWidth() {
         const menu = this;
+        if (menu.noRootAutoWidth) return;
+
         for (let item of menu.rootLevel) {
             if (item.minW == null) {
                 item.minW = menu.getRootLevelItemWidth(item);
@@ -222,9 +224,10 @@ export class MainMenuClass extends BaseComponent {
             <button
                 key={`menurootitem_${menu.id}_${item.id}_${ind}_`}
                 title={menu.translate(item.title || item.text)}
-                className={(menu.mainMenuItemClass || '')
-                    + (menu.activeItems[item.id] ? ' menu-item-root-selected' : ' menu-item-root')
-                    + (menu.selectedItems[item.id] ? ' active' : '')}
+                className={menu.outerRootCSS ? menu.mainMenuItemClass :
+                    (menu.activeItems[item.id] ? ' menu-item-root-selected' : ' menu-item-root')
+                    + (menu.selectedItems[item.id] ? ' active' : '')
+                    + (menu.mainMenuItemClass || '')}
                 disabled={menu.getDisabled && menu.getDisabled({ item: item }) || item.disabled ? 'disabled' : ''}
                 onClick={(e) => menu.onItemClick(e, item.id)}
                 onMouseEnter={(e) => {
@@ -247,10 +250,10 @@ export class MainMenuClass extends BaseComponent {
                         menu.closeDropdowns();
                     }, 300);
                 }}
-                style={{ minWidth: item.minW, whiteSpace: 'nowrap' }}
+                style={{ minWidth: !menu.noRootAutoWidth ? item.minW : '', whiteSpace: 'nowrap', minHeight: item.minH }}
             >
                 {item.img ? item.img() : ''}
-                {menu.translate(item.text)}
+                {!menu.noRootText ? menu.translate(item.text) : ''}
             </button>
         );
     }
