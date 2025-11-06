@@ -225,7 +225,7 @@ export class GridDBClass extends GridPKClass {
                                         title={grid.translate(button.title, 'grid-pager-button')}
                                         disabled={grid.isEditing() || button.getDisabled && button.getDisabled({ grid: grid }) || button.disabled ? 'disabled' : ''}
                                         onClick={button.click ? button.click : null}
-                                        style={{ margin: '5px 2px' }}
+                                        style={{ margin: '5px 2px', minHeight: '2em', display: 'flex' }}
                                     >
                                         {button.img ? button.img() : ''}
                                         {button.label ? grid.translate(button.label, 'grid-pager-button') : ''}

@@ -287,6 +287,7 @@ export class GridClass extends BaseComponent {
                                                 display: 'grid',
                                                 gridTemplateColumns: grid.getHeaderGridTemplateColumns(col),
                                                 alignItems: 'center', //'start',//
+                                                justifyItems: 'start',
                                                 gridTemplateRows: '1.5em auto',
                                                 gridAutoFlow: 'row',
                                                 width: 'calc(100% + 8px)',

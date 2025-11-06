@@ -179,7 +179,10 @@ export class MainMenuClass extends BaseComponent {
                                                             menu.refreshState();
                                                         }}
                                                         onItemMouseEnter={(e, childItem) => {
-                                                            if (menu.activeItems[childItem.id]) return;
+                                                            if (menu.activeItems[childItem.id]) {
+                                                                menu.isShowingDropdown = true;
+                                                                return;
+                                                            }
 
                                                             menu.activeItems[childItem.id] = 1;
                                                             menu.showChildren(e, childItem);
@@ -285,17 +288,20 @@ export class MainMenuClass extends BaseComponent {
         menu.showingItems = [];
         menu.activeItems = {};
         let i = 1;
-        while (item) {
+        let pitem = item;
+        while (pitem) {
             if (!e.skipActivate) {
-                menu.activeItems[item.id] = i++;
+                menu.activeItems[pitem.id] = i++;
             }
 
-            if (item.items && item.items.length > 0) {
-                menu.showingItems.unshift(item);
+            if (pitem.items && pitem.items.length > 0) {
+                menu.showingItems.unshift(pitem);
             }
 
-            item = menu.itemsDict[item.parent];
+            pitem = menu.itemsDict[pitem.parent];
         }
+
+        if (!item.items || item.items.length <= 0) return;
 
         menu.refreshState();
     }

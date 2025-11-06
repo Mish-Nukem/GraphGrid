@@ -15,39 +15,51 @@
         });
     }
 
-    static LastVersion = 'v1.0.5';
+    versionRows = [
+        {
+            Id: 0, Version: '1.0.0', App: 'React Grid', Description: 'Начальная версия.', Date: '21/10/2025'
+        },
+        {
+            Id: 1, Version: '1.0.1', App: 'React Grid',
+            Description: ` 1. При расширении колонок теперь легче нащупать границы колонок.\n 2. Добавлена зависимость параметров отчетов друг от друга.\n 3. Появилась возможность рисовать ячейки с изменяемым по высоте размером.`,
+            Date: '23/10/2025'
+        },
+        {
+            Id: 2, Version: '1.0.2', App: 'React Grid',
+            Description: `Добавлен режим "без CSS", в котором css на странице полностью отсутствует.`,
+            Date: '24/10/2025'
+        },
+        {
+            Id: 3, Version: '1.0.3', App: 'MR',
+            Description: `В проект "Мирный" добавлены PNG-картинки на кнопки гридов и в главное меню.`,
+            Date: '29/10/2025'
+        },
+        {
+            Id: 4, Version: '1.0.4', App: 'React Grid',
+            Description: `В главном меню исправлена ширина корневых пунктов.`,
+            Date: '30/10/2025'
+        },
+        {
+            Id: 5, Version: '1.0.5', App: 'MR',
+            Description: `В проект "Мирный" добавлена возможность выбирать размеры картинок (16, 24 и 32).`,
+            Date: '31/10/2025'
+        },
+        {
+            Id: 6, Version: '1.0.6', App: 'React Grid',
+            Description: `Изменения в стилях.`,
+            Date: '05/11/2025'
+        },
+        {
+            Id: 7, Version: '1.0.7', App: 'React Grid',
+            Description: ` 1. Исправлены ошибки в главном меню (при возврате с дочернего списка на родительский пункт закрывалось все меню, исправлено "залипание" меню). \n 2. Исправлена ошибка в lookup-колонке (для readonly-колонок показывался id вместо значения)`,
+            Date: '06/11/2025'
+        },
+    ];
+
+    // Не забываем менять LastVersion !!!
+    static LastVersion = 'v1.0.7';
 
     getVersions(e) {
-        const versionRows = [
-            { Id: 1, Version: '1.0.0', App: 'React Grid', Description: 'Начальная версия.', Date: '21/10/2025' },
-            {
-                Id: 2, Version: '1.0.1', App: 'React Grid',
-                Description: ` 1. При расширении колонок теперь легче нащупать границы колонок.\n 2. Добавлена зависимость параметров отчетов друг от друга.\n 3. Появилась возможность рисовать ячейки с изменяемым по высоте размером.`,
-                Date: '23/10/2025'
-            },
-            {
-                Id: 3, Version: '1.0.2', App: 'React Grid',
-                Description: `Добавлен режим "без CSS", в котором css на странице полностью отсутствует.`,
-                Date: '24/10/2025'
-            },
-            {
-                Id: 4, Version: '1.0.3', App: 'MR',
-                Description: `В проект "Мирный" добавлены PNG-картинки на кнопки гридов и в главное меню.`,
-                Date: '29/10/2025'
-            },
-            {
-                Id: 5, Version: '1.0.4', App: 'React Grid',
-                Description: `В главном меню исправлена ширина корневых пунктов.`,
-                Date: '30/10/2025'
-            },
-            {
-                Id: 6, Version: '1.0.5', App: 'MR',
-                Description: `В проект "Мирный" добавлена возможность выбирать размеры картинок (16, 24 и 32).`,
-                Date: '31/10/2025'
-            },
-        ];
-
-        // Не забываем менять LastVersion выше !!!
 
         if (e.autocompleteColumn) {
             e.grid._autocomplDict = {};
@@ -56,7 +68,7 @@
 
         let rows = [];
 
-        for (let row of versionRows) {
+        for (let row of this.versionRows) {
             if (!this.passRow(e.grid, row, e.autocompleteColumn)) continue;
 
             if (e.autocompleteColumn) {

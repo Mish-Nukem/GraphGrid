@@ -137,6 +137,7 @@
     grid-template-rows: auto auto;
     grid-auto-flow: row;
     align-items: center;
+    justify-items: start;
 }
 
 .grid-header-content {
@@ -144,7 +145,7 @@
     flex-wrap: nowrap;
     justify-content: space-between;
     align-items: center;
-    padding: 2px;
+    padding: 2px 0;
 }
 
 .grid-header-drag-over {
@@ -174,6 +175,7 @@
     justify-content: center;
     align-items: center;
     margin: 0 2px;
+    border-radius: 3px;
 }
 
     .grid-filter-clear:hover {
@@ -249,7 +251,7 @@
     border-width: 1px;
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    justify-content: center;    /*space-between;*/
 }
 
     .grid-pager-button:hover:not(:disabled) {
@@ -457,7 +459,7 @@
     display: grid;
     grid-template-columns: calc(100% - 3em) 1.5em 1.5em;
     grid-template-rows: auto;
-    column-gap: 2px;
+    /*column-gap: 2px;*/
     align-items: center;
     align-content: center;
     white-space: nowrap;
@@ -470,7 +472,7 @@
     grid-template-rows: auto;
     align-items: center;
     align-content: center;
-    column-gap: 2px;
+    /*column-gap: 2px;*/
     width: calc(100% - 2px);
 }
 
@@ -579,11 +581,12 @@
     height: 2.2em;
     */
     min-height: 2.2em;
+    width: 100%;
     border-radius: 3px;
     border-width: 1px;
     display: flex !important;
     align-items: center;
-    justify-content: space-between;
+    justify-content: center; /*space-between;*/
 }
 
     .graph-filter-button:hover:not(:disabled) {
@@ -595,11 +598,12 @@
     /*margin: 5px 0;*/
     /*width: 2.2em;*/
     height: 2.2em;
+    width: 100%;
     border-radius: 3px;
     border-width: 1px;
     display: flex !important;
     align-items: center;
-    justify-content: space-between;
+    justify-content: center; /*space-between;*/
 }
 
     .graph-filter-clear:hover:not(:disabled) {
@@ -703,7 +707,7 @@
     .datepicker-input-lg > div.react-datepicker-wrapper,
     .datepicker-input-lg > div > div.react-datepicker__input-container,
     .datepicker-input-lg > div > div.react-datepicker__input-container input {
-        width: calc(100% - 1px);
+        width: 100%/*calc(100% - 1px);*/
     }
 
         .datepicker-input-lg > div > div.react-datepicker__input-container input {

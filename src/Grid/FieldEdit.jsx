@@ -117,8 +117,9 @@ export class FieldEditClass extends BaseComponent {
     render() {
         const fe = this;
 
-        const isLookup = fe.column.type === 'lookup' && !fe.column.readonly;
-        const isDate = fe.column.type === 'date' && !fe.column.readonly;
+        const isLookup = fe.column.type === 'lookup';// && !fe.column.readonly;
+        const isDate = fe.column.type === 'date';// && !fe.column.readonly;
+        const isReadonly = fe.column.readonly;
         const noClear = fe.column.required || fe.column.readonly || (fe.multi ? fe._selectedOptions.length <= 0 : fe.value == null || fe.value === '');
         const allowCombobox = fe.column.allowCombobox;
 
@@ -135,29 +136,31 @@ export class FieldEditClass extends BaseComponent {
             <>
                 <div
                     key={`fieldEditDiv_${fe.id}_${fe.column.id}_`}
-                    className={fe.divContainerClass ? fe.divContainerClass : fe.large ? 'field-edit' : isLookup || isDate ? 'grid-cell-lookup' : 'grid-cell-edit'}
+                    className={fe.divContainerClass ? fe.divContainerClass : fe.large ? 'field-edit' : (isLookup || isDate) && !isReadonly ? 'grid-cell-lookup' : 'grid-cell-edit'}
                     style={{
                         border: 'none',
                         height: !fe.inputClass ? fe.h : '',
+                        width: '100%',
                         display: 'grid',
                         gridColumn: fe.gridColumn || '',
-                        gridTemplateColumns: fe.large ? (isDate ? 'calc(100% - 2.2em) 2.2em' : 'calc(100% - 5.1em) 2.2em 2.2em') : (isDate ? 'calc(100% - 1.3em) 1.4em' : 'calc(100% - 2.8em) 1.4em 1.4em'), //calc(100% - 2.8em)
+                        gridTemplateColumns: fe.large ? (isDate && !isReadonly ? 'calc(100% - 2.2em) 2.2em' : 'calc(100% - 4.6em) 2.2em 2.2em') : (isDate && !isReadonly ? 'calc(100% - 1.4em) 1.4em' : 'calc(100% - 2.8em) 1.4em 1.4em'), //calc(100% - 2.8em)
                         maxWidth: fe.maxW ? fe.maxW : '',
                         minHeight: fe.large ? '2.5em' : '',
                         columnGap: fe.large ? '0.2em' : '',
                         alignItems: 'center',
+                        justifyItems: 'center',
                         //width: fe.w ? fe.w : `calc(100% - ${isDate ? '2' : '4'}px)`,
                     }}
                 >
                     {
-                        isLookup ?
+                        isLookup && !isReadonly ?
                             <>
                                 {
                                     !allowCombobox ?
                                         <input
                                             key={`fieldLookupTitle_${fe.id}_${fe.column.id}_`}
                                             style={{
-                                                width: 'calc(100% - 1px)',
+                                                width: '100%',//'calc(100% - 1px)',
                                                 gridColumn: noClear ? !fe.comboboxValues ? 'span 2' : 'span 3' : 'span 1',
                                                 overflowX: 'hidden',
                                                 height: !fe.large ? '1.6em' : '2.2em',
@@ -218,12 +221,12 @@ export class FieldEditClass extends BaseComponent {
                                 }
                             </>
                             :
-                            isDate ?
+                            isDate && !isReadonly ?
                                 <>
                                     <div
                                         key={`fieldDateDiv_${fe.id}_${fe.column.id}_`}
                                         style={{
-                                            width: fe.w || '100%',
+                                            width: fe.w || 'calc(100% - 2px)',
                                             height: !fe.inputClass ? fe.h : '',
                                             minHeight: !fe.inputClass ? fe.h : '',
                                             padding: !fe.large ? '0' : '',
@@ -257,9 +260,9 @@ export class FieldEditClass extends BaseComponent {
                                 <textarea
                                     key={`fieldTextarea_${fe.id}_${fe.column.id}_`}
                                     className={`${fe.large ? fe.inputClassLG : fe.inputClass}`}
-                                    value={fe.value || ''}
+                                    value={isLookup ? fe.text : fe.value || ''}
                                     style={{
-                                        width: 'calc(100% - 2px)',
+                                        width: noClear ? 'calc(100% - 2px)' : '100%',
                                         //height: !fe.inputClass ? fe.textareaH : fe.h,
                                         minHeight: !fe.inputClass ? fe.textareaH : fe.h,
                                         height: !fe.large ? '1.8em' : '2.2em',
@@ -451,6 +454,8 @@ export class FieldEditClass extends BaseComponent {
     };
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     removeSelectedValuesFromList(list) {
+        return list;
+
         const fe = this;
         if (!fe._selectedOptions || fe._selectedOptions.length <= 0 || !list || list.length <= 0) return list;
 
@@ -465,7 +470,7 @@ export class FieldEditClass extends BaseComponent {
         if (fe.comboboxValues) {
             return new Promise((resolve) => {
                 const result = {
-                    options: fe.comboboxValues,//fe.removeSelectedValuesFromList(fe.comboboxValues),
+                    options: fe.removeSelectedValuesFromList(fe.comboboxValues),
                     hasMore: false,
                     additional: {
                         page: pageNum + 1,

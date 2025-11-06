@@ -88,7 +88,7 @@ export function Select(props) {
 
     return (
         <div
-            style={{ gridColumn: props.gridColumn || '' }}
+            style={{ gridColumn: props.gridColumn || '', width: '100%' }}
         >
             <AsyncPaginate
                 key={value}
