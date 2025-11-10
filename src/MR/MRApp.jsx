@@ -136,6 +136,17 @@ function MRApp() {
                         </div>
                     </>
                 );
+
+            case 'VS_About_Main':
+                return (
+                    <>
+                        <div className="div-with-grid">
+                            <h1 style={{ display: 'flex', justifyContent: 'center' }}>
+                                Демонстрационная web-версия проекта "Мирный"
+                            </h1>
+                        </div>
+                    </>
+                );
             //case 'acAddPropertys':
             //    return (
             //        <>

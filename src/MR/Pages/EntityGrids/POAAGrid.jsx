@@ -55,6 +55,7 @@ export class POAAGridClass extends GridINUClass {
                         allowCollapse={false}
                         mainMenuItemClass={grid.opt.toolbarButtonsClass || BaseComponent.theme.toolbarButtonsClass}
                         divClassName={''}
+                        displayStyle={'inline'}
                         init={(dd) => {
                             dd.noRootText = GLObject.gridSettings.buttonSize == null || GLObject.gridSettings.buttonSize == 0;
 

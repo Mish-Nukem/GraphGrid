@@ -55,6 +55,8 @@ export class MainMenuClass extends BaseComponent {
         menu.divClassName = props.divClassName != null ? props.divClassName : "main-menu-div";
         menu.allowCollapse = props.allowCollapse != null ? props.allowCollapse : true;
 
+        menu.displayStyle = props.displayStyle;
+
         menu.menuItems = props.menuItems;
         menu.onMenuItemClick = props.onMenuItemClick;
 
@@ -143,7 +145,7 @@ export class MainMenuClass extends BaseComponent {
                     <div
                         key={`mainmenu_div_${menu.id}_`}
                         className={menu.divClassName}
-                        style={{ height: menu.collapsed ? '0' : '' }}
+                        style={{ height: menu.collapsed ? '0' : '', display: menu.displayStyle || '' }}
                     >
                         {
                             menu.allowCollapse ?
@@ -301,8 +303,7 @@ export class MainMenuClass extends BaseComponent {
             pitem = menu.itemsDict[pitem.parent];
         }
 
-        if (!item.items || item.items.length <= 0) return;
-
+        //if (!item.items || item.items.length <= 0) return;
         menu.refreshState();
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------

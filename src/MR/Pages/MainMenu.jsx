@@ -441,6 +441,15 @@ export class MRMainMenuClass extends MainMenuClass {
             case null: case '': case undefined:
                 if (!item.items || item.items.length <= 0) return;
 
+                switch (item.text.toLowerCase()) {
+                    case 'отчеты':
+                        item.img = menu.renderImage('Карты_отчеты_Отчеты');
+                        return;
+                    case 'справочники':
+                        item.img = menu.renderImage('Управление_системой_Справочники');
+                        return;
+                }
+
                 //chAction = item.items[0].action;
                 for (let ind in item.items) {
                     chItm = item.items[ind];
