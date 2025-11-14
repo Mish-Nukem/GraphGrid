@@ -3,19 +3,28 @@ import { AsyncPaginate } from 'react-select-async-paginate';
 export function Select(props) {
     const [value, setValue] = useState(props.value);
 
-    if (value !== props.value) {
-        setValue(props.value);
-    }
+    //if (value !== props.value) {
+    //    setValue(props.value);
+    //}
 
     const getOptions = props.getOptions;
 
-    const loadOptions = async (inputValue, loadedOptions, { page }) => {
-
-        if (getOptions && !props.disabled) {
-            const res = await getOptions(inputValue, page);
-            return res;
+    const loadOptions =
+        props.noAsync ? (inputValue, loadedOptions, { page }) => {
+            if (getOptions && !props.disabled) {
+                const res = getOptions(inputValue, page);
+                return res;
+            }
         }
-    };
+            :
+            async (inputValue, loadedOptions, { page }) => {
+
+                if (getOptions && !props.disabled) {
+                    const res = await getOptions(inputValue, page);
+                    return res;
+                }
+            };
+
 
     const height = props.height || '30px';
     const className = props.className || '';
@@ -91,11 +100,10 @@ export function Select(props) {
             style={{ gridColumn: props.gridColumn || '', width: '100%' }}
         >
             <AsyncPaginate
-                key={value}
                 value={!props.isMulti ? value : value && value.length > 0 ? value : ''}
+                //defaultOptions={value && value.length > 0 ? value : undefined}
                 isMulti={props.isMulti}
                 isClearable={!props.required}
-                //cacheOptions
                 cacheUniqs={props.cache}
                 loadOptions={loadOptions}
                 additional={{
@@ -110,6 +118,28 @@ export function Select(props) {
                 isDisabled={props.disabled ? true : false}
                 style={props.style}
                 menuPortalTarget={document.body}
+                mapOptionsForMenu={(list) => {
+                    if (value == null || value.length <= 0 || list.length <= 0) return list;
+
+                    const vArr = Array.isArray(value) ? value : [value];
+
+                    //const updatedList = list.map((itm) => {
+                    //    if (itm.value === vArr[0].value) {
+                    //        return vArr[0]; // Replace with the new object
+                    //    }
+                    //    return itm; // Keep the original object
+                    //});
+
+                    //return updatedList;
+
+                    list = list.filter(
+                        (option) => !vArr.some((selected) => selected.value === option.value)
+                    );
+
+                    list.unshift(...vArr);
+
+                    return list;
+                }}
             >
             </AsyncPaginate >
         </div>

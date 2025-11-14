@@ -180,6 +180,7 @@ export class FieldEditClass extends BaseComponent {
                                             className={fe.selectClass || ''}
                                             value={fe._selectedOptions}
                                             getOptions={(filter, pageNum) => fe.getLookupValues(filter, pageNum)}
+                                            noAsync={fe.comboboxValues != null}
                                             height={fe.selectH}
                                             gridColumn={noClear ? !fe.comboboxValues ? 'span 2' : 'span 3' : 'span 1'}
                                             isMulti={fe.multi}

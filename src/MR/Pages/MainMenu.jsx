@@ -3,6 +3,8 @@ import { MainMenuClass } from '../../Grid/Pages/MainMenu';
 import { GLObject } from '../../Grid/GLObject';
 import Versions from '../../Grid/Versions';
 import { Images } from '../../Grid/Themes/Images';
+import { BaseComponent, log } from '../../Grid/Base';
+
 export function MRMainMenu(props) {
     let menu = null;
 
@@ -15,6 +17,7 @@ export function MRMainMenu(props) {
     }
 
     menu.refreshState = function () {
+        log(` ---- refreshState ${menu.stateind} --------------- `);
         setState({ menu: menu, ind: menu.stateind++ });
     }
 

@@ -52,6 +52,7 @@ export class MainMenuClass extends BaseComponent {
 
         menu.id = MainMenuClass._seq++;
 
+        menu.windowClass = "main-menu-wnd";
         menu.divClassName = props.divClassName != null ? props.divClassName : "main-menu-div";
         menu.allowCollapse = props.allowCollapse != null ? props.allowCollapse : true;
 
@@ -77,7 +78,6 @@ export class MainMenuClass extends BaseComponent {
 
         menu.rootLevel = [];
         menu.itemsDict = {};
-        menu.activeItems = {};
         menu.selectedItems = {};
 
         for (let item of menu.menuItems) {
@@ -173,31 +173,33 @@ export class MainMenuClass extends BaseComponent {
                                             menu.showingItems.map((item, ind) => {
                                                 return (
                                                     <Dropdown
-                                                        key={`menudropdownitem_${menu.id}_${item.id}_${ind}_`}
-                                                        onItemClick={(e) => menu.onItemClick(e, e.itemId)}
-                                                        onClose={() => {
-                                                            menu.isShowingDropdown = false;
-                                                            menu.showingItems = [];
-                                                            menu.refreshState();
+                                                        keyAdd={`menudropdownitem_${menu.id}_${item.id}_${ind}_${menu.stateind}_`}
+                                                        onItemClick={(e) => {
+                                                            menu.onItemClick(e, e.itemId);
                                                         }}
                                                         onItemMouseEnter={(e, childItem) => {
-                                                            if (menu.activeItems[childItem.id]) {
-                                                                menu.isShowingDropdown = true;
-                                                                return;
-                                                            }
+                                                            menu.isShowingDropdown = true;
 
-                                                            menu.activeItems[childItem.id] = 1;
-                                                            menu.showChildren(e, childItem);
+                                                            menu._currentItem = childItem;
+
+                                                            setTimeout(() => {
+                                                                if (menu._currentItem != childItem) return;
+
+                                                                menu.showChildren(e.target.closest('LI').getBoundingClientRect(), childItem);
+                                                            }, 100);
                                                         }}
-                                                        onMouseLeave={() => {
+                                                        onItemMouseLeave={(_, childItem) => {
                                                             menu.isShowingDropdown = false;
                                                             setTimeout(() => {
+                                                                if (menu._currentItem != childItem) return;
+
                                                                 menu.closeDropdowns();
-                                                            }, 100);
+                                                            }, 300);
                                                         }}
                                                         items={item.items}
                                                         dimensionsByContent={true}
                                                         isModal={false}
+                                                        windowClass={menu.windowClass}
                                                         pos={{ x: item.x, y: item.y, minW: item.minW, maxX: item.maxX }}
                                                         init={(dd) => {
                                                             dd.activeItem = item.items.find(function (fitem) {
@@ -230,28 +232,31 @@ export class MainMenuClass extends BaseComponent {
                 key={`menurootitem_${menu.id}_${item.id}_${ind}_`}
                 title={menu.translate(item.title || item.text)}
                 className={menu.outerRootCSS ? menu.mainMenuItemClass :
-                    (menu.activeItems[item.id] ? ' menu-item-root-selected' : ' menu-item-root')
+                    ' menu-item-root'
                     + (menu.selectedItems[item.id] ? ' active' : '')
                     + (menu.mainMenuItemClass || '')}
                 disabled={menu.getDisabled && menu.getDisabled({ item: item }) || item.disabled ? 'disabled' : ''}
                 onClick={(e) => menu.onItemClick(e, item.id)}
                 onMouseEnter={(e) => {
-                    if (menu.activeItems[item.id]) {
-                        setTimeout(() => {
-                            menu.closeDropdowns(e, item.id);
-                        }, 10);
-                        return;
-                    }
 
-                    menu.activeItems[item.id] = 1;
-                    menu.showChildren(e, item);
+                    menu._currentItem = item;
+
+                    menu.isShowingDropdown = item.items && item.items.length > 0;
+
+                    setTimeout(() => {
+                        if (menu._currentItem != item) return;
+
+                        if (menu.isShowingDropdown) {
+                            menu.showChildren(e.target.closest('BUTTON').getBoundingClientRect(), item);
+                        }
+                        else {
+                            menu.closeDropdowns();
+                        }
+                    }, 100);
                 }}
                 onMouseLeave={() => {
+                    menu.isShowingDropdown = false;
                     setTimeout(() => {
-                        if (!menu.activeItems[item.id] || +menu.activeItems[item.id] > 1) return;
-
-                        menu.isShowingDropdown = false;
-
                         menu.closeDropdowns();
                     }, 300);
                 }}
@@ -263,17 +268,15 @@ export class MainMenuClass extends BaseComponent {
         );
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
-    showChildren(e, item) {
+    showChildren(rect, item) {
         const menu = this;
 
         if (item.items && item.items.length > 0) {
-
-            menu.isShowingDropdown = true;
-
-            const rect = e.target.getBoundingClientRect();
-
             if (item.level > 1 && rect.x + rect.width * 2 >= document.documentElement.clientWidth) {
                 item.maxX = parseInt(rect.x);
+            }
+            else {
+                delete item.maxX;
             }
 
             if (item.minW == null || item.minW <= 0) {
@@ -283,19 +286,15 @@ export class MainMenuClass extends BaseComponent {
             item.x = parseInt(rect.x) + (item.level === 1 ? 0 : parseInt(rect.width));
             item.y = parseInt(rect.y) + (item.level === 1 ? parseInt(rect.height) : 0);
         }
-        else {
-            menu.isShowingDropdown = item.level !== 1;
+        else if (menu._lastShowingItem && (!menu._lastShowingItem.items || menu._lastShowingItem.items.length <= 0)) {
+            return;
         }
 
+        if (menu._lastShowingItem == item) return;
+
         menu.showingItems = [];
-        menu.activeItems = {};
-        let i = 1;
         let pitem = item;
         while (pitem) {
-            if (!e.skipActivate) {
-                menu.activeItems[pitem.id] = i++;
-            }
-
             if (pitem.items && pitem.items.length > 0) {
                 menu.showingItems.unshift(pitem);
             }
@@ -303,7 +302,8 @@ export class MainMenuClass extends BaseComponent {
             pitem = menu.itemsDict[pitem.parent];
         }
 
-        //if (!item.items || item.items.length <= 0) return;
+        menu._lastShowingItem = item;
+
         menu.refreshState();
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -312,29 +312,8 @@ export class MainMenuClass extends BaseComponent {
 
         if (menu.isShowingDropdown || menu.showingItems.length <= 0) return;
 
+        delete menu._lastShowingItem;
         menu.showingItems = [];
-        menu.activeItems = {};
-        menu.refreshState();
-    }
-    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
-    hideChildren(item) {
-        const menu = this;
-
-        if (menu.isShowingDropdown || menu.showingItems.length <= 0) return;
-
-        menu.showingItems = [];
-        menu.activeItems = {};
-        item = menu.itemsDict[item.parent];
-
-        while (item) {
-            menu.showingItems.push(item);
-            menu.activeItems[item.id] = 1;
-
-            item = menu.itemsDict[item.parent];
-        }
-
-        menu.isShowingDropdown = menu.showingItems.length > 0;
-
         menu.refreshState();
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -342,12 +321,8 @@ export class MainMenuClass extends BaseComponent {
         const menu = this;
         let item = menu.itemsDict[itemId];
 
-        if (item.level === 1 && (!item.items || item.items.length <= 0)) {
-            menu.activeItems = {};
-        }
-
         if (item.items && item.items.length > 0) {
-            menu.showChildren(e, item)
+            menu.showChildren(e.target.closest('LI').getBoundingClientRect(), item)
         }
         else {
             menu.onMenuItemClick(e, item, menu);

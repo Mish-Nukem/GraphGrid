@@ -70,6 +70,7 @@ export class DropdownClass extends ModalClass {
         dd.opt.hiddenOverlay = true;
 
         dd.opt.onItemMouseEnter = props.onItemMouseEnter;
+        dd.opt.onItemMouseLeave = props.onItemMouseLeave;
 
         dd.renderContent = dd.renderDropdownContent;
 
@@ -88,6 +89,10 @@ export class DropdownClass extends ModalClass {
                 dd.refreshState();
             }
         );
+    }
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
+    render() {
+        return super.render();
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     renderDropdownContent() {
@@ -129,6 +134,10 @@ export class DropdownClass extends ModalClass {
                                         if (!dd.opt.onItemMouseEnter) return;
                                         dd.opt.onItemMouseEnter(e, item);
                                     }}
+                                    onMouseLeave={(e) => {
+                                        if (!dd.opt.onItemMouseLeave) return;
+                                        dd.opt.onItemMouseLeave(e, item);
+                                    }}
                                 >
                                     <div style={{ width: '2em' }}>
                                         {item.img ? item.img() : ''}
@@ -169,10 +178,6 @@ export class DropdownClass extends ModalClass {
                 </ul>
             </>
         );
-    }
-    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
-    render() {
-        return super.render();
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     calcPos(e) {

@@ -749,6 +749,10 @@
         margin-top: 1px;
     }
 
+.main-menu-wnd {
+    border-color: lightgray !important;
+}
+
 .main-menu-div {
     display: flex;
     flex-wrap: nowrap;

@@ -44,6 +44,8 @@ export class ModalClass extends BaseComponent {
 
         wnd.id = ModalClass._seq++;
 
+        wnd.opt.keyAdd = props.keyAdd;
+
         wnd.opt.zInd = props.zInd || ++OverlayClass._zInd;
 
         wnd.opt.pos = props.pos || { x: 0, y: 0, w: '100%', h: '100%' };
@@ -70,6 +72,7 @@ export class ModalClass extends BaseComponent {
         wnd.opt.margin = props.margin;
         wnd.opt.padding = props.padding;
 
+        wnd.opt.windowClass = props.windowClass;
         wnd.opt.bodyClass = props.bodyClass || BaseComponent.theme.modalBodyClass || 'modal-window-body';
         wnd.opt.headerClass = props.headerClass || BaseComponent.theme.modalHeaderClass || 'modal-window-header';
         wnd.opt.footerClass = props.footerClass || BaseComponent.theme.modalFooterClass || 'modal-window-footer';
@@ -122,7 +125,7 @@ export class ModalClass extends BaseComponent {
             const rect = wnd.getDimensionsByContent(wnd.opt.margin, wnd.opt.padding);
             wnd.opt.pos.w = rect.w || wnd.opt.pos.w;
             wnd.opt.pos.h = rect.h || wnd.opt.pos.h;
-            if (wnd.opt.pos.maxX) {
+            if (wnd.opt.pos.maxX != null && parseInt(wnd.opt.pos.x) > wnd.opt.pos.maxX) {
                 wnd.opt.pos.x = (wnd.opt.pos.maxX - Math.max(wnd.opt.pos.w, parseInt(wnd.opt.pos.minW) || 0)) + 'px';
             }
         }
@@ -150,7 +153,7 @@ export class ModalClass extends BaseComponent {
             <>
                 <div
                     id={`window_${wnd.id}_`}
-                    key={`window_${wnd.id}_`}
+                    key={`window_${wnd.id}_${wnd.opt.keyAdd != null ? wnd.opt.keyAdd : ''}_`}
                     style={
                         {
                             width: wnd.opt.pos.w,
@@ -171,7 +174,7 @@ export class ModalClass extends BaseComponent {
                             border: '1px solid',
                         }
                     }
-                    className="modal-window-wnd"
+                    className={`modal-window-wnd ${wnd.opt.windowClass || ''}`}
                     onMouseLeave={(e) => wnd.onMouseLeave(e)}
                     onMouseEnter={(e) => wnd.onMouseEnter(e)}
                 >
