@@ -130,7 +130,7 @@ export class FieldEditClass extends BaseComponent {
         if (isDate && fe.value) {
             //parsedDate = format(fe.value, dateFormat);
 
-            parsedDate = parse(fe.value, dateFormat, new Date());
+            parsedDate = parse(fe.value, fe.dateTimeFormat, new Date());
             if (!isValid(parsedDate)) {
                 parsedDate = '';
                 fe.value = '';
@@ -254,8 +254,8 @@ export class FieldEditClass extends BaseComponent {
                                                     showYearDropdown
                                                     onSelect={(date) => {
                                                         const e = {};
-                                                        fe.value = fe.text = format(date, dateFormat);
-                                                        e.value = e.text = format(date, dateFormat);
+                                                        fe.value = fe.text = format(date, fe.dateTimeFormat);
+                                                        e.value = e.text = format(date, fe.dateTimeFormat);
                                                         e.fe = fe;
                                                         fe.onChange(e);
                                                     }}
