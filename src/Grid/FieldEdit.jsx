@@ -8,7 +8,7 @@ import { Images } from './Themes/Images';
 import DatePicker, { registerLocale } from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import ru from "date-fns/locale/ru";
-import Moment from 'moment';
+import { format, isValid, parse } from 'date-fns'
 import { GLObject } from './GLObject';
 
 registerLocale("ru", ru);
@@ -52,6 +52,7 @@ export function FieldEdit(props) {
     fe.clearButtonClass = props.clearButtonClass || BaseComponent.theme.clearButtonClass || '';
     fe.selectClass = props.selectClass || BaseComponent.theme.selectClass || '';
     fe.datePickerDateFormat = props.datePickerDateFormat || 'dd.MM.yyyy';
+    //fe.datePickerDateTimeFormat = props.datePickerDateTimeFormat || 'dd.MM.yyyy HH:mm:ss';
     fe.divContainerClass = props.divContainerClass || '';
 
     fe.w = props.w;
@@ -107,6 +108,7 @@ export class FieldEditClass extends BaseComponent {
         fe.large = props.large;
 
         fe.dateFormat = props.dateFormat || BaseComponent.dateFormat;
+        fe.dateTimeFormat = props.dateTimeFormat || BaseComponent.dateTimeFormat;
 
         // просто разметка 'span 2' etc.
         fe.gridColumn = props.gridColumn;
@@ -118,15 +120,18 @@ export class FieldEditClass extends BaseComponent {
         const fe = this;
 
         const isLookup = fe.column.type === 'lookup';// && !fe.column.readonly;
-        const isDate = fe.column.type === 'date';// && !fe.column.readonly;
+        const isDate = fe.column.type === 'date' || fe.column.type === 'datetime';// && !fe.column.readonly;
+        const dateFormat = fe.column.type === 'date' ? fe.dateFormat : fe.column.type === 'datetime' ? fe.dateTimeFormat : '';
         const isReadonly = fe.column.readonly;
         const noClear = fe.column.required || fe.column.readonly || (fe.multi ? fe._selectedOptions.length <= 0 : fe.value == null || fe.value === '');
         const allowCombobox = fe.column.allowCombobox;
 
         let parsedDate;
         if (isDate && fe.value) {
-            parsedDate = Moment(fe.value, fe.dateFormat);
-            if (!parsedDate.isValid()) {
+            //parsedDate = format(fe.value, dateFormat);
+
+            parsedDate = parse(fe.value, dateFormat, new Date());
+            if (!isValid(parsedDate)) {
                 parsedDate = '';
                 fe.value = '';
             }
@@ -237,24 +242,49 @@ export class FieldEditClass extends BaseComponent {
                                         }}
                                         className={fe.large ? 'datepicker-input-lg' : 'datepicker-input'}
                                     >
-                                        <DatePicker
-                                            selected={parsedDate}
-                                            className={fe.inputClass || ''}
-                                            style={{ height: fe.textareaH }}
-                                            locale="ru"
-                                            dateFormat={fe.datePickerDateFormat}
-                                            showMonthDropdown
-                                            showYearDropdown
-                                            onSelect={(date) => {
-                                                const e = {};
-                                                fe.value = fe.text = Moment(date, fe.datePickerDateFormat).format(fe.dateFormat);
-                                                e.value = e.text = Moment(date, fe.datePickerDateFormat).format(fe.dateFormat);
-                                                e.fe = fe;
-                                                fe.onChange(e);
-                                            }}
-                                            disabled={fe.disabled}
-                                            portalId="root-portal"
-                                        ></DatePicker>
+                                        {
+                                            fe.column.type === 'date' ?
+                                                <DatePicker
+                                                    selected={parsedDate}
+                                                    className={fe.inputClass || ''}
+                                                    style={{ height: fe.textareaH }}
+                                                    locale="ru"
+                                                    dateFormat={fe.datePickerDateFormat}
+                                                    showMonthDropdown
+                                                    showYearDropdown
+                                                    onSelect={(date) => {
+                                                        const e = {};
+                                                        fe.value = fe.text = format(date, dateFormat);
+                                                        e.value = e.text = format(date, dateFormat);
+                                                        e.fe = fe;
+                                                        fe.onChange(e);
+                                                    }}
+                                                    disabled={fe.disabled}
+                                                    portalId="root-portal"
+                                                ></DatePicker>
+                                                :
+                                                <DatePicker
+                                                    selected={parsedDate}
+                                                    className={fe.inputClass || ''}
+                                                    style={{ height: fe.textareaH }}
+                                                    locale="ru"
+                                                    dateFormat={fe.datePickerDateFormat}
+                                                    showTimeSelect
+                                                    timeFormat="HH:mm"
+                                                    timeIntervals={15}
+                                                    showMonthDropdown
+                                                    showYearDropdown
+                                                    onChange={(date) => {
+                                                        const e = {};
+                                                        fe.value = fe.text = format(date, dateFormat);
+                                                        e.value = e.text = format(date, dateFormat);
+                                                        e.fe = fe;
+                                                        fe.onChange(e);
+                                                    }}
+                                                    disabled={fe.disabled}
+                                                    portalId="root-portal"
+                                                ></DatePicker>
+                                        }
                                     </div>
                                 </>
                                 :
@@ -297,6 +327,11 @@ export class FieldEditClass extends BaseComponent {
                                     fe._selectedOptions = [];
 
                                     e.fe = fe;
+
+                                    if (isDate) {
+                                        e.value = null;
+                                    }
+
                                     fe.onChange(e);
                                     fe.refreshState();
                                 }}
@@ -352,7 +387,7 @@ export class FieldEditClass extends BaseComponent {
                     findGrid={() => { return fe.grid; }}
                     onSelectValue={(e) => {
                         fe._selectedOptions = e.values || [];
-;
+                        ;
                         fe.value = e.value;
                         fe.text = e.text;
 
@@ -381,6 +416,11 @@ export class FieldEditClass extends BaseComponent {
                                 }
                             }
                         }
+
+                        lookupGrid.closeSelfWnd = () => {
+                            fe.lookupIsShowing = false;
+                            fe.refreshState();
+                        };
                     }}
                     onClose={() => {
                         if (fe.ownerGrid) {

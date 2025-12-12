@@ -550,6 +550,7 @@ export class GridINUBaseClass extends GridFLClass {
         if (grid.skipOnWaveVisit(e)) return;
 
         grid.selectedRowIndex = 0;
+        grid.pageNumber = 1;
 
         if (grid.status === NodeStatus.grid && grid.visible === true) {
             const isLast = e.list.length <= 0;

@@ -2,7 +2,7 @@
 import { renderToStaticMarkup } from 'react-dom/server';
 import { BaseComponent, log } from './Base';
 import { OverlayClass } from './Overlay';
-import Moment from 'moment';
+import { format, parse } from 'date-fns'
 // ==================================================================================================================================================================
 export function Grid(props) {
     let grid = null;
@@ -91,8 +91,8 @@ export class GridClass extends BaseComponent {
             grid.renderCell = props.renderCell;
         }
 
-        grid.dateFormat = props.dateFormat || 'DD.MM.YYYY';
-        grid.dateTimeFormat = props.dateTimeFormat || 'DD.MM.YYYY HH:mm:ss';
+        grid.dateFormat = props.dateFormat || 'dd.MM.yyyy';//'DD.MM.YYYY';
+        grid.dateTimeFormat = props.dateTimeFormat || 'dd.MM.yyyy HH:mm:ss';
 
         grid.rows = [];
         grid.columns = [];
@@ -453,7 +453,12 @@ export class GridClass extends BaseComponent {
         let val = row[col.name];
 
         if (col.type === 'date' && val) {
-            val = Moment(val, grid.dateFormat).format(grid.dateFormat);
+            const parsed = parse(val, grid.dateTimeFormat, new Date());
+            val = format(parsed, grid.dateFormat);
+        }
+        else if (col.type === 'datetime' && val) {
+            const parsed = parse(val, grid.dateTimeFormat, new Date());
+            val = format(parsed, grid.dateTimeFormat);
         }
 
         if (col.allowVerticalResize) {
@@ -527,6 +532,7 @@ export class GridClass extends BaseComponent {
             Object.assign(grid.columnsDefaultOrder, grid.columns);
         }
 
+        grid.getSortedString();
         delete grid._waitingColumns;
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------

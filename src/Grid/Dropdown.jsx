@@ -152,7 +152,7 @@ export class DropdownClass extends ModalClass {
                                         }}
                                     >
                                         <span>{dd.translate(item.text)}</span>
-                                        {item.items && item.items.length > 0 ? Images.images.next(20, 10) : ''}
+                                        {item.items && item.items.length > 0 ? Images.images.submenu(20, 10) : ''}
                                     </div>
                                 </li>
                             );

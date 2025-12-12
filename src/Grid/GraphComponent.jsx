@@ -128,11 +128,22 @@ export class GraphComponentClass extends BaseComponent {
         const topGrids = [];
         const lowGrids = [];
 
-        const keys = Object.keys(gc.graph.nodesDict);
+        const sortedNodes = {};
+
+        //const keys = Object.keys(gc.graph.nodesDict);
+        //keys.sort();
+
+        for (let uid in gc.graph.nodesDict) {
+            let node = gc.graph.nodesDict[uid];
+            sortedNodes[(node.rowNum || 0) + "_" + (node.colNum || 0) + "_" + uid] = node;
+        }
+
+        const keys = Object.keys(sortedNodes);
         keys.sort();
 
         for (let uid of keys) {
-            let node = gc.graph.nodesDict[uid];
+            //let node = gc.graph.nodesDict[uid];
+            let node = sortedNodes[uid]; 
 
             if (node.status === NodeStatus.filter) {
                 if (gc.isTop(node)) {
@@ -348,11 +359,10 @@ export class GraphComponentClass extends BaseComponent {
         if (!gc.isTop(node) && node.parents.indexOf(gc.activeMaster) < 0 && node.parents.indexOf(gc.activeDetail) < 0 && node.uid !== gc.activeDetail) return <></>;
 
         const isActive = top && node.uid === gc.activeMaster || !top && node.uid === gc.activeDetail;
-        return (
+        return (//disabled={isActive || gc.isEditing() ? 'disabled' : ''}
             <button
                 key={`tabcontrol_${node.id}_${gc.id}_`}
-                disabled={isActive || gc.isEditing() ? 'disabled' : ''}
-                className={gc.tabControlButtonClass || BaseComponent.theme.tabControlButtonClass || 'graph-tabcontrol-button'}
+                className={`${gc.tabControlButtonClass || BaseComponent.theme.tabControlButtonClass || 'graph-tabcontrol-button'} ${isActive ? 'active' : ''}`}
                 onClick={(e) => gc.selectActiveTab(node, top)}
             >
                 {node.title}
@@ -413,6 +423,10 @@ export class GraphComponentClass extends BaseComponent {
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     selectActiveTab(node, top) {
         const gc = this;
+        const dnode = gc.graph.nodesDict[gc.activeDetail];
+
+        if (node.isEditing() || node.isDisabled() || dnode.isEditing() || dnode.isDisabled()) return;
+
         const isActive = top && node.uid === gc.activeMaster || !top && node.uid === gc.activeDetail;
 
         if (+node.status !== +NodeStatus.grid || gc.isTop(node) !== top || isActive) return;
@@ -420,7 +434,6 @@ export class GraphComponentClass extends BaseComponent {
         if (top) {
             gc.activeMaster = node.uid;
 
-            const dnode = gc.graph.nodesDict[gc.activeDetail];
             if (dnode && dnode.parents.indexOf(node.uid) < 0) {
                 delete gc.activeDetail;
             }
@@ -581,12 +594,20 @@ export class GraphComponentClass extends BaseComponent {
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     setEditing(node, value) {
         const gc = this;
+        const mnode = gc.graph.nodesDict[gc.activeMaster];
+        const dnode = gc.graph.nodesDict[gc.activeDetail];
+
         if (node.uid === gc.activeMaster) {
             gc._masterIsEditing = value;
+            if (dnode != null) {
+                dnode.setDisabled(value);
+            }
         }
         else if (node.uid === gc.activeDetail) {
             gc._detailIsEditing = value;
+            mnode.setDisabled(value);
         }
+
         gc.refreshState();
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -776,7 +797,7 @@ export class GraphComponentClass extends BaseComponent {
 
         grid.remSetEditing = grid.setEditing;
         grid.setEditing = (value) => { grid.remSetEditing(value); gc.setEditing(grid, value); };
-        grid.isEditing = () => { return gc.isEditing(); };
+        //grid.isEditing = () => { return gc.isEditing(); };
 
         return grid;
     }

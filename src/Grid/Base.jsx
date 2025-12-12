@@ -32,7 +32,11 @@ export class BaseComponent {
         )
     }
 
-    static dateFormat = 'DD.MM.YYYY';
+    //static dateFormat = 'DD.MM.YYYY';
+    //static dateTimeFormat = 'DD.MM.YYYY HH:mm:ss';
+
+    static dateFormat = 'dd.MM.yyyy';
+    static dateTimeFormat = 'dd.MM.yyyy HH:mm:ss';
 
     static theme = null;
     static useBootstrap = false;

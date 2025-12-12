@@ -16,6 +16,7 @@ import { DataGetter } from '../Grid/Utils/DataGetter';
 import { Select } from '../Grid/OuterComponents/Select';
 import DatePicker from "react-datepicker";
 import { GLObject } from '../Grid/GLObject';
+//import { format } from 'date-fns'
 
 function DebugApp() {
     const [state, setState] = useState({ menuItem: - 2 });
@@ -228,8 +229,6 @@ function DebugApp() {
         /*
         let value;
     
-        Moment.locale('ru');
-    
         const d = '10.03.2011 0:00:00';
         const d2 = '19.03.2011 0:00:00';
     
@@ -239,9 +238,7 @@ function DebugApp() {
         date = new Date(d2);
         formattedDate = date.toDateString()
     
-        date = Moment(d);
         date = date.format('DD.MM.YYYY')
-        date = Moment(d2, 'DD.MM.YYYY');
         date = date.format('DD.MM.YYYY')
     
         value = format(d, "dd.MMM.yyyy HH:mm:ss");

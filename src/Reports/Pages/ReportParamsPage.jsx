@@ -4,7 +4,7 @@ import { Select } from '../../Grid/OuterComponents/Select';
 import { FieldEdit } from '../../Grid/FieldEdit';
 import { BaseComponent } from '../../Grid/Base';
 import { Images } from '../../Grid/Themes/Images';
-import Moment from 'moment';
+import { format } from 'date-fns'
 import { GLObject } from '../../Grid/GLObject';
 import { FileManager } from '../../Grid/Utils/FileManager';
 // ==================================================================================================================================================================
@@ -504,7 +504,7 @@ export class ReportParamsPageClass extends ModalClass {
 
                 if (data.reportStr) {
                     const fm = new FileManager();
-                    fm.SaveToFile(data.reportStr, ("reportResult_" + String(Moment().format(BaseComponent.dateFormat))) + ".xls", "excel");
+                    fm.SaveToFile(data.reportStr, ("reportResult_" + String(format(new Date(), BaseComponent.dateFormat))) + ".xls", "excel");
                 }
                 else {
                     alert("Ошибка: " + data.error);

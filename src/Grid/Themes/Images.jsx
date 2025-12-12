@@ -191,6 +191,18 @@ export class Images {
             )
         };
 
+        images.submenu = (w, h) => {
+            const oi = Images._outerImagesDict['submenu'];
+            return (
+                oi ?
+                    <div dangerouslySetInnerHTML={{ __html: oi }} className="image-container-div"></div>
+                    :
+                    <svg xmlns="http://www.w3.org/2000/svg" width={w || "20"} height={h || "20"} fill="currentColor" viewBox="0 0 320 512">
+                        <path d="M278.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-160 160c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L210.7 256 73.4 118.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l160 160z" />
+                    </svg>
+            )
+        };
+
         images.last = (w, h) => {
             const oi = Images._outerImagesDict['last'];
             return (
@@ -391,6 +403,18 @@ export class Images {
                     :
                     <svg xmlns="http://www.w3.org/2000/svg" width={w || "20"} height={h || "20"} fill="currentColor" viewBox="0 40 600 512">
                         <path d="M560.3 301.2C570.7 313 588.6 315.6 602.1 306.7C616.8 296.9 620.8 277 611 262.3L563 190.3C560.2 186.1 556.4 182.6 551.9 180.1L351.4 68.7C332.1 58 308.6 58 289.2 68.7L88.8 180C83.4 183 79.1 187.4 76.2 192.8L27.7 282.7C15.1 306.1 23.9 335.2 47.3 347.8L80.3 365.5L80.3 418.8C80.3 441.8 92.7 463.1 112.7 474.5L288.7 574.2C308.3 585.3 332.2 585.3 351.8 574.2L527.8 474.5C547.9 463.1 560.2 441.9 560.2 418.8L560.2 301.3zM320.3 291.4L170.2 208L320.3 124.6L470.4 208L320.3 291.4zM278.8 341.6L257.5 387.8L91.7 299L117.1 251.8L278.8 341.6z" />
+                    </svg>
+            )
+        };
+
+        images.exit = (w, h) => {
+            const oi = Images._outerImagesDict['exit'];
+            return (
+                oi ?
+                    <div dangerouslySetInnerHTML={{ __html: oi }} className="image-container-div"></div>
+                    :
+                    <svg xmlns="http://www.w3.org/2000/svg" width={w || "20"} height={h || "20"} fill="currentColor" viewBox="0 0 320 512">
+                        <path d="M569 337C578.4 327.6 578.4 312.4 569 303.1L425 159C418.1 152.1 407.8 150.1 398.8 153.8C389.8 157.5 384 166.3 384 176L384 256L272 256C245.5 256 224 277.5 224 304L224 336C224 362.5 245.5 384 272 384L384 384L384 464C384 473.7 389.8 482.5 398.8 486.2C407.8 489.9 418.1 487.9 425 481L569 337zM224 160C241.7 160 256 145.7 256 128C256 110.3 241.7 96 224 96L160 96C107 96 64 139 64 192L64 448C64 501 107 544 160 544L224 544C241.7 544 256 529.7 256 512C256 494.3 241.7 480 224 480L160 480C142.3 480 128 465.7 128 448L128 192C128 174.3 142.3 160 160 160L224 160z" />
                     </svg>
             )
         };

@@ -179,7 +179,10 @@ export class GridINUClass extends GridINUBaseClass {
 
         super.onClosePopup();
 
-        grid.isNewRecord = false;
+        if (grid.isNewRecord) {
+            grid.isNewRecord = false;
+            grid.refresh();
+        }
 
         if (grid.cardIsShowing) {
             grid.cardIsShowing = false;
@@ -193,13 +196,14 @@ export class GridINUClass extends GridINUBaseClass {
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     renderCell(grid, col, row, selected) {
-        if (!grid.allowEditGrid && !col.allowVerticalResize || /*col.readonly ||*/ !selected) return super.renderCell(grid, col, row);
+        if (!grid.allowEditGrid && !col.allowVerticalResize || /*col.readonly ||*/ !selected || grid.isDisabled()) return super.renderCell(grid, col, row);
 
         row = !grid.isEditing() || !grid.changedRow ? row : grid.changedRow;
 
         return <FieldEdit
             keyPref={grid.id + '_' + row[grid.keyField]}
             column={col}
+            datePickerDateFormat={col.type === 'date' ? grid.dateFormat : col.type === 'datetime' ? grid.dateTimeFormat : ''}
             entity={grid.entity}
             value={col.type === 'lookup' ? row[col.keyField] : row[col.name]}
             text={row[col.name]}
@@ -259,7 +263,7 @@ export class GridINUClass extends GridINUBaseClass {
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     renderHeaderCell(col, context) {
         const grid = this;
-        if (grid.filtersDisabled || col.type !== 'date') {
+        if (grid.filtersDisabled || col.type !== 'date' || col.type !== 'datetime') {
             return super.renderHeaderCell(col, context);
         }
 
@@ -268,7 +272,8 @@ export class GridINUClass extends GridINUBaseClass {
                 {super.renderHeaderCell(col, 'fake')}
                 <FieldEdit
                     keyPref={grid.id + '_colfilter_'}
-                    column={{ type: 'date', id: col.id, title: col.title }}
+                    column={{ type: col.type, id: col.id, title: col.title }}
+                    datePickerDateFormat={col.type === 'date' ? grid.dateFormat : grid.dateTimeFormat}
                     value={col.filter}
                     text={col.filter}
                     findFieldEdit={() => { return col._filterEditObj; }}
@@ -372,6 +377,18 @@ export class GridINUClass extends GridINUBaseClass {
             label: grid.translate('Select'),
             click: (e) => grid.selectRecord(e),
             img: Images.images.selectFilterValue,
+            getDisabled: (e) => grid.selectRecordDisabled(e),
+            getVisible: () => { return grid.isSelecting },
+        });
+
+        grid.buttons.push({
+            id: grid.buttons.length,
+            name: 'exit',
+            title: grid.translate('Exit'),
+            label: grid.translate('Exit'),
+            click: (e) => grid.closeSelfWnd(e),
+            img: Images.images.exit,
+            getDisabled: (e) => grid.exitDisabled(e),
             getVisible: () => { return grid.isSelecting },
         });
 
@@ -379,6 +396,11 @@ export class GridINUClass extends GridINUBaseClass {
         for (let btn of grid.buttons) {
             grid._buttonsDict[btn.name] = btn;
         }
+    }
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
+    closeWnd(e) {
+        const grid = this;
+        grid.closeSelfWnd();
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     selectRecord(e) {
@@ -439,7 +461,7 @@ export class GridINUClass extends GridINUBaseClass {
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     commitChangesDisabled(e) {
         const grid = this;
-        return grid._waitingRows || !grid.isEditing();
+        return grid._waitingRows || !grid.isEditing() || grid.isDisabled();
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     rollbackChanges(e) {
@@ -452,7 +474,7 @@ export class GridINUClass extends GridINUBaseClass {
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     rollbackChangesDisabled(e) {
         const grid = this;
-        return grid._waitingRows || !grid.isEditing();
+        return grid._waitingRows || !grid.isEditing() || grid.isDisabled();
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     addRecord(e) {
@@ -522,7 +544,7 @@ export class GridINUClass extends GridINUBaseClass {
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     addRecordDisabled(e) {
         const grid = this;
-        return grid._waitingRows || !grid.allowAdd || grid.isEditing();
+        return grid._waitingRows || !grid.allowAdd || grid.isEditing() || grid.isDisabled();
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     copyRecord(e) {
@@ -548,20 +570,20 @@ export class GridINUClass extends GridINUBaseClass {
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     copyRecordDisabled(e) {
         const grid = this;
-        return grid._waitingRows || !grid.allowCopy || grid.isEditing() || grid.selectedRowIndex == null || grid.selectedRowIndex < 0 || !grid.rows || grid.rows.length <= 0;
+        return grid._waitingRows || !grid.allowCopy || grid.isEditing() || grid.isDisabled() || grid.selectedRowIndex == null || grid.selectedRowIndex < 0 || !grid.rows || grid.rows.length <= 0;
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     deleteRecord(e) {
         const grid = this;
 
-        if (window.confirm('Delete  record?')) {
+        if (window.confirm(grid.translate('Delete  record') + '?')) {
             grid.deleteRow(e).then(() => grid.refresh());
         }
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     deleteRecordDisabled(e) {
         const grid = this;
-        return grid._waitingRows || !grid.allowDelete || grid.isEditing() || grid.selectedRowIndex == null || grid.selectedRowIndex < 0 || !grid.rows || grid.rows.length <= 0;
+        return grid._waitingRows || !grid.allowDelete || grid.isEditing() || grid.isDisabled() || grid.selectedRowIndex == null || grid.selectedRowIndex < 0 || !grid.rows || grid.rows.length <= 0;
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     viewRecord(e) {
@@ -583,7 +605,17 @@ export class GridINUClass extends GridINUBaseClass {
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     viewRecordDisabled(e) {
         const grid = this;
-        return grid._waitingRows || !grid.allowView || grid.isEditing() || grid.selectedRowIndex == null || grid.selectedRowIndex < 0 || !grid.rows || grid.rows.length <= 0;
+        return grid._waitingRows || !grid.allowView || grid.isEditing() || grid.isDisabled() || grid.selectedRowIndex == null || grid.selectedRowIndex < 0 || !grid.rows || grid.rows.length <= 0;
+    }
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
+    selectRecordDisabled(e) {
+        const grid = this;
+        return grid._waitingRows || !grid.isSelecting || grid.isEditing() || grid.isDisabled() || grid.selectedRowIndex == null || grid.selectedRowIndex < 0 || !grid.rows || grid.rows.length <= 0;
+    }
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
+    exitDisabled(e) {
+        const grid = this;
+        return grid._waitingRows || !grid.isSelecting || grid.isEditing() || grid.isDisabled();
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     setPageSize(newSize) {
@@ -625,12 +657,16 @@ export class GridINUClass extends GridINUBaseClass {
         const grid = this;
         let res;
 
-        res = await grid.detailNodesChangesSaved();
-        if (!res) return false;
+        if (grid.detailNodesChanged()) return false;
 
-        if (!grid.allowEditGrid || !grid.isEditing()) return true;
+        //res = await grid.detailNodesChangesSaved();
+        //if (!res) return false;
+
+        //if (!grid.allowEditGrid || !grid.isEditing()) return true;
+
+        return (!grid.allowEditGrid || !grid.isEditing()) && !grid.isDisabled();
+
         const row = grid.rows[rowIndex];
-
         await grid.saveRow({ row: row, changedRow: grid.changedRow }).then(
             () => {
                 grid.setEditing(false);
@@ -647,6 +683,20 @@ export class GridINUClass extends GridINUBaseClass {
         });
 
         return res;
+    }
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
+    detailNodesChanged() {
+        const grid = this;
+        const graph = grid.graph;
+        if (!graph || !grid.children || grid.children.length <= 0) return false;
+
+        for (let cuid of grid.children) {
+            let child = graph.nodesDict[cuid];
+
+            if (child.visible && child.allowEditGrid && child.isEditing()) return true;
+        }
+
+        return false;
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     async detailNodesChangesSaved() {

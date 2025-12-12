@@ -125,6 +125,7 @@ export class CardINUClass extends GridINUBaseClass {
                 <FieldEdit
                     keyPref={card.id + '_card_'}
                     column={col}
+                    datePickerDateFormat={col.type === 'date' ? card.dateFormat : col.type === 'datetime' ? card.dateTimeFormat : ''}
                     entity={card.entity}
                     value={value}
                     text={row[col.name]}

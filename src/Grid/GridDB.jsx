@@ -83,6 +83,7 @@ export class GridDBClass extends GridPKClass {
         grid.opt.inputClass = props.inputClass;
 
         grid.sortColumns = [];
+        grid._sortSeq = 1;
 
         grid.multi = props.multi;
     }
@@ -126,6 +127,16 @@ export class GridDBClass extends GridPKClass {
                 <Dropdown init={(dd) => { grid.menuDropdown = dd; }} getItems={(e) => { return grid.getGridSettings(e); }} onItemClick={(e) => { grid.onSettingsItemClick(e.itemId); }}></Dropdown>
             </>
         )
+    }
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
+    isDisabled() {
+        const grid = this;
+        return grid._isDisabled === true;
+    }
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
+    setDisabled(value) {
+        const grid = this;
+        grid._isDisabled = value;
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     isEditing() {
@@ -223,7 +234,7 @@ export class GridDBClass extends GridPKClass {
                                         grid-pager-item={`${grid.id}_${button.id}_`}
                                         className={`${button.class || BaseComponent.theme.pagerButtonsClass || 'grid-pager-button'}`}
                                         title={grid.translate(button.title, 'grid-pager-button')}
-                                        disabled={grid.isEditing() || button.getDisabled && button.getDisabled({ grid: grid }) || button.disabled ? 'disabled' : ''}
+                                        disabled={grid.isEditing() || grid.isDisabled() || button.getDisabled && button.getDisabled({ grid: grid }) || button.disabled ? 'disabled' : ''}
                                         onClick={button.click ? button.click : null}
                                         style={{ margin: '5px 2px', minHeight: '2em', display: 'flex' }}
                                     >
@@ -389,7 +400,7 @@ export class GridDBClass extends GridPKClass {
                             grid-pager-item={`${grid.id}_${button.id}_`}
                             className={`${button.class ? button.class : grid.opt.inputClass || BaseComponent.theme.inputClass || 'grid-pager-current'}`}
                             style={{ width: '3em', height: '2em', display: 'inline-block', margin: '0 2px' }}
-                            disabled={grid._waitingRows || grid.isEditing() ? 'disabled' : ''}
+                            disabled={grid._waitingRows || grid.isEditing() || grid.isDisabled() ? 'disabled' : ''}
                             onChange={function (e) {
                                 const newPage = +e.target.value;
 
@@ -479,7 +490,7 @@ export class GridDBClass extends GridPKClass {
                             className={`grid-pager-size ${button.class ? button.class : grid.opt.inputClass || BaseComponent.theme.inputClass || ''}`}
                             style={{ width: '4.5em', height: '2em', display: 'inline-block', margin: '0 2px' }}
                             value={grid.pageSize}
-                            disabled={grid._waitingRows || grid.isEditing() ? 'disabled' : ''}
+                            disabled={grid._waitingRows || grid.isEditing() || grid.isDisabled() ? 'disabled' : ''}
                             onChange={function (e) {
                                 grid.setPageSize(+e.target.value);
                             }}
@@ -511,14 +522,15 @@ export class GridDBClass extends GridPKClass {
             title: 'Total Rows',
             label: 'Total Rows',
             render: function (button, bottom) {
+                const total = `${grid.translate('total rows', 'pager-button')} ${grid.totalRows >= 0 ? grid.totalRows : '0'}`;
                 return (
                     <span
                         className={'grid-pager-total'}
-                        title={grid.translate(button.title, 'grid-pager-button')}
+                        title={total}
                         key={`pager_${bottom ? 'bottom' : 'top'}_${grid.id}_${button.id}_`}
                         style={{ margin: '5px 2px' }}
                     >
-                        {`${grid.translate('total rows', 'pager-button')} ${grid.totalRows >= 0 ? grid.totalRows : '0'}`}
+                        {total}
                     </span>
                 );
             }
@@ -526,6 +538,33 @@ export class GridDBClass extends GridPKClass {
 
         grid.pagerButtons.push(rows);
         grid.pagerButtonsDict[rows.id] = grid.pagerButtonsDict[rows.name] = rows;
+
+        if (!grid.sortDisabled) {
+            const sort = {
+                id: 11,
+                name: 'sort',
+                title: 'Sort',
+                label: 'Sort',
+                render: function (button, bottom) {
+                    return (
+                        grid._sortString != null ?
+                            <span
+                                className={'grid-pager-total'}
+                                title={grid._sortString}
+                                key={`pager_${bottom ? 'bottom' : 'top'}_${grid.id}_${button.id}_`}
+                                style={{ margin: '5px 2px' }}
+                            >
+                                {`${grid._sortString}`}
+                            </span>
+                            :
+                            <></>
+                    );
+                }
+            }
+
+            grid.pagerButtons.push(sort);
+            grid.pagerButtonsDict[sort.id] = grid.pagerButtonsDict[sort.name] = sort;
+        }
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     setPageSize(newSize) {
@@ -541,7 +580,7 @@ export class GridDBClass extends GridPKClass {
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     getHeaderGridTemplateColumns(col) {
-        return col.sortInd == null ? 'auto 8px' : 'auto 18px';
+        return col.sortInd == null ? 'auto 8px' : 'auto 22px';
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     renderHeaderCell(col, context) {
@@ -556,22 +595,25 @@ export class GridDBClass extends GridPKClass {
         const parser = new DOMParser();
         const decodedString = parser.parseFromString(`<!doctype html><body>${sortDir}`, 'text/html').body.textContent;
 
+        const notDisabled = !grid._waitingRows && !grid.isEditing() && !grid.isDisabled();
+
         return (
             <>
                 <span
                     className={`grid-header-title ${col.sortable ? 'grid-header-title-sortable' : ''}`}
                     style={{
-                        cursor: col.sortable && !grid._waitingRows && !grid.isEditing() ? 'pointer' : '',
-                        gridColumn: !sortDir ? 'span 2' : '', opacity: !grid._waitingRows && !grid.isEditing() ? "1" : "0.6",
+                        cursor: col.sortable && notDisabled ? 'pointer' : '',
+                        gridColumn: !sortDir ? 'span 2' : '', opacity: notDisabled ? "1" : "0.6",
                         whiteSpace: 'nowrap',
                         overflowX: 'hidden',
+                        width: sortDir ? 'calc(100% - 10px)' : '',
                     }}
                     onClick={(e) => { if (!grid._waitingRows) grid.changeColumnSortOrder(col, e); }}
                     disabled={grid._waitingRows || col.disabled ? 'disabled' : ''}
                 >
                     {title}
                 </span>
-                {sortDir ? <span className={'grid-header-sort-sign'} style={{ opacity: !grid._waitingRows && !grid.isEditing() ? "1" : "0.6" }}>{decodedString + (col.sortInd > 0 ? ` ${col.sortInd} ` : '')}</span> : ''}
+                {sortDir ? <span className={'grid-header-sort-sign'} style={{ opacity: notDisabled ? "1" : "0.6" }}>{decodedString + (col.sortInd > 0 ? ` ${col.sortInd} ` : '')}</span> : ''}
             </>
         );
     }
@@ -700,6 +742,8 @@ export class GridDBClass extends GridPKClass {
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     resetColumnsSort() {
         const grid = this;
+        //delete grid._sortString;
+        grid.getSortedString();
         for (let col of grid.columns) {
             delete col.asc;
             delete col.desc;
@@ -716,7 +760,7 @@ export class GridDBClass extends GridPKClass {
             return;
         }
 
-        if (!column.sortable || grid.isEditing()) return;
+        if (!column.sortable || grid.isEditing() || grid.isDisabled()) return;
 
         let nextInd = 1;
         if (e.shiftKey) {
@@ -767,6 +811,7 @@ export class GridDBClass extends GridPKClass {
             }
         }
 
+        delete grid._sortString;
         grid.selectedRowIndex = 0;
         grid.afterSortColumn(column);
         grid.refresh();
@@ -774,7 +819,32 @@ export class GridDBClass extends GridPKClass {
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     afterSortColumn(column) {
         const grid = this;
+        grid.getSortedString();
         delete grid._selectedRows;
+    }
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
+    getSortedString() {
+        const grid = this;
+        //if (grid._sortString != null) return grid._sortString;
+
+        grid._sortString = '';
+        if (grid.sortDisabled) return '';
+
+        const sortedColumns = [];
+        for (let col of grid.columns) {
+            if (col.asc || col.desc) sortedColumns.push(col);
+        }
+
+        sortedColumns.sort((a, b) => { return a.sortInd > b.sortInd ? 1 : -1 });
+
+        const arr = [];
+        for (let col of sortedColumns) {
+            arr.push((col.title || col.name) + (col.desc ? ' (' + grid.translate('desc') + ')' : ''));
+        }
+
+        grid._sortString = arr.join(', ');
+
+        grid._sortString = grid._sortString ? grid.translate('sort', 'pager-button') + ': ' + grid._sortString : '';
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
 }

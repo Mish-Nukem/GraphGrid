@@ -3,7 +3,7 @@ import { BaseComponent } from './Base';
 import { Images } from './Themes/Images';
 import { GridDBClass } from './GridDB';
 import { Dropdown } from './Dropdown';
-import Moment from 'moment';
+import { format } from 'date-fns'
 // ==================================================================================================================================================================
 export function GridFL(props) {
     let grid = null;
@@ -117,6 +117,8 @@ export class GridFLClass extends GridDBClass {
             delete grid._autoFocusColumn;
         }
 
+        const isDisabled = grid._waitingRows || grid.isEditing() || grid.isDisabled();
+
         return (
             <>
                 {super.renderHeaderCell(col, context)}
@@ -134,7 +136,7 @@ export class GridFLClass extends GridDBClass {
                             onClick={(e) => { grid.onColumnFilterClick(col, e); }}
                             onInput={(e) => { grid.onColumnFilterInput(col, e) }}
                             autoFocus={needFocus}
-                            disabled={grid._waitingRows || grid.isEditing() ? 'disabled' : ''}
+                            disabled={isDisabled ? 'disabled' : ''}
                             onBlur={(e) => { grid.onColumnFocusLost(col, col.filter, e); }}
                             autoComplete="off"
                         >
@@ -145,7 +147,7 @@ export class GridFLClass extends GridDBClass {
                                 className={"grid-filter-clear"}
                                 style={{ color: 'black', display: hasFilter ? 'flex' : 'none', justifyContent: 'center', alignItems: 'center', width: '8px' }}
                                 type={'button'}
-                                disabled={grid._waitingRows || grid.isEditing() ? 'disabled' : ''}
+                                disabled={isDisabled ? 'disabled' : ''}
                                 onClick={() => grid.clearColumnFilter(col)}
                             >×</button>
                         }
@@ -191,10 +193,10 @@ export class GridFLClass extends GridDBClass {
                             let txt = row[grid._inputingColumn.name] || String(row);
 
                             if (grid._inputingColumn.type === 'date') {
-                                txt = Moment(txt).format(grid.dateFormat);
+                                txt = format(txt, grid.dateFormat);
                             }
                             else if (grid._inputingColumn.type === 'datetime') {
-                                txt = Moment(txt).format(grid.dateTimeFormat);
+                                txt = format(txt, grid.dateTimeFormat);
                             }
 
                             res.push({ id: i++, text: txt });
@@ -399,7 +401,7 @@ export class GridFLClass extends GridDBClass {
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     getHeaderGridTemplateColumns(col) {
-        return col.sortInd == null /*&& (col.filter == null || col.filter === '')*/ ? 'auto 18px' : 'auto 18px';
+        return col.sortInd == null /*&& (col.filter == null || col.filter === '')*/ ? 'auto 18px' : 'auto 22px';
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     getGridSettingsList() {

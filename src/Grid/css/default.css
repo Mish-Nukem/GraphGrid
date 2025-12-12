@@ -160,6 +160,7 @@
     justify-content: flex-end;
     cursor: pointer;
     align-items: center;
+    background-color: white;
 }
 
 .grid-header-filter {
@@ -251,7 +252,7 @@
     border-width: 1px;
     display: flex;
     align-items: center;
-    justify-content: center;    /*space-between;*/
+    justify-content: center; /*space-between;*/
 }
 
     .grid-pager-button:hover:not(:disabled) {
@@ -503,7 +504,6 @@
     .graph-tabcontrol-buttons > button {
         margin: 5px 2px 5px 2px;
         /*height: 2.3em;*/
-        font-weight: bold;
     }
 
 .graph-tabcontrol-button {
@@ -515,9 +515,16 @@
     justify-content: space-between;
 }
 
-    .graph-tabcontrol-button:hover:not(:disabled) {
-        cursor: pointer;
+    .graph-tabcontrol-button:hover:not(:disabled):not(.active) {
         background-color: lightgray;
+    }
+
+    .graph-tabcontrol-button:not(.active) {
+        cursor: pointer;
+    }
+
+    .graph-tabcontrol-button.active {
+        font-weight: bold;
     }
 
 .graph-filters-div {
@@ -707,7 +714,7 @@
     .datepicker-input-lg > div.react-datepicker-wrapper,
     .datepicker-input-lg > div > div.react-datepicker__input-container,
     .datepicker-input-lg > div > div.react-datepicker__input-container input {
-        width: 100%/*calc(100% - 1px);*/
+        width: 100% /*calc(100% - 1px);*/
     }
 
         .datepicker-input-lg > div > div.react-datepicker__input-container input {
