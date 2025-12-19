@@ -88,9 +88,34 @@ export class GridDBClass extends GridPKClass {
         grid.multi = props.multi;
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
+    //visitByWaveOld(e) {
+    //    const grid = this;
+    //    if (grid.skipOnWaveVisit(e)) return;
+
+    //    if (e.waveType === WaveType.value) {
+    //        if (grid.status === NodeStatus.filter) {
+    //            if (!grid._selecting) {
+    //                grid.selectedRowIndex = -1;
+    //            }
+    //            grid.value = grid.text = '';
+    //            grid._selectedOptions = [];
+    //            return;
+    //        }
+    //    }
+
+    //    grid.pageNumber = 1;
+
+    //    super.visitByWaveOld(e);
+    //}
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     visitByWave(e) {
         const grid = this;
-        if (grid.skipOnWaveVisit(e)) return;
+
+        const rpr = new Promise(function (resolve) {
+            resolve(e);
+        })
+
+        if (grid.skipOnWaveVisit(e)) return rpr;
 
         if (e.waveType === WaveType.value) {
             if (grid.status === NodeStatus.filter) {
@@ -99,13 +124,13 @@ export class GridDBClass extends GridPKClass {
                 }
                 grid.value = grid.text = '';
                 grid._selectedOptions = [];
-                return;
+                return rpr;
             }
         }
 
         grid.pageNumber = 1;
 
-        super.visitByWave(e);
+        return super.visitByWave(e);
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     keyAdd() {

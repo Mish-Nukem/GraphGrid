@@ -12,6 +12,7 @@ export class GraphClass {
         graph.nodeCount = 0;
 
         graph.lastWaveInd = 0;
+        graph.lastWaveInds = {};
     }
 
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -42,10 +43,20 @@ export class GraphClass {
                 node.visited = true;
             }
 
+            //if (node.visitByWaveOld) {
+            //    node.visitByWaveOld(e);
+            //    break;
+            //}
+
             if (node.visitByWave) {
-                node.visitByWave(e);
-                break;
+                node.visitByWave(e).then(() => {
+                    graph.visitNodesByWave(e);
+                });
             }
+        }
+
+        if (e.afterAllVisited) {
+            e.afterAllVisited();
         }
     };
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -62,6 +73,136 @@ export class GraphClass {
         }
     };
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
+    // возвращает истину, если у узла все родители посещены текущей волной
+    allParentsVisited(node, e) {
+        const graph = this;
+
+        for (let pid of node.parents) {
+            let link = graph.linksDict[node.id + '_' + graph.nodesDict[pid].id];
+            // дополнительная проверка skipLink может запретить включение узла в список, несмотря на то, что он связан с предыдущим уровнем
+            if (link.parent._lastWaveInd < e.waveInd && !graph.skipLink(link, e.waveType)) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
+    // добавляет к списку узлов e.nodes список всех детей, еще не посещенных волной, для узлов из parents
+    addChildrenToWave(parents, e) {
+        const graph = this;
+
+        const dubl = {};
+        for (let node of e.nodes) {
+            dubl[node.uid] = 1;
+        }
+
+        for (let node of parents) {
+            node._lastWaveInd = e.waveInd;
+            dubl[node.uid] = 1;
+            for (let cid of node.children) {
+                if (!dubl[cid]) {
+                    dubl[cid] = 1;
+                    let chNode = graph.nodesDict[cid];
+                    if (chNode._lastWaveInd == null || chNode._lastWaveInd < e.waveInd) {
+                        e.nodes.push(chNode);
+                    }
+                }
+            }
+        }
+    }
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+    // Генерирует волну, которая сначала проходит первый уровень узлов, ссылающихся на начальный узел (или список узлов),
+    // затем волна распространяется на их прямые потомки и т.д. пока волна не охватит все непосещенные узлы, каким-то образом зависящие от начального(ых).
+    // Решает проблему, заключающуюся в том, что если узлы из цикла находятся в виде формы (мастер + детальные),
+    // то обновлять нужно сначала узлы в виде фильтра, потом мастера, а потом детальные
+    // nodes                - массив узлов, инициирующих волну
+    // waveType             - тип волны
+    // withStartNodes       - вызывать реакцию на волну в стартовых узлах
+    // markVisited          - помечать visited = true узлы, посещенные волной
+    // allParentsVisited    - помещать в очередь только те узлы, у которых волной посещены все родители
+    // moveType             - способ распространения волны по графу: fromParent - от родителя к детям, fromChild - от ребенка к родителям
+    triggerWave(e) {
+        if (e == null || !e.nodes || e.nodes.length <= 0) return;
+
+        const graph = this;
+
+        // выставляем у графа признак "пущена волна"
+        graph._isMakingWave = true;
+
+        if (e.prepared == null) {
+            if (e.waveType == null) {
+                e.waveType = WaveType.value;
+                e.allParentsVisited = true;
+            }
+            if (e.withStartNodes == null) e.withStartNodes = true;
+            if (e.moveType == null) e.moveType = MoveType.fromParent;
+
+            if (e.waveInd == null) {
+                e.waveInd = ++graph.lastWaveInd;
+            }
+
+            e.prepared = true;
+        }
+
+        // если запущена новая однотипная волна, то нет смысла продолжать текущую
+        if (graph.lastWaveInds[e.waveType] != null && e.waveInd < graph.lastWaveInds[e.waveType]) return;
+
+        if (graph.lastWaveInds[e.waveType] == null || graph.lastWaveInds[e.waveType] < e.waveInd) {
+            graph.lastWaveInds[e.waveType] = e.waveInd;
+        }
+
+        if (!e.withStartNodes) {
+            // если посещение стартовых узлов не требуется, переходим к детям стартовых узлов
+            const parents = [...e.nodes];
+            e.nodes = [];
+            graph.addChildrenToWave(parents, e);
+            e.withStartNodes = true;
+        }
+
+        if (graph.lastWaveInds[e.waveType] == e.waveInd && e.nodes.length <= 0) {
+            graph._isMakingWave = false;
+            return;
+        }
+
+        let i = 0;
+        while (i < e.nodes.length) {
+            let node = e.nodes[i];
+            node._lastWaveInd = e.waveInd;
+
+            // если текущий узел не должен посещаться текущей волной
+            if (node.skipOnWaveVisit && node.skipOnWaveVisit(e)) {
+                e.nodes.splice(i, 1);
+                continue;
+            }
+
+            // узел еще не готов к посещению, т.к. не все его родители посещены
+            if (e.allParentsVisited && !graph.allParentsVisited(node, e)) {
+                i++;
+                continue;
+            }
+
+            if (e.markVisited) {
+                node.visited = true;
+            }
+
+            e.nodes.splice(i, 1);
+
+            if (node.visitByWave) {
+                node.visitByWave(e).then(() => {
+                    graph.addChildrenToWave([node], e);
+
+                    graph.triggerWave(e);
+
+                    if (graph.lastWaveInds[e.waveType] == e.waveInd && e.nodes.length <= 0) {
+                        graph._isMakingWave = false;
+                    }
+                });
+            }
+        }
+    }
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
 
     // Генерирует волну, которая сначала проходит первый уровень узлов, ссылающихся на начальный узел (или список узлов), 
     // затем волна распространяется на их прямые потомки и т.д. пока волна не охватит все непосещенные узлы, каким-то образом зависящие от начального. 
@@ -73,7 +214,7 @@ export class GraphClass {
     // markVisited          - помечать visited = true узлы, посещенные волной
     // allParentsVisited    - помещать в очередь только те узлы, у которых волной посещены все родители
     // moveType             - способ распространения волны по графу: fromParent - от родителя к детям, fromChild - от ребенка к родителям
-    triggerWave(e) {
+    triggerWaveOld(e) {
         e = e || {};
         const graph = this;
 

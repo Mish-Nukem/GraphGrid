@@ -175,7 +175,7 @@ export class GridGRClass extends GridClass {
 
         const grid = this;
         const graph = grid.graph;
-        if (graph && !graph._isMakingWave) {
+        if (graph && (!graph._isMakingWave || e.source == 'rowClick')) {
 
             if (!grid.connectedToParents) {
                 grid.connectToParents();
@@ -266,14 +266,42 @@ export class GridGRClass extends GridClass {
         });
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
-    afterGetRows(e) {
-        super.afterGetRows(e);
+    //afterGetRows(e) {
+    //    super.afterGetRows(e);
 
+    //    const grid = this;
+
+    //    if (grid.graph) {
+    //        grid.graph.visitNodesByWave(e);
+    //    }
+    //}
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
+    visitByWaveAlt(e) {
         const grid = this;
 
-        if (grid.graph) {
-            grid.graph.visitNodesByWave(e);
-        }
+        return new Promise(function (resolve) {
+            if (grid.skipOnWaveVisit(e)) {
+                resolve(e);
+                return;
+            }
+
+            grid.selectedRowIndex = 0;
+
+            grid._waitingRows = true;
+            grid.refreshState();
+
+            grid.getRows({ filters: grid.collectFilters(), grid: grid }).then(
+                rows => {
+                    grid.rows = rows;
+                    grid.afterGetRows(e);
+                    resolve(e);
+                    grid.refreshState();
+                }
+            ).finally(() => {
+                grid._waitingRows = false;
+                grid.refreshState();
+            });
+        });
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
 }

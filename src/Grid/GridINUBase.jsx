@@ -544,53 +544,84 @@ export class GridINUBaseClass extends GridFLClass {
         grid.saveColumnsConfig();
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
+    //visitByWaveOld(e) {
+    //    const grid = this;
+
+    //    if (grid.skipOnWaveVisit(e)) return;
+
+    //    grid.selectedRowIndex = 0;
+    //    grid.pageNumber = 1;
+
+    //    if (grid.status === NodeStatus.grid && grid.visible === true) {
+    //        const isLast = e.list.length <= 0;
+
+    //        grid._waitingRows = true;
+    //        grid.getRows({ filters: grid.collectFilters(), grid: grid }).then(
+    //            rows => {
+    //                grid.graph._isMakingWave = true;
+
+    //                grid.rows = rows;
+    //                grid.afterGetRows(e);
+    //                grid.refreshState();
+
+    //                if (e.waveType === WaveType.value && isLast && e.afterAllVisited) {
+    //                    e.afterAllVisited();
+    //                }
+
+    //                grid.graph._isMakingWave = e.list.length > 0;
+    //            }
+    //        ).finally(() => {
+    //            grid._waitingRows = false;
+    //            grid.refreshState();
+    //        });
+    //    }
+    //    else {
+    //        grid.value = grid.text = '';
+    //        grid._selectedOptions = [];
+
+    //        if (grid.graph) {
+    //            grid.graph._isMakingWave = true;
+
+    //            grid.graph.visitNodesByWave(e);
+
+    //            if (e.waveType === WaveType.value && e.list.length <= 0 && e.afterAllVisited) {
+    //                e.afterAllVisited();
+    //            }
+
+    //            grid.graph._isMakingWave = e.list.length > 0;
+    //        }
+    //    }
+    //}
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     visitByWave(e) {
         const grid = this;
 
-        if (grid.skipOnWaveVisit(e)) return;
-
-        grid.selectedRowIndex = 0;
-        grid.pageNumber = 1;
-
-        if (grid.status === NodeStatus.grid && grid.visible === true) {
-            const isLast = e.list.length <= 0;
-
-            grid._waitingRows = true;
-            grid.getRows({ filters: grid.collectFilters(), grid: grid }).then(
-                rows => {
-                    grid.graph._isMakingWave = true;
-
-                    grid.rows = rows;
-                    grid.afterGetRows(e);
-                    grid.refreshState();
-
-                    if (e.waveType === WaveType.value && isLast && e.afterAllVisited) {
-                        e.afterAllVisited();
-                    }
-
-                    grid.graph._isMakingWave = e.list.length > 0;
-                }
-            ).finally(() => {
-                grid._waitingRows = false;
-                grid.refreshState();
-            });
-        }
-        else {
-            grid.value = grid.text = '';
-            grid._selectedOptions = [];
-
-            if (grid.graph) {
-                grid.graph._isMakingWave = true;
-
-                grid.graph.visitNodesByWave(e);
-
-                if (e.waveType === WaveType.value && e.list.length <= 0 && e.afterAllVisited) {
-                    e.afterAllVisited();
-                }
-
-                grid.graph._isMakingWave = e.list.length > 0;
+        return new Promise(function (resolve) {
+            if (grid.skipOnWaveVisit(e)) {
+                resolve(e);
+                return;
             }
-        }
+
+            if (grid.status === NodeStatus.grid && grid.visible === true) {
+                grid._waitingRows = true;
+                grid.getRows({ filters: grid.collectFilters(), grid: grid }).then(
+                    rows => {
+                        grid.rows = rows;
+                        grid.afterGetRows(e);
+                        resolve(e);
+                        grid.refreshState();
+                    }
+                ).finally(() => {
+                    grid._waitingRows = false;
+                    grid.refreshState();
+                });
+            }
+            else {
+                grid.value = grid.text = '';
+                grid._selectedOptions = [];
+                resolve(e);
+            }
+        });
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
 }
