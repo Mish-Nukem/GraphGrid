@@ -99,10 +99,15 @@
             Description: ` 1. Заменен устаревший пакет Moment на date-fns.\n 2. Добавлена обработка полей datetime (раньше было только date).`,
             Date: '12/12/2025'
         },
+        {
+            Id: 17, Version: '1.0.17', App: 'React Grid',
+            Description: ` 1. Изменен алгоритм запуска волны графа, теперь возможен асинхронный обход узлов.\n 2. Из Grid.jsx удален старый код, отвечающий за множественный выбор.`,
+            Date: '22/12/2025'
+        },
     ];
 
     // Не забываем менять LastVersion !!!
-    static LastVersion = 'v1.0.16';
+    static LastVersion = 'v1.0.17';
 
     getVersions(e) {
 

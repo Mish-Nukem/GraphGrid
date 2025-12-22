@@ -704,6 +704,10 @@ export class GridDBClass extends GridPKClass {
 
         grid.setPocketImage();
         grid.refreshState();
+
+        if (grid.graph) {
+            grid.graph.triggerWave({ nodes: [grid], withStartNodes: false });
+        }
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     loadPocketRows() {

@@ -202,6 +202,7 @@ export class GridINUBaseClass extends GridFLClass {
                         if (!parentKeyField || !parent.entity) return '';
 
                         activeValue = parent.selectedValue();
+                        if (!activeValue) return '1=2';
                         break;
                     case NodeStatus.filter:
                         activeValue = parent.value;

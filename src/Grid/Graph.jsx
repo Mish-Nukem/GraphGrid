@@ -80,7 +80,7 @@ export class GraphClass {
         for (let pid of node.parents) {
             let link = graph.linksDict[node.id + '_' + graph.nodesDict[pid].id];
             // дополнительная проверка skipLink может запретить включение узла в список, несмотря на то, что он связан с предыдущим уровнем
-            if (link.parent._lastWaveInd < e.waveInd && !graph.skipLink(link, e.waveType)) {
+            if (link.parent._lastWaveInd > e.waveInd && !graph.skipLink(link, e.waveType)) {
                 return false;
             }
         }

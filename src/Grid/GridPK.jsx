@@ -61,6 +61,7 @@ export class GridPKClass extends GridGRClass {
 
         const grid = this;
 
+        grid._selectedRowsDict = {};
         if (props.multi === true && props.keyField) {
             grid.multi = true;
             grid._allRowsOnPageSelected = false;
@@ -83,7 +84,7 @@ export class GridPKClass extends GridGRClass {
     renderSelectColumnHeader() {
         const grid = this;
         return (
-            !grid.pocketOpened ? <></>
+            !grid.multi || !grid.pocketOpened ? <></>
                 :
                 <th
                     key={`headerCellSelect_${grid.id}_${grid.keyAdd()}_`}
@@ -212,6 +213,18 @@ export class GridPKClass extends GridGRClass {
         )
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
+    renderRow(row, rowInd, selected) {
+        const grid = this;
+        return (
+            <>
+                {grid.multi && grid.pocketOpened ? grid.renderSelectColumn(row) : <></>}
+                {
+                    super.renderRow(row, rowInd, selected)
+                }
+            </>
+        )
+    }
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     loadPocketRows() {
         const grid = this;
         for (let id in grid._selectedRowsDict) {
@@ -224,7 +237,7 @@ export class GridPKClass extends GridGRClass {
         const grid = this;
         return (
             <>
-                {grid.multi ? grid.renderPocketClearColumn(row, rowInd) : <></>}
+                {grid.renderPocketClearColumn(row, rowInd)}
                 {
                     grid.columns.map((col, cind) => {
                         return (
@@ -241,9 +254,76 @@ export class GridPKClass extends GridGRClass {
         )
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
-    selectedRows() {
+    getGridWidth() {
         const grid = this;
-        return grid._selectedRowsDict || {};
+
+        let w = super.getGridWidth();
+
+        if (grid.multi) w += 20;
+
+        grid._currW = w;
+        return grid._currW;
+    }
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
+    selectedValue(delim) {
+        const grid = this;
+
+        const keyColumn = grid.getKeyColumn();
+        if (!grid.multi || !grid.pocketOpened) {
+            const row = grid.selectedRow();
+
+            return row != null ? row[keyColumn] : '';
+        }
+        else {
+            delim = delim || ',';
+            const res = [];
+            for (let id in grid._selectedRowsDict) {
+                let row = grid._selectedRowsDict[id];
+                res.push(row[keyColumn]);
+            }
+            return res.join(delim);
+        }
+    }
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
+    selectedText(delim) {
+        const grid = this;
+        if (!grid.nameField) return '';
+
+        if (!grid.multi || !grid.pocketOpened) {
+            const row = grid.selectedRow();
+            return row != null ? row[grid.nameField] : '';
+        }
+        else {
+            delim = delim || ',';
+            const res = [];
+            for (let id in grid._selectedRowsDict) {
+                let row = grid._selectedRowsDict[id];
+                res.push(row[grid.nameField]);
+            }
+            return res.join(delim);
+        }
+    }
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
+    selectedValues(texts) {
+        const grid = this;
+        texts = texts || [];
+
+        const keyColumn = grid.getKeyColumn();
+        if (!grid.multi || !grid.pocketOpened) {
+            const row = grid.selectedRow();
+
+            return row != null ? [{ value: row[keyColumn], label: row[grid.nameField] }] : [];
+        }
+        else {
+            const res = [];
+            for (let id in grid._selectedRowsDict) {
+                let row = grid._selectedRowsDict[id];
+                let text = row[grid.nameField];
+                texts.push(text);
+                res.push({ value: row[keyColumn], label: text });
+            }
+            return res;
+        }
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     selectRow(e, row) {
@@ -255,6 +335,10 @@ export class GridPKClass extends GridGRClass {
 
         grid.checkPocketState();
         grid.refreshState();
+
+        if (grid.graph) {
+            grid.graph.triggerWave({ nodes: [grid], withStartNodes: false });
+        }
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     unselectRow(e, row) {
@@ -266,6 +350,10 @@ export class GridPKClass extends GridGRClass {
 
         grid.checkPocketState();
         grid.refreshState();
+
+        if (grid.graph) {
+            grid.graph.triggerWave({ nodes: [grid], withStartNodes: false });
+        }
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     selectAllRows() {
@@ -281,6 +369,24 @@ export class GridPKClass extends GridGRClass {
 
         grid.checkPocketState();
         grid.refreshState();
+
+        if (grid.graph) {
+            grid.graph.triggerWave({ nodes: [grid], withStartNodes: false });
+        }
+    }
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
+    clearPocket() {
+        const grid = this;
+        grid._selectedRowsDict = {};
+        delete grid._selectedRows;
+        grid._allRowsOnPageSelected = false;
+        grid.checkPocketState();
+
+        grid.refreshState();
+
+        if (grid.graph) {
+            grid.graph.triggerWave({ nodes: [grid], withStartNodes: false });
+        }
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     checkPocketState() {
@@ -302,16 +408,6 @@ export class GridPKClass extends GridGRClass {
                 break;
             }
         }
-    }
-    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
-    clearPocket() {
-        const grid = this;
-        grid._selectedRowsDict = {};
-        delete grid._selectedRows;
-        grid._allRowsOnPageSelected = false;
-        grid.checkPocketState();
-
-        grid.refreshState();
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
 }
