@@ -87,6 +87,8 @@ export class GridINUClass extends GridINUBaseClass {
             };
         }
 
+        grid.closeSelfWnd = grid.closeSelfWnd || (() => { }); 
+
         grid.addToolbarButtons();
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------

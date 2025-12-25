@@ -349,13 +349,10 @@ export class FieldEditClass extends BaseComponent {
                             renderContent={(wnd) => { return fe.renderLookupGrid(wnd); }}
                             pos={fe.popupPos}
                             onClose={(e) => {
-                                fe.lookupIsShowing = false;
                                 if (fe.grid) {
                                     delete fe.grid.value;
                                 }
-                                if (fe.ownerGrid) {
-                                    fe.ownerGrid._clicksDisabled = false;
-                                }
+                                fe.closeLookupField();
                                 fe.refreshState();
                             }}
                         >
@@ -393,11 +390,7 @@ export class FieldEditClass extends BaseComponent {
 
                         e.fe = fe;
 
-                        fe.lookupIsShowing = false;
-                        if (fe.ownerGrid) {
-                            fe.ownerGrid._clicksDisabled = false;
-                        }
-
+                        fe.closeLookupField();
                         fe.onChange(e);
                     }}
                     //getColumns={info.columns ? () => { return info.columns; } : null}
@@ -418,18 +411,24 @@ export class FieldEditClass extends BaseComponent {
                         }
 
                         lookupGrid.closeSelfWnd = () => {
-                            fe.lookupIsShowing = false;
+                            fe.closeLookupField();
                             fe.refreshState();
                         };
                     }}
                     onClose={() => {
-                        if (fe.ownerGrid) {
-                            fe.ownerGrid._clicksDisabled = false;
-                        }
+                        fe.closeLookupField();
                     }}
                 >
                 </GridINU>
         );
+    }
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
+    closeLookupField() {
+        const fe = this;
+        fe.lookupIsShowing = false;
+        if (fe.ownerGrid) {
+            fe.ownerGrid._clicksDisabled = false;
+        }
     }
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     openLookupField(e) {
