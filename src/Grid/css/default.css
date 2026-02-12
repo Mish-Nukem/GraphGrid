@@ -892,7 +892,7 @@
     cursor: pointer;
 }
 
-    .tree-node .name:hover {
+    .tree-node/*, .name:hover*/ {
         background: rgba(0, 0, 0, 0.1);
     }
 
@@ -901,7 +901,7 @@
     }
 
 
-.tree-node--focused .name {
+.tree-node--focused/*, .name*/ {
     background: rgba(0, 0, 0, 0.2);
 }
 

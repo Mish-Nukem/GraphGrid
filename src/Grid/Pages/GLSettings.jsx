@@ -3,6 +3,7 @@ import { ModalClass } from '../Modal';
 import { Select } from '../OuterComponents/Select';
 import { GLObject } from '../GLObject';
 import { BaseComponent } from '../Base';
+import { GridDBClass } from '../GridDB';
 
 export function GLSettings(props) {
     const [pageState, setState] = useState({ settings: null, ind: 0 });
@@ -43,8 +44,8 @@ export class SettingsPageClass extends ModalClass {
 
         sp.parent = props.parent;
 
-        sp._selectedTheme = sp._selectedTheme || { value: GLObject.gridSettings.themeId || 0, label: GLObject.gridSettings.themeName || sp.translate('Default theme') };
-        sp._selectedButtonSize = sp._selectedButtonSize || { value: GLObject.gridSettings.buttonSize || 0, label: GLObject.gridSettings.buttonSizeName || sp.translate('Small buttons') };
+        sp._selectedTheme = sp._selectedTheme || { value: GridDBClass.gridSettings.themeId || 0, label: GridDBClass.gridSettings.themeName || sp.translate('Default theme') };
+        sp._selectedButtonSize = sp._selectedButtonSize || { value: GridDBClass.gridSettings.buttonSize || 0, label: GridDBClass.gridSettings.buttonSizeName || sp.translate('Small buttons') };
 
         sp.buttons = sp.getButtons();
     }
@@ -77,8 +78,8 @@ export class SettingsPageClass extends ModalClass {
                                     const isBootstrap = sp._selectedTheme.value !== 0;
 
                                     if (sp.parent) {
-                                        GLObject.gridSettings.themeId = sp._selectedTheme.value;
-                                        GLObject.gridSettings.themeName = sp._selectedTheme.label;
+                                        GridDBClass.gridSettings.themeId = sp._selectedTheme.value;
+                                        GridDBClass.gridSettings.themeName = sp._selectedTheme.label;
 
                                         BaseComponent.changeTheme(isBootstrap).then(() => {
                                             sp.changeButtonSizes(isBootstrap);
@@ -120,8 +121,10 @@ export class SettingsPageClass extends ModalClass {
                                 onChange={(e) => {
                                     sp._selectedButtonSize = e || { value: 0, label: sp.translate('Small buttons') };
                                     if (sp.parent) {
-                                        GLObject.gridSettings.buttonSize = sp._selectedButtonSize.value;
-                                        GLObject.gridSettings.buttonSizeName = sp._selectedButtonSize.label;
+                                        GridDBClass.gridSettings.buttonSize = sp._selectedButtonSize.value;
+                                        GridDBClass.gridSettings.buttonSizeName = sp._selectedButtonSize.label;
+
+                                        
 
                                         sp.changeButtonSizes(sp._selectedTheme.value !== 0);
 
@@ -129,8 +132,8 @@ export class SettingsPageClass extends ModalClass {
                                         sp.parent.refreshState();
                                     }
                                     else {
-                                        GLObject.gridSettings.buttonSize = sp._selectedButtonSize.value;
-                                        GLObject.gridSettings.buttonSizeName = sp._selectedButtonSize.label;
+                                        GridDBClass.gridSettings.buttonSize = sp._selectedButtonSize.value;
+                                        GridDBClass.gridSettings.buttonSizeName = sp._selectedButtonSize.label;
 
                                         sp.changeButtonSizes(sp._selectedTheme.value !== 0);
                                         sp.refreshState();
@@ -184,11 +187,11 @@ export class SettingsPageClass extends ModalClass {
     applySettings(e) {
         const sp = this;
 
-        GLObject.gridSettings.themeId = sp._selectedTheme.value;
-        GLObject.gridSettings.themeName = sp._selectedTheme.label;
+        GridDBClass.gridSettings.themeId = sp._selectedTheme.value;
+        GridDBClass.gridSettings.themeName = sp._selectedTheme.label;
 
-        GLObject.gridSettings.buttonSize = sp._selectedButtonSize.value;
-        GLObject.gridSettings.buttonSizeName = sp._selectedButtonSize.label;
+        GridDBClass.gridSettings.buttonSize = sp._selectedButtonSize.value;
+        GridDBClass.gridSettings.buttonSizeName = sp._selectedButtonSize.label;
 
         const isBootstrap = sp._selectedTheme.value !== 0;
 
@@ -205,7 +208,7 @@ export class SettingsPageClass extends ModalClass {
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     changeButtonSizes(isBootstrap) {
         if (isBootstrap) {
-            switch (+GLObject.gridSettings.buttonSize) {
+            switch (+GridDBClass.gridSettings.buttonSize) {
                 case 0:
                     BaseComponent.theme.toolbarButtonsClass = 'btn btn-primary btn-sm';
                     break;
@@ -218,7 +221,7 @@ export class SettingsPageClass extends ModalClass {
             }
         }
         else {
-            switch (+GLObject.gridSettings.buttonSize) {
+            switch (+GridDBClass.gridSettings.buttonSize) {
                 case 0:
                     BaseComponent.theme.toolbarButtonsClass = 'grid-toolbar-button';
                     break;

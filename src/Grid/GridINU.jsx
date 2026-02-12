@@ -32,21 +32,20 @@ export function GridINU(props) {
         setState({ grid: grid, ind: grid.stateind++ });
     }
 
-    useEffect(() => {
-        grid.setupEvents();
+    grid._waitingRows = grid._waitingRows || needGetRows && (grid.rows.length <= 0 || grid.columns.length <= 0) || grid._forceRefresh;
 
-        if (needGetRows && (grid.rows.length <= 0 || grid.columns.length <= 0) || grid._forceRefresh) {
+    useEffect(() => {
+        grid.setupEvents(grid);
+
+        if (grid._waitingRows) {
 
             grid._forceRefresh = false;
 
-            grid._waitingRows = true;
-            grid.getRows().then(
+            grid.getRows({ filters: grid.collectFilters(), grid: grid }).then(
                 rows => {
-                    //setTimeout(() => {
                     grid.rows = rows;
                     grid.afterGetRows();
                     grid.refreshState();
-                    //}, 100000);
                 }
             ).finally(() => {
                 grid._waitingRows = false;
@@ -54,13 +53,13 @@ export function GridINU(props) {
             });
         }
         else if (grid.columns.length <= 0 && grid.getColumns) {
-            grid.prepareColumns().then(() => grid.refreshState());;
+            grid.prepareColumns().then(() => grid.refreshState());
         }
 
         return () => {
             grid.clearEvents();
         }
-    }, [grid, needGetRows])
+    }, [grid])
 
     return (grid.render());
 }

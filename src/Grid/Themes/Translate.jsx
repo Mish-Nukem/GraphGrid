@@ -1,8 +1,12 @@
 ﻿export class Translate {
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
+    static language = null;//'ru';
+
     static translate(text/*, context*/) {
 
         if (text == null) return '';
+
+        if (Translate.language != 'ru') return text;
 
         const dict = {
             'ADD': 'Добавить',
@@ -28,6 +32,7 @@
             'LARGE BUTTONS': 'Большие',
             'LAST': 'В конец',
             'LOAD MORE RECORDS': 'Загрузить еще строк',
+            'LOADING': 'Загрузка',
             'MEDIUM BUTTONS': 'Средние',
             'MORE...': 'еще...',
             'NEXT': 'Следующая',

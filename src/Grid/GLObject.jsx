@@ -8,7 +8,7 @@
 
     static entityInfo = {};
 
-    static gridSettings = {};
+    //static gridSettings = {};
 
     static appSettings = {};
 

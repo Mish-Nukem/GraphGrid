@@ -6,7 +6,6 @@ import { Dropdown } from './Dropdown';
 import { WaveType } from './Graph';
 import { NodeStatus } from './Base';
 import { BaseComponent } from './Base';
-import { GLObject } from './GLObject';
 // ==================================================================================================================================================================
 export function GridDB(props) {
     let grid = null;
@@ -32,12 +31,13 @@ export function GridDB(props) {
         setState({ grid: grid, ind: grid.stateind++ });
     }
 
+    grid._waitingRows = needGetRows && (grid.rows.length <= 0 || grid.columns.length <= 0);
+
     useEffect(() => {
-        grid.setupEvents();
+        grid.setupEvents(grid);
 
-        if (needGetRows && (grid.rows.length <= 0 || grid.columns.length <= 0)) {
+        if (grid._waitingRows) {
 
-            grid._waitingRows = true;
             grid.getRows({ filters: grid.collectFilters(), grid: grid }).then(
                 rows => {
                     grid.rows = rows;
@@ -50,13 +50,13 @@ export function GridDB(props) {
             });
         }
         else if (grid.columns.length <= 0 && grid.getColumns) {
-            grid.prepareColumns().then(() => grid.refreshState());;
+            grid.prepareColumns().then(() => grid.refreshState());
         }
 
         return () => {
             grid.clearEvents();
         }
-    }, [grid, needGetRows])
+    }, [grid])
 
     return (grid.render());
 }
@@ -87,6 +87,8 @@ export class GridDBClass extends GridPKClass {
 
         grid.multi = props.multi;
     }
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
+    static gridSettings = {};
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     //visitByWaveOld(e) {
     //    const grid = this;
@@ -227,7 +229,7 @@ export class GridDBClass extends GridPKClass {
                                             } : grid.onButtonClick ? (e) => { grid.onButtonClick(e) } : null}
                                         >
                                             {button.img ? button.img() : ''}
-                                            {GLObject.gridSettings.buttonSize > 0 || !button.img ? grid.translate(button.label, 'grid-toolbar-button') || grid.translate(button.title, 'grid-toolbar-button') : ''}
+                                            {GridDBClass.gridSettings.buttonSize > 0 || !button.img ? grid.translate(button.label, 'grid-toolbar-button') || grid.translate(button.title, 'grid-toolbar-button') : ''}
                                         </button>
                                 );
                             })

@@ -2,7 +2,6 @@
 import { renderToStaticMarkup } from 'react-dom/server';
 import { BaseComponent, log } from './Base';
 import { OverlayClass } from './Overlay';
-import { format, parse } from 'date-fns'
 // ==================================================================================================================================================================
 export function Grid(props) {
     let grid = null;
@@ -33,12 +32,13 @@ export function Grid(props) {
         setState({ grid: grid, ind: grid.stateind++ });
     }
 
+    grid._waitingRows = needGetRows && (grid.rows.length <= 0 || grid.columns.length <= 0);
+
     useEffect(() => {
         grid.setupEvents(grid);
 
-        if (needGetRows && (grid.rows.length <= 0 || grid.columns.length <= 0)) {
+        if (grid._waitingRows) {
 
-            grid._waitingRows = true;
             grid.getRows({ filters: grid.collectFilters(), grid: grid }).then(
                 rows => {
                     grid.rows = rows;
@@ -57,7 +57,7 @@ export function Grid(props) {
         return () => {
             grid.clearEvents();
         }
-    }, [grid, needGetRows])
+    }, [grid])
 
     return (grid.render());
 }
@@ -421,12 +421,10 @@ export class GridClass extends BaseComponent {
         let val = row[col.name];
 
         if (col.type === 'date' && val) {
-            const parsed = parse(val, grid.dateTimeFormat, new Date());
-            val = format(parsed, grid.dateFormat);
+            val = grid.formatDate(val, grid.dateFormat);
         }
         else if (col.type === 'datetime' && val) {
-            const parsed = parse(val, grid.dateTimeFormat, new Date());
-            val = format(parsed, grid.dateTimeFormat);
+            val = grid.formatDate(val, grid.dateTimeFormat);
         }
 
         if (col.allowVerticalResize) {

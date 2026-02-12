@@ -3,7 +3,6 @@ import { BaseComponent } from './Base';
 import { Images } from './Themes/Images';
 import { GridDBClass } from './GridDB';
 import { Dropdown } from './Dropdown';
-import { format } from 'date-fns'
 // ==================================================================================================================================================================
 export function GridFL(props) {
     let grid = null;
@@ -29,12 +28,13 @@ export function GridFL(props) {
         setState({ grid: grid, ind: grid.stateind++ });
     }
 
+    grid._waitingRows = needGetRows && (grid.rows.length <= 0 || grid.columns.length <= 0);
+
     useEffect(() => {
-        grid.setupEvents();
+        grid.setupEvents(grid);
 
-        if (needGetRows && (grid.rows.length <= 0 || grid.columns.length <= 0)) {
+        if (grid._waitingRows) {
 
-            grid._waitingRows = true;
             grid.getRows({ filters: grid.collectFilters(), grid: grid }).then(
                 rows => {
                     grid.rows = rows;
@@ -47,13 +47,13 @@ export function GridFL(props) {
             });
         }
         else if (grid.columns.length <= 0 && grid.getColumns) {
-            grid.prepareColumns().then(() => grid.refreshState());;
+            grid.prepareColumns().then(() => grid.refreshState());
         }
 
         return () => {
             grid.clearEvents();
         }
-    }, [grid, needGetRows])
+    }, [grid])
 
     return (grid.render());
 }
@@ -193,10 +193,10 @@ export class GridFLClass extends GridDBClass {
                             let txt = row[grid._inputingColumn.name] || String(row);
 
                             if (grid._inputingColumn.type === 'date') {
-                                txt = format(txt, grid.dateFormat);
+                                txt = grid.formatDate(txt, grid.dateFormat);
                             }
                             else if (grid._inputingColumn.type === 'datetime') {
-                                txt = format(txt, grid.dateTimeFormat);
+                                txt = grid.formatDate(txt, grid.dateTimeFormat);
                             }
 
                             res.push({ id: i++, text: txt });

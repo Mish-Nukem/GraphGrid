@@ -1,6 +1,4 @@
 ﻿import { DefaultGridTheme as Theme } from './Themes/DefaultGridTheme';
-import { Translate } from './Themes/Translate';
-import { ClipLoader } from 'react-spinners';
 export class BaseComponent {
 
     constructor(props) {
@@ -12,53 +10,51 @@ export class BaseComponent {
             BaseComponent.theme = new Theme();
 
             if (BaseComponent.useBootstrap) {
-                import('./Themes/BootstrapGridTheme.jsx').then(({ BootstrapTheme }) => { BaseComponent.theme = new BootstrapTheme(); });
+                BaseComponent.changeTheme(true);
             }
         }
     }
 
     translate(text, context) {
-        return Translate.translate(text, context);
+        return BaseComponent.translate(text, context);
+    }
+
+    static translate(text/*, context*/) {
+        return text;
     }
 
     Spinner(id = -1, minW = -1, maxW = -1) {
+        return BaseComponent.Spinner ? BaseComponent.Spinner(id, minW, maxW) : <></>;
+    }
+
+    static Spinner(id = -1, minW = -1, maxW = -1) {
         return (
             <div key={`loader_${id}_`}
                 className='grid-loader'
                 style={{ minWidth: minW ? minW + "px" : "", maxWidth: maxW ? maxW + "px" : "" }}
             >
-                <ClipLoader size={15}></ClipLoader>
+                <div>{BaseComponent.translate('Loading') + '...'}</div>
             </div>
         )
     }
 
-    //static dateFormat = 'DD.MM.YYYY';
-    //static dateTimeFormat = 'DD.MM.YYYY HH:mm:ss';
+    formatDate(text, dateFormat) {
+        return BaseComponent.formatDate(text, dateFormat);
+    }
+
+    static formatDate(text) {
+        return text;
+    }
 
     static dateFormat = 'dd.MM.yyyy';
     static dateTimeFormat = 'dd.MM.yyyy HH:mm:ss';
 
     static theme = null;
     static useBootstrap = false;
-    static changeTheme = (val) => {
+    static changeTheme = () => {
         return new Promise(function (resolve) {
-            if (val != null) {
-                BaseComponent.useBootstrap = val;
-            }
-            else {
-                BaseComponent.useBootstrap = !BaseComponent.useBootstrap;
-            }
-
-            if (BaseComponent.useBootstrap) {
-                import('./Themes/BootstrapGridTheme.jsx').then(({ BootstrapTheme }) => {
-                    BaseComponent.theme = new BootstrapTheme();
-                    resolve();
-                });
-            }
-            else {
-                BaseComponent.theme = new Theme();
-                resolve();
-            }
+            BaseComponent.theme = new Theme();
+            resolve();
         })
     };
 }

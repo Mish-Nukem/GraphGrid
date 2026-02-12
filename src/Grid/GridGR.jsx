@@ -26,12 +26,13 @@ export function GridGR(props) {
         setState({ grid: grid, ind: grid.stateind++ });
     }
 
+    grid._waitingRows = needGetRows && (grid.rows.length <= 0 || grid.columns.length <= 0);
+
     useEffect(() => {
-        grid.setupEvents();
+        grid.setupEvents(grid);
 
-        if (needGetRows && (grid.rows.length <= 0 || grid.columns.length <= 0)) {
+        if (grid._waitingRows) {
 
-            grid._waitingRows = true;
             grid.getRows({ filters: grid.collectFilters(), grid: grid }).then(
                 rows => {
                     grid.rows = rows;
@@ -44,13 +45,13 @@ export function GridGR(props) {
             });
         }
         else if (grid.columns.length <= 0 && grid.getColumns) {
-            grid.prepareColumns().then(() => grid.refreshState());;
+            grid.prepareColumns().then(() => grid.refreshState());
         }
 
         return () => {
             grid.clearEvents();
         }
-    }, [grid, needGetRows])
+    }, [grid])
 
     return (grid.render());
 }

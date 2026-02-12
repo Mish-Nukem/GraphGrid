@@ -30,9 +30,12 @@ export function GraphComponent(props) {
     }
 
     useEffect(() => {
-        if (!gc.graph) {
+        if (!gc.graph && !gc._waitingGraph) {
+            gc._waitingGraph = true;
+
             gc.getScheme().then(
                 (graph) => {
+                    gc._waitingGraph = false;
                     gc.graph = graph;
                     gc.refreshState();
                 }
@@ -425,7 +428,7 @@ export class GraphComponentClass extends BaseComponent {
         const gc = this;
         const dnode = gc.graph.nodesDict[gc.activeDetail];
 
-        if (node.isEditing() || node.isDisabled() || dnode.isEditing() || dnode.isDisabled()) return;
+        if (node.isEditing() || node.isDisabled() || dnode && (dnode.isEditing() || dnode.isDisabled())) return;
 
         const isActive = top && node.uid === gc.activeMaster || !top && node.uid === gc.activeDetail;
 

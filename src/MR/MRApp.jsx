@@ -1,5 +1,6 @@
 ﻿//import '../Grid/css/default.css';
 import { useState } from 'react';
+import { BaseComponent } from '../Grid/Base';
 import { GridFL } from '../Grid/GridFL';
 import { GridINU } from '../Grid/GridINU';
 import { GraphComponent } from '../Grid/GraphComponent';
@@ -13,6 +14,10 @@ import { ReportParamsPage } from '../Reports/Pages/ReportParamsPage';
 import Versions from '../Grid/Versions';
 import { Images } from '../Grid/Themes/Images';
 import { GLSettings } from '../Grid/Pages/GLSettings';
+import { ClipLoader } from 'react-spinners';
+import { Translate } from '../Grid/Themes/Translate';
+import { format, parse } from 'date-fns'
+import { DefaultGridTheme } from '../Grid/Themes/DefaultGridTheme';
 function MRApp() {
     const [state, setState] = useState({ menuObj: { id: - 2 } });
 
@@ -56,6 +61,55 @@ function MRApp() {
             GLObject.dataGetter.APIurl = appSettings.APIurl = GLObject.serverType !== 0 ? appSettings.MSSQLAPIurl : appSettings.PostgreSQLAPIurl;
         }
     };
+
+    BaseComponent.Spinner = (id = -1, minW = -1, maxW = -1) => {
+        return (
+            <div key={`loader_${id}_`}
+                className='grid-loader'
+                style={{ minWidth: minW ? minW + "px" : "", maxWidth: maxW ? maxW + "px" : "" }}
+            >
+                <ClipLoader size={15}></ClipLoader>
+            </div>
+        )
+    };
+
+    Translate.language = 'ru';
+
+    BaseComponent.translate = (text, context) => {
+        return Translate.translate(text, context);
+    }
+
+    BaseComponent.formatDate = (text, dateFormat) => {
+        if (text == null) return '';
+
+        if (dateFormat == null) return text;
+
+        const parsed = parse(text, BaseComponent.dateTimeFormat, new Date());
+        return format(parsed, dateFormat);
+    };
+
+    BaseComponent.changeTheme = (val) => {
+        return new Promise(function (resolve) {
+            if (val != null) {
+                BaseComponent.useBootstrap = val;
+            }
+            else {
+                BaseComponent.useBootstrap = !BaseComponent.useBootstrap;
+            }
+
+            if (BaseComponent.useBootstrap) {
+                import('../Grid/Themes/BootstrapGridTheme.jsx').then(({ BootstrapTheme }) => {
+                    BaseComponent.theme = new BootstrapTheme();
+                    resolve();
+                });
+            }
+            else {
+                BaseComponent.theme = new DefaultGridTheme();
+                resolve();
+            }
+        })
+    };
+
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------
     const getMRApp = () => {
         console.log('state == ' + state.menuObj.id);
